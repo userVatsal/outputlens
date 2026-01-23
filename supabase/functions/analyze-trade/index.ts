@@ -5,6 +5,12 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+const MARKET_CONTEXT: Record<string, { name: string; centralBank: string; currency: string }> = {
+  US: { name: 'United States', centralBank: 'Federal Reserve (Fed)', currency: 'USD' },
+  UK: { name: 'United Kingdom', centralBank: 'Bank of England (BOE)', currency: 'GBP' },
+  EU: { name: 'Europe', centralBank: 'European Central Bank (ECB)', currency: 'EUR' },
+};
+
 serve(async (req) => {
   // Handle CORS preflight
   if (req.method === "OPTIONS") {
@@ -24,22 +30,29 @@ serve(async (req) => {
     }
 
     const { input, results, bestCase, worstCase, overallRisk } = analysis;
+    const marketContext = MARKET_CONTEXT[input.market] || MARKET_CONTEXT.US;
 
-    // Build context for the AI
+    // Build context for the AI with market-specific info
     const scenarioSummary = results.map((r: any) => 
       `- ${r.scenario.name}: ${r.returnMin.toFixed(1)}% to ${r.returnMax.toFixed(1)}% return, ${r.scenario.riskLevel} risk`
     ).join('\n');
 
-    const systemPrompt = `You are a professional trading analyst providing educational scenario analysis. Your role is to help traders understand potential outcomes across different market conditions.
+    const systemPrompt = `You are a professional trading analyst providing educational scenario analysis for the ${marketContext.name} market. Your role is to help traders understand potential outcomes across different market conditions.
+
+MARKET CONTEXT:
+- Market: ${marketContext.name}
+- Currency: ${marketContext.currency}
+- Central Bank: ${marketContext.centralBank}
 
 CRITICAL RULES:
 - NEVER use words like "guarantee", "will", "definitely", "certainly", or make price predictions
 - Always use probabilistic language: "may", "could", "might", "tends to", "historically"
 - State clearly this is educational analysis, not financial advice
 - Focus on risk awareness and scenario-based thinking
+- Reference market-specific factors (e.g., Fed for US, BOE for UK, ECB for Europe)
 - Be concise but insightful (3-4 paragraphs max)`;
 
-    const userPrompt = `Analyze this ${input.direction.toUpperCase()} trade on ${input.asset} at entry price $${input.entryPrice} with a ${input.timeHorizon} time horizon.
+    const userPrompt = `Analyze this ${input.direction.toUpperCase()} trade on ${input.asset} in the ${marketContext.name} market at entry price ${marketContext.currency} ${input.entryPrice} with a ${input.timeHorizon} time horizon.
 
 SCENARIO ANALYSIS:
 ${scenarioSummary}
@@ -49,10 +62,13 @@ Worst case: ${worstCase.scenario.name} (down to ${worstCase.returnMin.toFixed(1)
 Overall risk rating: ${overallRisk}
 
 Provide a plain-English explanation that:
-1. Highlights which scenarios matter most for this trade
-2. Identifies where the biggest risk comes from
+1. Highlights which scenarios matter most for this ${marketContext.name} market trade
+2. Identifies where the biggest risk comes from (consider ${marketContext.centralBank} policy, regional factors)
 3. Explains why this trade could fail
-4. Uses probabilistic language throughout`;
+4. Uses probabilistic language throughout
+5. References market-specific factors relevant to ${input.asset}`;
+
+    console.log(`Analyzing ${input.direction} trade for ${input.asset} in ${input.market} market at ${input.entryPrice}`);
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -96,6 +112,8 @@ Provide a plain-English explanation that:
     if (!explanation) {
       throw new Error("No explanation generated");
     }
+
+    console.log(`Successfully generated explanation for ${input.asset} (${input.market})`);
 
     return new Response(
       JSON.stringify({ explanation }),

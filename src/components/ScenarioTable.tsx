@@ -1,8 +1,9 @@
-import { ScenarioResult, RiskLevel } from '@/types/trade';
+import { ScenarioResult, RiskLevel, Market, MARKETS } from '@/types/trade';
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
 
 interface ScenarioTableProps {
   results: ScenarioResult[];
+  market: Market;
 }
 
 function RiskBadge({ level }: { level: RiskLevel }) {
@@ -29,11 +30,11 @@ function ReturnIndicator({ min, max }: { min: number; max: number }) {
   return <Minus className="h-4 w-4 text-neutral" />;
 }
 
-function formatPrice(price: number): string {
-  return price.toLocaleString('en-US', {
+function formatPrice(price: number, currencySymbol: string): string {
+  return `${currencySymbol}${price.toLocaleString('en-US', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
-  });
+  })}`;
 }
 
 function formatReturn(value: number): string {
@@ -41,7 +42,10 @@ function formatReturn(value: number): string {
   return `${sign}${value.toFixed(1)}%`;
 }
 
-export function ScenarioTable({ results }: ScenarioTableProps) {
+export function ScenarioTable({ results, market }: ScenarioTableProps) {
+  const marketInfo = MARKETS[market];
+  const currencySymbol = marketInfo.currencySymbol;
+
   return (
     <div className="overflow-hidden rounded-lg border border-border/50 bg-card">
       {/* Desktop Table */}
@@ -50,7 +54,7 @@ export function ScenarioTable({ results }: ScenarioTableProps) {
           <thead className="bg-muted/50">
             <tr>
               <th className="px-4 py-3 text-left text-sm font-semibold text-foreground">Scenario</th>
-              <th className="px-4 py-3 text-right text-sm font-semibold text-foreground">Expected Price</th>
+              <th className="px-4 py-3 text-right text-sm font-semibold text-foreground">Expected Price ({marketInfo.currency})</th>
               <th className="px-4 py-3 text-right text-sm font-semibold text-foreground">Expected Return</th>
               <th className="px-4 py-3 text-center text-sm font-semibold text-foreground">Risk</th>
             </tr>
@@ -68,7 +72,7 @@ export function ScenarioTable({ results }: ScenarioTableProps) {
                   </div>
                 </td>
                 <td className="px-4 py-4 text-right font-mono text-sm">
-                  ${formatPrice(result.priceRangeMin)} – ${formatPrice(result.priceRangeMax)}
+                  {formatPrice(result.priceRangeMin, currencySymbol)} – {formatPrice(result.priceRangeMax, currencySymbol)}
                 </td>
                 <td className="px-4 py-4 text-right">
                   <span className={`font-mono text-sm font-medium ${
@@ -101,7 +105,7 @@ export function ScenarioTable({ results }: ScenarioTableProps) {
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
                 <div className="text-xs text-muted-foreground mb-1">Expected Price</div>
-                <div className="font-mono">${formatPrice(result.priceRangeMin)} – ${formatPrice(result.priceRangeMax)}</div>
+                <div className="font-mono">{formatPrice(result.priceRangeMin, currencySymbol)} – {formatPrice(result.priceRangeMax, currencySymbol)}</div>
               </div>
               <div>
                 <div className="text-xs text-muted-foreground mb-1">Expected Return</div>
