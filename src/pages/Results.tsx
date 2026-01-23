@@ -1,11 +1,12 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, TrendingUp, TrendingDown, Clock, DollarSign } from 'lucide-react';
+import { ArrowLeft, TrendingUp, TrendingDown, Clock, Globe } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ScenarioTable } from '@/components/ScenarioTable';
 import { RiskSummary } from '@/components/RiskSummary';
 import { AIExplanation } from '@/components/AIExplanation';
 import { useTrade } from '@/hooks/useTrade';
+import { MARKETS } from '@/types/trade';
 
 const Results = () => {
   const navigate = useNavigate();
@@ -22,6 +23,7 @@ const Results = () => {
   }
 
   const { input, results } = analysis;
+  const marketInfo = MARKETS[input.market];
 
   const handleNewAnalysis = () => {
     clearAnalysis();
@@ -51,6 +53,11 @@ const Results = () => {
         <div className="glass-card p-4 mb-6 animate-fade-in" style={{ animationDelay: '0.1s' }}>
           <div className="flex flex-wrap items-center gap-4 sm:gap-6">
             <div className="flex items-center gap-2">
+              <Globe className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">Market:</span>
+              <span className="font-semibold text-foreground">{marketInfo.name}</span>
+            </div>
+            <div className="flex items-center gap-2">
               <span className="text-sm text-muted-foreground">Asset:</span>
               <span className="font-mono font-semibold text-foreground">{input.asset}</span>
             </div>
@@ -68,10 +75,9 @@ const Results = () => {
               </span>
             </div>
             <div className="flex items-center gap-2">
-              <DollarSign className="h-4 w-4 text-muted-foreground" />
               <span className="text-sm text-muted-foreground">Entry:</span>
               <span className="font-mono font-semibold text-foreground">
-                ${input.entryPrice.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                {marketInfo.currencySymbol}{input.entryPrice.toLocaleString('en-US', { minimumFractionDigits: 2 })}
               </span>
             </div>
             <div className="flex items-center gap-2">
@@ -79,6 +85,9 @@ const Results = () => {
               <span className="text-sm text-muted-foreground">Horizon:</span>
               <span className="font-semibold text-foreground">{input.timeHorizon}</span>
             </div>
+          </div>
+          <div className="mt-3 pt-3 border-t border-border/50 text-xs text-muted-foreground">
+            Trading Hours: {marketInfo.tradingHours} {marketInfo.timezone} • Central Bank: {marketInfo.centralBank}
           </div>
         </div>
 
@@ -90,8 +99,10 @@ const Results = () => {
 
         {/* Scenario Table */}
         <div className="mb-6 animate-fade-in" style={{ animationDelay: '0.3s' }}>
-          <h2 className="text-lg font-semibold mb-3 text-foreground">Scenario Analysis</h2>
-          <ScenarioTable results={results} />
+          <h2 className="text-lg font-semibold mb-3 text-foreground">
+            Scenario Analysis ({results.length} scenarios for {marketInfo.name})
+          </h2>
+          <ScenarioTable results={results} market={input.market} />
         </div>
 
         {/* AI Explanation */}

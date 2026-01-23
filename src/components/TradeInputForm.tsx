@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { TrendingUp, TrendingDown, Clock, DollarSign, BarChart3 } from 'lucide-react';
+import { TrendingUp, TrendingDown, Clock, DollarSign, BarChart3, Globe } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { TradeDirection, TimeHorizon, TradeInput } from '@/types/trade';
+import { TradeDirection, TimeHorizon, TradeInput, Market, MARKETS } from '@/types/trade';
 
 interface TradeInputFormProps {
   onSubmit: (input: TradeInput) => void;
@@ -22,16 +22,20 @@ export function TradeInputForm({ onSubmit }: TradeInputFormProps) {
   const [direction, setDirection] = useState<TradeDirection>('long');
   const [entryPrice, setEntryPrice] = useState('');
   const [timeHorizon, setTimeHorizon] = useState<TimeHorizon>('3-7 days');
+  const [market, setMarket] = useState<Market>('US');
   const navigate = useNavigate();
+
+  const selectedMarket = MARKETS[market];
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
     const input: TradeInput = {
-      asset: asset.toUpperCase(),
+      asset: asset.toUpperCase().trim(),
       direction,
       entryPrice: parseFloat(entryPrice),
       timeHorizon,
+      market,
     };
     
     onSubmit(input);
@@ -42,6 +46,53 @@ export function TradeInputForm({ onSubmit }: TradeInputFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Market Selection */}
+      <div className="space-y-2">
+        <Label htmlFor="market" className="flex items-center gap-2 text-sm font-medium">
+          <Globe className="h-4 w-4 text-muted-foreground" />
+          Market
+        </Label>
+        <Select value={market} onValueChange={(v) => setMarket(v as Market)}>
+          <SelectTrigger className="trading-input">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="US">
+              <div className="flex items-center gap-2">
+                <span className="text-lg">🇺🇸</span>
+                <span>US Market (NYSE/NASDAQ)</span>
+              </div>
+            </SelectItem>
+            <SelectItem value="UK">
+              <div className="flex items-center gap-2">
+                <span className="text-lg">🇬🇧</span>
+                <span>UK Market (LSE)</span>
+              </div>
+            </SelectItem>
+            <SelectItem value="EU">
+              <div className="flex items-center gap-2">
+                <span className="text-lg">🇪🇺</span>
+                <span>Europe (Euronext/DAX)</span>
+              </div>
+            </SelectItem>
+          </SelectContent>
+        </Select>
+        <div className="text-xs text-muted-foreground bg-muted/30 rounded-lg p-3 space-y-1">
+          <div className="flex justify-between">
+            <span>Trading Hours:</span>
+            <span className="font-mono">{selectedMarket.tradingHours} {selectedMarket.timezone}</span>
+          </div>
+          <div className="flex justify-between">
+            <span>Currency:</span>
+            <span className="font-mono">{selectedMarket.currency} ({selectedMarket.currencySymbol})</span>
+          </div>
+          <div className="flex justify-between">
+            <span>Central Bank:</span>
+            <span>{selectedMarket.centralBank}</span>
+          </div>
+        </div>
+      </div>
+
       {/* Asset Name */}
       <div className="space-y-2">
         <Label htmlFor="asset" className="flex items-center gap-2 text-sm font-medium">
@@ -51,7 +102,7 @@ export function TradeInputForm({ onSubmit }: TradeInputFormProps) {
         <Input
           id="asset"
           type="text"
-          placeholder="e.g. SPY, BTC, NIFTY"
+          placeholder={market === 'US' ? 'e.g. SPY, AAPL, TSLA' : market === 'UK' ? 'e.g. FTSE, HSBA, BP' : 'e.g. DAX, SAP, ASML'}
           value={asset}
           onChange={(e) => setAsset(e.target.value)}
           className="trading-input font-mono text-lg"
@@ -100,18 +151,23 @@ export function TradeInputForm({ onSubmit }: TradeInputFormProps) {
       <div className="space-y-2">
         <Label htmlFor="entryPrice" className="flex items-center gap-2 text-sm font-medium">
           <DollarSign className="h-4 w-4 text-muted-foreground" />
-          Entry Price
+          Entry Price ({selectedMarket.currencySymbol})
         </Label>
-        <Input
-          id="entryPrice"
-          type="number"
-          step="0.01"
-          min="0"
-          placeholder="0.00"
-          value={entryPrice}
-          onChange={(e) => setEntryPrice(e.target.value)}
-          className="trading-input font-mono text-lg"
-        />
+        <div className="relative">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-mono">
+            {selectedMarket.currencySymbol}
+          </span>
+          <Input
+            id="entryPrice"
+            type="number"
+            step="0.01"
+            min="0"
+            placeholder="0.00"
+            value={entryPrice}
+            onChange={(e) => setEntryPrice(e.target.value)}
+            className="trading-input font-mono text-lg pl-8"
+          />
+        </div>
       </div>
 
       {/* Time Horizon */}

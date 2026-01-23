@@ -1,6 +1,7 @@
-import { Scenario, TradeInput, ScenarioResult, TradeAnalysis, RiskLevel } from '@/types/trade';
+import { Scenario, TradeInput, ScenarioResult, TradeAnalysis, RiskLevel, Market, MARKETS } from '@/types/trade';
 
-export const SCENARIOS: Scenario[] = [
+// Base scenarios that apply to all markets
+const BASE_SCENARIOS: Scenario[] = [
   {
     id: 'bullish-continuation',
     name: 'Bullish Continuation',
@@ -26,14 +27,6 @@ export const SCENARIOS: Scenario[] = [
     riskLevel: 'High',
   },
   {
-    id: 'macro-shock',
-    name: 'Macro Shock',
-    description: 'External catalyst like rate decisions, CPI data, or geopolitical events. Can trigger risk-off sentiment and rapid de-leveraging.',
-    priceChangeMin: -8,
-    priceChangeMax: -3,
-    riskLevel: 'High',
-  },
-  {
     id: 'sideways',
     name: 'Sideways / No Momentum',
     description: 'Price consolidation with no clear direction. Low volume and indecision as the market waits for a catalyst or clearer signals.',
@@ -43,10 +36,105 @@ export const SCENARIOS: Scenario[] = [
   },
 ];
 
+// Market-specific macro scenarios
+const MACRO_SCENARIOS: Record<Market, Scenario> = {
+  US: {
+    id: 'macro-shock-us',
+    name: 'Fed Policy Shock',
+    description: 'Federal Reserve surprises with rate decision, hawkish/dovish pivot, or QT changes. Triggers rapid repricing across risk assets and dollar strength shifts.',
+    priceChangeMin: -8,
+    priceChangeMax: -3,
+    riskLevel: 'High',
+  },
+  UK: {
+    id: 'macro-shock-uk',
+    name: 'BOE / Brexit Shock',
+    description: 'Bank of England rate surprise, UK political instability, or trade policy changes. GBP volatility impacts FTSE components and multinational exposure.',
+    priceChangeMin: -7,
+    priceChangeMax: -2,
+    riskLevel: 'High',
+  },
+  EU: {
+    id: 'macro-shock-eu',
+    name: 'ECB / Eurozone Shock',
+    description: 'ECB policy shift, peripheral debt concerns, or political uncertainty in major economies. Euro moves affect export-heavy DAX and CAC constituents.',
+    priceChangeMin: -7,
+    priceChangeMax: -2,
+    riskLevel: 'High',
+  },
+};
+
+// Additional market-specific scenarios
+const MARKET_SPECIFIC_SCENARIOS: Record<Market, Scenario[]> = {
+  US: [
+    {
+      id: 'earnings-season-us',
+      name: 'Earnings Season Volatility',
+      description: 'Quarterly earnings reports drive individual stock moves. Tech-heavy sectors may see outsized reactions to guidance changes.',
+      priceChangeMin: -4,
+      priceChangeMax: 4,
+      riskLevel: 'Medium',
+    },
+    {
+      id: 'cpi-data-us',
+      name: 'CPI / Jobs Data Release',
+      description: 'Inflation or employment data surprises market expectations. May shift Fed policy outlook and impact rate-sensitive sectors.',
+      priceChangeMin: -5,
+      priceChangeMax: 3,
+      riskLevel: 'High',
+    },
+  ],
+  UK: [
+    {
+      id: 'ftse-sector-rotation',
+      name: 'FTSE Sector Rotation',
+      description: 'Shift between defensive (utilities, healthcare) and cyclical (mining, energy) sectors. Commodity prices heavily influence UK indices.',
+      priceChangeMin: -3,
+      priceChangeMax: 3,
+      riskLevel: 'Medium',
+    },
+    {
+      id: 'sterling-volatility',
+      name: 'Sterling Volatility Event',
+      description: 'GBP moves sharply on political news or data. Exporters benefit from weak pound while importers suffer.',
+      priceChangeMin: -4,
+      priceChangeMax: 2,
+      riskLevel: 'Medium',
+    },
+  ],
+  EU: [
+    {
+      id: 'eu-political-risk',
+      name: 'Political / Election Risk',
+      description: 'Elections in Germany, France, or Italy create uncertainty. Coalition negotiations or policy shifts impact market confidence.',
+      priceChangeMin: -4,
+      priceChangeMax: 2,
+      riskLevel: 'Medium',
+    },
+    {
+      id: 'energy-shock-eu',
+      name: 'Energy Price Shock',
+      description: 'Natural gas or oil price surge impacts industrial production costs. Energy-intensive sectors face margin compression.',
+      priceChangeMin: -6,
+      priceChangeMax: -1,
+      riskLevel: 'High',
+    },
+  ],
+};
+
+export function getScenariosForMarket(market: Market): Scenario[] {
+  return [
+    ...BASE_SCENARIOS,
+    MACRO_SCENARIOS[market],
+    ...MARKET_SPECIFIC_SCENARIOS[market],
+  ];
+}
+
 export function calculateScenarioResults(input: TradeInput): ScenarioResult[] {
-  const { entryPrice, direction } = input;
+  const { entryPrice, direction, market } = input;
+  const scenarios = getScenariosForMarket(market);
   
-  return SCENARIOS.map((scenario) => {
+  return scenarios.map((scenario) => {
     // Calculate price range
     const priceRangeMin = entryPrice * (1 + scenario.priceChangeMin / 100);
     const priceRangeMax = entryPrice * (1 + scenario.priceChangeMax / 100);
