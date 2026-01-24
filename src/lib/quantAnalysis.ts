@@ -49,15 +49,17 @@ function parseHoldingPeriod(timeHorizon: string): number {
 }
 
 function calculateRiskScore(volatility: number, holdingDays: number, direction: string): number {
-  // Base risk from volatility (higher vol = higher risk)
-  let score = Math.min(volatility * 1.5, 5);
+  // Base risk from volatility (scale: volatility of 2% = score 3, 5% = score 6)
+  // Using a more balanced scaling factor
+  let score = volatility * 1.2;
   
   // Holding period adjustment (longer = more exposure to events)
-  if (holdingDays > 10) score += 2;
-  else if (holdingDays > 5) score += 1;
+  if (holdingDays > 15) score += 1.5;
+  else if (holdingDays > 7) score += 0.75;
+  else if (holdingDays > 3) score += 0.25;
   
   // Short positions slightly higher risk (unlimited loss potential conceptually)
-  if (direction === 'short') score += 1;
+  if (direction === 'short') score += 0.5;
   
   // Clamp to 1-10
   return Math.max(1, Math.min(10, Math.round(score)));
