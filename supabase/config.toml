@@ -38,3 +38,12 @@ verify_jwt = false
 
 [functions.customer-portal]
 verify_jwt = false
+
+[functions.platform-monitor]
+verify_jwt = false
+
+[functions.optimization-engine]
+verify_jwt = false
+
+[functions.stripe-webhook]
+verify_jwt = false
