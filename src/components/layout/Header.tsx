@@ -103,9 +103,9 @@ export function Header() {
             {user ? (
               <>
                 <Button variant="ghost" size="sm" asChild>
-                  <Link to="/analyze" className="flex items-center gap-2">
+                  <Link to="/account" className="flex items-center gap-2">
                     <User className="h-4 w-4" />
-                    {t('dashboard')}
+                    Account
                   </Link>
                 </Button>
                 <Button variant="outline" size="sm" onClick={handleSignOut}>
@@ -172,8 +172,8 @@ export function Header() {
                 {user ? (
                   <>
                     <Button variant="ghost" size="sm" asChild>
-                      <Link to="/analyze" onClick={() => setMobileMenuOpen(false)}>
-                        {t('dashboard')}
+                      <Link to="/account" onClick={() => setMobileMenuOpen(false)}>
+                        Account
                       </Link>
                     </Button>
                     <Button variant="outline" size="sm" onClick={handleSignOut}>
