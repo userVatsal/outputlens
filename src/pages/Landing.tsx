@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { BarChart3, Shield, Zap, Target, ArrowRight, Check } from 'lucide-react';
+import { Shield, Zap, Target, ArrowRight, Check, BarChart3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Layout } from '@/components/layout/Layout';
 
