@@ -185,6 +185,83 @@ serve(async (req) => {
       });
     }
 
+    // 8. SentinelAI Security Metrics (last 24 hours)
+    const { count: securityEventsCount } = await supabase
+      .from("security_events")
+      .select("*", { count: "exact", head: true })
+      .gte("created_at", oneDayAgo.toISOString());
+
+    metricsToInsert.push({
+      metric_type: "security",
+      metric_name: "security_events_24h",
+      metric_value: securityEventsCount || 0,
+      dimensions: {}
+    });
+
+    // Failed logins
+    const { count: failedLogins } = await supabase
+      .from("security_events")
+      .select("*", { count: "exact", head: true })
+      .eq("event_type", "failed_login")
+      .gte("created_at", oneDayAgo.toISOString());
+
+    metricsToInsert.push({
+      metric_type: "security",
+      metric_name: "failed_logins_24h",
+      metric_value: failedLogins || 0,
+      dimensions: {}
+    });
+
+    // Blocked IPs
+    const { count: blockedIps } = await supabase
+      .from("security_events")
+      .select("*", { count: "exact", head: true })
+      .eq("event_type", "blocked")
+      .gte("created_at", oneDayAgo.toISOString());
+
+    metricsToInsert.push({
+      metric_type: "security",
+      metric_name: "blocked_requests_24h",
+      metric_value: blockedIps || 0,
+      dimensions: {}
+    });
+
+    // Captcha challenges
+    const { data: captchaChallenges } = await supabase
+      .from("captcha_challenges")
+      .select("success")
+      .gte("issued_at", oneDayAgo.toISOString());
+
+    if (captchaChallenges && captchaChallenges.length > 0) {
+      const passed = captchaChallenges.filter(c => c.success === true).length;
+      const failed = captchaChallenges.filter(c => c.success === false).length;
+      const pending = captchaChallenges.length - passed - failed;
+      const passRate = captchaChallenges.length > 0 ? passed / captchaChallenges.length : 1;
+
+      metricsToInsert.push({
+        metric_type: "security",
+        metric_name: "captcha_stats_24h",
+        metric_value: passRate,
+        dimensions: { total: captchaChallenges.length, passed, failed, pending }
+      });
+    }
+
+    // High severity events
+    const { count: highSeverityEvents } = await supabase
+      .from("security_events")
+      .select("*", { count: "exact", head: true })
+      .in("severity", ["high", "critical"])
+      .gte("created_at", oneDayAgo.toISOString());
+
+    metricsToInsert.push({
+      metric_type: "security",
+      metric_name: "high_severity_events_24h",
+      metric_value: highSeverityEvents || 0,
+      dimensions: {}
+    });
+
+    console.log(`[MONITOR] Security events: ${securityEventsCount}, Failed logins: ${failedLogins}, Blocked: ${blockedIps}`);
+
     // Insert all metrics
     if (metricsToInsert.length > 0) {
       const { error: insertError } = await supabase

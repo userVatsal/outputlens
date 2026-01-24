@@ -162,7 +162,75 @@ serve(async (req) => {
       });
     }
 
-    // Use AI to analyze metrics and generate deeper insights if API key available
+    // Security metrics analysis
+    const securityMetrics = recentMetrics?.filter(m => m.metric_type === 'security') || [];
+    
+    // Check for high failed login rate
+    const failedLoginMetric = securityMetrics.find(m => m.metric_name === 'failed_logins_24h');
+    if (failedLoginMetric && failedLoginMetric.metric_value > 50) {
+      recommendations.push({
+        category: 'security',
+        priority: failedLoginMetric.metric_value > 100 ? 'critical' : 'high',
+        title: 'Elevated failed login attempts detected',
+        description: `${failedLoginMetric.metric_value} failed login attempts in the last 24 hours. Consider reviewing IP reputation thresholds or implementing additional security measures.`,
+        impact_estimate: { security_improvement: 0.4, user_protection: 0.5 },
+        action_type: 'review'
+      });
+    }
+
+    // Check for blocked requests spike
+    const blockedMetric = securityMetrics.find(m => m.metric_name === 'blocked_requests_24h');
+    if (blockedMetric && blockedMetric.metric_value > 20) {
+      recommendations.push({
+        category: 'security',
+        priority: 'high',
+        title: 'High number of blocked requests',
+        description: `${blockedMetric.metric_value} requests were blocked by SentinelAI. This may indicate an attack or overly aggressive thresholds.`,
+        impact_estimate: { security_posture: 0.3 },
+        action_type: 'review'
+      });
+    }
+
+    // Check for high severity events
+    const highSeverityMetric = securityMetrics.find(m => m.metric_name === 'high_severity_events_24h');
+    if (highSeverityMetric && highSeverityMetric.metric_value > 0) {
+      recommendations.push({
+        category: 'security',
+        priority: 'critical',
+        title: 'High severity security events detected',
+        description: `${highSeverityMetric.metric_value} high/critical severity security events occurred. Immediate review recommended.`,
+        impact_estimate: { security_posture: 0.8, user_protection: 0.7 },
+        action_type: 'manual'
+      });
+    }
+
+    // Check captcha pass rate
+    const captchaMetric = securityMetrics.find(m => m.metric_name === 'captcha_stats_24h');
+    if (captchaMetric) {
+      const passRate = captchaMetric.metric_value;
+      const dimensions = captchaMetric.dimensions as { total?: number; passed?: number; failed?: number };
+      
+      if (passRate < 0.5 && (dimensions.total || 0) > 10) {
+        recommendations.push({
+          category: 'security',
+          priority: 'medium',
+          title: 'Low captcha pass rate',
+          description: `Only ${(passRate * 100).toFixed(1)}% of captcha challenges passed. Consider reviewing if captcha difficulty is appropriate or if legitimate users are being challenged.`,
+          impact_estimate: { user_experience: -0.2, security_improvement: 0.1 },
+          action_type: 'review'
+        });
+      } else if (passRate > 0.95 && (dimensions.total || 0) > 10) {
+        recommendations.push({
+          category: 'security',
+          priority: 'low',
+          title: 'Very high captcha pass rate',
+          description: `${(passRate * 100).toFixed(1)}% captcha pass rate may indicate thresholds are too lenient. Consider lowering the threat score threshold for captcha challenges.`,
+          impact_estimate: { security_improvement: 0.2 },
+          action_type: 'review'
+        });
+      }
+    }
+
     if (LOVABLE_API_KEY && metricSummaries.length > 0) {
       try {
         const aiAnalysis = await generateAIInsights(
