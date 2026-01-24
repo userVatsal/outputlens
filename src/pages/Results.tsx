@@ -6,6 +6,8 @@ import { EnhancedQuantMetricsCard } from '@/components/EnhancedQuantMetricsCard'
 import { EnhancedScenarioDisplay } from '@/components/EnhancedScenarioDisplay';
 import { EnhancedRiskSummary } from '@/components/EnhancedRiskSummary';
 import { ReturnDistributionChart } from '@/components/ReturnDistributionChart';
+import { ScenarioProbabilityChart } from '@/components/ScenarioProbabilityChart';
+import { SentimentIndicator } from '@/components/SentimentIndicator';
 import { AIExplanation } from '@/components/AIExplanation';
 import { Layout } from '@/components/layout/Layout';
 import { useTrade } from '@/hooks/useTrade';
@@ -167,12 +169,26 @@ const Results = () => {
             <EnhancedRiskSummary analysis={analysis} />
           </div>
 
-          {/* Step 3: Structured Scenarios */}
+          {/* Step 3: Scenario Probability Charts */}
           <div className="mb-8 animate-fade-in" style={{ animationDelay: '0.3s' }}>
             <div className="flex items-center gap-2 mb-4">
               <div className="flex items-center justify-center w-6 h-6 rounded-full bg-primary/10 text-primary text-xs font-bold">3</div>
               <h2 className="text-lg font-semibold text-foreground font-brand">
-                Probability-Weighted Scenarios ({totalScenarios} scenarios)
+                Scenario Probabilities
+              </h2>
+            </div>
+            <p className="text-sm text-muted-foreground mb-4">
+              Visual breakdown of outcome probabilities and expected returns.
+            </p>
+            <ScenarioProbabilityChart scenarios={scenarios} currencySymbol={marketInfo.currencySymbol} />
+          </div>
+
+          {/* Step 4: Structured Scenarios */}
+          <div className="mb-8 animate-fade-in" style={{ animationDelay: '0.35s' }}>
+            <div className="flex items-center gap-2 mb-4">
+              <div className="flex items-center justify-center w-6 h-6 rounded-full bg-primary/10 text-primary text-xs font-bold">4</div>
+              <h2 className="text-lg font-semibold text-foreground font-brand">
+                Detailed Scenarios ({totalScenarios} scenarios)
               </h2>
             </div>
             <p className="text-sm text-muted-foreground mb-4">
@@ -181,10 +197,22 @@ const Results = () => {
             <EnhancedScenarioDisplay scenarios={scenarios} currencySymbol={marketInfo.currencySymbol} />
           </div>
 
-          {/* Step 4: AI Explanation */}
+          {/* Step 5: Market Sentiment */}
           <div className="mb-8 animate-fade-in" style={{ animationDelay: '0.4s' }}>
             <div className="flex items-center gap-2 mb-4">
-              <div className="flex items-center justify-center w-6 h-6 rounded-full bg-primary/10 text-primary text-xs font-bold">4</div>
+              <div className="flex items-center justify-center w-6 h-6 rounded-full bg-primary/10 text-primary text-xs font-bold">5</div>
+              <h2 className="text-lg font-semibold text-foreground font-brand">Market Sentiment</h2>
+            </div>
+            <p className="text-sm text-muted-foreground mb-4">
+              AI-analyzed sentiment from news and qualitative signals.
+            </p>
+            <SentimentIndicator asset={input.asset} market={input.market} />
+          </div>
+
+          {/* Step 6: AI Explanation */}
+          <div className="mb-8 animate-fade-in" style={{ animationDelay: '0.45s' }}>
+            <div className="flex items-center gap-2 mb-4">
+              <div className="flex items-center justify-center w-6 h-6 rounded-full bg-primary/10 text-primary text-xs font-bold">6</div>
               <h2 className="text-lg font-semibold text-foreground font-brand">AI Explanation</h2>
             </div>
             <p className="text-sm text-muted-foreground mb-4">
@@ -194,7 +222,7 @@ const Results = () => {
           </div>
 
           {/* New Analysis Button */}
-          <div className="text-center animate-fade-in" style={{ animationDelay: '0.5s' }}>
+          <div className="text-center animate-fade-in" style={{ animationDelay: '0.55s' }}>
             <Button onClick={handleNewAnalysis} className="px-8">
               Analyze Another Trade
             </Button>

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { TrendingUp, TrendingDown, Clock, DollarSign, BarChart3, Globe, Loader2, CalendarIcon, Sliders, FileText } from 'lucide-react';
 import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
@@ -19,6 +19,7 @@ import { TradeDirection, TimeHorizon, Market, MARKETS } from '@/types/trade';
 import { EnhancedTradeInput } from '@/types/analysis';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
+import { LivePriceIndicator } from './LivePriceIndicator';
 
 interface TradeInputFormProps {
   onSubmit: (input: EnhancedTradeInput) => void;
@@ -128,6 +129,13 @@ export function TradeInputForm({ onSubmit, isLoading = false }: TradeInputFormPr
         <p className="text-xs text-muted-foreground">
           Supports stocks, ETFs, indices, crypto (BTC, ETH), and forex (EUR/USD)
         </p>
+        {/* Live Price Indicator */}
+        <LivePriceIndicator
+          symbol={asset}
+          market={market}
+          currencySymbol={selectedMarket.currencySymbol}
+          onUsePrice={(price) => setEntryPrice(price.toString())}
+        />
       </div>
 
       {/* Trade Direction */}
