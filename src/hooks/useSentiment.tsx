@@ -97,7 +97,7 @@ export function useSentiment(): UseSentimentReturn {
   }, []);
 
   /**
-   * Run the full agent pipeline (ingest → sentiment → aggregate)
+   * Run the full agent pipeline (news → social → youtube → sentiment → aggregate)
    */
   const runPipeline = useCallback(async (
     assets?: string[]
@@ -109,9 +109,9 @@ export function useSentiment(): UseSentimentReturn {
       const { data, error: fnError } = await supabase.functions.invoke('run-agent-pipeline', {
         body: { 
           assets: assets || [],
-          stages: ['ingest', 'sentiment', 'aggregate'],
+          stages: ['ingest-news', 'ingest-social', 'ingest-youtube', 'sentiment', 'aggregate'],
           newsLimit: 50,
-          sentimentLimit: 20
+          sentimentLimit: 30
         }
       });
 
