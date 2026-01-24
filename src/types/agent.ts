@@ -258,9 +258,10 @@ export interface AggregateInsightsRequest {
 
 export interface PipelineRequest {
   assets?: string[];
-  stages?: ('ingest' | 'sentiment' | 'aggregate')[];
+  stages?: ('ingest-news' | 'ingest-social' | 'ingest-youtube' | 'sentiment' | 'aggregate')[];
   newsLimit?: number;
   sentimentLimit?: number;
+  socialSubreddits?: string[];
 }
 
 export interface PipelineResponse {
@@ -268,8 +269,16 @@ export interface PipelineResponse {
   stages: string[];
   results: {
     newsIngested: number;
+    socialIngested: number;
+    youtubeIngested: number;
     sentimentProcessed: number;
     assetsAggregated: number;
+  };
+  sources?: {
+    news: number;
+    reddit: number;
+    research: number;
+    youtube: number;
   };
   errors?: string[];
   timestamp: string;
