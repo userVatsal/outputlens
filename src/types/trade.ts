@@ -52,6 +52,7 @@ export interface TradeInput {
   asset: string;
   direction: TradeDirection;
   entryPrice: number;
+  tradeDate: Date;
   timeHorizon: TimeHorizon;
   market: Market;
 }

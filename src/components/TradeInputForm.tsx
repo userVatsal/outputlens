@@ -1,8 +1,11 @@
 import { useState } from 'react';
-import { TrendingUp, TrendingDown, Clock, DollarSign, BarChart3, Globe, Loader2 } from 'lucide-react';
+import { TrendingUp, TrendingDown, Clock, DollarSign, BarChart3, Globe, Loader2, CalendarIcon } from 'lucide-react';
+import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import {
   Select,
   SelectContent,
@@ -11,6 +14,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { TradeDirection, TimeHorizon, TradeInput, Market, MARKETS } from '@/types/trade';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { cn } from '@/lib/utils';
 
 interface TradeInputFormProps {
   onSubmit: (input: TradeInput) => void;
@@ -18,9 +23,11 @@ interface TradeInputFormProps {
 }
 
 export function TradeInputForm({ onSubmit, isLoading = false }: TradeInputFormProps) {
+  const { t, formatDate } = useLanguage();
   const [asset, setAsset] = useState('');
   const [direction, setDirection] = useState<TradeDirection>('long');
   const [entryPrice, setEntryPrice] = useState('');
+  const [tradeDate, setTradeDate] = useState<Date>(new Date());
   const [timeHorizon, setTimeHorizon] = useState<TimeHorizon>('3-7 days');
   const [market, setMarket] = useState<Market>('US');
 
@@ -33,6 +40,7 @@ export function TradeInputForm({ onSubmit, isLoading = false }: TradeInputFormPr
       asset: asset.toUpperCase().trim(),
       direction,
       entryPrice: parseFloat(entryPrice),
+      tradeDate,
       timeHorizon,
       market,
     };
@@ -152,7 +160,7 @@ export function TradeInputForm({ onSubmit, isLoading = false }: TradeInputFormPr
       <div className="space-y-2">
         <Label htmlFor="entryPrice" className="flex items-center gap-2 text-sm font-medium">
           <DollarSign className="h-4 w-4 text-muted-foreground" />
-          Entry Price ({selectedMarket.currencySymbol})
+          {t('entryPrice')} ({selectedMarket.currencySymbol})
         </Label>
         <div className="relative">
           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-mono">
@@ -172,11 +180,43 @@ export function TradeInputForm({ onSubmit, isLoading = false }: TradeInputFormPr
         </div>
       </div>
 
+      {/* Trade Date */}
+      <div className="space-y-2">
+        <Label className="flex items-center gap-2 text-sm font-medium">
+          <CalendarIcon className="h-4 w-4 text-muted-foreground" />
+          {t('tradeDate')}
+        </Label>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              disabled={isLoading}
+              className={cn(
+                "w-full justify-start text-left font-normal trading-input",
+                !tradeDate && "text-muted-foreground"
+              )}
+            >
+              <CalendarIcon className="mr-2 h-4 w-4" />
+              {tradeDate ? formatDate(tradeDate) : <span>{t('selectDate')}</span>}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0 bg-background border" align="start">
+            <Calendar
+              mode="single"
+              selected={tradeDate}
+              onSelect={(date) => date && setTradeDate(date)}
+              initialFocus
+              className="p-3 pointer-events-auto"
+            />
+          </PopoverContent>
+        </Popover>
+      </div>
+
       {/* Time Horizon */}
       <div className="space-y-2">
         <Label htmlFor="timeHorizon" className="flex items-center gap-2 text-sm font-medium">
           <Clock className="h-4 w-4 text-muted-foreground" />
-          Time Horizon
+          {t('timeHorizon')}
         </Label>
         <Select value={timeHorizon} onValueChange={(v) => setTimeHorizon(v as TimeHorizon)} disabled={isLoading}>
           <SelectTrigger className="trading-input">
@@ -199,15 +239,15 @@ export function TradeInputForm({ onSubmit, isLoading = false }: TradeInputFormPr
         {isLoading ? (
           <>
             <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-            Analyzing...
+            {t('analyzing')}
           </>
         ) : (
-          'Evaluate Trade'
+          t('evaluateTrade')
         )}
       </Button>
 
       <p className="text-center text-xs text-muted-foreground">
-        This tool provides scenario analysis only. Not financial advice.
+        {t('disclaimer')}
       </p>
     </form>
   );

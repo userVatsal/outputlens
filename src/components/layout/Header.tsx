@@ -1,20 +1,28 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X, LogOut, User } from 'lucide-react';
+import { Menu, X, LogOut, User, Languages } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { supabase } from '@/integrations/supabase/client';
 import { User as SupabaseUser } from '@supabase/supabase-js';
+import { useLanguage, Language } from '@/contexts/LanguageContext';
 import logo from '@/assets/logo.png';
 
 const navLinks = [
-  { href: '/analyze', label: 'Analyze' },
-  { href: '/methodology', label: 'Methodology' },
-  { href: '/pricing', label: 'Pricing' },
+  { href: '/analyze', labelKey: 'analyze' },
+  { href: '/methodology', labelKey: 'methodology' },
+  { href: '/pricing', labelKey: 'pricing' },
 ];
 
 export function Header() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { language, setLanguage, t } = useLanguage();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [user, setUser] = useState<SupabaseUser | null>(null);
 
@@ -60,33 +68,57 @@ export function Header() {
                     : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
-                {link.label}
+                {t(link.labelKey)}
               </Link>
             ))}
           </nav>
 
-          {/* Auth Buttons */}
+          {/* Language Toggle & Auth Buttons */}
           <div className="hidden md:flex items-center gap-3">
+            {/* Language Toggle */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="flex items-center gap-2">
+                  <Languages className="h-4 w-4" />
+                  <span className="text-xs font-medium">{language === 'en-US' ? '🇺🇸 US' : '🇬🇧 UK'}</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="bg-background border z-50">
+                <DropdownMenuItem 
+                  onClick={() => setLanguage('en-US')}
+                  className={language === 'en-US' ? 'bg-muted' : ''}
+                >
+                  <span className="mr-2">🇺🇸</span> US English
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  onClick={() => setLanguage('en-GB')}
+                  className={language === 'en-GB' ? 'bg-muted' : ''}
+                >
+                  <span className="mr-2">🇬🇧</span> UK English
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
             {user ? (
               <>
                 <Button variant="ghost" size="sm" asChild>
                   <Link to="/analyze" className="flex items-center gap-2">
                     <User className="h-4 w-4" />
-                    Dashboard
+                    {t('dashboard')}
                   </Link>
                 </Button>
                 <Button variant="outline" size="sm" onClick={handleSignOut}>
                   <LogOut className="h-4 w-4 mr-2" />
-                  Sign Out
+                  {t('signOut')}
                 </Button>
               </>
             ) : (
               <>
                 <Button variant="ghost" size="sm" asChild>
-                  <Link to="/auth">Sign In</Link>
+                  <Link to="/auth">{t('signIn')}</Link>
                 </Button>
                 <Button size="sm" asChild>
-                  <Link to="/auth?mode=signup">Get Started</Link>
+                  <Link to="/auth?mode=signup">{t('getStarted')}</Link>
                 </Button>
               </>
             )}
@@ -120,31 +152,43 @@ export function Header() {
                       : 'text-muted-foreground hover:text-foreground'
                   }`}
                 >
-                  {link.label}
+                  {t(link.labelKey)}
                 </Link>
               ))}
+              
+              {/* Language Toggle for Mobile */}
+              <div className="flex items-center gap-2 py-2">
+                <Languages className="h-4 w-4 text-muted-foreground" />
+                <button
+                  onClick={() => setLanguage(language === 'en-US' ? 'en-GB' : 'en-US')}
+                  className="text-sm font-medium text-muted-foreground hover:text-foreground"
+                >
+                  {language === 'en-US' ? '🇺🇸 US English' : '🇬🇧 UK English'}
+                </button>
+              </div>
+
               <div className="flex flex-col gap-2 pt-4 border-t border-border">
                 {user ? (
                   <>
                     <Button variant="ghost" size="sm" asChild>
                       <Link to="/analyze" onClick={() => setMobileMenuOpen(false)}>
-                        Dashboard
+                        {t('dashboard')}
                       </Link>
                     </Button>
                     <Button variant="outline" size="sm" onClick={handleSignOut}>
-                      Sign Out
+                      {t('signOut')}
                     </Button>
                   </>
                 ) : (
                   <>
                     <Button variant="ghost" size="sm" asChild>
                       <Link to="/auth" onClick={() => setMobileMenuOpen(false)}>
-                        Sign In
+                        {t('signIn')}
                       </Link>
                     </Button>
                     <Button size="sm" asChild>
                       <Link to="/auth?mode=signup" onClick={() => setMobileMenuOpen(false)}>
-                        Get Started
+                        {t('getStarted')}
                       </Link>
                     </Button>
                   </>
