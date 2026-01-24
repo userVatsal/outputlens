@@ -163,23 +163,42 @@ serve(async (req) => {
   }
 });
 
-function calculateAggregation(scores: any[]) {
-  // Extract sentiment values with confidence weighting
-  const sentiments = scores.map(s => ({
-    value: s.sentiment_score,
-    confidence: s.confidence,
-    impact: s.expected_impact || 0,
-    sourceType: s.qualitative_signals?.source_type || "unknown"
-  }));
+// Source reliability weights for weighted aggregation
+const SOURCE_WEIGHTS: Record<string, number> = {
+  news: 1.0,        // Professional journalism - highest weight
+  research: 0.9,    // Analyst reports, Seeking Alpha
+  analyst: 0.9,     // Professional analysts
+  video: 0.7,       // YouTube financial content (CNBC, Bloomberg)
+  forum: 0.5,       // Reddit, stock forums
+  social: 0.4,      // General social media
+  unknown: 0.3      // Unclassified sources
+};
 
-  // Simple average
+function calculateAggregation(scores: any[]) {
+  // Extract sentiment values with confidence AND source weighting
+  const sentiments = scores.map(s => {
+    const sourceType = s.qualitative_signals?.source_type || "unknown";
+    const sourceWeight = SOURCE_WEIGHTS[sourceType] || SOURCE_WEIGHTS.unknown;
+    
+    return {
+      value: s.sentiment_score,
+      confidence: s.confidence,
+      impact: s.expected_impact || 0,
+      sourceType,
+      sourceWeight,
+      // Combined weight = confidence * source reliability
+      combinedWeight: s.confidence * sourceWeight
+    };
+  });
+
+  // Simple average (unweighted)
   const avgSentiment = sentiments.reduce((sum, s) => sum + s.value, 0) / sentiments.length;
 
-  // Confidence-weighted average
-  const totalWeight = sentiments.reduce((sum, s) => sum + s.confidence, 0);
+  // Source-weighted average (accounts for source reliability)
+  const totalCombinedWeight = sentiments.reduce((sum, s) => sum + s.combinedWeight, 0);
   const weightedSentiment = sentiments.reduce((sum, s) => 
-    sum + (s.value * s.confidence), 0
-  ) / (totalWeight || 1);
+    sum + (s.value * s.combinedWeight), 0
+  ) / (totalCombinedWeight || 1);
 
   // Standard deviation (for conflict detection)
   const variance = sentiments.reduce((sum, s) => 
@@ -199,59 +218,77 @@ function calculateAggregation(scores: any[]) {
   const sourceTypes = new Set(sentiments.map(s => s.sourceType));
   const sourceDiversity = sourceTypes.size / 6; // Max 6 source types
 
-  // Source breakdown
+  // Source breakdown with weights
   const sourceBreakdown: Record<string, number> = {};
   sentiments.forEach(s => {
     sourceBreakdown[s.sourceType] = (sourceBreakdown[s.sourceType] || 0) + 1;
   });
 
-  // Top signals (highest confidence)
+  // Top signals (highest combined weight, not just confidence)
   const topSignals = scores
-    .sort((a, b) => b.confidence - a.confidence)
+    .map(s => {
+      const sourceType = s.qualitative_signals?.source_type || "unknown";
+      const sourceWeight = SOURCE_WEIGHTS[sourceType] || SOURCE_WEIGHTS.unknown;
+      return {
+        ...s,
+        combinedWeight: s.confidence * sourceWeight
+      };
+    })
+    .sort((a, b) => b.combinedWeight - a.combinedWeight)
     .slice(0, 5)
     .map(s => ({
       sentiment: s.sentiment_score,
       confidence: s.confidence,
-      reasoning: s.reasoning
+      reasoning: s.reasoning,
+      source: s.qualitative_signals?.source_type
     }));
 
-  // Data quality score
+  // Data quality score (incorporates source diversity)
   const avgConfidence = sentiments.reduce((sum, s) => sum + s.confidence, 0) / sentiments.length;
-  const dataQuality = avgConfidence * (1 - sentimentStdDev / 2) * (0.5 + sourceDiversity / 2);
+  const avgSourceWeight = sentiments.reduce((sum, s) => sum + s.sourceWeight, 0) / sentiments.length;
+  const dataQuality = avgConfidence * avgSourceWeight * (1 - sentimentStdDev / 2) * (0.5 + sourceDiversity / 2);
 
   // ===== QUANTITATIVE ADJUSTMENTS FOR SCENARIO ENGINE =====
 
   // Volatility adjustment: High disagreement or uncertainty = higher volatility
-  // Range: 0.8 (low vol) to 1.5 (high vol)
+  // Also factor in source quality - low-quality sources = more uncertainty
   let volatilityAdjustment = 1.0;
   if (conflictDetected) {
     volatilityAdjustment = 1.0 + sentimentStdDev * 0.5;
-  } else if (avgConfidence > 0.7) {
+  } else if (avgConfidence > 0.7 && avgSourceWeight > 0.7) {
+    // High-confidence from reliable sources = lower vol adjustment
     volatilityAdjustment = 1.0 - (avgConfidence - 0.7) * 0.3;
+  } else if (avgSourceWeight < 0.5) {
+    // Low-quality sources = slight vol increase
+    volatilityAdjustment = 1.1;
   }
   volatilityAdjustment = Math.max(0.8, Math.min(1.5, volatilityAdjustment));
 
-  // Probability shift: Strong consensus shifts base probabilities
-  // Range: -0.2 (bearish) to +0.2 (bullish)
-  let probabilityShift = weightedSentiment * 0.2;
+  // Probability shift: Strong consensus from reliable sources shifts probabilities
+  // Weight shift by average source quality
+  let probabilityShift = weightedSentiment * 0.2 * avgSourceWeight;
   if (conflictDetected) {
     probabilityShift *= 0.5; // Reduce shift when signals conflict
   }
   probabilityShift = Math.max(-0.2, Math.min(0.2, probabilityShift));
 
   // Tail risk multiplier: Extreme sentiment or high disagreement increases tail risk
-  // Range: 0.8 (less tail risk) to 2.0 (more tail risk)
+  // Low-quality consensus can also be a contrarian signal
   let tailRiskMultiplier = 1.0;
   if (Math.abs(weightedSentiment) > 0.7) {
     // Extreme consensus sometimes precedes reversals
     tailRiskMultiplier = 1.3;
   } else if (conflictDetected) {
     tailRiskMultiplier = 1.5;
+  } else if (avgSourceWeight < 0.5 && Math.abs(weightedSentiment) > 0.5) {
+    // Strong sentiment from unreliable sources = higher tail risk
+    tailRiskMultiplier = 1.4;
   }
   tailRiskMultiplier = Math.max(0.8, Math.min(2.0, tailRiskMultiplier));
 
-  // Expected move adjustment: Based on average expected impact
-  const avgImpact = sentiments.reduce((sum, s) => sum + s.impact, 0) / sentiments.length;
+  // Expected move adjustment: Based on average expected impact weighted by source quality
+  const avgImpact = sentiments.reduce((sum, s) => sum + s.impact * s.sourceWeight, 0) / 
+                    sentiments.reduce((sum, s) => sum + s.sourceWeight, 0);
   const expectedMoveAdjustment = avgImpact * (avgConfidence || 0.5);
 
   return {
@@ -269,6 +306,9 @@ function calculateAggregation(scores: any[]) {
     volatilityAdjustment,
     probabilityShift,
     tailRiskMultiplier,
-    expectedMoveAdjustment
+    expectedMoveAdjustment,
+    // New metrics for transparency
+    avgSourceWeight,
+    sourceWeightsUsed: SOURCE_WEIGHTS
   };
 }
