@@ -43,7 +43,7 @@ export function useUsage() {
         .from('profiles' as never)
         .select('subscription_tier')
         .eq('user_id', userId)
-        .single() as { data: Profile | null; error: unknown };
+        .maybeSingle() as { data: Profile | null; error: unknown };
 
       const tier = (profile?.subscription_tier as 'free' | 'pro') || 'free';
 
@@ -53,7 +53,7 @@ export function useUsage() {
         .select('analysis_count')
         .eq('user_id', userId)
         .eq('month_year', monthYear)
-        .single() as { data: UsageTracking | null; error: unknown };
+        .maybeSingle() as { data: UsageTracking | null; error: unknown };
 
       if (!usageData) {
         // Create new usage record for this month
