@@ -1,16 +1,34 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
-import { Mail, Lock, AlertCircle, Loader2 } from 'lucide-react';
+import { Mail, Lock, AlertCircle, Loader2, User, Calendar, Shield, CheckSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
 import { supabase } from '@/integrations/supabase/client';
 import { z } from 'zod';
+import { differenceInYears } from 'date-fns';
 import logo from '@/assets/logo.png';
+import { LEGAL_VERSIONS } from '@/lib/legal';
 
-const authSchema = z.object({
+const signInSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
+});
+
+const signUpSchema = z.object({
+  email: z.string().email('Please enter a valid email address'),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
+  fullName: z.string().min(2, 'Name must be at least 2 characters').max(100, 'Name must be less than 100 characters'),
+  dateOfBirth: z.string().refine((val) => {
+    if (!val) return false;
+    const date = new Date(val);
+    const age = differenceInYears(new Date(), date);
+    return age >= 18;
+  }, 'You must be at least 18 years old'),
+  consentGdpr: z.boolean().refine(val => val === true, 'GDPR consent is required'),
+  consentTerms: z.boolean().refine(val => val === true, 'You must accept Terms of Service'),
+  consentPrivacy: z.boolean().refine(val => val === true, 'You must accept Privacy Policy'),
 });
 
 export default function Auth() {
@@ -19,8 +37,16 @@ export default function Auth() {
   const [mode, setMode] = useState<'signin' | 'signup'>(
     searchParams.get('mode') === 'signup' ? 'signup' : 'signin'
   );
+  
+  // Form fields
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [fullName, setFullName] = useState('');
+  const [dateOfBirth, setDateOfBirth] = useState('');
+  const [consentGdpr, setConsentGdpr] = useState(false);
+  const [consentTerms, setConsentTerms] = useState(false);
+  const [consentPrivacy, setConsentPrivacy] = useState(false);
+  
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -46,7 +72,19 @@ export default function Auth() {
 
   const validateForm = () => {
     try {
-      authSchema.parse({ email, password });
+      if (mode === 'signup') {
+        signUpSchema.parse({
+          email,
+          password,
+          fullName,
+          dateOfBirth,
+          consentGdpr,
+          consentTerms,
+          consentPrivacy
+        });
+      } else {
+        signInSchema.parse({ email, password });
+      }
       return true;
     } catch (err) {
       if (err instanceof z.ZodError) {
@@ -71,6 +109,14 @@ export default function Auth() {
           password,
           options: {
             emailRedirectTo: `${window.location.origin}/analyze`,
+            data: {
+              full_name: fullName,
+              date_of_birth: dateOfBirth,
+              consent_gdpr: consentGdpr,
+              privacy_version: LEGAL_VERSIONS.privacy_policy.version,
+              terms_version: LEGAL_VERSIONS.terms_of_service.version,
+              onboarding_completed: true
+            },
           },
         });
 
@@ -106,6 +152,22 @@ export default function Auth() {
     }
   };
 
+  const resetForm = () => {
+    setEmail('');
+    setPassword('');
+    setFullName('');
+    setDateOfBirth('');
+    setConsentGdpr(false);
+    setConsentTerms(false);
+    setConsentPrivacy(false);
+    setError(null);
+  };
+
+  const switchMode = (newMode: 'signin' | 'signup') => {
+    setMode(newMode);
+    resetForm();
+  };
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
@@ -139,6 +201,7 @@ export default function Auth() {
               </div>
             )}
 
+            {/* Email Field */}
             <div className="space-y-2">
               <Label htmlFor="email" className="flex items-center gap-2">
                 <Mail className="h-4 w-4 text-muted-foreground" />
@@ -156,6 +219,7 @@ export default function Auth() {
               />
             </div>
 
+            {/* Password Field */}
             <div className="space-y-2">
               <Label htmlFor="password" className="flex items-center gap-2">
                 <Lock className="h-4 w-4 text-muted-foreground" />
@@ -172,6 +236,111 @@ export default function Auth() {
                 required
               />
             </div>
+
+            {/* Signup-only fields */}
+            {mode === 'signup' && (
+              <>
+                {/* Full Name */}
+                <div className="space-y-2">
+                  <Label htmlFor="fullName" className="flex items-center gap-2">
+                    <User className="h-4 w-4 text-muted-foreground" />
+                    Full Name
+                  </Label>
+                  <Input
+                    id="fullName"
+                    type="text"
+                    placeholder="John Doe"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    className="trading-input"
+                    disabled={loading}
+                    required
+                  />
+                </div>
+
+                {/* Date of Birth */}
+                <div className="space-y-2">
+                  <Label htmlFor="dateOfBirth" className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4 text-muted-foreground" />
+                    Date of Birth
+                  </Label>
+                  <Input
+                    id="dateOfBirth"
+                    type="date"
+                    value={dateOfBirth}
+                    onChange={(e) => setDateOfBirth(e.target.value)}
+                    className="trading-input"
+                    disabled={loading}
+                    required
+                    max={new Date(new Date().setFullYear(new Date().getFullYear() - 18)).toISOString().split('T')[0]}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    You must be at least 18 years old to use this service.
+                  </p>
+                </div>
+
+                {/* Consent Section */}
+                <div className="space-y-4 pt-4 border-t border-border">
+                  <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+                    <Shield className="h-4 w-4 text-primary" />
+                    Privacy & Legal Agreements
+                  </div>
+
+                  {/* GDPR Consent */}
+                  <div className="flex items-start gap-3">
+                    <Checkbox
+                      id="gdpr"
+                      checked={consentGdpr}
+                      onCheckedChange={(checked) => setConsentGdpr(checked === true)}
+                      disabled={loading}
+                    />
+                    <div className="grid gap-1.5 leading-none">
+                      <Label htmlFor="gdpr" className="text-sm font-normal cursor-pointer">
+                        I consent to the processing of my personal data in accordance with GDPR.
+                      </Label>
+                    </div>
+                  </div>
+
+                  {/* Privacy Policy */}
+                  <div className="flex items-start gap-3">
+                    <Checkbox
+                      id="privacy"
+                      checked={consentPrivacy}
+                      onCheckedChange={(checked) => setConsentPrivacy(checked === true)}
+                      disabled={loading}
+                    />
+                    <div className="grid gap-1.5 leading-none">
+                      <Label htmlFor="privacy" className="text-sm font-normal cursor-pointer">
+                        I have read and accept the{' '}
+                        <Link to="/privacy" className="text-primary hover:underline" target="_blank">
+                          Privacy Policy
+                        </Link>
+                        {' '}(v{LEGAL_VERSIONS.privacy_policy.version}).
+                      </Label>
+                    </div>
+                  </div>
+
+                  {/* Terms of Service */}
+                  <div className="flex items-start gap-3">
+                    <Checkbox
+                      id="terms"
+                      checked={consentTerms}
+                      onCheckedChange={(checked) => setConsentTerms(checked === true)}
+                      disabled={loading}
+                    />
+                    <div className="grid gap-1.5 leading-none">
+                      <Label htmlFor="terms" className="text-sm font-normal cursor-pointer">
+                        I have read and accept the{' '}
+                        <Link to="/terms" className="text-primary hover:underline" target="_blank">
+                          Terms of Service
+                        </Link>
+                        {' '}(v{LEGAL_VERSIONS.terms_of_service.version}).
+                      </Label>
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
 
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? (
@@ -191,10 +360,7 @@ export default function Auth() {
                     Already have an account?{' '}
                     <button
                       type="button"
-                      onClick={() => {
-                        setMode('signin');
-                        setError(null);
-                      }}
+                      onClick={() => switchMode('signin')}
                       className="text-primary hover:underline font-medium"
                     >
                       Sign in
@@ -205,10 +371,7 @@ export default function Auth() {
                     Don't have an account?{' '}
                     <button
                       type="button"
-                      onClick={() => {
-                        setMode('signup');
-                        setError(null);
-                      }}
+                      onClick={() => switchMode('signup')}
                       className="text-primary hover:underline font-medium"
                     >
                       Sign up
@@ -219,16 +382,18 @@ export default function Auth() {
             </div>
           </form>
 
-          <p className="text-center text-xs text-muted-foreground">
-            By continuing, you agree to our{' '}
-            <Link to="/terms" className="text-primary hover:underline">
-              Terms of Service
-            </Link>{' '}
-            and{' '}
-            <Link to="/privacy" className="text-primary hover:underline">
-              Privacy Policy
-            </Link>
-          </p>
+          {mode === 'signin' && (
+            <p className="text-center text-xs text-muted-foreground">
+              By continuing, you agree to our{' '}
+              <Link to="/terms" className="text-primary hover:underline">
+                Terms of Service
+              </Link>{' '}
+              and{' '}
+              <Link to="/privacy" className="text-primary hover:underline">
+                Privacy Policy
+              </Link>
+            </p>
+          )}
         </div>
       </div>
     </div>

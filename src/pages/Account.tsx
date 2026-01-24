@@ -1,26 +1,16 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useSearchParams, Link } from 'react-router-dom';
-import { 
-  CreditCard, 
-  Calendar, 
-  TrendingUp, 
-  Sparkles, 
-  CheckCircle,
-  Loader2,
-  ExternalLink,
-  BarChart3,
-  History
-} from 'lucide-react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Loader2, User, CreditCard, Shield } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
-import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ProfileSection } from '@/components/account/ProfileSection';
+import { SubscriptionSection } from '@/components/account/SubscriptionSection';
+import { LegalSection } from '@/components/account/LegalSection';
+import { useProfile } from '@/hooks/useProfile';
 import { usePlan } from '@/hooks/usePlan';
 import { useUsage } from '@/hooks/useUsage';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { PLAN_CONFIG, SubscriptionPlan } from '@/lib/stripe';
 
 export default function Account() {
   const navigate = useNavigate();
@@ -29,7 +19,14 @@ export default function Account() {
   const [portalLoading, setPortalLoading] = useState(false);
   
   const { 
-    plan, 
+    profile, 
+    loading: profileLoading, 
+    updateProfile, 
+    checkUsernameAvailable,
+    acceptConsent 
+  } = useProfile();
+  
+  const { 
     subscribed, 
     subscriptionEnd, 
     isLoading: planLoading,
@@ -52,7 +49,6 @@ export default function Account() {
     // Handle success redirect
     if (searchParams.get('success') === 'true') {
       toast.success('Subscription activated! Welcome to your new plan.');
-      // Refresh subscription status
       checkSubscription();
     }
   }, [navigate, searchParams, checkSubscription]);
@@ -68,7 +64,7 @@ export default function Account() {
     }
   };
 
-  if (loading || planLoading) {
+  if (loading || planLoading || profileLoading) {
     return (
       <Layout>
         <div className="flex items-center justify-center min-h-[60vh]">
@@ -78,9 +74,15 @@ export default function Account() {
     );
   }
 
-  const usagePercentage = usage 
-    ? (usage.analysisCount / (planConfig.analysesLimit || 1)) * 100 
-    : 0;
+  if (!profile) {
+    return (
+      <Layout>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <p className="text-muted-foreground">Unable to load profile. Please try again.</p>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
@@ -90,160 +92,55 @@ export default function Account() {
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-foreground mb-2">Account</h1>
             <p className="text-muted-foreground">
-              Manage your subscription and view usage statistics
+              Manage your profile, subscription, and privacy settings
             </p>
           </div>
 
-          <div className="grid gap-6 md:grid-cols-2">
-            {/* Current Plan Card */}
-            <Card className="glass-card">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Sparkles className="h-5 w-5 text-primary" />
-                  Current Plan
-                </CardTitle>
-                <CardDescription>Your active subscription</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-2xl font-bold text-foreground">
-                        {planConfig.name}
-                      </span>
-                      {subscribed && (
-                        <Badge variant="default" className="bg-bullish text-bullish-foreground">
-                          <CheckCircle className="h-3 w-3 mr-1" />
-                          Active
-                        </Badge>
-                      )}
-                    </div>
-                    <p className="text-muted-foreground">
-                      {planConfig.price === 0 
-                        ? 'Free forever' 
-                        : `$${planConfig.price}/month`}
-                    </p>
-                  </div>
-                </div>
+          {/* Tabbed Content */}
+          <Tabs defaultValue="profile" className="space-y-6">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="profile" className="flex items-center gap-2">
+                <User className="h-4 w-4" />
+                <span className="hidden sm:inline">Profile</span>
+              </TabsTrigger>
+              <TabsTrigger value="subscription" className="flex items-center gap-2">
+                <CreditCard className="h-4 w-4" />
+                <span className="hidden sm:inline">Subscription</span>
+              </TabsTrigger>
+              <TabsTrigger value="privacy" className="flex items-center gap-2">
+                <Shield className="h-4 w-4" />
+                <span className="hidden sm:inline">Privacy</span>
+              </TabsTrigger>
+            </TabsList>
 
-                {subscriptionEnd && (
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Calendar className="h-4 w-4" />
-                    <span>Renews on {new Date(subscriptionEnd).toLocaleDateString()}</span>
-                  </div>
-                )}
+            <TabsContent value="profile">
+              <ProfileSection
+                profile={profile}
+                onUpdate={updateProfile}
+                checkUsernameAvailable={checkUsernameAvailable}
+              />
+            </TabsContent>
 
-                <div className="flex gap-2 pt-2">
-                  {subscribed ? (
-                    <Button 
-                      variant="outline" 
-                      onClick={handleManageSubscription}
-                      disabled={portalLoading}
-                    >
-                      {portalLoading ? (
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      ) : (
-                        <CreditCard className="h-4 w-4 mr-2" />
-                      )}
-                      Manage Subscription
-                    </Button>
-                  ) : (
-                    <Button asChild>
-                      <Link to="/pricing">
-                        <Sparkles className="h-4 w-4 mr-2" />
-                        Upgrade Plan
-                      </Link>
-                    </Button>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+            <TabsContent value="subscription">
+              <SubscriptionSection
+                profile={profile}
+                planConfig={planConfig}
+                usage={usage}
+                usageLoading={usageLoading}
+                subscriptionEnd={subscriptionEnd}
+                subscribed={subscribed}
+                onManageSubscription={handleManageSubscription}
+                portalLoading={portalLoading}
+              />
+            </TabsContent>
 
-            {/* Usage Card */}
-            <Card className="glass-card">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <BarChart3 className="h-5 w-5 text-primary" />
-                  Monthly Usage
-                </CardTitle>
-                <CardDescription>Analyses used this month</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {usageLoading ? (
-                  <div className="flex items-center justify-center py-4">
-                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-                  </div>
-                ) : (
-                  <>
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-muted-foreground">Analyses</span>
-                        <span className="font-medium text-foreground">
-                          {usage?.analysisCount || 0} / {planConfig.analysesLimit}
-                        </span>
-                      </div>
-                      <Progress value={Math.min(usagePercentage, 100)} className="h-2" />
-                    </div>
-
-                    {usagePercentage >= 80 && plan === 'free' && (
-                      <div className="bg-caution/10 border border-caution/20 rounded-lg p-3">
-                        <p className="text-sm text-caution">
-                          You're running low on free analyses. 
-                          <Link to="/pricing" className="underline ml-1">
-                            Upgrade for more
-                          </Link>
-                        </p>
-                      </div>
-                    )}
-
-                    <div className="pt-2">
-                      <Button variant="outline" size="sm" asChild>
-                        <Link to="/history">
-                          <History className="h-4 w-4 mr-2" />
-                          View History
-                        </Link>
-                      </Button>
-                    </div>
-                  </>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Plan Features Card */}
-            <Card className="glass-card md:col-span-2">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <TrendingUp className="h-5 w-5 text-primary" />
-                  Plan Features
-                </CardTitle>
-                <CardDescription>What's included in your {planConfig.name} plan</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ul className="grid gap-2 sm:grid-cols-2">
-                  {planConfig.features.map((feature, index) => (
-                    <li key={index} className="flex items-center gap-2 text-sm">
-                      <CheckCircle className="h-4 w-4 text-bullish flex-shrink-0" />
-                      <span className="text-foreground">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-
-                {plan !== 'trader' && (
-                  <div className="mt-6 pt-4 border-t border-border">
-                    <p className="text-sm text-muted-foreground mb-3">
-                      Want more features?
-                    </p>
-                    <Button asChild variant="outline">
-                      <Link to="/pricing">
-                        <ExternalLink className="h-4 w-4 mr-2" />
-                        Compare Plans
-                      </Link>
-                    </Button>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
+            <TabsContent value="privacy">
+              <LegalSection
+                profile={profile}
+                onAcceptConsent={acceptConsent}
+              />
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
     </Layout>
