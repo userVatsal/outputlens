@@ -2,9 +2,11 @@
  * Agent Pipeline Orchestrator
  * 
  * Runs the full qualitative→quantitative pipeline for specified assets:
- * 1. Ingest news
- * 2. Process sentiment
- * 3. Aggregate insights
+ * 1. Ingest news (Finnhub)
+ * 2. Ingest social media (Reddit, blogs via Firecrawl)
+ * 3. Ingest YouTube (financial video content)
+ * 4. Process sentiment (Lovable AI)
+ * 5. Aggregate insights (weighted by source)
  * 
  * Can be triggered via cron job or on-demand.
  */
@@ -17,11 +19,14 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+type PipelineStage = "ingest-news" | "ingest-social" | "ingest-youtube" | "sentiment" | "aggregate";
+
 interface PipelineRequest {
   assets?: string[];
-  stages?: ("ingest" | "sentiment" | "aggregate")[];
+  stages?: PipelineStage[];
   newsLimit?: number;
   sentimentLimit?: number;
+  socialSubreddits?: string[];
 }
 
 serve(async (req) => {
@@ -40,9 +45,10 @@ serve(async (req) => {
   try {
     const {
       assets = [],
-      stages = ["ingest", "sentiment", "aggregate"],
+      stages = ["ingest-news", "ingest-social", "ingest-youtube", "sentiment", "aggregate"],
       newsLimit = 50,
-      sentimentLimit = 20
+      sentimentLimit = 30,
+      socialSubreddits
     }: PipelineRequest = await req.json().catch(() => ({}));
 
     console.log(`Running agent pipeline: stages=${stages.join(",")}, assets=${assets.join(",") || "all"}`);
@@ -50,9 +56,9 @@ serve(async (req) => {
     const results: Record<string, any> = {};
     const errors: string[] = [];
 
-    // Stage 1: Ingest News
-    if (stages.includes("ingest")) {
-      console.log("Stage 1: Ingesting news...");
+    // Stage 1: Ingest News (Finnhub)
+    if (stages.includes("ingest-news")) {
+      console.log("Stage: Ingesting news from Finnhub...");
       try {
         const ingestResponse = await fetch(`${supabaseUrl}/functions/v1/ingest-news`, {
           method: "POST",
@@ -64,25 +70,86 @@ serve(async (req) => {
         });
 
         if (ingestResponse.ok) {
-          results.ingest = await ingestResponse.json();
-          console.log(`Ingest complete: ${results.ingest.itemsProcessed} items`);
+          results.ingestNews = await ingestResponse.json();
+          console.log(`News ingest complete: ${results.ingestNews.itemsProcessed} items`);
         } else {
           const error = await ingestResponse.text();
-          errors.push(`Ingest failed: ${error}`);
-          console.error("Ingest error:", error);
+          errors.push(`News ingest failed: ${error}`);
+          console.error("News ingest error:", error);
         }
       } catch (ingestError) {
-        errors.push(`Ingest error: ${ingestError}`);
-        console.error("Ingest error:", ingestError);
+        errors.push(`News ingest error: ${ingestError}`);
+        console.error("News ingest error:", ingestError);
       }
 
-      // Small delay before next stage
       await new Promise(resolve => setTimeout(resolve, 1000));
     }
 
-    // Stage 2: Process Sentiment
+    // Stage 2: Ingest Social Media (Reddit, blogs via Firecrawl)
+    if (stages.includes("ingest-social")) {
+      console.log("Stage: Ingesting social media via Firecrawl...");
+      try {
+        const socialResponse = await fetch(`${supabaseUrl}/functions/v1/ingest-social`, {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${serviceRoleKey}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ 
+            assets, 
+            subreddits: socialSubreddits,
+            limit: 30 
+          })
+        });
+
+        if (socialResponse.ok) {
+          results.ingestSocial = await socialResponse.json();
+          console.log(`Social ingest complete: ${results.ingestSocial.itemsProcessed} items`);
+        } else {
+          const error = await socialResponse.text();
+          errors.push(`Social ingest failed: ${error}`);
+          console.error("Social ingest error:", error);
+        }
+      } catch (socialError) {
+        errors.push(`Social ingest error: ${socialError}`);
+        console.error("Social ingest error:", socialError);
+      }
+
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    }
+
+    // Stage 3: Ingest YouTube (financial video content)
+    if (stages.includes("ingest-youtube")) {
+      console.log("Stage: Ingesting YouTube content via Firecrawl...");
+      try {
+        const youtubeResponse = await fetch(`${supabaseUrl}/functions/v1/ingest-youtube`, {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${serviceRoleKey}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ assets, limit: 20 })
+        });
+
+        if (youtubeResponse.ok) {
+          results.ingestYoutube = await youtubeResponse.json();
+          console.log(`YouTube ingest complete: ${results.ingestYoutube.itemsProcessed} items`);
+        } else {
+          const error = await youtubeResponse.text();
+          errors.push(`YouTube ingest failed: ${error}`);
+          console.error("YouTube ingest error:", error);
+        }
+      } catch (youtubeError) {
+        errors.push(`YouTube ingest error: ${youtubeError}`);
+        console.error("YouTube ingest error:", youtubeError);
+      }
+
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    }
+
+    // Stage 4: Process Sentiment
     if (stages.includes("sentiment")) {
-      console.log("Stage 2: Processing sentiment...");
+      console.log("Stage: Processing sentiment via Lovable AI...");
       try {
         const sentimentResponse = await fetch(`${supabaseUrl}/functions/v1/process-sentiment`, {
           method: "POST",
@@ -109,9 +176,9 @@ serve(async (req) => {
       await new Promise(resolve => setTimeout(resolve, 1000));
     }
 
-    // Stage 3: Aggregate Insights (for each asset)
+    // Stage 5: Aggregate Insights (for each asset)
     if (stages.includes("aggregate")) {
-      console.log("Stage 3: Aggregating insights...");
+      console.log("Stage: Aggregating insights with source weighting...");
       results.aggregate = {};
 
       // Get unique assets from sentiment scores if none specified
@@ -157,9 +224,17 @@ serve(async (req) => {
       success: errors.length === 0,
       stages: stages,
       results: {
-        newsIngested: results.ingest?.itemsProcessed || 0,
+        newsIngested: results.ingestNews?.itemsProcessed || 0,
+        socialIngested: results.ingestSocial?.itemsProcessed || 0,
+        youtubeIngested: results.ingestYoutube?.itemsProcessed || 0,
         sentimentProcessed: results.sentiment?.itemsProcessed || 0,
         assetsAggregated: Object.keys(results.aggregate || {}).length
+      },
+      sources: {
+        news: results.ingestNews?.itemsProcessed || 0,
+        reddit: results.ingestSocial?.sources?.reddit || 0,
+        research: results.ingestSocial?.sources?.research || 0,
+        youtube: results.ingestYoutube?.videosFound || 0
       },
       errors: errors.length > 0 ? errors : undefined,
       timestamp: new Date().toISOString()
