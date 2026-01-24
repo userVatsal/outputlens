@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { BarChart3 } from 'lucide-react';
+import logo from '@/assets/logo.png';
 
 export function Footer() {
   return (
@@ -8,11 +8,8 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand */}
           <div className="space-y-4">
-            <Link to="/" className="flex items-center gap-2 font-semibold text-foreground">
-              <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary text-primary-foreground">
-                <BarChart3 className="h-5 w-5" />
-              </div>
-              <span className="text-lg">OutputLens</span>
+            <Link to="/" className="flex items-center">
+              <img src={logo} alt="OutputLens" className="h-7" />
             </Link>
             <p className="text-sm text-muted-foreground">
               Educational scenario analysis for traders. Understand potential outcomes before you trade.

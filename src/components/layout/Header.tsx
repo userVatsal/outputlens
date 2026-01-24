@@ -1,9 +1,10 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { BarChart3, Menu, X, LogOut, User } from 'lucide-react';
+import { Menu, X, LogOut, User } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { User as SupabaseUser } from '@supabase/supabase-js';
+import logo from '@/assets/logo.png';
 
 const navLinks = [
   { href: '/analyze', label: 'Analyze' },
@@ -43,11 +44,8 @@ export function Header() {
       <div className="section-container">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 font-semibold text-foreground">
-            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary text-primary-foreground">
-              <BarChart3 className="h-5 w-5" />
-            </div>
-            <span className="text-lg">OutputLens</span>
+          <Link to="/" className="flex items-center">
+            <img src={logo} alt="OutputLens" className="h-8" />
           </Link>
 
           {/* Desktop Navigation */}

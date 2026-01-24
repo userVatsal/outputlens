@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
-import { BarChart3, Mail, Lock, AlertCircle, Loader2 } from 'lucide-react';
+import { Mail, Lock, AlertCircle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { z } from 'zod';
+import logo from '@/assets/logo.png';
 
 const authSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
@@ -110,11 +111,8 @@ export default function Auth() {
       {/* Header */}
       <header className="border-b border-border">
         <div className="section-container py-4">
-          <Link to="/" className="flex items-center gap-2 font-semibold text-foreground w-fit">
-            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary text-primary-foreground">
-              <BarChart3 className="h-5 w-5" />
-            </div>
-            <span className="text-lg">OutputLens</span>
+          <Link to="/" className="flex items-center w-fit">
+            <img src={logo} alt="OutputLens" className="h-8" />
           </Link>
         </div>
       </header>
