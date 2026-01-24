@@ -1,5 +1,5 @@
 import { Layout } from '@/components/layout/Layout';
-import { BarChart3, Shield, AlertTriangle, BookOpen, TrendingUp, TrendingDown } from 'lucide-react';
+import { BarChart3, Shield, AlertTriangle, BookOpen, TrendingUp, TrendingDown, Activity, Zap } from 'lucide-react';
 
 const scenarios = [
   {
@@ -47,8 +47,8 @@ export default function Methodology() {
               How OutputLens Works
             </h1>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Understanding our scenario-based approach to trade analysis. 
-              No predictions—just structured thinking about possibilities.
+              We show the probability distribution of possible outcomes—not predictions. 
+              Understand the full range of where your trade could end up.
             </p>
           </div>
 
@@ -62,24 +62,64 @@ export default function Methodology() {
               <div className="glass-card p-6">
                 <h3 className="font-semibold text-foreground mb-2">No Predictions</h3>
                 <p className="text-sm text-muted-foreground">
-                  We don't predict what will happen. We show what could happen based on 
-                  common market scenarios.
+                  We don't predict what will happen. We show the probability distribution 
+                  of possible outcomes based on current market conditions and historical patterns.
                 </p>
               </div>
               <div className="glass-card p-6">
-                <h3 className="font-semibold text-foreground mb-2">Educational Only</h3>
+                <h3 className="font-semibold text-foreground mb-2">Educational Tool</h3>
                 <p className="text-sm text-muted-foreground">
-                  This is a learning tool to help you think through trades, not 
-                  financial advice or trading signals.
+                  OutputLens helps you think through trades systematically. It's a learning 
+                  tool—not financial advice or trading signals.
                 </p>
               </div>
               <div className="glass-card p-6">
-                <h3 className="font-semibold text-foreground mb-2">Static Scenarios</h3>
+                <h3 className="font-semibold text-foreground mb-2">Dynamic Scenarios</h3>
                 <p className="text-sm text-muted-foreground">
-                  Our scenarios are predefined based on typical market conditions, 
-                  not real-time data or market analysis.
+                  Scenarios are generated from Monte Carlo simulation using live volatility 
+                  data when available, with robust fallbacks for reliability.
                 </p>
               </div>
+            </div>
+          </section>
+
+          {/* How It Works */}
+          <section className="mb-16">
+            <h2 className="text-2xl font-bold text-foreground mb-6 flex items-center gap-3">
+              <Activity className="h-6 w-6 text-primary" />
+              Monte Carlo Simulation
+            </h2>
+            <div className="glass-card p-6 mb-6">
+              <p className="text-muted-foreground mb-4">
+                For each trade, we run <strong className="text-foreground">10,000 simulated price paths</strong> using 
+                Geometric Brownian Motion (GBM)—the same mathematical model used by quantitative 
+                finance professionals.
+              </p>
+              <div className="grid md:grid-cols-3 gap-4 mt-6">
+                <div className="p-4 rounded-lg bg-muted/30 text-center">
+                  <p className="text-2xl font-bold text-primary font-mono">10,000</p>
+                  <p className="text-xs text-muted-foreground">Simulation Paths</p>
+                </div>
+                <div className="p-4 rounded-lg bg-muted/30 text-center">
+                  <p className="text-2xl font-bold text-primary font-mono">GBM</p>
+                  <p className="text-xs text-muted-foreground">Brownian Motion</p>
+                </div>
+                <div className="p-4 rounded-lg bg-muted/30 text-center">
+                  <p className="text-2xl font-bold text-primary font-mono">&lt;2s</p>
+                  <p className="text-xs text-muted-foreground">Processing Time</p>
+                </div>
+              </div>
+            </div>
+            <div className="glass-card p-6">
+              <h4 className="font-semibold text-foreground mb-3 flex items-center gap-2">
+                <Zap className="h-4 w-4 text-primary" />
+                Live Data Integration
+              </h4>
+              <p className="text-sm text-muted-foreground">
+                When available, simulations use real-time volatility from Finnhub, Twelve Data, 
+                and CoinGecko. If live data is unavailable, we fall back to historical volatility 
+                estimates to ensure you always get a result.
+              </p>
             </div>
           </section>
 
@@ -90,8 +130,7 @@ export default function Methodology() {
               Base Scenarios
             </h2>
             <p className="text-muted-foreground mb-6">
-              Every trade analysis includes these four base scenarios that represent 
-              common market conditions:
+              Every analysis includes four base scenarios derived from the simulation distribution:
             </p>
             <div className="space-y-4">
               {scenarios.map((scenario) => (
@@ -107,7 +146,7 @@ export default function Methodology() {
                       <p className="text-sm text-muted-foreground">{scenario.description}</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm text-muted-foreground">Price Range</p>
+                      <p className="text-sm text-muted-foreground">Typical Range</p>
                       <p className="font-mono font-semibold text-foreground">{scenario.range}</p>
                     </div>
                   </div>
@@ -122,8 +161,7 @@ export default function Methodology() {
               Market-Specific Scenarios
             </h2>
             <p className="text-muted-foreground mb-6">
-              In addition to base scenarios, each market has specific scenarios based on 
-              regional factors:
+              Additional tail-risk scenarios based on regional factors and central bank policies:
             </p>
             <div className="grid md:grid-cols-3 gap-6">
               <div className="glass-card p-6">
@@ -139,7 +177,7 @@ export default function Methodology() {
                 <div className="text-2xl mb-3">🇬🇧</div>
                 <h3 className="font-semibold text-foreground mb-2">UK Markets</h3>
                 <ul className="text-sm text-muted-foreground space-y-1">
-                  <li>• BOE / Brexit Shock</li>
+                  <li>• BOE Rate Decision</li>
                   <li>• FTSE Sector Rotation</li>
                   <li>• Sterling Volatility Event</li>
                 </ul>
@@ -148,7 +186,7 @@ export default function Methodology() {
                 <div className="text-2xl mb-3">🇪🇺</div>
                 <h3 className="font-semibold text-foreground mb-2">EU Markets</h3>
                 <ul className="text-sm text-muted-foreground space-y-1">
-                  <li>• ECB / Eurozone Shock</li>
+                  <li>• ECB Policy Shock</li>
                   <li>• Political / Election Risk</li>
                   <li>• Energy Price Shock</li>
                 </ul>
@@ -192,10 +230,10 @@ export default function Methodology() {
               <div>
                 <h3 className="font-semibold text-foreground mb-2">Important Disclaimer</h3>
                 <p className="text-sm text-muted-foreground">
-                  OutputLens is for educational purposes only. Our scenarios are static and 
-                  do not reflect real-time market conditions or provide any guarantees about 
-                  future performance. This is not financial advice. Markets are unpredictable, 
-                  and past scenarios do not indicate future results. Always consult a qualified 
+                  OutputLens is for educational purposes only. Monte Carlo simulations show 
+                  possible outcomes based on mathematical models—they are not predictions. 
+                  Markets are unpredictable, and past volatility patterns do not guarantee 
+                  future results. This is not financial advice. Always consult a qualified 
                   financial advisor before making trading decisions.
                 </p>
               </div>

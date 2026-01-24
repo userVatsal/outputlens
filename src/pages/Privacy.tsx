@@ -9,7 +9,7 @@ export default function Privacy() {
           
           <div className="prose prose-gray max-w-none space-y-8">
             <p className="text-muted-foreground">
-              Last updated: {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+              Last updated: January 2025
             </p>
 
             <section className="space-y-4">
@@ -66,7 +66,35 @@ export default function Privacy() {
             </section>
 
             <section className="space-y-4">
-              <h2 className="text-2xl font-semibold text-foreground">5. Your Rights</h2>
+              <h2 className="text-2xl font-semibold text-foreground">5. Third-Party Services</h2>
+              <div className="glass-card p-6">
+                <p className="text-sm text-muted-foreground mb-3">
+                  OutputLens integrates with third-party market data providers to deliver live analysis:
+                </p>
+                <ul className="space-y-2 text-sm text-muted-foreground">
+                  <li>• Finnhub (stock quotes and news)</li>
+                  <li>• Twelve Data (forex and historical data)</li>
+                  <li>• CoinGecko (cryptocurrency data)</li>
+                </ul>
+                <p className="text-sm text-muted-foreground mt-3">
+                  These providers may have their own privacy policies regarding data they collect.
+                </p>
+              </div>
+            </section>
+
+            <section className="space-y-4">
+              <h2 className="text-2xl font-semibold text-foreground">6. Data Retention</h2>
+              <div className="glass-card p-6">
+                <p className="text-sm text-muted-foreground">
+                  We retain your account information for as long as your account is active. 
+                  Analysis history is retained for Pro users. Upon account deletion, we remove 
+                  your personal data within 30 days, except where required by law.
+                </p>
+              </div>
+            </section>
+
+            <section className="space-y-4">
+              <h2 className="text-2xl font-semibold text-foreground">7. Your Rights</h2>
               <div className="glass-card p-6">
                 <p className="text-sm text-muted-foreground">You have the right to:</p>
                 <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
@@ -79,7 +107,7 @@ export default function Privacy() {
             </section>
 
             <section className="space-y-4">
-              <h2 className="text-2xl font-semibold text-foreground">6. Cookies</h2>
+              <h2 className="text-2xl font-semibold text-foreground">8. Cookies</h2>
               <div className="glass-card p-6">
                 <p className="text-sm text-muted-foreground">
                   We use essential cookies for authentication and session management. 
@@ -90,7 +118,7 @@ export default function Privacy() {
             </section>
 
             <section className="space-y-4">
-              <h2 className="text-2xl font-semibold text-foreground">7. Changes to This Policy</h2>
+              <h2 className="text-2xl font-semibold text-foreground">9. Changes to This Policy</h2>
               <div className="glass-card p-6">
                 <p className="text-sm text-muted-foreground">
                   We may update this privacy policy from time to time. We will notify you of 
@@ -100,7 +128,7 @@ export default function Privacy() {
             </section>
 
             <section className="space-y-4">
-              <h2 className="text-2xl font-semibold text-foreground">8. Contact</h2>
+              <h2 className="text-2xl font-semibold text-foreground">10. Contact</h2>
               <div className="glass-card p-6">
                 <p className="text-sm text-muted-foreground">
                   For privacy-related questions, please contact us through the application.

@@ -8,14 +8,14 @@ const plans = [
     name: 'Free',
     price: '$0',
     period: 'forever',
-    description: 'Perfect for occasional analysis',
+    description: 'Try before you commit',
     features: [
       '10 analyses per month',
-      'All market scenarios',
-      'AI explanations',
-      'Basic support',
+      'US, UK, and EU market scenarios',
+      'Plain-language AI summaries',
+      'Email support',
     ],
-    cta: 'Get Started',
+    cta: 'Start Free',
     ctaLink: '/auth?mode=signup',
     highlighted: false,
   },
@@ -23,14 +23,14 @@ const plans = [
     name: 'Pro',
     price: '$9',
     period: 'per month',
-    description: 'For active traders and learners',
+    description: 'For traders who analyze before they execute',
     features: [
       'Unlimited analyses',
-      'All market scenarios',
-      'AI explanations',
-      'Analysis history',
-      'Priority support',
-      'Early access to new features',
+      'US, UK, and EU market scenarios',
+      'Plain-language AI summaries',
+      'Full analysis history',
+      'Priority email support',
+      'Beta features and roadmap input',
     ],
     cta: 'Upgrade to Pro',
     ctaLink: '/auth?mode=signup',
@@ -41,11 +41,15 @@ const plans = [
 const faqs = [
   {
     question: 'Is this financial advice?',
-    answer: 'No. OutputLens is an educational tool that shows potential scenarios based on predefined market conditions. It does not provide financial advice, trading signals, or predictions.',
+    answer: 'No. OutputLens is an educational tool that shows the probability distribution of possible outcomes using Monte Carlo simulation. It does not provide financial advice, trading signals, or predictions.',
   },
   {
-    question: 'How accurate are the scenarios?',
-    answer: 'Our scenarios are static and educational. They represent typical market conditions but do not reflect real-time data or provide any guarantees about actual market behavior.',
+    question: 'How do the simulations work?',
+    answer: 'We run 10,000 Monte Carlo paths using Geometric Brownian Motion, incorporating live volatility data when available. The result is a probability distribution of possible outcomes—not a single prediction.',
+  },
+  {
+    question: 'What\'s the difference between VaR and Expected Shortfall?',
+    answer: 'VaR (Value at Risk) tells you the maximum expected loss at a given confidence level (e.g., 95%). Expected Shortfall goes further—it shows the average loss when things are worse than VaR.',
   },
   {
     question: 'Can I cancel anytime?',
@@ -53,7 +57,11 @@ const faqs = [
   },
   {
     question: 'What markets are supported?',
-    answer: 'We support US (NYSE/NASDAQ), UK (LSE), and European (Euronext/DAX) markets with region-specific scenarios.',
+    answer: 'We support US (NYSE/NASDAQ), UK (LSE), and European (Euronext/DAX) markets with region-specific scenarios and local currencies.',
+  },
+  {
+    question: 'How is my data used?',
+    answer: 'We store your analysis history to show you past trades. We don\'t sell your data. See our Privacy Policy for full details.',
   },
 ];
 

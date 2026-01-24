@@ -2,7 +2,6 @@ import { Link } from 'react-router-dom';
 import { 
   Shield, 
   Zap, 
-  Target, 
   ArrowRight, 
   Check, 
   BarChart3, 
@@ -12,72 +11,68 @@ import {
   LineChart,
   Activity,
   Lock,
-  Users,
-  Star,
-  ChevronRight
+  ChevronRight,
+  BookOpen
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Layout } from '@/components/layout/Layout';
-
 const features = [
   {
     icon: Activity,
     title: 'Monte Carlo Simulation',
-    description: '10,000+ probabilistic paths using Geometric Brownian Motion. See the full distribution of possible outcomes.',
+    description: 'See all possible outcomes, not just one price target. 10,000 probabilistic paths reveal where your trade could realistically end up.',
   },
   {
     icon: Shield,
     title: 'Advanced Risk Metrics',
-    description: 'VaR, Expected Shortfall, Sharpe proxy, and tail risk detection. Know your downside before you enter.',
+    description: 'Calculate VaR, Expected Shortfall, and tail risk before you enter. Know your worst-case scenario upfront.',
   },
   {
     icon: Brain,
     title: 'AI-Powered Insights',
-    description: 'GPT-5 synthesizes quantitative data with qualitative context. Plain-language explanations of complex scenarios.',
+    description: 'Complex quantitative results translated into plain language. Understand what the numbers actually mean for your trade.',
   },
   {
     icon: LineChart,
     title: 'Live Market Data',
-    description: 'Real-time volatility from Finnhub, Twelve Data, and CoinGecko. Your analysis uses current market conditions.',
+    description: 'Analysis uses current volatility from global markets. Your scenarios reflect real market conditions, not static assumptions.',
   },
   {
     icon: Globe2,
     title: 'Multi-Market Support',
-    description: 'US, UK, and EU markets. Stocks, ETFs, crypto, and forex. Localized currencies and trading hours.',
+    description: 'US, UK, and EU markets with localized currencies. Stocks, ETFs, crypto, and forex—all in one platform.',
   },
   {
     icon: Zap,
     title: 'Sentiment Analysis',
-    description: 'AI agents continuously monitor news and social signals. Qualitative data becomes quantitative edge.',
+    description: 'AI agents monitor news and social signals continuously. Qualitative data quantified into your scenario analysis.',
   },
 ];
 
 const metrics = [
-  { value: '10,000+', label: 'Simulation Paths', sublabel: 'Per Analysis' },
-  { value: '95%', label: 'VaR Coverage', sublabel: 'Confidence Level' },
-  { value: '<2s', label: 'Analysis Time', sublabel: 'Edge Functions' },
-  { value: '24/7', label: 'Data Feeds', sublabel: 'Live Markets' },
+  { value: '10,000', label: 'Scenarios Simulated', sublabel: 'Per Trade' },
+  { value: '95%', label: 'Confidence Metrics', sublabel: 'VaR Coverage' },
+  { value: '<2s', label: 'Results Delivered', sublabel: 'Edge Functions' },
+  { value: '24/7', label: 'Global Market Data', sublabel: 'Live Feeds' },
 ];
 
-const testimonials = [
+// Use cases instead of fake testimonials
+const useCases = [
   {
-    quote: "Finally, a tool that shows me the distribution of outcomes, not just a single price target. Game changer for risk management.",
-    author: "Sarah K.",
-    role: "Portfolio Manager",
-    rating: 5,
+    persona: 'Active Trader',
+    useCase: 'See the probability distribution before sizing your position. Know your max drawdown before you enter.',
+    icon: TrendingUp,
   },
   {
-    quote: "The Monte Carlo approach gives me confidence in my trade sizing. I can see exactly what my worst case looks like.",
-    author: "Michael T.",
-    role: "Active Trader",
-    rating: 5,
+    persona: 'Portfolio Manager',
+    useCase: 'Run multi-asset scenarios to understand correlation risk. Quantify tail events across your book.',
+    icon: BarChart3,
   },
   {
-    quote: "OutputLens helps me explain risk scenarios to clients in a way they actually understand. The visualizations are excellent.",
-    author: "David L.",
-    role: "Financial Advisor",
-    rating: 5,
+    persona: 'Learning Investor',
+    useCase: 'Understand how volatility affects potential outcomes. Build intuition for risk-reward without real capital at stake.',
+    icon: BookOpen,
   },
 ];
 
@@ -97,50 +92,50 @@ export default function Landing() {
       <section className="hero-gradient py-16 lg:py-24 overflow-hidden">
         <div className="section-container">
           <div className="max-w-4xl mx-auto text-center space-y-8">
-            {/* Trust badges */}
+            {/* Trust badges - verifiable claims only */}
             <div className="flex items-center justify-center gap-4 flex-wrap">
               <Badge variant="secondary" className="px-3 py-1">
+                <Activity className="h-3 w-3 mr-1" />
+                10,000 Simulation Paths
+              </Badge>
+              <Badge variant="secondary" className="px-3 py-1">
+                <LineChart className="h-3 w-3 mr-1" />
+                Live Market Data
+              </Badge>
+              <Badge variant="secondary" className="px-3 py-1">
                 <Lock className="h-3 w-3 mr-1" />
-                Bank-Level Security
-              </Badge>
-              <Badge variant="secondary" className="px-3 py-1">
-                <Users className="h-3 w-3 mr-1" />
-                1,000+ Active Users
-              </Badge>
-              <Badge variant="secondary" className="px-3 py-1">
-                <Star className="h-3 w-3 mr-1 text-yellow-500" />
-                4.9/5 Rating
+                Bank-Grade Encryption
               </Badge>
             </div>
 
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-foreground font-brand leading-tight">
-              Quantitative Scenario Analysis{' '}
-              <span className="text-primary">Powered by AI</span>
+              Know Your Risk{' '}
+              <span className="text-primary">Before You Trade</span>
             </h1>
             
             <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto">
-              10,000-path Monte Carlo simulations with live market data. 
-              See the full probability distribution of your trade outcomes—not just a guess.
+              See the full probability distribution of your trade outcomes in seconds. 
+              Powered by 10,000-path Monte Carlo simulation with live volatility data.
             </p>
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
               <Button size="lg" asChild className="px-8 py-6 text-lg shadow-lg hover:shadow-xl transition-all">
                 <Link to="/auth?mode=signup">
-                  Start Free Analysis
+                  Get Your First Analysis Free
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
               <Button size="lg" variant="outline" asChild className="px-8 py-6 text-lg">
                 <Link to="/methodology">
-                  See How It Works
+                  How It Works
                   <ChevronRight className="ml-1 h-5 w-5" />
                 </Link>
               </Button>
             </div>
 
             <p className="text-sm text-muted-foreground">
-              ✓ 10 free analyses/month • ✓ No credit card required • ✓ Cancel anytime
+              ✓ 10 free analyses/month • ✓ No credit card required • ✓ Results in under 2 seconds
             </p>
           </div>
 
@@ -311,28 +306,26 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Testimonials */}
+      {/* Use Cases */}
       <section className="py-20 bg-background">
         <div className="section-container">
           <div className="text-center mb-12">
-            <Badge variant="outline" className="mb-4">Testimonials</Badge>
+            <Badge variant="outline" className="mb-4">Use Cases</Badge>
             <h2 className="text-3xl font-bold text-foreground mb-4 font-brand">
-              Trusted by Traders
+              Built for Every Trader
             </h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              Whether you're sizing a position, managing a portfolio, or learning the ropes.
+            </p>
           </div>
           <div className="grid md:grid-cols-3 gap-6">
-            {testimonials.map((testimonial, index) => (
+            {useCases.map((item, index) => (
               <div key={index} className="glass-card p-6">
-                <div className="flex gap-1 mb-4">
-                  {Array(testimonial.rating).fill(null).map((_, i) => (
-                    <Star key={i} className="h-4 w-4 fill-yellow-500 text-yellow-500" />
-                  ))}
+                <div className="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-primary/10 text-primary mb-4">
+                  <item.icon className="h-5 w-5" />
                 </div>
-                <p className="text-foreground mb-4 italic">"{testimonial.quote}"</p>
-                <div>
-                  <p className="font-semibold text-foreground">{testimonial.author}</p>
-                  <p className="text-sm text-muted-foreground">{testimonial.role}</p>
-                </div>
+                <h3 className="font-semibold text-foreground mb-2">{item.persona}</h3>
+                <p className="text-sm text-muted-foreground">{item.useCase}</p>
               </div>
             ))}
           </div>
@@ -344,21 +337,20 @@ export default function Landing() {
         <div className="section-container">
           <div className="glass-card p-8 md:p-12 text-center max-w-3xl mx-auto border-primary/20">
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4 font-brand">
-              Ready to See Your Trade's Full Potential?
+              Stop Guessing. Start Quantifying.
             </h2>
             <p className="text-muted-foreground mb-8 max-w-xl mx-auto">
-              Join thousands of traders who use probabilistic analysis to make smarter decisions.
-              Start with 10 free analyses—no credit card required.
+              Your first analysis is free. See the probability distribution of your next trade in under 2 seconds.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Button size="lg" asChild className="px-8 py-6 text-lg">
                 <Link to="/auth?mode=signup">
-                  Start Free Analysis
+                  Analyze Your First Trade
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
               <Button size="lg" variant="outline" asChild className="px-8 py-6 text-lg">
-                <Link to="/pricing">View Pricing Plans</Link>
+                <Link to="/pricing">Compare Plans</Link>
               </Button>
             </div>
           </div>
