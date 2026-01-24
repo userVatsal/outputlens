@@ -1,5 +1,5 @@
 import { QuantMetrics } from '@/types/trade';
-import { Activity, Gauge, Target, Calendar } from 'lucide-react';
+import { Activity, Gauge, Target, Calendar, Wifi, WifiOff } from 'lucide-react';
 
 interface QuantMetricsCardProps {
   metrics: QuantMetrics;
@@ -28,6 +28,17 @@ export function QuantMetricsCard({ metrics, currencySymbol }: QuantMetricsCardPr
         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
           <Activity className="h-4 w-4" />
           <span>Volatility Estimate</span>
+          {metrics.usedLiveData ? (
+            <span className="ml-auto flex items-center gap-1 text-xs text-bullish">
+              <Wifi className="h-3 w-3" />
+              Live
+            </span>
+          ) : (
+            <span className="ml-auto flex items-center gap-1 text-xs text-muted-foreground">
+              <WifiOff className="h-3 w-3" />
+              Default
+            </span>
+          )}
         </div>
         <div className="font-mono text-xl font-semibold text-foreground">
           ±{metrics.volatilityProxy.toFixed(1)}%
