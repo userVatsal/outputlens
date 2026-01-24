@@ -4,50 +4,54 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Scenario Trade Analyzer Design System
-   Dark professional fintech aesthetic with green/red accents */
+/* OutputLens Design System
+   Light professional fintech theme with navy/blue accents */
 
 @layer base {
   :root {
-    --background: 220 20% 97%;
-    --foreground: 220 20% 10%;
+    --background: 210 40% 98%;
+    --foreground: 222 47% 11%;
 
     --card: 0 0% 100%;
-    --card-foreground: 220 20% 10%;
+    --card-foreground: 222 47% 11%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 220 20% 10%;
+    --popover-foreground: 222 47% 11%;
 
-    --primary: 220 70% 50%;
+    --primary: 221 83% 53%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 220 15% 92%;
-    --secondary-foreground: 220 20% 10%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222 47% 11%;
 
-    --muted: 220 15% 95%;
-    --muted-foreground: 220 10% 45%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
 
-    --accent: 220 15% 92%;
-    --accent-foreground: 220 20% 10%;
+    --accent: 210 40% 96%;
+    --accent-foreground: 222 47% 11%;
 
-    --destructive: 0 72% 51%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 15% 88%;
-    --input: 220 15% 88%;
-    --ring: 220 70% 50%;
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 221 83% 53%;
 
     --radius: 0.5rem;
 
     /* Trading colors */
     --bullish: 142 76% 36%;
     --bullish-foreground: 0 0% 100%;
-    --bearish: 0 72% 51%;
+    --bearish: 0 84% 60%;
     --bearish-foreground: 0 0% 100%;
     --caution: 38 92% 50%;
     --caution-foreground: 0 0% 10%;
-    --neutral: 220 10% 50%;
+    --neutral: 215 16% 47%;
     --neutral-foreground: 0 0% 100%;
+
+    /* Brand colors */
+    --navy: 222 47% 11%;
+    --navy-light: 217 33% 17%;
   }
 
   .dark {
@@ -60,7 +64,7 @@
     --popover: 222 47% 8%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 210 100% 52%;
+    --primary: 217 91% 60%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 217 33% 17%;
@@ -77,7 +81,7 @@
 
     --border: 217 33% 20%;
     --input: 217 33% 20%;
-    --ring: 210 100% 52%;
+    --ring: 217 91% 60%;
 
     /* Trading colors - dark mode */
     --bullish: 142 69% 45%;
@@ -88,6 +92,10 @@
     --caution-foreground: 0 0% 10%;
     --neutral: 220 13% 50%;
     --neutral-foreground: 0 0% 100%;
+
+    /* Brand colors - dark mode */
+    --navy: 210 40% 98%;
+    --navy-light: 215 20% 65%;
   }
 }
 
@@ -108,26 +116,42 @@
 
 @layer components {
   .glass-card {
-    @apply bg-card/80 backdrop-blur-sm border border-border/50 rounded-lg shadow-lg;
+    @apply bg-card border border-border rounded-xl shadow-sm;
   }
 
   .trading-input {
-    @apply bg-muted/50 border-border focus:border-primary focus:ring-1 focus:ring-primary/30 transition-all duration-200;
+    @apply bg-background border-border focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200;
   }
 
   .scenario-row {
-    @apply border-b border-border/50 hover:bg-muted/30 transition-colors duration-150;
+    @apply border-b border-border/50 hover:bg-muted/50 transition-colors duration-150;
   }
 
   .risk-badge-low {
-    @apply bg-bullish/15 text-bullish border border-bullish/30;
+    @apply bg-bullish/10 text-bullish border border-bullish/20;
   }
 
   .risk-badge-medium {
-    @apply bg-caution/15 text-caution border border-caution/30;
+    @apply bg-caution/10 text-caution border border-caution/20;
   }
 
   .risk-badge-high {
-    @apply bg-bearish/15 text-bearish border border-bearish/30;
+    @apply bg-bearish/10 text-bearish border border-bearish/20;
+  }
+
+  .nav-link {
+    @apply text-muted-foreground hover:text-foreground transition-colors duration-200;
+  }
+
+  .nav-link-active {
+    @apply text-primary font-medium;
+  }
+
+  .section-container {
+    @apply max-w-6xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  .hero-gradient {
+    @apply bg-gradient-to-br from-primary/5 via-background to-primary/10;
   }
 }
