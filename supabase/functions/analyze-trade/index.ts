@@ -29,14 +29,14 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    const { input, quantMetrics, scenarios, bestCase, worstCase, overallRisk } = analysis;
+    const { input, marketData, riskMetrics, scenarios, simulation, bestCase, worstCase, overallRisk } = analysis;
     const marketContext = MARKET_CONTEXT[input.market] || MARKET_CONTEXT.US;
 
-    // Build structured scenario summary by category
+    // Build structured scenario summary by category with probabilities
     const formatScenarios = (categoryScenarios: any[], categoryName: string) => {
       if (!categoryScenarios || categoryScenarios.length === 0) return '';
-      return `${categoryName}:\n${categoryScenarios.map((r: any) => 
-        `  - ${r.scenario.name} (${r.scenario.probability}): ${r.returnMin.toFixed(1)}% to ${r.returnMax.toFixed(1)}% return`
+      return `${categoryName}:\n${categoryScenarios.map((s: any) => 
+        `  - ${s.name} (${(s.probability * 100).toFixed(0)}% probability): ${s.returnRangeMin.toFixed(1)}% to ${s.returnRangeMax.toFixed(1)}% return`
       ).join('\n')}`;
     };
 
@@ -47,6 +47,11 @@ serve(async (req) => {
       formatScenarios(scenarios.tail, 'TAIL RISK EVENTS'),
     ].filter(Boolean).join('\n\n');
 
+    // Format data source info
+    const dataQualityNote = marketData?.dataQuality === 'live' 
+      ? `Live data from ${marketData.source}` 
+      : 'Using market default estimates';
+
     const systemPrompt = `You are a professional trading analyst providing educational scenario analysis for the ${marketContext.name} market. Your role is to help traders understand potential outcomes and think critically about their trade.
 
 MARKET CONTEXT:
@@ -56,10 +61,11 @@ MARKET CONTEXT:
 
 DATA FLOW CONTEXT:
 You are the qualitative reasoning layer of a structured analysis system. Before you:
-1. User manually entered trade details (asset, direction, entry price, time horizon)
-2. System validated user access and usage limits
-3. System computed quantitative metrics (volatility, risk score)
-4. System generated structured scenarios (base, upside, downside, tail)
+1. User manually entered trade details (asset, direction, entry price, time horizon, confidence level)
+2. System fetched live market data and computed volatility
+3. System ran Monte Carlo simulation with ${simulation?.paths?.toLocaleString() || '10,000'} paths
+4. System generated dynamic scenarios with calculated probabilities
+5. System computed advanced risk metrics (VaR, Expected Shortfall, win/loss probability)
 
 Your job is to synthesize this data into educational insights, NOT to predict outcomes.
 
@@ -67,9 +73,10 @@ CRITICAL RULES:
 - NEVER use words like "guarantee", "will", "definitely", "certainly", or make price predictions
 - Always use probabilistic language: "may", "could", "might", "tends to", "historically"
 - State clearly this is educational analysis, not financial advice
+- Reference the specific probabilities from the Monte Carlo simulation
+- Explain what the VaR and Expected Shortfall mean in practical terms
 - Focus on explaining WHY scenarios exist and what drives them
 - Reference market-specific factors (${marketContext.centralBank} policy, regional risks)
-- Explain the quantitative metrics in plain English
 - Be concise but insightful (3-4 paragraphs max)
 - Prioritize clarity and explainability over technical jargon`;
 
@@ -80,31 +87,47 @@ TRADE PARAMETERS (user input):
 - Direction: ${input.direction.toUpperCase()}
 - Entry Price: ${marketContext.currency} ${input.entryPrice}
 - Time Horizon: ${input.timeHorizon}
+- User Confidence: ${input.confidence || 5}/10
+${input.assumptions ? `- User Thesis: "${input.assumptions}"` : ''}
 
-QUANTITATIVE METRICS (system computed):
-- Volatility Estimate: ±${quantMetrics.volatilityProxy}% over ${quantMetrics.holdingPeriodDays} days
-- Max Expected Move: ±${quantMetrics.maxExpectedMove}% (2σ range)
-- Risk Score: ${quantMetrics.riskScore}/10 (${quantMetrics.riskLabel})
+LIVE MARKET DATA (${dataQualityNote}):
+- Current Price: ${marketContext.currency} ${marketData?.price || input.entryPrice}
+- Annualized Volatility: ${marketData?.volatility?.toFixed(1) || 'N/A'}%
+${marketData?.changePercent ? `- Today's Change: ${marketData.changePercent > 0 ? '+' : ''}${marketData.changePercent.toFixed(2)}%` : ''}
 
-STRUCTURED SCENARIOS:
+MONTE CARLO SIMULATION (${simulation?.paths?.toLocaleString() || '10,000'} paths):
+- Mean Expected Return: ${simulation?.meanReturn?.toFixed(2) || 'N/A'}%
+- Median Return: ${simulation?.medianReturn?.toFixed(2) || 'N/A'}%
+- Standard Deviation: ${simulation?.stdDev?.toFixed(2) || 'N/A'}%
+- Distribution Skew: ${simulation?.skewness?.toFixed(2) || 'N/A'} (${simulation?.skewness < 0 ? 'left-skewed, more downside risk' : simulation?.skewness > 0 ? 'right-skewed, more upside potential' : 'symmetric'})
+- Tail Thickness (Kurtosis): ${simulation?.kurtosis?.toFixed(2) || 'N/A'} (${simulation?.kurtosis > 1 ? 'fat tails - extreme moves more likely than normal' : 'normal tails'})
+
+RISK METRICS:
+- Probability of Profit: ${riskMetrics?.probabilityOfProfit ? (riskMetrics.probabilityOfProfit * 100).toFixed(0) : 'N/A'}%
+- Probability of Loss: ${riskMetrics?.probabilityOfLoss ? (riskMetrics.probabilityOfLoss * 100).toFixed(0) : 'N/A'}%
+- 95% Value at Risk (VaR): ${riskMetrics?.valueAtRisk95?.toFixed(1) || 'N/A'}% (95% of outcomes better than this)
+- Expected Shortfall (CVaR): ${riskMetrics?.expectedShortfall?.toFixed(1) || 'N/A'}% (average loss in worst 5% of cases)
+- Risk Score: ${riskMetrics?.riskScore || 'N/A'}/10 (${riskMetrics?.riskLabel || 'N/A'})
+
+PROBABILITY-WEIGHTED SCENARIOS:
 ${scenarioSummary}
 
 SUMMARY:
-- Best case: ${bestCase.scenario.name} (up to ${bestCase.returnMax.toFixed(1)}%)
-- Worst case: ${worstCase.scenario.name} (down to ${worstCase.returnMin.toFixed(1)}%)
+- Best case: ${bestCase?.scenario?.name || 'N/A'} (up to ${bestCase?.returnMax?.toFixed(1) || 'N/A'}%)
+- Worst case: ${worstCase?.scenario?.name || 'N/A'} (down to ${worstCase?.returnMin?.toFixed(1) || 'N/A'}%)
 - Overall risk rating: ${overallRisk}
 
 Provide an educational explanation that:
-1. Explains what the quantitative metrics mean for this specific trade
-2. Identifies which scenario categories matter most and why
-3. Highlights the key risk factors specific to the ${marketContext.name} market and ${input.asset}
-4. Explains conditions under which this trade could fail
-5. Uses clear, probabilistic language throughout
+1. Interprets the Monte Carlo simulation results - what does the ${(riskMetrics?.probabilityOfProfit * 100)?.toFixed(0) || 'N/A'}% win probability mean practically?
+2. Explains the VaR and Expected Shortfall in plain English - what should the trader expect in worst cases?
+3. Identifies which scenario categories matter most based on the probabilities
+4. ${simulation?.kurtosis > 1 ? 'Warns about the fat tails detected - extreme moves are more likely than a normal distribution would suggest' : 'Notes that the distribution shows typical market behavior'}
+5. ${input.assumptions ? `Considers the user's thesis: "${input.assumptions}" - does it align with the probabilistic outcomes?` : 'Highlights key risk factors specific to ' + input.asset}
 
 Focus on helping the trader understand the RANGE of possibilities and the FACTORS that could influence outcomes.`;
 
     console.log(`Analyzing ${input.direction} trade for ${input.asset} in ${input.market} market at ${input.entryPrice}`);
-    console.log(`Quant metrics: volatility=${quantMetrics.volatilityProxy}%, risk=${quantMetrics.riskScore}/10`);
+    console.log(`Risk metrics: volatility=${marketData?.volatility?.toFixed(1) || 'default'}%, risk=${riskMetrics?.riskScore}/10, winRate=${(riskMetrics?.probabilityOfProfit * 100)?.toFixed(0)}%`);
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",

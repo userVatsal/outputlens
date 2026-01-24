@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Sparkles, AlertCircle, Loader2 } from 'lucide-react';
-import { TradeAnalysis } from '@/types/trade';
+import { EnhancedTradeAnalysis } from '@/types/analysis';
 import { supabase } from '@/integrations/supabase/client';
 
 interface AIExplanationProps {
-  analysis: TradeAnalysis;
+  analysis: EnhancedTradeAnalysis;
 }
 
 export function AIExplanation({ analysis }: AIExplanationProps) {
@@ -48,12 +48,15 @@ export function AIExplanation({ analysis }: AIExplanationProps) {
       <div className="flex items-center gap-2">
         <Sparkles className="h-5 w-5 text-primary" />
         <h3 className="text-lg font-semibold">AI Analysis</h3>
+        {analysis.riskMetrics.usedLiveData && (
+          <span className="ml-auto text-xs text-bullish">Using live market data</span>
+        )}
       </div>
 
       {isLoading && (
         <div className="flex items-center gap-3 py-8 justify-center text-muted-foreground">
           <Loader2 className="h-5 w-5 animate-spin" />
-          <span>Analyzing trade scenarios...</span>
+          <span>Analyzing {analysis.simulation.paths.toLocaleString()}-path simulation...</span>
         </div>
       )}
 
@@ -79,7 +82,7 @@ export function AIExplanation({ analysis }: AIExplanationProps) {
 
       <div className="pt-2 border-t border-border/50">
         <p className="text-xs text-muted-foreground italic">
-          ⚠️ This analysis is probabilistic and educational only. Markets are unpredictable. 
+          ⚠️ This analysis is probabilistic based on Monte Carlo simulation. Markets are unpredictable. 
           This is not financial advice and no outcomes are guaranteed.
         </p>
       </div>
