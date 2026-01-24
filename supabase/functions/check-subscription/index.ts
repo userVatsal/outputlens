@@ -38,14 +38,48 @@ serve(async (req) => {
     );
 
     const authHeader = req.headers.get("Authorization");
-    if (!authHeader) throw new Error("No authorization header provided");
+    if (!authHeader) {
+      // No auth - return free tier (not an error)
+      logStep("No auth header, returning free tier");
+      return new Response(JSON.stringify({ 
+        subscribed: false,
+        plan: "free",
+        subscription_end: null
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
+    }
 
     const token = authHeader.replace("Bearer ", "");
     const { data: userData, error: userError } = await supabaseClient.auth.getUser(token);
-    if (userError) throw new Error(`Authentication error: ${userError.message}`);
+    
+    if (userError || !userData.user) {
+      // Auth failed - return free tier (not an error)
+      logStep("Auth failed, returning free tier", { error: userError?.message });
+      return new Response(JSON.stringify({ 
+        subscribed: false,
+        plan: "free",
+        subscription_end: null
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
+    }
     
     const user = userData.user;
-    if (!user?.email) throw new Error("User not authenticated or email not available");
+    if (!user?.email) {
+      logStep("No email, returning free tier");
+      return new Response(JSON.stringify({ 
+        subscribed: false,
+        plan: "free",
+        subscription_end: null
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
+    }
+    logStep("User authenticated", { userId: user.id, email: user.email });
     logStep("User authenticated", { userId: user.id, email: user.email });
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
