@@ -65,6 +65,7 @@ async function fetchFinnhubQuote(symbol: string, apiKey: string): Promise<Market
 
 /**
  * Fetch historical candles from Finnhub for volatility calculation
+ * Note: Free tier may not have access to this endpoint
  */
 async function fetchFinnhubHistorical(symbol: string, apiKey: string, days: number = 30): Promise<number[]> {
   const now = Math.floor(Date.now() / 1000);
@@ -72,19 +73,26 @@ async function fetchFinnhubHistorical(symbol: string, apiKey: string, days: numb
   
   const url = `https://finnhub.io/api/v1/stock/candle?symbol=${encodeURIComponent(symbol)}&resolution=D&from=${from}&to=${now}&token=${apiKey}`;
   
-  const response = await fetch(url);
-  
-  if (!response.ok) {
-    throw new Error(`Finnhub historical API error: ${response.status}`);
-  }
-  
-  const data = await response.json();
-  
-  if (data.s === 'no_data' || !data.c) {
+  try {
+    const response = await fetch(url);
+    
+    // Free tier returns 403 for candle data
+    if (!response.ok) {
+      console.log(`Finnhub historical API returned ${response.status} - may require paid plan`);
+      return [];
+    }
+    
+    const data = await response.json();
+    
+    if (data.s === 'no_data' || !data.c) {
+      return [];
+    }
+    
+    return data.c; // Close prices
+  } catch (error) {
+    console.warn('Finnhub historical data not available:', error);
     return [];
   }
-  
-  return data.c; // Close prices
 }
 
 /**
