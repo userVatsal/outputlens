@@ -15,6 +15,7 @@ import logo from '@/assets/logo.png';
 
 const navLinks = [
   { href: '/analyze', labelKey: 'analyze' },
+  { href: '/portfolio', labelKey: 'portfolio' },
   { href: '/methodology', labelKey: 'methodology' },
   { href: '/pricing', labelKey: 'pricing' },
 ];
