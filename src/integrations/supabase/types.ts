@@ -14,6 +14,129 @@ export type Database = {
   }
   public: {
     Tables: {
+      agent_runs: {
+        Row: {
+          agent_name: string
+          agent_type: string
+          completed_at: string | null
+          created_at: string
+          error_message: string | null
+          id: string
+          items_failed: number | null
+          items_processed: number | null
+          metadata: Json | null
+          started_at: string
+          status: string
+        }
+        Insert: {
+          agent_name: string
+          agent_type: string
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          items_failed?: number | null
+          items_processed?: number | null
+          metadata?: Json | null
+          started_at?: string
+          status: string
+        }
+        Update: {
+          agent_name?: string
+          agent_type?: string
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          items_failed?: number | null
+          items_processed?: number | null
+          metadata?: Json | null
+          started_at?: string
+          status?: string
+        }
+        Relationships: []
+      }
+      aggregated_insights: {
+        Row: {
+          asset: string
+          avg_sentiment: number | null
+          bearish_count: number | null
+          bullish_count: number | null
+          computed_at: string
+          conflict_detected: boolean | null
+          created_at: string
+          data_quality_score: number | null
+          expected_move_adjustment: number | null
+          expires_at: string
+          id: string
+          market: string
+          neutral_count: number | null
+          probability_shift: number | null
+          sentiment_stddev: number | null
+          source_breakdown: Json | null
+          source_diversity_score: number | null
+          tail_risk_multiplier: number | null
+          top_signals: Json | null
+          total_signals: number | null
+          volatility_adjustment: number | null
+          weighted_sentiment: number | null
+          window_end: string
+          window_start: string
+        }
+        Insert: {
+          asset: string
+          avg_sentiment?: number | null
+          bearish_count?: number | null
+          bullish_count?: number | null
+          computed_at?: string
+          conflict_detected?: boolean | null
+          created_at?: string
+          data_quality_score?: number | null
+          expected_move_adjustment?: number | null
+          expires_at: string
+          id?: string
+          market?: string
+          neutral_count?: number | null
+          probability_shift?: number | null
+          sentiment_stddev?: number | null
+          source_breakdown?: Json | null
+          source_diversity_score?: number | null
+          tail_risk_multiplier?: number | null
+          top_signals?: Json | null
+          total_signals?: number | null
+          volatility_adjustment?: number | null
+          weighted_sentiment?: number | null
+          window_end: string
+          window_start: string
+        }
+        Update: {
+          asset?: string
+          avg_sentiment?: number | null
+          bearish_count?: number | null
+          bullish_count?: number | null
+          computed_at?: string
+          conflict_detected?: boolean | null
+          created_at?: string
+          data_quality_score?: number | null
+          expected_move_adjustment?: number | null
+          expires_at?: string
+          id?: string
+          market?: string
+          neutral_count?: number | null
+          probability_shift?: number | null
+          sentiment_stddev?: number | null
+          source_breakdown?: Json | null
+          source_diversity_score?: number | null
+          tail_risk_multiplier?: number | null
+          top_signals?: Json | null
+          total_signals?: number | null
+          volatility_adjustment?: number | null
+          weighted_sentiment?: number | null
+          window_end?: string
+          window_start?: string
+        }
+        Relationships: []
+      }
       analysis_history: {
         Row: {
           asset: string
@@ -109,6 +232,122 @@ export type Database = {
           volatility_30d?: number | null
         }
         Relationships: []
+      }
+      qualitative_signals: {
+        Row: {
+          asset: string | null
+          asset_type: string | null
+          author: string | null
+          content: string
+          content_hash: string
+          created_at: string
+          fetched_at: string
+          id: string
+          language: string | null
+          metadata: Json | null
+          processed: boolean | null
+          processing_error: string | null
+          published_at: string | null
+          source_name: string
+          source_type: string
+          source_url: string | null
+          title: string | null
+        }
+        Insert: {
+          asset?: string | null
+          asset_type?: string | null
+          author?: string | null
+          content: string
+          content_hash: string
+          created_at?: string
+          fetched_at?: string
+          id?: string
+          language?: string | null
+          metadata?: Json | null
+          processed?: boolean | null
+          processing_error?: string | null
+          published_at?: string | null
+          source_name: string
+          source_type: string
+          source_url?: string | null
+          title?: string | null
+        }
+        Update: {
+          asset?: string | null
+          asset_type?: string | null
+          author?: string | null
+          content?: string
+          content_hash?: string
+          created_at?: string
+          fetched_at?: string
+          id?: string
+          language?: string | null
+          metadata?: Json | null
+          processed?: boolean | null
+          processing_error?: string | null
+          published_at?: string | null
+          source_name?: string
+          source_type?: string
+          source_url?: string | null
+          title?: string | null
+        }
+        Relationships: []
+      }
+      sentiment_scores: {
+        Row: {
+          asset: string
+          confidence: number
+          created_at: string
+          entities: Json | null
+          expected_impact: number | null
+          id: string
+          impact_timeframe: string | null
+          keywords: Json | null
+          model_used: string
+          processed_at: string
+          reasoning: string | null
+          sentiment_score: number
+          signal_id: string
+        }
+        Insert: {
+          asset: string
+          confidence: number
+          created_at?: string
+          entities?: Json | null
+          expected_impact?: number | null
+          id?: string
+          impact_timeframe?: string | null
+          keywords?: Json | null
+          model_used: string
+          processed_at?: string
+          reasoning?: string | null
+          sentiment_score: number
+          signal_id: string
+        }
+        Update: {
+          asset?: string
+          confidence?: number
+          created_at?: string
+          entities?: Json | null
+          expected_impact?: number | null
+          id?: string
+          impact_timeframe?: string | null
+          keywords?: Json | null
+          model_used?: string
+          processed_at?: string
+          reasoning?: string | null
+          sentiment_score?: number
+          signal_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sentiment_scores_signal_id_fkey"
+            columns: ["signal_id"]
+            isOneToOne: false
+            referencedRelation: "qualitative_signals"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

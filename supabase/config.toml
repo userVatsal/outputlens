@@ -5,3 +5,18 @@ verify_jwt = false
 
 [functions.fetch-market-data]
 verify_jwt = false
+
+[functions.ingest-news]
+verify_jwt = false
+
+[functions.process-sentiment]
+verify_jwt = false
+
+[functions.aggregate-insights]
+verify_jwt = false
+
+[functions.analyze-asset-enhanced]
+verify_jwt = false
+
+[functions.run-agent-pipeline]
+verify_jwt = false
