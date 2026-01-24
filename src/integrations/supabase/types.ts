@@ -337,42 +337,123 @@ export type Database = {
         }
         Relationships: []
       }
+      profile_audit_log: {
+        Row: {
+          change_source: string | null
+          changed_at: string | null
+          field_name: string
+          id: string
+          new_value: string | null
+          old_value: string | null
+          user_id: string
+        }
+        Insert: {
+          change_source?: string | null
+          changed_at?: string | null
+          field_name: string
+          id?: string
+          new_value?: string | null
+          old_value?: string | null
+          user_id: string
+        }
+        Update: {
+          change_source?: string | null
+          changed_at?: string | null
+          field_name?: string
+          id?: string
+          new_value?: string | null
+          old_value?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
+          account_status: string | null
+          avatar_url: string | null
+          consent_accepted_at: string | null
+          consent_gdpr: boolean | null
+          consent_privacy_version: number | null
+          consent_terms_version: number | null
+          contact_preferences: Json | null
           created_at: string
+          date_of_birth: string | null
+          display_name: string | null
+          full_name: string | null
           id: string
+          language: string | null
+          locale: string | null
+          onboarding_completed: boolean | null
           plan_expires_at: string | null
           plan_started_at: string | null
+          profile_updated_at: string | null
+          social_handles: Json | null
           stripe_customer_id: string | null
           stripe_subscription_id: string | null
           subscription_plan: string | null
           subscription_tier: string
+          timezone: string | null
           updated_at: string
           user_id: string
+          username: string | null
         }
         Insert: {
+          account_status?: string | null
+          avatar_url?: string | null
+          consent_accepted_at?: string | null
+          consent_gdpr?: boolean | null
+          consent_privacy_version?: number | null
+          consent_terms_version?: number | null
+          contact_preferences?: Json | null
           created_at?: string
+          date_of_birth?: string | null
+          display_name?: string | null
+          full_name?: string | null
           id?: string
+          language?: string | null
+          locale?: string | null
+          onboarding_completed?: boolean | null
           plan_expires_at?: string | null
           plan_started_at?: string | null
+          profile_updated_at?: string | null
+          social_handles?: Json | null
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
           subscription_plan?: string | null
           subscription_tier?: string
+          timezone?: string | null
           updated_at?: string
           user_id: string
+          username?: string | null
         }
         Update: {
+          account_status?: string | null
+          avatar_url?: string | null
+          consent_accepted_at?: string | null
+          consent_gdpr?: boolean | null
+          consent_privacy_version?: number | null
+          consent_terms_version?: number | null
+          contact_preferences?: Json | null
           created_at?: string
+          date_of_birth?: string | null
+          display_name?: string | null
+          full_name?: string | null
           id?: string
+          language?: string | null
+          locale?: string | null
+          onboarding_completed?: boolean | null
           plan_expires_at?: string | null
           plan_started_at?: string | null
+          profile_updated_at?: string | null
+          social_handles?: Json | null
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
           subscription_plan?: string | null
           subscription_tier?: string
+          timezone?: string | null
           updated_at?: string
           user_id?: string
+          username?: string | null
         }
         Relationships: []
       }
