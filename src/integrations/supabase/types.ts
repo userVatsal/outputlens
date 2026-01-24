@@ -233,6 +233,110 @@ export type Database = {
         }
         Relationships: []
       }
+      optimization_recommendations: {
+        Row: {
+          action_type: string | null
+          category: string
+          created_at: string | null
+          description: string
+          id: string
+          impact_estimate: Json | null
+          implemented_at: string | null
+          priority: string
+          result_metrics: Json | null
+          status: string | null
+          title: string
+        }
+        Insert: {
+          action_type?: string | null
+          category: string
+          created_at?: string | null
+          description: string
+          id?: string
+          impact_estimate?: Json | null
+          implemented_at?: string | null
+          priority: string
+          result_metrics?: Json | null
+          status?: string | null
+          title: string
+        }
+        Update: {
+          action_type?: string | null
+          category?: string
+          created_at?: string | null
+          description?: string
+          id?: string
+          impact_estimate?: Json | null
+          implemented_at?: string | null
+          priority?: string
+          result_metrics?: Json | null
+          status?: string | null
+          title?: string
+        }
+        Relationships: []
+      }
+      optimization_results: {
+        Row: {
+          after_metrics: Json
+          before_metrics: Json
+          id: string
+          improvement_pct: number | null
+          measured_at: string | null
+          recommendation_id: string | null
+        }
+        Insert: {
+          after_metrics: Json
+          before_metrics: Json
+          id?: string
+          improvement_pct?: number | null
+          measured_at?: string | null
+          recommendation_id?: string | null
+        }
+        Update: {
+          after_metrics?: Json
+          before_metrics?: Json
+          id?: string
+          improvement_pct?: number | null
+          measured_at?: string | null
+          recommendation_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "optimization_results_recommendation_id_fkey"
+            columns: ["recommendation_id"]
+            isOneToOne: false
+            referencedRelation: "optimization_recommendations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      platform_metrics: {
+        Row: {
+          dimensions: Json | null
+          id: string
+          metric_name: string
+          metric_type: string
+          metric_value: number
+          recorded_at: string | null
+        }
+        Insert: {
+          dimensions?: Json | null
+          id?: string
+          metric_name: string
+          metric_type: string
+          metric_value: number
+          recorded_at?: string | null
+        }
+        Update: {
+          dimensions?: Json | null
+          id?: string
+          metric_name?: string
+          metric_type?: string
+          metric_value?: number
+          recorded_at?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string

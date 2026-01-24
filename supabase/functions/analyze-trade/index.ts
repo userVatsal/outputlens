@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -11,14 +12,36 @@ const MARKET_CONTEXT: Record<string, { name: string; centralBank: string; curren
   EU: { name: 'Europe', centralBank: 'European Central Bank (ECB)', currency: 'EUR' },
 };
 
+// Tier-based AI model selection
+const MODEL_BY_TIER: Record<string, string> = {
+  free: 'google/gemini-2.5-flash-lite',
+  starter: 'google/gemini-3-flash-preview',
+  pro: 'google/gemini-3-flash-preview',
+  trader: 'google/gemini-2.5-pro',
+};
+
+// Plan limits
+const PLAN_LIMITS: Record<string, number> = {
+  free: 5,
+  starter: 30,
+  pro: 100,
+  trader: 500,
+};
+
 serve(async (req) => {
-  // Handle CORS preflight
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
+  const startTime = Date.now();
+  
+  const supabase = createClient(
+    Deno.env.get("SUPABASE_URL")!,
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+  );
+
   try {
-    const { analysis } = await req.json();
+    const { analysis, tier = 'free' } = await req.json();
     
     if (!analysis) {
       throw new Error("Analysis data is required");
@@ -29,10 +52,60 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
+    // Server-side usage verification (optional - user auth check)
+    const authHeader = req.headers.get("Authorization");
+    if (authHeader) {
+      const token = authHeader.replace("Bearer ", "");
+      const { data: userData } = await supabase.auth.getUser(token);
+      
+      if (userData?.user) {
+        const userId = userData.user.id;
+        const monthYear = new Date().toISOString().slice(0, 7);
+        
+        // Check usage limit
+        const { data: usageData } = await supabase
+          .from("usage_tracking")
+          .select("analysis_count")
+          .eq("user_id", userId)
+          .eq("month_year", monthYear)
+          .maybeSingle();
+        
+        // Get user's plan
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("subscription_plan")
+          .eq("user_id", userId)
+          .maybeSingle();
+        
+        const userPlan = profile?.subscription_plan || 'free';
+        const limit = PLAN_LIMITS[userPlan] || PLAN_LIMITS.free;
+        const currentCount = usageData?.analysis_count || 0;
+        
+        if (currentCount >= limit) {
+          console.log(`[ANALYZE] User ${userId} exceeded limit: ${currentCount}/${limit}`);
+          return new Response(
+            JSON.stringify({ 
+              error: "Monthly analysis limit reached",
+              code: "LIMIT_EXCEEDED",
+              plan: userPlan,
+              limit: limit,
+              current: currentCount,
+              upgrade_url: "/pricing"
+            }),
+            { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+      }
+    }
+
     const { input, marketData, riskMetrics, scenarios, simulation, bestCase, worstCase, overallRisk } = analysis;
     const marketContext = MARKET_CONTEXT[input.market] || MARKET_CONTEXT.US;
+    
+    // Select model based on tier
+    const model = MODEL_BY_TIER[tier] || MODEL_BY_TIER.free;
+    console.log(`[ANALYZE] Using model: ${model} for tier: ${tier}`);
 
-    // Build structured scenario summary by category with probabilities
+    // Build structured scenario summary
     const formatScenarios = (categoryScenarios: any[], categoryName: string) => {
       if (!categoryScenarios || categoryScenarios.length === 0) return '';
       return `${categoryName}:\n${categoryScenarios.map((s: any) => 
@@ -47,7 +120,6 @@ serve(async (req) => {
       formatScenarios(scenarios.tail, 'TAIL RISK EVENTS'),
     ].filter(Boolean).join('\n\n');
 
-    // Format data source info
     const dataQualityNote = marketData?.dataQuality === 'live' 
       ? `Live data from ${marketData.source}` 
       : 'Using market default estimates';
@@ -126,8 +198,7 @@ Provide an educational explanation that:
 
 Focus on helping the trader understand the RANGE of possibilities and the FACTORS that could influence outcomes.`;
 
-    console.log(`Analyzing ${input.direction} trade for ${input.asset} in ${input.market} market at ${input.entryPrice}`);
-    console.log(`Risk metrics: volatility=${marketData?.volatility?.toFixed(1) || 'default'}%, risk=${riskMetrics?.riskScore}/10, winRate=${(riskMetrics?.probabilityOfProfit * 100)?.toFixed(0)}%`);
+    console.log(`[ANALYZE] Analyzing ${input.direction} trade for ${input.asset} in ${input.market} market`);
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -136,7 +207,7 @@ Focus on helping the trader understand the RANGE of possibilities and the FACTOR
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model: model,
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt },
@@ -172,7 +243,18 @@ Focus on helping the trader understand the RANGE of possibilities and the FACTOR
       throw new Error("No explanation generated");
     }
 
-    console.log(`Successfully generated explanation for ${input.asset} (${input.market})`);
+    const latency = Date.now() - startTime;
+    console.log(`[ANALYZE] Generated explanation in ${latency}ms for ${input.asset} (${input.market})`);
+
+    // Log metrics
+    await supabase
+      .from("platform_metrics")
+      .insert({
+        metric_type: 'ai_cost',
+        metric_name: 'analyze_trade_call',
+        metric_value: 1,
+        dimensions: { tier, model, asset: input.asset, latency_ms: latency }
+      });
 
     return new Response(
       JSON.stringify({ explanation }),

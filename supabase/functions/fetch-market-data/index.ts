@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -10,7 +11,8 @@ interface MarketDataRequest {
   provider: 'finnhub' | 'coingecko' | 'twelvedata';
   type: 'quote' | 'historical';
   market?: string;
-  days?: number; // For historical data
+  days?: number;
+  tier?: 'free' | 'starter' | 'pro' | 'trader';
 }
 
 interface MarketDataResponse {
@@ -27,6 +29,112 @@ interface MarketDataResponse {
   volatility?: number;
   source: string;
   error?: string;
+  cached?: boolean;
+}
+
+// Tier-based cache TTL in milliseconds
+const CACHE_TTL_BY_TIER: Record<string, number> = {
+  free: 15 * 60 * 1000,      // 15 minutes
+  starter: 5 * 60 * 1000,    // 5 minutes
+  pro: 2 * 60 * 1000,        // 2 minutes
+  trader: 1 * 60 * 1000,     // 1 minute
+};
+
+const DEFAULT_CACHE_TTL = 5 * 60 * 1000; // 5 minutes default
+
+/**
+ * Check cache for existing market data
+ */
+async function checkCache(
+  supabase: any,
+  symbol: string,
+  market: string
+): Promise<MarketDataResponse | null> {
+  try {
+    const { data, error } = await supabase
+      .from('market_data_cache')
+      .select('*')
+      .eq('symbol', symbol.toUpperCase())
+      .eq('market', market)
+      .gte('expires_at', new Date().toISOString())
+      .order('fetched_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (error || !data) {
+      return null;
+    }
+
+    const quoteData = data.quote_data as Record<string, unknown> || {};
+    
+    console.log(`[CACHE HIT] Found cached data for ${symbol} (expires: ${data.expires_at})`);
+    
+    return {
+      price: quoteData.price as number,
+      change: quoteData.change as number,
+      changePercent: quoteData.changePercent as number,
+      high: quoteData.high as number,
+      low: quoteData.low as number,
+      open: quoteData.open as number,
+      previousClose: quoteData.previousClose as number,
+      volume: quoteData.volume as number,
+      timestamp: quoteData.timestamp as number,
+      volatility: typeof data.volatility_30d === 'number' ? data.volatility_30d : undefined,
+      historicalPrices: Array.isArray(data.historical_prices) ? data.historical_prices : undefined,
+      source: (quoteData.source as string) || 'cache',
+      cached: true,
+    };
+  } catch (err) {
+    console.error('[CACHE] Error checking cache:', err);
+    return null;
+  }
+}
+
+/**
+ * Save market data to cache
+ */
+async function saveToCache(
+  supabase: any,
+  symbol: string,
+  market: string,
+  provider: string,
+  data: MarketDataResponse,
+  ttlMs: number
+): Promise<void> {
+  try {
+    const expiresAt = new Date(Date.now() + ttlMs).toISOString();
+    
+    await supabase
+      .from('market_data_cache')
+      .upsert({
+        symbol: symbol.toUpperCase(),
+        market: market,
+        asset_type: provider === 'coingecko' ? 'crypto' : provider === 'twelvedata' ? 'forex' : 'stock',
+        quote_data: {
+          price: data.price,
+          change: data.change,
+          changePercent: data.changePercent,
+          high: data.high,
+          low: data.low,
+          open: data.open,
+          previousClose: data.previousClose,
+          volume: data.volume,
+          timestamp: data.timestamp,
+          source: data.source,
+        },
+        volatility_30d: data.volatility,
+        historical_prices: data.historicalPrices,
+        fetched_at: new Date().toISOString(),
+        expires_at: expiresAt,
+      }, {
+        onConflict: 'symbol,market',
+        ignoreDuplicates: false,
+      });
+
+    console.log(`[CACHE] Saved data for ${symbol} (expires: ${expiresAt})`);
+  } catch (err) {
+    console.error('[CACHE] Error saving to cache:', err);
+  }
 }
 
 /**
@@ -45,27 +153,25 @@ async function fetchFinnhubQuote(symbol: string, apiKey: string): Promise<Market
   
   const data = await response.json();
   
-  // Finnhub returns c=0 for invalid symbols
   if (data.c === 0 && data.h === 0 && data.l === 0) {
     throw new Error('Symbol not found or market closed');
   }
   
   return {
-    price: data.c, // Current price
-    change: data.d, // Change
-    changePercent: data.dp, // Change percent
-    high: data.h, // High
-    low: data.l, // Low
-    open: data.o, // Open
-    previousClose: data.pc, // Previous close
-    timestamp: data.t * 1000, // Convert to ms
+    price: data.c,
+    change: data.d,
+    changePercent: data.dp,
+    high: data.h,
+    low: data.l,
+    open: data.o,
+    previousClose: data.pc,
+    timestamp: data.t * 1000,
     source: 'finnhub'
   };
 }
 
 /**
  * Fetch historical candles from Finnhub for volatility calculation
- * Note: Free tier may not have access to this endpoint
  */
 async function fetchFinnhubHistorical(symbol: string, apiKey: string, days: number = 30): Promise<number[]> {
   const now = Math.floor(Date.now() / 1000);
@@ -76,7 +182,6 @@ async function fetchFinnhubHistorical(symbol: string, apiKey: string, days: numb
   try {
     const response = await fetch(url);
     
-    // Free tier returns 403 for candle data
     if (!response.ok) {
       console.log(`Finnhub historical API returned ${response.status} - may require paid plan`);
       return [];
@@ -88,7 +193,7 @@ async function fetchFinnhubHistorical(symbol: string, apiKey: string, days: numb
       return [];
     }
     
-    return data.c; // Close prices
+    return data.c;
   } catch (error) {
     console.warn('Finnhub historical data not available:', error);
     return [];
@@ -96,7 +201,7 @@ async function fetchFinnhubHistorical(symbol: string, apiKey: string, days: numb
 }
 
 /**
- * Fetch crypto data from CoinGecko (free, no API key required for basic endpoints)
+ * Fetch crypto data from CoinGecko
  */
 async function fetchCoinGeckoQuote(coinId: string): Promise<MarketDataResponse> {
   const url = `https://api.coingecko.com/api/v3/simple/price?ids=${encodeURIComponent(coinId)}&vs_currencies=usd&include_24hr_change=true&include_24hr_vol=true`;
@@ -142,7 +247,6 @@ async function fetchCoinGeckoHistorical(coinId: string, days: number = 30): Prom
     return [];
   }
   
-  // Extract closing prices (prices array contains [timestamp, price] pairs)
   return data.prices.map((p: [number, number]) => p[1]);
 }
 
@@ -196,20 +300,17 @@ async function fetchTwelveDataHistorical(symbol: string, apiKey: string, days: n
     return [];
   }
   
-  // Extract closing prices (values are in reverse chronological order)
   return data.values.map((v: { close: string }) => parseFloat(v.close)).reverse();
 }
 
 /**
  * Calculate historical volatility from price series
- * Returns annualized volatility as a percentage
  */
 function calculateVolatility(prices: number[]): number {
   if (prices.length < 2) {
     return 0;
   }
   
-  // Calculate log returns
   const logReturns: number[] = [];
   for (let i = 1; i < prices.length; i++) {
     if (prices[i] > 0 && prices[i - 1] > 0) {
@@ -221,31 +322,53 @@ function calculateVolatility(prices: number[]): number {
     return 0;
   }
   
-  // Calculate mean
   const mean = logReturns.reduce((sum, r) => sum + r, 0) / logReturns.length;
-  
-  // Calculate variance
   const variance = logReturns.reduce((sum, r) => sum + Math.pow(r - mean, 2), 0) / logReturns.length;
-  
-  // Daily volatility (standard deviation)
   const dailyVol = Math.sqrt(variance);
-  
-  // Annualize (assuming 252 trading days for stocks/forex, 365 for crypto)
   const tradingDays = 252;
   const annualizedVol = dailyVol * Math.sqrt(tradingDays);
   
-  // Convert to percentage
   return annualizedVol * 100;
 }
 
+/**
+ * Log metrics for platform monitoring
+ */
+async function logMetric(
+  supabase: any,
+  metricName: string,
+  metricValue: number,
+  dimensions: Record<string, unknown>
+): Promise<void> {
+  try {
+    await supabase
+      .from('platform_metrics')
+      .insert({
+        metric_type: 'edge_function',
+        metric_name: metricName,
+        metric_value: metricValue,
+        dimensions: dimensions,
+      });
+  } catch (err) {
+    console.error('[METRICS] Error logging metric:', err);
+  }
+}
+
 serve(async (req) => {
-  // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
+  const startTime = Date.now();
+  
+  // Initialize Supabase client for caching
+  const supabase = createClient(
+    Deno.env.get("SUPABASE_URL")!,
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+  );
+
   try {
-    const { symbol, provider, type, market, days = 30 }: MarketDataRequest = await req.json();
+    const { symbol, provider, type, market = 'US', days = 30, tier = 'free' }: MarketDataRequest = await req.json();
 
     if (!symbol || !provider) {
       return new Response(
@@ -254,7 +377,24 @@ serve(async (req) => {
       );
     }
 
-    console.log(`Fetching ${type} data for ${symbol} from ${provider}`);
+    console.log(`[FETCH] Fetching ${type} data for ${symbol} from ${provider} (tier: ${tier})`);
+
+    // CACHE-FIRST PATTERN: Check cache before making external API calls
+    if (type === 'quote') {
+      const cached = await checkCache(supabase, symbol, market);
+      if (cached) {
+        const latency = Date.now() - startTime;
+        // Log cache hit metric
+        logMetric(supabase, 'fetch_market_data_latency', latency, { 
+          provider, symbol, cache_hit: true, tier 
+        });
+        
+        return new Response(
+          JSON.stringify(cached),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+    }
 
     let result: MarketDataResponse;
 
@@ -271,10 +411,10 @@ serve(async (req) => {
           result = { historicalPrices: prices, volatility, source: 'finnhub' };
         } else {
           result = await fetchFinnhubQuote(symbol, apiKey);
-          // Also fetch historical for volatility
           try {
             const prices = await fetchFinnhubHistorical(symbol, apiKey, 30);
             result.volatility = calculateVolatility(prices);
+            result.historicalPrices = prices;
           } catch (e) {
             console.warn('Could not fetch historical data for volatility:', e);
           }
@@ -289,10 +429,10 @@ serve(async (req) => {
           result = { historicalPrices: prices, volatility, source: 'coingecko' };
         } else {
           result = await fetchCoinGeckoQuote(symbol);
-          // Also fetch historical for volatility
           try {
             const prices = await fetchCoinGeckoHistorical(symbol, 30);
             result.volatility = calculateVolatility(prices);
+            result.historicalPrices = prices;
           } catch (e) {
             console.warn('Could not fetch historical data for volatility:', e);
           }
@@ -312,10 +452,10 @@ serve(async (req) => {
           result = { historicalPrices: prices, volatility, source: 'twelvedata' };
         } else {
           result = await fetchTwelveDataQuote(symbol, apiKey);
-          // Also fetch historical for volatility
           try {
             const prices = await fetchTwelveDataHistorical(symbol, apiKey, 30);
             result.volatility = calculateVolatility(prices);
+            result.historicalPrices = prices;
           } catch (e) {
             console.warn('Could not fetch historical data for volatility:', e);
           }
@@ -327,7 +467,17 @@ serve(async (req) => {
         throw new Error(`Unknown provider: ${provider}`);
     }
 
-    console.log(`Successfully fetched data:`, result);
+    // Save to cache with tier-based TTL
+    const cacheTtl = CACHE_TTL_BY_TIER[tier] || DEFAULT_CACHE_TTL;
+    saveToCache(supabase, symbol, market, provider, result, cacheTtl);
+
+    const latency = Date.now() - startTime;
+    console.log(`[FETCH] Successfully fetched data in ${latency}ms:`, result);
+    
+    // Log cache miss metric
+    logMetric(supabase, 'fetch_market_data_latency', latency, { 
+      provider, symbol, cache_hit: false, tier 
+    });
 
     return new Response(
       JSON.stringify(result),
@@ -335,7 +485,14 @@ serve(async (req) => {
     );
 
   } catch (error) {
+    const latency = Date.now() - startTime;
     console.error('Error fetching market data:', error);
+    
+    // Log error metric
+    logMetric(supabase, 'fetch_market_data_error', 1, { 
+      error: error instanceof Error ? error.message : 'Unknown error',
+      latency 
+    });
     
     return new Response(
       JSON.stringify({ 

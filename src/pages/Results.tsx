@@ -1,17 +1,35 @@
-import { useEffect } from 'react';
+import { useEffect, Suspense, lazy } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, TrendingUp, TrendingDown, Clock, Globe, Activity, Gauge, Target, Wifi, WifiOff } from 'lucide-react';
+import { ArrowLeft, TrendingUp, TrendingDown, Clock, Globe, Wifi, WifiOff, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { EnhancedQuantMetricsCard } from '@/components/EnhancedQuantMetricsCard';
 import { EnhancedScenarioDisplay } from '@/components/EnhancedScenarioDisplay';
 import { EnhancedRiskSummary } from '@/components/EnhancedRiskSummary';
 import { ReturnDistributionChart } from '@/components/ReturnDistributionChart';
 import { ScenarioProbabilityChart } from '@/components/ScenarioProbabilityChart';
-import { SentimentIndicator } from '@/components/SentimentIndicator';
-import { AIExplanation } from '@/components/AIExplanation';
+import { FeatureGate } from '@/components/FeatureGate';
 import { Layout } from '@/components/layout/Layout';
 import { useTrade } from '@/hooks/useTrade';
 import { MARKETS } from '@/types/trade';
+import { Skeleton } from '@/components/ui/skeleton';
+
+// Lazy load heavy components for performance
+const SentimentIndicator = lazy(() => import('@/components/SentimentIndicator').then(m => ({ default: m.SentimentIndicator })));
+const AIExplanation = lazy(() => import('@/components/AIExplanation').then(m => ({ default: m.AIExplanation })));
+
+// Loading skeleton for lazy-loaded components
+function SectionSkeleton() {
+  return (
+    <div className="glass-card p-5 space-y-4">
+      <div className="flex items-center gap-2">
+        <Skeleton className="h-5 w-5 rounded" />
+        <Skeleton className="h-5 w-32" />
+      </div>
+      <Skeleton className="h-24 w-full" />
+      <Skeleton className="h-16 w-full" />
+    </div>
+  );
+}
 
 const Results = () => {
   const navigate = useNavigate();
@@ -197,7 +215,7 @@ const Results = () => {
             <EnhancedScenarioDisplay scenarios={scenarios} currencySymbol={marketInfo.currencySymbol} />
           </div>
 
-          {/* Step 5: Market Sentiment */}
+          {/* Step 5: Market Sentiment - Feature Gated */}
           <div className="mb-8 animate-fade-in" style={{ animationDelay: '0.4s' }}>
             <div className="flex items-center gap-2 mb-4">
               <div className="flex items-center justify-center w-6 h-6 rounded-full bg-primary/10 text-primary text-xs font-bold">5</div>
@@ -206,10 +224,14 @@ const Results = () => {
             <p className="text-sm text-muted-foreground mb-4">
               AI-analyzed sentiment from news and qualitative signals.
             </p>
-            <SentimentIndicator asset={input.asset} market={input.market} />
+            <FeatureGate feature="sentiment">
+              <Suspense fallback={<SectionSkeleton />}>
+                <SentimentIndicator asset={input.asset} market={input.market} />
+              </Suspense>
+            </FeatureGate>
           </div>
 
-          {/* Step 6: AI Explanation */}
+          {/* Step 6: AI Explanation - Lazy Loaded */}
           <div className="mb-8 animate-fade-in" style={{ animationDelay: '0.45s' }}>
             <div className="flex items-center gap-2 mb-4">
               <div className="flex items-center justify-center w-6 h-6 rounded-full bg-primary/10 text-primary text-xs font-bold">6</div>
@@ -218,7 +240,9 @@ const Results = () => {
             <p className="text-sm text-muted-foreground mb-4">
               Qualitative reasoning based on Monte Carlo results and risk metrics.
             </p>
-            <AIExplanation analysis={analysis} />
+            <Suspense fallback={<SectionSkeleton />}>
+              <AIExplanation analysis={analysis} />
+            </Suspense>
           </div>
 
           {/* New Analysis Button */}
