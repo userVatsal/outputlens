@@ -3,15 +3,20 @@ import { TradeInput, QuantMetrics, RiskLevel, MARKETS } from '@/types/trade';
 /**
  * Computes quantitative metrics from user trade input.
  * These metrics provide a foundation for scenario analysis.
+ * 
+ * @param input - Trade input from user
+ * @param liveVolatility - Optional live volatility from market data API (annualized %)
  */
-export function computeQuantMetrics(input: TradeInput): QuantMetrics {
+export function computeQuantMetrics(input: TradeInput, liveVolatility?: number): QuantMetrics {
   const marketInfo = MARKETS[input.market];
   
   // Parse holding period from time horizon
   const holdingPeriodDays = parseHoldingPeriod(input.timeHorizon);
   
+  // Use live volatility if available, otherwise fall back to market baseline
+  const annualizedVol = liveVolatility ?? marketInfo.baseVolatility;
+  
   // Calculate daily volatility from annualized (assuming 252 trading days)
-  const annualizedVol = marketInfo.baseVolatility;
   const dailyVolatility = annualizedVol / Math.sqrt(252);
   
   // Volatility proxy adjusted for holding period (sqrt of time rule)
@@ -32,6 +37,7 @@ export function computeQuantMetrics(input: TradeInput): QuantMetrics {
     riskScore,
     riskLabel,
     holdingPeriodDays,
+    usedLiveData: liveVolatility !== undefined,
   };
 }
 

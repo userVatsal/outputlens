@@ -235,9 +235,14 @@ export function analyzeTradeRisk(results: ScenarioResult[]): {
 // MAIN ANALYSIS FUNCTION
 // ==========================================
 
-export function createTradeAnalysis(input: TradeInput): TradeAnalysis {
-  // Step 1: Compute quantitative metrics
-  const quantMetrics = computeQuantMetrics(input);
+/**
+ * Create trade analysis with optional live volatility data
+ * @param input - Trade input from user
+ * @param liveVolatility - Optional annualized volatility from live market data (%)
+ */
+export function createTradeAnalysis(input: TradeInput, liveVolatility?: number): TradeAnalysis {
+  // Step 1: Compute quantitative metrics (with live volatility if available)
+  const quantMetrics = computeQuantMetrics(input, liveVolatility);
   
   // Step 2: Calculate all scenario results
   const allResults = calculateScenarioResults(input);

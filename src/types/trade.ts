@@ -65,6 +65,22 @@ export interface QuantMetrics {
   riskScore: number;              // 1-10 scale
   riskLabel: RiskLevel;
   holdingPeriodDays: number;      // Parsed from time horizon
+  usedLiveData?: boolean;         // Whether live market data was used
+}
+
+// Live market data from API
+export interface LiveMarketData {
+  price: number;
+  change?: number;
+  changePercent?: number;
+  high?: number;
+  low?: number;
+  open?: number;
+  previousClose?: number;
+  volume?: number;
+  volatility?: number;            // Annualized volatility from historical data
+  timestamp: number;
+  source: string;
 }
 
 export interface Scenario {

@@ -2,3 +2,6 @@ project_id = "xuhhamaddpvljppieirw"
 
 [functions.analyze-trade]
 verify_jwt = false
+
+[functions.fetch-market-data]
+verify_jwt = false
