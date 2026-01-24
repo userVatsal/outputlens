@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { EnhancedQuantMetricsCard } from '@/components/EnhancedQuantMetricsCard';
 import { EnhancedScenarioDisplay } from '@/components/EnhancedScenarioDisplay';
 import { EnhancedRiskSummary } from '@/components/EnhancedRiskSummary';
+import { ReturnDistributionChart } from '@/components/ReturnDistributionChart';
 import { AIExplanation } from '@/components/AIExplanation';
 import { Layout } from '@/components/layout/Layout';
 import { useTrade } from '@/hooks/useTrade';
@@ -145,6 +146,13 @@ const Results = () => {
               simulation={simulation}
               currencySymbol={marketInfo.currencySymbol} 
             />
+            {/* Distribution Chart */}
+            <div className="mt-4">
+              <ReturnDistributionChart 
+                riskMetrics={riskMetrics}
+                simulation={simulation}
+              />
+            </div>
           </div>
 
           {/* Step 2: Risk Overview */}

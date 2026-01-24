@@ -20,3 +20,6 @@ verify_jwt = false
 
 [functions.run-agent-pipeline]
 verify_jwt = false
+
+[functions.seo-keyword-tracker]
+verify_jwt = false
