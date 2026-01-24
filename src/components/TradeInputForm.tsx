@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { TrendingUp, TrendingDown, Clock, DollarSign, BarChart3, Globe } from 'lucide-react';
+import { TrendingUp, TrendingDown, Clock, DollarSign, BarChart3, Globe, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -15,15 +14,15 @@ import { TradeDirection, TimeHorizon, TradeInput, Market, MARKETS } from '@/type
 
 interface TradeInputFormProps {
   onSubmit: (input: TradeInput) => void;
+  isLoading?: boolean;
 }
 
-export function TradeInputForm({ onSubmit }: TradeInputFormProps) {
+export function TradeInputForm({ onSubmit, isLoading = false }: TradeInputFormProps) {
   const [asset, setAsset] = useState('');
   const [direction, setDirection] = useState<TradeDirection>('long');
   const [entryPrice, setEntryPrice] = useState('');
   const [timeHorizon, setTimeHorizon] = useState<TimeHorizon>('3-7 days');
   const [market, setMarket] = useState<Market>('US');
-  const navigate = useNavigate();
 
   const selectedMarket = MARKETS[market];
 
@@ -39,7 +38,6 @@ export function TradeInputForm({ onSubmit }: TradeInputFormProps) {
     };
     
     onSubmit(input);
-    navigate('/results');
   };
 
   const isValid = asset.trim() !== '' && entryPrice !== '' && parseFloat(entryPrice) > 0;
@@ -52,7 +50,7 @@ export function TradeInputForm({ onSubmit }: TradeInputFormProps) {
           <Globe className="h-4 w-4 text-muted-foreground" />
           Market
         </Label>
-        <Select value={market} onValueChange={(v) => setMarket(v as Market)}>
+        <Select value={market} onValueChange={(v) => setMarket(v as Market)} disabled={isLoading}>
           <SelectTrigger className="trading-input">
             <SelectValue />
           </SelectTrigger>
@@ -106,6 +104,7 @@ export function TradeInputForm({ onSubmit }: TradeInputFormProps) {
           value={asset}
           onChange={(e) => setAsset(e.target.value)}
           className="trading-input font-mono text-lg"
+          disabled={isLoading}
         />
       </div>
 
@@ -123,7 +122,8 @@ export function TradeInputForm({ onSubmit }: TradeInputFormProps) {
           <button
             type="button"
             onClick={() => setDirection('long')}
-            className={`flex items-center justify-center gap-2 rounded-lg border-2 px-4 py-3 font-medium transition-all ${
+            disabled={isLoading}
+            className={`flex items-center justify-center gap-2 rounded-lg border-2 px-4 py-3 font-medium transition-all disabled:opacity-50 ${
               direction === 'long'
                 ? 'border-bullish bg-bullish/10 text-bullish'
                 : 'border-border bg-muted/30 text-muted-foreground hover:border-bullish/50'
@@ -135,7 +135,8 @@ export function TradeInputForm({ onSubmit }: TradeInputFormProps) {
           <button
             type="button"
             onClick={() => setDirection('short')}
-            className={`flex items-center justify-center gap-2 rounded-lg border-2 px-4 py-3 font-medium transition-all ${
+            disabled={isLoading}
+            className={`flex items-center justify-center gap-2 rounded-lg border-2 px-4 py-3 font-medium transition-all disabled:opacity-50 ${
               direction === 'short'
                 ? 'border-bearish bg-bearish/10 text-bearish'
                 : 'border-border bg-muted/30 text-muted-foreground hover:border-bearish/50'
@@ -166,6 +167,7 @@ export function TradeInputForm({ onSubmit }: TradeInputFormProps) {
             value={entryPrice}
             onChange={(e) => setEntryPrice(e.target.value)}
             className="trading-input font-mono text-lg pl-8"
+            disabled={isLoading}
           />
         </div>
       </div>
@@ -176,7 +178,7 @@ export function TradeInputForm({ onSubmit }: TradeInputFormProps) {
           <Clock className="h-4 w-4 text-muted-foreground" />
           Time Horizon
         </Label>
-        <Select value={timeHorizon} onValueChange={(v) => setTimeHorizon(v as TimeHorizon)}>
+        <Select value={timeHorizon} onValueChange={(v) => setTimeHorizon(v as TimeHorizon)} disabled={isLoading}>
           <SelectTrigger className="trading-input">
             <SelectValue />
           </SelectTrigger>
@@ -191,10 +193,17 @@ export function TradeInputForm({ onSubmit }: TradeInputFormProps) {
       {/* Submit Button */}
       <Button
         type="submit"
-        disabled={!isValid}
+        disabled={!isValid || isLoading}
         className="w-full py-6 text-lg font-semibold transition-all hover:scale-[1.02] disabled:opacity-50"
       >
-        Evaluate Trade
+        {isLoading ? (
+          <>
+            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+            Analyzing...
+          </>
+        ) : (
+          'Evaluate Trade'
+        )}
       </Button>
 
       <p className="text-center text-xs text-muted-foreground">

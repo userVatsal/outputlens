@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BarChart3, History, Loader2 } from 'lucide-react';
+import { History, Loader2 } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
 import { TradeInputForm } from '@/components/TradeInputForm';
 import { UsageIndicator } from '@/components/UsageIndicator';
@@ -10,10 +10,11 @@ import { useTrade } from '@/hooks/useTrade';
 import { useUsage } from '@/hooks/useUsage';
 import { User } from '@supabase/supabase-js';
 import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
 
 export default function Analyze() {
   const navigate = useNavigate();
-  const { submitTrade } = useTrade();
+  const { submitTrade, isLoading: tradeLoading } = useTrade();
   const { usage, loading: usageLoading, canAnalyze, incrementUsage } = useUsage();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -50,7 +51,8 @@ export default function Analyze() {
 
     // Increment usage before submitting
     await incrementUsage();
-    submitTrade(input);
+    await submitTrade(input);
+    navigate('/results');
   };
 
   if (loading) {
@@ -76,10 +78,10 @@ export default function Analyze() {
               </p>
             </div>
             <Button variant="outline" size="sm" asChild>
-              <a href="/history">
+              <Link to="/history">
                 <History className="h-4 w-4 mr-2" />
                 History
-              </a>
+              </Link>
             </Button>
           </div>
 
@@ -92,7 +94,7 @@ export default function Analyze() {
 
           {/* Form Card */}
           <div className="glass-card p-6">
-            <TradeInputForm onSubmit={handleSubmitTrade} />
+            <TradeInputForm onSubmit={handleSubmitTrade} isLoading={tradeLoading} />
           </div>
 
           {/* Disclaimer */}

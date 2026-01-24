@@ -8,6 +8,7 @@ import Landing from "./pages/Landing";
 import Auth from "./pages/Auth";
 import Analyze from "./pages/Analyze";
 import Results from "./pages/Results";
+import History from "./pages/History";
 import Methodology from "./pages/Methodology";
 import Pricing from "./pages/Pricing";
 import Privacy from "./pages/Privacy";
@@ -28,6 +29,7 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/analyze" element={<Analyze />} />
             <Route path="/results" element={<Results />} />
+            <Route path="/history" element={<History />} />
             <Route path="/methodology" element={<Methodology />} />
             <Route path="/pricing" element={<Pricing />} />
             <Route path="/privacy" element={<Privacy />} />
