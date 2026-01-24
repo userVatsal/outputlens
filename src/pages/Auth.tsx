@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
-import { Mail, Lock, AlertCircle, Loader2, User, Calendar, Shield, CheckSquare } from 'lucide-react';
+import { Mail, Lock, AlertCircle, Loader2, User, Calendar, Shield, ShieldAlert, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -10,6 +10,8 @@ import { z } from 'zod';
 import { differenceInYears } from 'date-fns';
 import logo from '@/assets/logo.png';
 import { LEGAL_VERSIONS } from '@/lib/legal';
+import { useSecurity } from '@/hooks/useSecurity';
+import { CaptchaGate } from '@/components/security/CaptchaGate';
 
 const signInSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
@@ -49,6 +51,23 @@ export default function Auth() {
   
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  
+  // Security state
+  const { 
+    checkSecurity, 
+    handleCaptchaVerify, 
+    logEvent, 
+    captchaRequired, 
+    captchaType, 
+    captchaVerified,
+    isBlocked,
+    threatScore,
+    error: securityError,
+    resetCaptcha
+  } = useSecurity();
+  const [showCaptcha, setShowCaptcha] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const pendingSubmitRef = useRef(false);
 
   useEffect(() => {
     // Check if already logged in
@@ -100,6 +119,23 @@ export default function Auth() {
 
     if (!validateForm()) return;
 
+    // Check security before submitting
+    const endpoint = mode === 'signup' ? 'signup' : 'login';
+    const analysis = await checkSecurity(endpoint);
+
+    // If blocked, show error
+    if (analysis.blocked) {
+      setError(analysis.blockReason || 'Access temporarily blocked. Please try again later.');
+      return;
+    }
+
+    // If captcha required and not yet verified
+    if (analysis.captchaRequired && !captchaVerified) {
+      setShowCaptcha(true);
+      pendingSubmitRef.current = true;
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -126,10 +162,10 @@ export default function Auth() {
           } else {
             setError(error.message);
           }
+          // Log failed signup attempt
+          await logEvent('failed_signup', 'low', 'signup', { email });
           return;
         }
-
-        // User created successfully, they will be redirected by onAuthStateChange
       } else {
         const { error } = await supabase.auth.signInWithPassword({
           email,
@@ -142,6 +178,8 @@ export default function Auth() {
           } else {
             setError(error.message);
           }
+          // Log failed login attempt (this affects IP reputation)
+          await logEvent('failed_login', 'medium', 'login', { email });
           return;
         }
       }
@@ -149,6 +187,20 @@ export default function Auth() {
       setError('An unexpected error occurred. Please try again.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Handle captcha verification
+  const handleCaptchaSuccess = async (token: string) => {
+    setCaptchaToken(token);
+    const verified = await handleCaptchaVerify(token, mode === 'signup' ? 'signup' : 'login');
+    
+    if (verified && pendingSubmitRef.current) {
+      pendingSubmitRef.current = false;
+      setShowCaptcha(false);
+      // Re-trigger submit
+      const fakeEvent = { preventDefault: () => {} } as React.FormEvent;
+      handleSubmit(fakeEvent);
     }
   };
 
@@ -194,6 +246,43 @@ export default function Auth() {
           </div>
 
           <form onSubmit={handleSubmit} className="glass-card p-8 space-y-6">
+            {/* Blocked state */}
+            {isBlocked && (
+              <div className="flex items-start gap-3 p-4 rounded-lg bg-destructive/10 border border-destructive/20">
+                <ShieldAlert className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-sm font-medium text-destructive">Access Temporarily Blocked</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Too many failed attempts. Please try again in 15 minutes.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Captcha challenge */}
+            {showCaptcha && !captchaVerified && (
+              <div className="p-4 rounded-lg bg-primary/5 border border-primary/20">
+                <CaptchaGate
+                  action={mode === 'signup' ? 'signup' : 'login'}
+                  captchaType={captchaType}
+                  onVerified={handleCaptchaSuccess}
+                  onError={(err) => setError(err)}
+                  onExpired={() => {
+                    resetCaptcha();
+                    setShowCaptcha(false);
+                  }}
+                />
+              </div>
+            )}
+
+            {/* Captcha verified indicator */}
+            {captchaVerified && (
+              <div className="flex items-center gap-2 p-3 rounded-lg bg-green-500/10 border border-green-500/20">
+                <ShieldCheck className="h-4 w-4 text-green-500" />
+                <span className="text-sm text-green-500">Security check passed</span>
+              </div>
+            )}
+
             {error && (
               <div className="flex items-start gap-3 p-4 rounded-lg bg-destructive/10 border border-destructive/20">
                 <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
@@ -342,11 +431,16 @@ export default function Auth() {
               </>
             )}
 
-            <Button type="submit" className="w-full" disabled={loading}>
+            <Button type="submit" className="w-full" disabled={loading || isBlocked}>
               {loading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   {mode === 'signup' ? 'Creating account...' : 'Signing in...'}
+                </>
+              ) : isBlocked ? (
+                <>
+                  <ShieldAlert className="mr-2 h-4 w-4" />
+                  Access Blocked
                 </>
               ) : (
                 <>{mode === 'signup' ? 'Create Account' : 'Sign In'}</>

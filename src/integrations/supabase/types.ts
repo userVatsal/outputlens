@@ -188,6 +188,111 @@ export type Database = {
         }
         Relationships: []
       }
+      captcha_challenges: {
+        Row: {
+          action: string
+          challenge_token: string
+          challenge_type: string | null
+          expired_at: string | null
+          failure_reason: string | null
+          id: string
+          ip_address: string
+          issued_at: string | null
+          metadata: Json | null
+          score: number | null
+          success: boolean | null
+          user_id: string | null
+          verified_at: string | null
+        }
+        Insert: {
+          action: string
+          challenge_token: string
+          challenge_type?: string | null
+          expired_at?: string | null
+          failure_reason?: string | null
+          id?: string
+          ip_address: string
+          issued_at?: string | null
+          metadata?: Json | null
+          score?: number | null
+          success?: boolean | null
+          user_id?: string | null
+          verified_at?: string | null
+        }
+        Update: {
+          action?: string
+          challenge_token?: string
+          challenge_type?: string | null
+          expired_at?: string | null
+          failure_reason?: string | null
+          id?: string
+          ip_address?: string
+          issued_at?: string | null
+          metadata?: Json | null
+          score?: number | null
+          success?: boolean | null
+          user_id?: string | null
+          verified_at?: string | null
+        }
+        Relationships: []
+      }
+      ip_reputation: {
+        Row: {
+          block_reason: string | null
+          blocked_until: string | null
+          captcha_challenges: number | null
+          captcha_failures: number | null
+          created_at: string | null
+          failed_attempts: number | null
+          first_seen_at: string | null
+          id: string
+          ip_address: string
+          last_seen_at: string | null
+          metadata: Json | null
+          permanent_block: boolean | null
+          reputation_score: number | null
+          successful_attempts: number | null
+          total_requests: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          block_reason?: string | null
+          blocked_until?: string | null
+          captcha_challenges?: number | null
+          captcha_failures?: number | null
+          created_at?: string | null
+          failed_attempts?: number | null
+          first_seen_at?: string | null
+          id?: string
+          ip_address: string
+          last_seen_at?: string | null
+          metadata?: Json | null
+          permanent_block?: boolean | null
+          reputation_score?: number | null
+          successful_attempts?: number | null
+          total_requests?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          block_reason?: string | null
+          blocked_until?: string | null
+          captcha_challenges?: number | null
+          captcha_failures?: number | null
+          created_at?: string | null
+          failed_attempts?: number | null
+          first_seen_at?: string | null
+          id?: string
+          ip_address?: string
+          last_seen_at?: string | null
+          metadata?: Json | null
+          permanent_block?: boolean | null
+          reputation_score?: number | null
+          successful_attempts?: number | null
+          total_requests?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       market_data_cache: {
         Row: {
           asset_type: string
@@ -517,6 +622,102 @@ export type Database = {
         }
         Relationships: []
       }
+      security_events: {
+        Row: {
+          action_taken: string | null
+          created_at: string | null
+          endpoint: string | null
+          event_type: string
+          id: string
+          ip_address: string | null
+          notes: string | null
+          request_metadata: Json | null
+          resolved: boolean | null
+          resolved_at: string | null
+          resolved_by: string | null
+          severity: string
+          threat_score: number | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action_taken?: string | null
+          created_at?: string | null
+          endpoint?: string | null
+          event_type: string
+          id?: string
+          ip_address?: string | null
+          notes?: string | null
+          request_metadata?: Json | null
+          resolved?: boolean | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string
+          threat_score?: number | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action_taken?: string | null
+          created_at?: string | null
+          endpoint?: string | null
+          event_type?: string
+          id?: string
+          ip_address?: string | null
+          notes?: string | null
+          request_metadata?: Json | null
+          resolved?: boolean | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string
+          threat_score?: number | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      security_thresholds: {
+        Row: {
+          auto_tune_enabled: boolean | null
+          created_at: string | null
+          description: string | null
+          id: string
+          last_tuned_at: string | null
+          max_value: number | null
+          min_value: number | null
+          threshold_name: string
+          threshold_value: number
+          tuned_by: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          auto_tune_enabled?: boolean | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          last_tuned_at?: string | null
+          max_value?: number | null
+          min_value?: number | null
+          threshold_name: string
+          threshold_value: number
+          tuned_by?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          auto_tune_enabled?: boolean | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          last_tuned_at?: string | null
+          max_value?: number | null
+          min_value?: number | null
+          threshold_name?: string
+          threshold_value?: number
+          tuned_by?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       sentiment_scores: {
         Row: {
           asset: string
@@ -614,7 +815,34 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_ip_blocked: { Args: { p_ip_address: string }; Returns: boolean }
+      update_ip_reputation: {
+        Args: { p_delta: number; p_event_type?: string; p_ip_address: string }
+        Returns: {
+          block_reason: string | null
+          blocked_until: string | null
+          captcha_challenges: number | null
+          captcha_failures: number | null
+          created_at: string | null
+          failed_attempts: number | null
+          first_seen_at: string | null
+          id: string
+          ip_address: string
+          last_seen_at: string | null
+          metadata: Json | null
+          permanent_block: boolean | null
+          reputation_score: number | null
+          successful_attempts: number | null
+          total_requests: number | null
+          updated_at: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "ip_reputation"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
     }
     Enums: {
       [_ in never]: never
