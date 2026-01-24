@@ -99,8 +99,8 @@ export default function Analyze() {
 
           {/* Disclaimer */}
           <p className="text-center text-xs text-muted-foreground mt-8 max-w-sm mx-auto">
-            This tool uses predefined scenarios for educational purposes. 
-            No live market data. No execution. No claims of accuracy.
+            This tool uses Monte Carlo simulation with live market data when available. 
+            Educational purposes only. Not financial advice.
           </p>
         </div>
       </div>

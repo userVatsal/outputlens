@@ -14,7 +14,102 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      analysis_history: {
+        Row: {
+          asset: string
+          created_at: string
+          data_sources: Json | null
+          direction: string
+          entry_price: number
+          id: string
+          live_volatility: number | null
+          market: string
+          results: Json
+          simulation_stats: Json | null
+          time_horizon: string
+          user_assumptions: string | null
+          user_confidence: number | null
+          user_id: string
+        }
+        Insert: {
+          asset: string
+          created_at?: string
+          data_sources?: Json | null
+          direction: string
+          entry_price: number
+          id?: string
+          live_volatility?: number | null
+          market: string
+          results: Json
+          simulation_stats?: Json | null
+          time_horizon: string
+          user_assumptions?: string | null
+          user_confidence?: number | null
+          user_id: string
+        }
+        Update: {
+          asset?: string
+          created_at?: string
+          data_sources?: Json | null
+          direction?: string
+          entry_price?: number
+          id?: string
+          live_volatility?: number | null
+          market?: string
+          results?: Json
+          simulation_stats?: Json | null
+          time_horizon?: string
+          user_assumptions?: string | null
+          user_confidence?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      market_data_cache: {
+        Row: {
+          asset_type: string
+          atr_14: number | null
+          created_at: string
+          expires_at: string
+          fetched_at: string
+          historical_prices: Json | null
+          id: string
+          market: string
+          quote_data: Json | null
+          sentiment_score: number | null
+          symbol: string
+          volatility_30d: number | null
+        }
+        Insert: {
+          asset_type: string
+          atr_14?: number | null
+          created_at?: string
+          expires_at: string
+          fetched_at?: string
+          historical_prices?: Json | null
+          id?: string
+          market: string
+          quote_data?: Json | null
+          sentiment_score?: number | null
+          symbol: string
+          volatility_30d?: number | null
+        }
+        Update: {
+          asset_type?: string
+          atr_14?: number | null
+          created_at?: string
+          expires_at?: string
+          fetched_at?: string
+          historical_prices?: Json | null
+          id?: string
+          market?: string
+          quote_data?: Json | null
+          sentiment_score?: number | null
+          symbol?: string
+          volatility_30d?: number | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

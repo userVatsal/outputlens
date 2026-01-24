@@ -1,10 +1,10 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, TrendingUp, TrendingDown, Clock, Globe, Activity, Gauge, Target } from 'lucide-react';
+import { ArrowLeft, TrendingUp, TrendingDown, Clock, Globe, Activity, Gauge, Target, Wifi, WifiOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { QuantMetricsCard } from '@/components/QuantMetricsCard';
-import { StructuredScenarioDisplay } from '@/components/StructuredScenarioDisplay';
-import { RiskSummary } from '@/components/RiskSummary';
+import { EnhancedQuantMetricsCard } from '@/components/EnhancedQuantMetricsCard';
+import { EnhancedScenarioDisplay } from '@/components/EnhancedScenarioDisplay';
+import { EnhancedRiskSummary } from '@/components/EnhancedRiskSummary';
 import { AIExplanation } from '@/components/AIExplanation';
 import { Layout } from '@/components/layout/Layout';
 import { useTrade } from '@/hooks/useTrade';
@@ -24,8 +24,15 @@ const Results = () => {
     return null;
   }
 
-  const { input, quantMetrics, scenarios, allResults } = analysis;
+  const { input, riskMetrics, scenarios, simulation, marketData } = analysis;
   const marketInfo = MARKETS[input.market];
+
+  // Count all scenarios
+  const totalScenarios = 
+    scenarios.base.length + 
+    scenarios.upside.length + 
+    scenarios.downside.length + 
+    scenarios.tail.length;
 
   const handleNewAnalysis = () => {
     clearAnalysis();
@@ -48,7 +55,27 @@ const Results = () => {
             </Button>
             <div className="flex-1">
               <h1 className="text-2xl font-bold text-foreground font-brand">Trade Analysis Results</h1>
-              <p className="text-sm text-muted-foreground">Educational scenario-based evaluation</p>
+              <p className="text-sm text-muted-foreground">
+                Monte Carlo simulation with {simulation.paths.toLocaleString()} paths
+              </p>
+            </div>
+            {/* Data quality indicator */}
+            <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium ${
+              marketData.dataQuality === 'live' 
+                ? 'bg-bullish/10 text-bullish' 
+                : 'bg-muted text-muted-foreground'
+            }`}>
+              {marketData.dataQuality === 'live' ? (
+                <>
+                  <Wifi className="h-3 w-3" />
+                  Live Data
+                </>
+              ) : (
+                <>
+                  <WifiOff className="h-3 w-3" />
+                  Default Estimates
+                </>
+              )}
             </div>
           </div>
 
@@ -88,19 +115,36 @@ const Results = () => {
                 <span className="text-sm text-muted-foreground">Horizon:</span>
                 <span className="font-semibold text-foreground">{input.timeHorizon}</span>
               </div>
+              {input.confidence && input.confidence !== 5 && (
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground">Confidence:</span>
+                  <span className="font-semibold text-foreground">{input.confidence}/10</span>
+                </div>
+              )}
             </div>
+            {input.assumptions && (
+              <div className="mt-3 pt-3 border-t border-border/50">
+                <p className="text-sm text-muted-foreground">
+                  <span className="font-medium">Your thesis:</span> "{input.assumptions}"
+                </p>
+              </div>
+            )}
           </div>
 
-          {/* Step 1: Quantitative Metrics */}
+          {/* Step 1: Advanced Risk Metrics */}
           <div className="mb-8 animate-fade-in" style={{ animationDelay: '0.15s' }}>
             <div className="flex items-center gap-2 mb-4">
               <div className="flex items-center justify-center w-6 h-6 rounded-full bg-primary/10 text-primary text-xs font-bold">1</div>
-              <h2 className="text-lg font-semibold text-foreground font-brand">Quantitative Metrics</h2>
+              <h2 className="text-lg font-semibold text-foreground font-brand">Risk Metrics</h2>
             </div>
             <p className="text-sm text-muted-foreground mb-4">
-              Computed from your trade parameters using historical volatility data.
+              Computed from Monte Carlo simulation using {marketData.dataQuality === 'live' ? 'live' : 'estimated'} volatility data.
             </p>
-            <QuantMetricsCard metrics={quantMetrics} currencySymbol={marketInfo.currencySymbol} />
+            <EnhancedQuantMetricsCard 
+              riskMetrics={riskMetrics} 
+              simulation={simulation}
+              currencySymbol={marketInfo.currencySymbol} 
+            />
           </div>
 
           {/* Step 2: Risk Overview */}
@@ -110,9 +154,9 @@ const Results = () => {
               <h2 className="text-lg font-semibold text-foreground font-brand">Risk Overview</h2>
             </div>
             <p className="text-sm text-muted-foreground mb-4">
-              Best and worst case outcomes based on structured scenario analysis.
+              Best and worst case outcomes with simulated probabilities.
             </p>
-            <RiskSummary analysis={analysis} />
+            <EnhancedRiskSummary analysis={analysis} />
           </div>
 
           {/* Step 3: Structured Scenarios */}
@@ -120,13 +164,13 @@ const Results = () => {
             <div className="flex items-center gap-2 mb-4">
               <div className="flex items-center justify-center w-6 h-6 rounded-full bg-primary/10 text-primary text-xs font-bold">3</div>
               <h2 className="text-lg font-semibold text-foreground font-brand">
-                Scenario Analysis ({allResults.length} scenarios)
+                Probability-Weighted Scenarios ({totalScenarios} scenarios)
               </h2>
             </div>
             <p className="text-sm text-muted-foreground mb-4">
-              Scenarios organized by outcome type: base case, upside potential, downside risk, and tail events.
+              Dynamic scenarios generated from simulation, organized by outcome type.
             </p>
-            <StructuredScenarioDisplay scenarios={scenarios} currencySymbol={marketInfo.currencySymbol} />
+            <EnhancedScenarioDisplay scenarios={scenarios} currencySymbol={marketInfo.currencySymbol} />
           </div>
 
           {/* Step 4: AI Explanation */}
@@ -136,7 +180,7 @@ const Results = () => {
               <h2 className="text-lg font-semibold text-foreground font-brand">AI Explanation</h2>
             </div>
             <p className="text-sm text-muted-foreground mb-4">
-              Qualitative reasoning based on the quantitative analysis and scenarios above.
+              Qualitative reasoning based on Monte Carlo results and risk metrics.
             </p>
             <AIExplanation analysis={analysis} />
           </div>
@@ -151,8 +195,9 @@ const Results = () => {
           {/* Disclaimer */}
           <div className="mt-8 p-4 rounded-lg bg-muted/30 border border-border/50">
             <p className="text-xs text-muted-foreground text-center">
-              <strong>Educational Disclaimer:</strong> This analysis uses predefined scenarios and simplified volatility estimates. 
-              It does not use live market data, does not predict actual outcomes, and is not financial advice. 
+              <strong>Educational Disclaimer:</strong> This analysis uses Monte Carlo simulation with {simulation.paths.toLocaleString()} paths 
+              and {marketData.dataQuality === 'live' ? 'live market data' : 'estimated volatility'}. 
+              It does not predict actual outcomes and is not financial advice. 
               Markets are inherently unpredictable. Always consult a qualified financial advisor before trading.
             </p>
           </div>

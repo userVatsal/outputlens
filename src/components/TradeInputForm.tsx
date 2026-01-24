@@ -1,9 +1,11 @@
 import { useState } from 'react';
-import { TrendingUp, TrendingDown, Clock, DollarSign, BarChart3, Globe, Loader2, CalendarIcon } from 'lucide-react';
+import { TrendingUp, TrendingDown, Clock, DollarSign, BarChart3, Globe, Loader2, CalendarIcon, Sliders, FileText } from 'lucide-react';
 import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Slider } from '@/components/ui/slider';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import {
@@ -13,12 +15,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { TradeDirection, TimeHorizon, TradeInput, Market, MARKETS } from '@/types/trade';
+import { TradeDirection, TimeHorizon, Market, MARKETS } from '@/types/trade';
+import { EnhancedTradeInput } from '@/types/analysis';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
 
 interface TradeInputFormProps {
-  onSubmit: (input: TradeInput) => void;
+  onSubmit: (input: EnhancedTradeInput) => void;
   isLoading?: boolean;
 }
 
@@ -30,25 +33,33 @@ export function TradeInputForm({ onSubmit, isLoading = false }: TradeInputFormPr
   const [tradeDate, setTradeDate] = useState<Date>(new Date());
   const [timeHorizon, setTimeHorizon] = useState<TimeHorizon>('3-7 days');
   const [market, setMarket] = useState<Market>('US');
+  const [confidence, setConfidence] = useState(5);
+  const [assumptions, setAssumptions] = useState('');
+  const [showAdvanced, setShowAdvanced] = useState(false);
 
   const selectedMarket = MARKETS[market];
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    const input: TradeInput = {
+    const input: EnhancedTradeInput = {
       asset: asset.toUpperCase().trim(),
       direction,
       entryPrice: parseFloat(entryPrice),
       tradeDate,
       timeHorizon,
       market,
+      confidence,
+      assumptions: assumptions.trim() || undefined,
     };
     
     onSubmit(input);
   };
 
   const isValid = asset.trim() !== '' && entryPrice !== '' && parseFloat(entryPrice) > 0;
+
+  const confidenceLabel = confidence <= 3 ? 'Low' : confidence <= 6 ? 'Medium' : 'High';
+  const confidenceColor = confidence <= 3 ? 'text-bearish' : confidence <= 6 ? 'text-yellow-500' : 'text-bullish';
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -108,12 +119,15 @@ export function TradeInputForm({ onSubmit, isLoading = false }: TradeInputFormPr
         <Input
           id="asset"
           type="text"
-          placeholder={market === 'US' ? 'e.g. SPY, AAPL, TSLA' : market === 'UK' ? 'e.g. FTSE, HSBA, BP' : 'e.g. DAX, SAP, ASML'}
+          placeholder={market === 'US' ? 'e.g. SPY, AAPL, BTC, EUR/USD' : market === 'UK' ? 'e.g. FTSE, HSBA, BP' : 'e.g. DAX, SAP, ASML'}
           value={asset}
           onChange={(e) => setAsset(e.target.value)}
           className="trading-input font-mono text-lg"
           disabled={isLoading}
         />
+        <p className="text-xs text-muted-foreground">
+          Supports stocks, ETFs, indices, crypto (BTC, ETH), and forex (EUR/USD)
+        </p>
       </div>
 
       {/* Trade Direction */}
@@ -230,6 +244,66 @@ export function TradeInputForm({ onSubmit, isLoading = false }: TradeInputFormPr
         </Select>
       </div>
 
+      {/* Advanced Options Toggle */}
+      <button
+        type="button"
+        onClick={() => setShowAdvanced(!showAdvanced)}
+        className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+      >
+        <Sliders className="h-4 w-4" />
+        {showAdvanced ? 'Hide' : 'Show'} Advanced Options
+      </button>
+
+      {/* Advanced Options */}
+      {showAdvanced && (
+        <div className="space-y-6 p-4 rounded-lg bg-muted/30 border border-border/50">
+          {/* Confidence Level */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <Label className="flex items-center gap-2 text-sm font-medium">
+                <Sliders className="h-4 w-4 text-muted-foreground" />
+                Confidence Level
+              </Label>
+              <span className={`text-sm font-medium ${confidenceColor}`}>
+                {confidence}/10 ({confidenceLabel})
+              </span>
+            </div>
+            <Slider
+              value={[confidence]}
+              onValueChange={(v) => setConfidence(v[0])}
+              min={1}
+              max={10}
+              step={1}
+              disabled={isLoading}
+              className="w-full"
+            />
+            <p className="text-xs text-muted-foreground">
+              Higher confidence narrows the base case probability and reduces tail risk weights.
+            </p>
+          </div>
+
+          {/* Assumptions / Thesis */}
+          <div className="space-y-2">
+            <Label htmlFor="assumptions" className="flex items-center gap-2 text-sm font-medium">
+              <FileText className="h-4 w-4 text-muted-foreground" />
+              Trade Thesis (Optional)
+            </Label>
+            <Textarea
+              id="assumptions"
+              placeholder="e.g., Expecting positive earnings guidance, Fed likely to pause rate hikes..."
+              value={assumptions}
+              onChange={(e) => setAssumptions(e.target.value)}
+              className="trading-input min-h-[80px] resize-none"
+              disabled={isLoading}
+              maxLength={500}
+            />
+            <p className="text-xs text-muted-foreground">
+              Your thesis will be incorporated into the AI explanation.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Submit Button */}
       <Button
         type="submit"
@@ -239,7 +313,7 @@ export function TradeInputForm({ onSubmit, isLoading = false }: TradeInputFormPr
         {isLoading ? (
           <>
             <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-            {t('analyzing')}
+            Running Monte Carlo Simulation...
           </>
         ) : (
           t('evaluateTrade')
@@ -247,7 +321,7 @@ export function TradeInputForm({ onSubmit, isLoading = false }: TradeInputFormPr
       </Button>
 
       <p className="text-center text-xs text-muted-foreground">
-        {t('disclaimer')}
+        Analysis uses 10,000 Monte Carlo paths with live market volatility when available.
       </p>
     </form>
   );
