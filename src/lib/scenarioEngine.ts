@@ -62,7 +62,7 @@ export interface DynamicScenarioSet {
 /**
  * Parse time horizon string to number of days
  */
-function parseHorizonToDays(horizon: TimeHorizon): number {
+export function parseHorizonToDays(horizon: TimeHorizon): number {
   switch (horizon) {
     case '1-3 days': return 2;
     case '3-7 days': return 5;

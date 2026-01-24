@@ -9,6 +9,7 @@ import Landing from "./pages/Landing";
 import Auth from "./pages/Auth";
 import Analyze from "./pages/Analyze";
 import Results from "./pages/Results";
+import Portfolio from "./pages/Portfolio";
 import History from "./pages/History";
 import Methodology from "./pages/Methodology";
 import Pricing from "./pages/Pricing";
@@ -31,6 +32,7 @@ const App = () => (
               <Route path="/auth" element={<Auth />} />
               <Route path="/analyze" element={<Analyze />} />
               <Route path="/results" element={<Results />} />
+              <Route path="/portfolio" element={<Portfolio />} />
               <Route path="/history" element={<History />} />
               <Route path="/methodology" element={<Methodology />} />
               <Route path="/pricing" element={<Pricing />} />
