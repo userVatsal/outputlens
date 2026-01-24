@@ -122,12 +122,12 @@ export default function Auth() {
         <div className="w-full max-w-md space-y-8">
           <div className="text-center">
             <h1 className="text-2xl font-bold text-foreground">
-              {mode === 'signup' ? 'Create your account' : 'Welcome back'}
+              {mode === 'signup' ? 'Create Your Account' : 'Welcome Back'}
             </h1>
             <p className="mt-2 text-muted-foreground">
               {mode === 'signup'
-                ? 'Start analyzing trades with OutputLens'
-                : 'Sign in to continue to OutputLens'}
+                ? 'Get your first analysis free. See how your trades might perform before you enter.'
+                : 'Your trade scenarios are waiting.'}
             </p>
           </div>
 

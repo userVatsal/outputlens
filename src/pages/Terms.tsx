@@ -10,7 +10,7 @@ export default function Terms() {
           
           <div className="prose prose-gray max-w-none space-y-8">
             <p className="text-muted-foreground">
-              Last updated: {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+              Last updated: January 2025
             </p>
 
             {/* Important Disclaimer Box */}
@@ -46,8 +46,8 @@ export default function Terms() {
                   OutputLens provides educational scenario analysis for trading positions. The service:
                 </p>
                 <ul className="space-y-2 text-sm text-muted-foreground">
-                  <li>• Uses predefined, static scenarios based on typical market conditions</li>
-                  <li>• Does not use real-time market data</li>
+                  <li>• Uses Monte Carlo simulation to generate probabilistic scenarios</li>
+                  <li>• Integrates live market data when available, with fallbacks for reliability</li>
                   <li>• Does not provide financial advice or trading recommendations</li>
                   <li>• Does not execute any trades on your behalf</li>
                   <li>• Makes no claims about the accuracy of any scenario or outcome</li>
@@ -61,8 +61,8 @@ export default function Terms() {
                 <p className="text-sm text-muted-foreground">
                   OutputLens is NOT a financial advisor. The scenarios and analyses provided are purely 
                   educational and should not be construed as financial advice, investment recommendations, 
-                  or trading signals. Always consult with a qualified financial advisor before making 
-                  any investment decisions.
+                  or trading signals. Simulation results show possible outcomes, not predictions. 
+                  Always consult with a qualified financial advisor before making any investment decisions.
                 </p>
               </div>
             </section>
@@ -109,8 +109,8 @@ export default function Terms() {
               <div className="glass-card p-6">
                 <p className="text-sm text-muted-foreground">
                   The service is provided "as is" without warranties of any kind. We do not warrant that 
-                  the scenarios are accurate, complete, or suitable for any purpose. Past scenarios do 
-                  not indicate future market behavior.
+                  the scenarios are accurate, complete, or suitable for any purpose. Simulated outcomes 
+                  are based on mathematical models and do not guarantee future market behavior.
                 </p>
               </div>
             </section>

@@ -31,7 +31,7 @@ export function PaywallModal({ open, onOpenChange }: PaywallModalProps) {
             Upgrade to Pro
           </DialogTitle>
           <DialogDescription>
-            You've reached your free monthly limit. Upgrade to Pro for unlimited analyses.
+            You've used your 10 free analyses this month. Upgrade to keep analyzing.
           </DialogDescription>
         </DialogHeader>
 
