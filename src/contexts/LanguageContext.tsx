@@ -13,6 +13,7 @@ interface LanguageContextType {
 const translations: Record<Language, Record<string, string>> = {
   'en-US': {
     analyze: 'Analyze',
+    portfolio: 'Portfolio',
     methodology: 'Methodology',
     pricing: 'Pricing',
     dashboard: 'Dashboard',
@@ -40,6 +41,7 @@ const translations: Record<Language, Record<string, string>> = {
   },
   'en-GB': {
     analyze: 'Analyse',
+    portfolio: 'Portfolio',
     methodology: 'Methodology',
     pricing: 'Pricing',
     dashboard: 'Dashboard',
