@@ -29,46 +29,82 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    const { input, results, bestCase, worstCase, overallRisk } = analysis;
+    const { input, quantMetrics, scenarios, bestCase, worstCase, overallRisk } = analysis;
     const marketContext = MARKET_CONTEXT[input.market] || MARKET_CONTEXT.US;
 
-    // Build context for the AI with market-specific info
-    const scenarioSummary = results.map((r: any) => 
-      `- ${r.scenario.name}: ${r.returnMin.toFixed(1)}% to ${r.returnMax.toFixed(1)}% return, ${r.scenario.riskLevel} risk`
-    ).join('\n');
+    // Build structured scenario summary by category
+    const formatScenarios = (categoryScenarios: any[], categoryName: string) => {
+      if (!categoryScenarios || categoryScenarios.length === 0) return '';
+      return `${categoryName}:\n${categoryScenarios.map((r: any) => 
+        `  - ${r.scenario.name} (${r.scenario.probability}): ${r.returnMin.toFixed(1)}% to ${r.returnMax.toFixed(1)}% return`
+      ).join('\n')}`;
+    };
 
-    const systemPrompt = `You are a professional trading analyst providing educational scenario analysis for the ${marketContext.name} market. Your role is to help traders understand potential outcomes across different market conditions.
+    const scenarioSummary = [
+      formatScenarios(scenarios.base, 'BASE CASE'),
+      formatScenarios(scenarios.upside, 'UPSIDE SCENARIOS'),
+      formatScenarios(scenarios.downside, 'DOWNSIDE SCENARIOS'),
+      formatScenarios(scenarios.tail, 'TAIL RISK EVENTS'),
+    ].filter(Boolean).join('\n\n');
+
+    const systemPrompt = `You are a professional trading analyst providing educational scenario analysis for the ${marketContext.name} market. Your role is to help traders understand potential outcomes and think critically about their trade.
 
 MARKET CONTEXT:
 - Market: ${marketContext.name}
 - Currency: ${marketContext.currency}
 - Central Bank: ${marketContext.centralBank}
 
+DATA FLOW CONTEXT:
+You are the qualitative reasoning layer of a structured analysis system. Before you:
+1. User manually entered trade details (asset, direction, entry price, time horizon)
+2. System validated user access and usage limits
+3. System computed quantitative metrics (volatility, risk score)
+4. System generated structured scenarios (base, upside, downside, tail)
+
+Your job is to synthesize this data into educational insights, NOT to predict outcomes.
+
 CRITICAL RULES:
 - NEVER use words like "guarantee", "will", "definitely", "certainly", or make price predictions
 - Always use probabilistic language: "may", "could", "might", "tends to", "historically"
 - State clearly this is educational analysis, not financial advice
-- Focus on risk awareness and scenario-based thinking
-- Reference market-specific factors (e.g., Fed for US, BOE for UK, ECB for Europe)
-- Be concise but insightful (3-4 paragraphs max)`;
+- Focus on explaining WHY scenarios exist and what drives them
+- Reference market-specific factors (${marketContext.centralBank} policy, regional risks)
+- Explain the quantitative metrics in plain English
+- Be concise but insightful (3-4 paragraphs max)
+- Prioritize clarity and explainability over technical jargon`;
 
-    const userPrompt = `Analyze this ${input.direction.toUpperCase()} trade on ${input.asset} in the ${marketContext.name} market at entry price ${marketContext.currency} ${input.entryPrice} with a ${input.timeHorizon} time horizon.
+    const userPrompt = `Analyze this ${input.direction.toUpperCase()} trade on ${input.asset} in the ${marketContext.name} market.
 
-SCENARIO ANALYSIS:
+TRADE PARAMETERS (user input):
+- Asset: ${input.asset}
+- Direction: ${input.direction.toUpperCase()}
+- Entry Price: ${marketContext.currency} ${input.entryPrice}
+- Time Horizon: ${input.timeHorizon}
+
+QUANTITATIVE METRICS (system computed):
+- Volatility Estimate: ±${quantMetrics.volatilityProxy}% over ${quantMetrics.holdingPeriodDays} days
+- Max Expected Move: ±${quantMetrics.maxExpectedMove}% (2σ range)
+- Risk Score: ${quantMetrics.riskScore}/10 (${quantMetrics.riskLabel})
+
+STRUCTURED SCENARIOS:
 ${scenarioSummary}
 
-Best case: ${bestCase.scenario.name} (up to ${bestCase.returnMax.toFixed(1)}%)
-Worst case: ${worstCase.scenario.name} (down to ${worstCase.returnMin.toFixed(1)}%)
-Overall risk rating: ${overallRisk}
+SUMMARY:
+- Best case: ${bestCase.scenario.name} (up to ${bestCase.returnMax.toFixed(1)}%)
+- Worst case: ${worstCase.scenario.name} (down to ${worstCase.returnMin.toFixed(1)}%)
+- Overall risk rating: ${overallRisk}
 
-Provide a plain-English explanation that:
-1. Highlights which scenarios matter most for this ${marketContext.name} market trade
-2. Identifies where the biggest risk comes from (consider ${marketContext.centralBank} policy, regional factors)
-3. Explains why this trade could fail
-4. Uses probabilistic language throughout
-5. References market-specific factors relevant to ${input.asset}`;
+Provide an educational explanation that:
+1. Explains what the quantitative metrics mean for this specific trade
+2. Identifies which scenario categories matter most and why
+3. Highlights the key risk factors specific to the ${marketContext.name} market and ${input.asset}
+4. Explains conditions under which this trade could fail
+5. Uses clear, probabilistic language throughout
+
+Focus on helping the trader understand the RANGE of possibilities and the FACTORS that could influence outcomes.`;
 
     console.log(`Analyzing ${input.direction} trade for ${input.asset} in ${input.market} market at ${input.entryPrice}`);
+    console.log(`Quant metrics: volatility=${quantMetrics.volatilityProxy}%, risk=${quantMetrics.riskScore}/10`);
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
