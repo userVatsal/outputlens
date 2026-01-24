@@ -1,101 +1,105 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 /* OutputLens Design System
-   Light professional fintech theme with navy/blue accents */
+   Light professional theme with deep navy and royal blue accents
+   Matching the logo: Navy (#1B2B4B) + Royal Blue (#2847C8) */
 
 @layer base {
   :root {
-    --background: 210 40% 98%;
-    --foreground: 222 47% 11%;
+    --background: 220 30% 98%;
+    --foreground: 222 47% 15%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    --card-foreground: 222 47% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
+    --popover-foreground: 222 47% 15%;
 
-    --primary: 221 83% 53%;
+    /* Royal blue from logo "Lens" */
+    --primary: 230 70% 53%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 40% 96%;
-    --secondary-foreground: 222 47% 11%;
+    --secondary: 220 25% 95%;
+    --secondary-foreground: 222 47% 15%;
 
-    --muted: 210 40% 96%;
-    --muted-foreground: 215 16% 47%;
+    --muted: 220 25% 95%;
+    --muted-foreground: 220 15% 45%;
 
-    --accent: 210 40% 96%;
-    --accent-foreground: 222 47% 11%;
+    --accent: 220 25% 95%;
+    --accent-foreground: 222 47% 15%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
-    --ring: 221 83% 53%;
+    --border: 220 20% 90%;
+    --input: 220 20% 90%;
+    --ring: 230 70% 53%;
 
-    --radius: 0.5rem;
+    --radius: 0.625rem;
 
     /* Trading colors */
-    --bullish: 142 76% 36%;
+    --bullish: 152 69% 40%;
     --bullish-foreground: 0 0% 100%;
-    --bearish: 0 84% 60%;
+    --bearish: 4 84% 55%;
     --bearish-foreground: 0 0% 100%;
-    --caution: 38 92% 50%;
+    --caution: 40 95% 50%;
     --caution-foreground: 0 0% 10%;
-    --neutral: 215 16% 47%;
+    --neutral: 220 15% 50%;
     --neutral-foreground: 0 0% 100%;
 
-    /* Brand colors */
-    --navy: 222 47% 11%;
-    --navy-light: 217 33% 17%;
+    /* Brand colors - from logo */
+    --navy: 222 47% 20%;
+    --navy-deep: 222 50% 15%;
+    --brand-blue: 230 70% 53%;
   }
 
   .dark {
     --background: 222 47% 6%;
     --foreground: 210 40% 98%;
 
-    --card: 222 47% 8%;
+    --card: 222 47% 9%;
     --card-foreground: 210 40% 98%;
 
-    --popover: 222 47% 8%;
+    --popover: 222 47% 9%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 217 91% 60%;
+    --primary: 225 75% 60%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 217 33% 17%;
+    --secondary: 222 40% 15%;
     --secondary-foreground: 210 40% 98%;
 
-    --muted: 217 33% 17%;
+    --muted: 222 40% 15%;
     --muted-foreground: 215 20% 65%;
 
-    --accent: 217 33% 17%;
+    --accent: 222 40% 15%;
     --accent-foreground: 210 40% 98%;
 
     --destructive: 0 62% 50%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 217 33% 20%;
-    --input: 217 33% 20%;
-    --ring: 217 91% 60%;
+    --border: 222 40% 18%;
+    --input: 222 40% 18%;
+    --ring: 225 75% 60%;
 
     /* Trading colors - dark mode */
-    --bullish: 142 69% 45%;
+    --bullish: 152 65% 45%;
     --bullish-foreground: 0 0% 100%;
-    --bearish: 0 84% 60%;
+    --bearish: 4 80% 58%;
     --bearish-foreground: 0 0% 100%;
-    --caution: 38 92% 50%;
+    --caution: 40 92% 50%;
     --caution-foreground: 0 0% 10%;
-    --neutral: 220 13% 50%;
+    --neutral: 220 13% 55%;
     --neutral-foreground: 0 0% 100%;
 
     /* Brand colors - dark mode */
     --navy: 210 40% 98%;
-    --navy-light: 215 20% 65%;
+    --navy-deep: 215 20% 80%;
+    --brand-blue: 225 75% 65%;
   }
 }
 
@@ -109,8 +113,17 @@
     font-family: 'Inter', system-ui, sans-serif;
   }
 
+  /* Brand font - matches logo style */
+  .font-brand {
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  }
+
   .font-mono {
     font-family: 'JetBrains Mono', monospace;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
   }
 }
 
@@ -153,5 +166,14 @@
 
   .hero-gradient {
     @apply bg-gradient-to-br from-primary/5 via-background to-primary/10;
+  }
+
+  /* Brand text styling to match logo */
+  .brand-text {
+    @apply font-brand font-bold;
+    background: linear-gradient(135deg, hsl(var(--navy)) 0%, hsl(var(--navy)) 50%, hsl(var(--brand-blue)) 50%, hsl(var(--brand-blue)) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
 }

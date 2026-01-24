@@ -40,7 +40,7 @@ export default function Landing() {
               <BarChart3 className="h-4 w-4" />
               Educational Trading Tool
             </div>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-foreground">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-foreground font-brand">
               Understand Your Trade{' '}
               <span className="text-primary">Before You Enter</span>
             </h1>
@@ -70,7 +70,7 @@ export default function Landing() {
       <section className="py-20 bg-background">
         <div className="section-container">
           <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-foreground mb-4">
+            <h2 className="text-3xl font-bold text-foreground mb-4 font-brand">
               How OutputLens Helps
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
@@ -105,7 +105,7 @@ export default function Landing() {
         <div className="section-container">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="space-y-6">
-              <h2 className="text-3xl font-bold text-foreground">
+              <h2 className="text-3xl font-bold text-foreground font-brand">
                 Everything you need to evaluate trades
               </h2>
               <p className="text-muted-foreground">
@@ -160,7 +160,7 @@ export default function Landing() {
       <section className="py-20 bg-background">
         <div className="section-container">
           <div className="glass-card p-12 text-center bg-gradient-to-br from-primary/5 to-primary/10">
-            <h2 className="text-3xl font-bold text-foreground mb-4">
+            <h2 className="text-3xl font-bold text-foreground mb-4 font-brand">
               Ready to analyze your first trade?
             </h2>
             <p className="text-muted-foreground mb-8 max-w-xl mx-auto">

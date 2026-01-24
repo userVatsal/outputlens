@@ -45,7 +45,7 @@ export function Header() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center">
-            <img src={logo} alt="OutputLens" className="h-8" />
+            <img src={logo} alt="OutputLens" className="h-7 md:h-8" />
           </Link>
 
           {/* Desktop Navigation */}

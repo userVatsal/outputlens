@@ -15,6 +15,7 @@ export default {
     extend: {
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
+        brand: ['Plus Jakarta Sans', 'system-ui', 'sans-serif'],
         mono: ['JetBrains Mono', 'monospace'],
       },
       colors: {
@@ -69,7 +70,10 @@ export default {
         },
         navy: {
           DEFAULT: "hsl(var(--navy))",
-          light: "hsl(var(--navy-light))",
+          deep: "hsl(var(--navy-deep))",
+        },
+        brand: {
+          blue: "hsl(var(--brand-blue))",
         },
       },
       borderRadius: {
