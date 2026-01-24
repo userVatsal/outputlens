@@ -93,7 +93,7 @@ export function usePortfolioAnalysis(): UsePortfolioReturn {
               .gte('expires_at', new Date().toISOString())
               .order('computed_at', { ascending: false })
               .limit(1)
-              .single();
+              .maybeSingle();
 
             if (sentimentData) {
               const score = sentimentData.weighted_sentiment || 0;
