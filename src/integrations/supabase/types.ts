@@ -237,6 +237,11 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          plan_expires_at: string | null
+          plan_started_at: string | null
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          subscription_plan: string | null
           subscription_tier: string
           updated_at: string
           user_id: string
@@ -244,6 +249,11 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
+          plan_expires_at?: string | null
+          plan_started_at?: string | null
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          subscription_plan?: string | null
           subscription_tier?: string
           updated_at?: string
           user_id: string
@@ -251,6 +261,11 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
+          plan_expires_at?: string | null
+          plan_started_at?: string | null
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          subscription_plan?: string | null
           subscription_tier?: string
           updated_at?: string
           user_id?: string
@@ -376,25 +391,34 @@ export type Database = {
       usage_tracking: {
         Row: {
           analysis_count: number
+          api_call_count: number | null
           created_at: string
+          extra_credits: number | null
           id: string
           month_year: string
+          portfolio_analysis_count: number | null
           updated_at: string
           user_id: string
         }
         Insert: {
           analysis_count?: number
+          api_call_count?: number | null
           created_at?: string
+          extra_credits?: number | null
           id?: string
           month_year: string
+          portfolio_analysis_count?: number | null
           updated_at?: string
           user_id: string
         }
         Update: {
           analysis_count?: number
+          api_call_count?: number | null
           created_at?: string
+          extra_credits?: number | null
           id?: string
           month_year?: string
+          portfolio_analysis_count?: number | null
           updated_at?: string
           user_id?: string
         }

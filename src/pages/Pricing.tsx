@@ -1,41 +1,17 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Check, Sparkles } from 'lucide-react';
+import { Check, Sparkles, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Layout } from '@/components/layout/Layout';
+import { usePlan } from '@/hooks/usePlan';
+import { PLAN_CONFIG, SubscriptionPlan } from '@/lib/stripe';
+import { toast } from 'sonner';
 
-const plans = [
-  {
-    name: 'Free',
-    price: '$0',
-    period: 'forever',
-    description: 'Try before you commit',
-    features: [
-      '10 analyses per month',
-      'US, UK, and EU market scenarios',
-      'Plain-language AI summaries',
-      'Email support',
-    ],
-    cta: 'Start Free',
-    ctaLink: '/auth?mode=signup',
-    highlighted: false,
-  },
-  {
-    name: 'Pro',
-    price: '$9',
-    period: 'per month',
-    description: 'For traders who analyze before they execute',
-    features: [
-      'Unlimited analyses',
-      'US, UK, and EU market scenarios',
-      'Plain-language AI summaries',
-      'Full analysis history',
-      'Priority email support',
-      'Beta features and roadmap input',
-    ],
-    cta: 'Upgrade to Pro',
-    ctaLink: '/auth?mode=signup',
-    highlighted: true,
-  },
+const plans: { key: SubscriptionPlan; badge?: string }[] = [
+  { key: 'free' },
+  { key: 'starter' },
+  { key: 'pro', badge: 'Most Popular' },
+  { key: 'trader' },
 ];
 
 const faqs = [
@@ -45,15 +21,15 @@ const faqs = [
   },
   {
     question: 'How do the simulations work?',
-    answer: 'We run 10,000 Monte Carlo paths using Geometric Brownian Motion, incorporating live volatility data when available. The result is a probability distribution of possible outcomes—not a single prediction.',
+    answer: 'We run up to 10,000 Monte Carlo paths using Geometric Brownian Motion, incorporating live volatility data when available. The result is a probability distribution of possible outcomes—not a single prediction.',
   },
   {
-    question: 'What\'s the difference between VaR and Expected Shortfall?',
-    answer: 'VaR (Value at Risk) tells you the maximum expected loss at a given confidence level (e.g., 95%). Expected Shortfall goes further—it shows the average loss when things are worse than VaR.',
+    question: "What's the difference between VaR and Expected Shortfall?",
+    answer: "VaR (Value at Risk) tells you the maximum expected loss at a given confidence level (e.g., 95%). Expected Shortfall goes further—it shows the average loss when things are worse than VaR.",
   },
   {
     question: 'Can I cancel anytime?',
-    answer: 'Yes. Pro subscriptions can be cancelled at any time. You\'ll retain access until the end of your billing period.',
+    answer: "Yes. All subscriptions can be cancelled at any time from your Account page. You'll retain access until the end of your billing period.",
   },
   {
     question: 'What markets are supported?',
@@ -61,11 +37,39 @@ const faqs = [
   },
   {
     question: 'How is my data used?',
-    answer: 'We store your analysis history to show you past trades. We don\'t sell your data. See our Privacy Policy for full details.',
+    answer: "We store your analysis history to show you past trades. We don't sell your data. See our Privacy Policy for full details.",
   },
 ];
 
 export default function Pricing() {
+  const { plan: currentPlan, createCheckoutSession, isLoading: planLoading } = usePlan();
+  const [loadingPlan, setLoadingPlan] = useState<SubscriptionPlan | null>(null);
+
+  const handleSubscribe = async (planKey: SubscriptionPlan) => {
+    const config = PLAN_CONFIG[planKey];
+    if (!config.priceId) return;
+
+    setLoadingPlan(planKey);
+    try {
+      await createCheckoutSession(config.priceId);
+    } catch (err) {
+      toast.error('Unable to start checkout. Please try again.');
+    } finally {
+      setLoadingPlan(null);
+    }
+  };
+
+  const getButtonText = (planKey: SubscriptionPlan) => {
+    if (planKey === currentPlan) return 'Current Plan';
+    if (planKey === 'free') return 'Start Free';
+    return `Get ${PLAN_CONFIG[planKey].name}`;
+  };
+
+  const isUpgrade = (planKey: SubscriptionPlan) => {
+    const planOrder: SubscriptionPlan[] = ['free', 'starter', 'pro', 'trader'];
+    return planOrder.indexOf(planKey) > planOrder.indexOf(currentPlan);
+  };
+
   return (
     <Layout>
       <div className="section-container py-12">
@@ -75,57 +79,97 @@ export default function Pricing() {
             Simple, Transparent Pricing
           </h1>
           <p className="text-lg text-muted-foreground max-w-xl mx-auto">
-            Start free, upgrade when you need more. No hidden fees.
+            Start free, upgrade when you need more. No hidden fees. Cancel anytime.
           </p>
         </div>
 
         {/* Pricing Cards */}
-        <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto mb-20">
-          {plans.map((plan) => (
-            <div
-              key={plan.name}
-              className={`glass-card p-8 relative ${
-                plan.highlighted ? 'border-2 border-primary' : ''
-              }`}
-            >
-              {plan.highlighted && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                  <span className="inline-flex items-center gap-1 bg-primary text-primary-foreground text-xs font-medium px-3 py-1 rounded-full">
-                    <Sparkles className="h-3 w-3" />
-                    Most Popular
-                  </span>
-                </div>
-              )}
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto mb-20">
+          {plans.map(({ key, badge }) => {
+            const config = PLAN_CONFIG[key];
+            const isCurrentPlan = key === currentPlan;
+            const isHighlighted = config.highlighted;
+            const canUpgrade = isUpgrade(key);
 
-              <div className="text-center mb-8">
-                <h2 className="text-2xl font-bold text-foreground mb-2">{plan.name}</h2>
-                <div className="flex items-baseline justify-center gap-1">
-                  <span className="text-4xl font-bold text-foreground">{plan.price}</span>
-                  <span className="text-muted-foreground">/{plan.period}</span>
-                </div>
-                <p className="text-sm text-muted-foreground mt-2">{plan.description}</p>
-              </div>
-
-              <ul className="space-y-4 mb-8">
-                {plan.features.map((feature) => (
-                  <li key={feature} className="flex items-start gap-3">
-                    <div className="flex-shrink-0 w-5 h-5 rounded-full bg-bullish/10 flex items-center justify-center mt-0.5">
-                      <Check className="h-3 w-3 text-bullish" />
-                    </div>
-                    <span className="text-foreground">{feature}</span>
-                  </li>
-                ))}
-              </ul>
-
-              <Button
-                asChild
-                className="w-full"
-                variant={plan.highlighted ? 'default' : 'outline'}
+            return (
+              <div
+                key={key}
+                className={`glass-card p-6 relative flex flex-col ${
+                  isHighlighted ? 'border-2 border-primary ring-2 ring-primary/20' : ''
+                } ${isCurrentPlan ? 'bg-primary/5' : ''}`}
               >
-                <Link to={plan.ctaLink}>{plan.cta}</Link>
-              </Button>
-            </div>
-          ))}
+                {badge && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                    <span className="inline-flex items-center gap-1 bg-primary text-primary-foreground text-xs font-medium px-3 py-1 rounded-full whitespace-nowrap">
+                      <Sparkles className="h-3 w-3" />
+                      {badge}
+                    </span>
+                  </div>
+                )}
+
+                {isCurrentPlan && (
+                  <div className="absolute -top-3 right-4">
+                    <span className="inline-flex items-center gap-1 bg-bullish text-bullish-foreground text-xs font-medium px-2 py-1 rounded-full">
+                      Your Plan
+                    </span>
+                  </div>
+                )}
+
+                <div className="text-center mb-6">
+                  <h2 className="text-xl font-bold text-foreground mb-2">{config.name}</h2>
+                  <div className="flex items-baseline justify-center gap-1">
+                    <span className="text-3xl font-bold text-foreground">
+                      ${config.price}
+                    </span>
+                    {config.price > 0 && (
+                      <span className="text-muted-foreground">/mo</span>
+                    )}
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {config.analysesLimit} analyses/month
+                  </p>
+                </div>
+
+                <ul className="space-y-3 mb-6 flex-1">
+                  {config.features.map((feature) => (
+                    <li key={feature} className="flex items-start gap-2">
+                      <div className="flex-shrink-0 w-5 h-5 rounded-full bg-bullish/10 flex items-center justify-center mt-0.5">
+                        <Check className="h-3 w-3 text-bullish" />
+                      </div>
+                      <span className="text-sm text-foreground">{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                {key === 'free' ? (
+                  <Button
+                    variant={isCurrentPlan ? 'outline' : 'secondary'}
+                    className="w-full"
+                    disabled={isCurrentPlan}
+                    asChild={!isCurrentPlan}
+                  >
+                    {isCurrentPlan ? (
+                      <span>Current Plan</span>
+                    ) : (
+                      <Link to="/auth?mode=signup">Start Free</Link>
+                    )}
+                  </Button>
+                ) : (
+                  <Button
+                    className="w-full"
+                    variant={isHighlighted && canUpgrade ? 'default' : 'outline'}
+                    disabled={isCurrentPlan || loadingPlan === key || planLoading}
+                    onClick={() => handleSubscribe(key)}
+                  >
+                    {loadingPlan === key ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : null}
+                    {getButtonText(key)}
+                  </Button>
+                )}
+              </div>
+            );
+          })}
         </div>
 
         {/* FAQ Section */}
@@ -133,9 +177,9 @@ export default function Pricing() {
           <h2 className="text-2xl font-bold text-foreground text-center mb-8">
             Frequently Asked Questions
           </h2>
-          <div className="space-y-6">
+          <div className="grid gap-4 sm:grid-cols-2">
             {faqs.map((faq) => (
-              <div key={faq.question} className="glass-card p-6">
+              <div key={faq.question} className="glass-card p-5">
                 <h3 className="font-semibold text-foreground mb-2">{faq.question}</h3>
                 <p className="text-sm text-muted-foreground">{faq.answer}</p>
               </div>
@@ -146,7 +190,7 @@ export default function Pricing() {
         {/* Disclaimer */}
         <div className="mt-16 text-center">
           <p className="text-xs text-muted-foreground max-w-xl mx-auto">
-            OutputLens is for educational purposes only. It does not provide financial advice 
+            OutputLens is for educational purposes only. It does not provide financial advice
             or trading recommendations. Past scenarios do not guarantee future results.
           </p>
         </div>

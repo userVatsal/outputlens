@@ -1,22 +1,25 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { SubscriptionPlan, PLAN_CONFIG } from '@/lib/stripe';
 
 export interface UsageData {
   analysisCount: number;
+  portfolioAnalysisCount: number;
+  apiCallCount: number;
   limit: number;
-  tier: 'free' | 'pro';
+  plan: SubscriptionPlan;
   monthYear: string;
 }
 
 interface Profile {
-  subscription_tier: string;
+  subscription_plan: string;
 }
 
 interface UsageTracking {
   analysis_count: number;
+  portfolio_analysis_count: number;
+  api_call_count: number;
 }
-
-const FREE_LIMIT = 10;
 
 export function useUsage() {
   const [usage, setUsage] = useState<UsageData | null>(null);
@@ -38,19 +41,20 @@ export function useUsage() {
     const monthYear = getCurrentMonthYear();
 
     try {
-      // Get profile for subscription tier
+      // Get profile for subscription plan
       const { data: profile } = await supabase
         .from('profiles' as never)
-        .select('subscription_tier')
+        .select('subscription_plan')
         .eq('user_id', userId)
         .maybeSingle() as { data: Profile | null; error: unknown };
 
-      const tier = (profile?.subscription_tier as 'free' | 'pro') || 'free';
+      const plan = (profile?.subscription_plan as SubscriptionPlan) || 'free';
+      const planConfig = PLAN_CONFIG[plan];
 
       // Get or create usage tracking
       let { data: usageData } = await supabase
         .from('usage_tracking' as never)
-        .select('analysis_count')
+        .select('analysis_count, portfolio_analysis_count, api_call_count')
         .eq('user_id', userId)
         .eq('month_year', monthYear)
         .maybeSingle() as { data: UsageTracking | null; error: unknown };
@@ -63,16 +67,20 @@ export function useUsage() {
             user_id: userId,
             month_year: monthYear,
             analysis_count: 0,
+            portfolio_analysis_count: 0,
+            api_call_count: 0,
           } as never)
-          .select('analysis_count')
+          .select('analysis_count, portfolio_analysis_count, api_call_count')
           .single() as { data: UsageTracking | null; error: unknown };
         usageData = newUsage;
       }
 
       setUsage({
         analysisCount: usageData?.analysis_count || 0,
-        limit: tier === 'pro' ? Infinity : FREE_LIMIT,
-        tier,
+        portfolioAnalysisCount: usageData?.portfolio_analysis_count || 0,
+        apiCallCount: usageData?.api_call_count || 0,
+        limit: planConfig.analysesLimit,
+        plan,
         monthYear,
       });
     } catch (error) {
@@ -86,7 +94,7 @@ export function useUsage() {
     fetchUsage();
   }, [fetchUsage]);
 
-  const incrementUsage = useCallback(async () => {
+  const incrementUsage = useCallback(async (type: 'analysis' | 'portfolio' | 'api' = 'analysis') => {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) return;
 
@@ -94,19 +102,32 @@ export function useUsage() {
     const monthYear = getCurrentMonthYear();
 
     try {
-      // Increment the count
+      const updateField = type === 'portfolio' 
+        ? 'portfolio_analysis_count' 
+        : type === 'api' 
+          ? 'api_call_count' 
+          : 'analysis_count';
+      
+      const currentValue = type === 'portfolio'
+        ? usage?.portfolioAnalysisCount || 0
+        : type === 'api'
+          ? usage?.apiCallCount || 0
+          : usage?.analysisCount || 0;
+
       const { data } = await supabase
         .from('usage_tracking' as never)
-        .update({ analysis_count: (usage?.analysisCount || 0) + 1 } as never)
+        .update({ [updateField]: currentValue + 1 } as never)
         .eq('user_id', userId)
         .eq('month_year', monthYear)
-        .select('analysis_count')
+        .select('analysis_count, portfolio_analysis_count, api_call_count')
         .single() as { data: UsageTracking | null; error: unknown };
 
       if (data && usage) {
         setUsage({
           ...usage,
           analysisCount: data.analysis_count,
+          portfolioAnalysisCount: data.portfolio_analysis_count,
+          apiCallCount: data.api_call_count,
         });
       }
     } catch (error) {
@@ -114,12 +135,16 @@ export function useUsage() {
     }
   }, [usage]);
 
-  const canAnalyze = usage ? (usage.tier === 'pro' || usage.analysisCount < usage.limit) : false;
+  const canAnalyze = usage ? usage.analysisCount < usage.limit : false;
+  const canPortfolioAnalyze = usage 
+    ? usage.portfolioAnalysisCount < PLAN_CONFIG[usage.plan].portfolioAssetsLimit 
+    : false;
 
   return {
     usage,
     loading,
     canAnalyze,
+    canPortfolioAnalyze,
     incrementUsage,
     refetch: fetchUsage,
   };
