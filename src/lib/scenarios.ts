@@ -209,16 +209,20 @@ export function analyzeTradeRisk(results: ScenarioResult[]): {
   const bestCase = sortedByReturn[0];
   const worstCase = sortedByReturn[sortedByReturn.length - 1];
   
-  // Calculate overall risk based on scenario distribution
-  const highRiskCount = results.filter(r => r.scenario.riskLevel === 'High').length;
-  const negativeReturnCount = results.filter(r => r.returnMax < 0).length;
-  const tailScenarios = results.filter(r => r.scenario.category === 'tail');
-  const worstTailReturn = Math.min(...tailScenarios.map(t => t.returnMin));
+  // Calculate overall risk based on non-tail scenario distribution
+  // Tail scenarios are always high-risk by definition, so we exclude them from the count
+  const nonTailResults = results.filter(r => r.scenario.category !== 'tail');
+  const highRiskNonTailCount = nonTailResults.filter(r => r.scenario.riskLevel === 'High').length;
+  const mediumRiskCount = nonTailResults.filter(r => r.scenario.riskLevel === 'Medium').length;
+  
+  // Calculate average expected return across base scenarios (most likely outcomes)
+  const baseScenarios = results.filter(r => r.scenario.category === 'base');
+  const avgBaseReturn = baseScenarios.reduce((sum, r) => sum + (r.returnMin + r.returnMax) / 2, 0) / baseScenarios.length;
   
   let overallRisk: RiskLevel;
-  if (highRiskCount >= 3 || worstTailReturn < -12) {
+  if (highRiskNonTailCount >= 2 || avgBaseReturn < -2) {
     overallRisk = 'High';
-  } else if (highRiskCount >= 2 || negativeReturnCount >= 3) {
+  } else if (highRiskNonTailCount >= 1 || mediumRiskCount >= 2 || avgBaseReturn < 0) {
     overallRisk = 'Medium';
   } else {
     overallRisk = 'Low';
