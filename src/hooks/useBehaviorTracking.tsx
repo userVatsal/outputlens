@@ -80,6 +80,9 @@ export function useBehaviorTracking() {
   const cursorFlushInterval = useRef<NodeJS.Timeout | null>(null);
   const [showExitSurvey, setShowExitSurvey] = useState(false);
   const exitIntentTriggered = useRef(false);
+  
+  // Check if exit survey was already shown (persisted across sessions)
+  const exitSurveyShown = useRef(localStorage.getItem('_ol_exit_survey_shown') === 'true');
 
   // Initialize session
   const initSession = useCallback(async () => {
@@ -240,8 +243,11 @@ export function useBehaviorTracking() {
   // Track exit intent
   const handleExitIntent = useCallback((e: MouseEvent) => {
     // Detect mouse leaving viewport toward top (browser bar)
-    if (e.clientY <= 0 && !exitIntentTriggered.current) {
+    // Only show if never shown before (persisted in localStorage)
+    if (e.clientY <= 0 && !exitIntentTriggered.current && !exitSurveyShown.current) {
       exitIntentTriggered.current = true;
+      exitSurveyShown.current = true;
+      localStorage.setItem('_ol_exit_survey_shown', 'true');
 
       trackEvent('exit_intent', {
         timeOnPage: Math.round((Date.now() - pageStartTime.current) / 1000),
