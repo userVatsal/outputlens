@@ -816,6 +816,7 @@ export type Database = {
     }
     Functions: {
       is_ip_blocked: { Args: { p_ip_address: string }; Returns: boolean }
+      purge_old_ip_reputation: { Args: never; Returns: undefined }
       update_ip_reputation: {
         Args: { p_delta: number; p_event_type?: string; p_ip_address: string }
         Returns: {
