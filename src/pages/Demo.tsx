@@ -35,7 +35,19 @@ export default function Demo() {
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [loadingPhase, setLoadingPhase] = useState<'fetching' | 'simulating' | 'generating'>('fetching');
   const [simulationCount, setSimulationCount] = useState(0);
+  const [showSignupPrompt, setShowSignupPrompt] = useState(false);
+  const [signupPromptDismissed, setSignupPromptDismissed] = useState(false);
   const popularAssets = POPULAR_ASSETS.US;
+  
+  // Show soft signup prompt after viewing results for a bit
+  useEffect(() => {
+    if (showingResults && !signupPromptDismissed) {
+      const timer = setTimeout(() => {
+        setShowSignupPrompt(true);
+      }, 5000); // Show after 5 seconds of viewing results
+      return () => clearTimeout(timer);
+    }
+  }, [showingResults, signupPromptDismissed]);
   
   // Simulate analysis loading with phases for engagement
   useEffect(() => {
@@ -378,6 +390,44 @@ export default function Demo() {
           </div>
         )}
       </div>
+      
+      {/* Soft Signup Prompt - appears after viewing results */}
+      {showSignupPrompt && !signupPromptDismissed && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 animate-in slide-in-from-bottom-4 fade-in duration-300">
+          <Card className="bg-card/95 backdrop-blur-md border-primary/30 shadow-xl">
+            <CardContent className="py-4 px-6">
+              <div className="flex items-center gap-4">
+                <div className="hidden sm:flex w-10 h-10 rounded-full bg-primary/20 items-center justify-center">
+                  <Sparkles className="h-5 w-5 text-primary" />
+                </div>
+                <div className="flex-1">
+                  <p className="font-medium text-foreground text-sm">
+                    Like what you see?
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Sign up to analyze your own trades
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button size="sm" asChild>
+                    <Link to="/auth?mode=signup">
+                      Sign Up Free
+                    </Link>
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    variant="ghost" 
+                    onClick={() => setSignupPromptDismissed(true)}
+                    className="text-muted-foreground hover:text-foreground"
+                  >
+                    ✕
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </Layout>
   );
 }

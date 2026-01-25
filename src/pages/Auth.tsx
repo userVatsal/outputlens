@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
-import { Mail, Lock, AlertCircle, Loader2, User, Calendar, Shield, ShieldAlert, ShieldCheck } from 'lucide-react';
+import { Mail, Lock, AlertCircle, Loader2, ShieldAlert, ShieldCheck, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -18,7 +18,14 @@ const signInSchema = z.object({
   password: z.string().min(6, 'Password must be at least 6 characters'),
 });
 
-const signUpSchema = z.object({
+// Quick signup schema - only email and password required
+const quickSignUpSchema = z.object({
+  email: z.string().email('Please enter a valid email address'),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
+});
+
+// Full signup schema - for complete profile (deferred)
+const fullSignUpSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
   fullName: z.string().min(2, 'Name must be at least 2 characters').max(100, 'Name must be less than 100 characters'),
@@ -92,14 +99,10 @@ export default function Auth() {
   const validateForm = () => {
     try {
       if (mode === 'signup') {
-        signUpSchema.parse({
+        // Quick signup: only validate email and password
+        quickSignUpSchema.parse({
           email,
           password,
-          fullName,
-          dateOfBirth,
-          consentGdpr,
-          consentTerms,
-          consentPrivacy
         });
       } else {
         signInSchema.parse({ email, password });
@@ -140,18 +143,15 @@ export default function Auth() {
 
     try {
       if (mode === 'signup') {
+        // Quick signup - only send email and password, profile will be completed later
         const { error } = await supabase.auth.signUp({
           email,
           password,
           options: {
             emailRedirectTo: `${window.location.origin}/analyze`,
             data: {
-              full_name: fullName,
-              date_of_birth: dateOfBirth,
-              consent_gdpr: consentGdpr,
-              privacy_version: LEGAL_VERSIONS.privacy_policy.version,
-              terms_version: LEGAL_VERSIONS.terms_of_service.version,
-              onboarding_completed: true
+              // Minimal data for quick signup - user will complete profile later
+              onboarding_completed: false
             },
           },
         });
@@ -326,109 +326,14 @@ export default function Auth() {
               />
             </div>
 
-            {/* Signup-only fields */}
+            {/* Quick signup info */}
             {mode === 'signup' && (
-              <>
-                {/* Full Name */}
-                <div className="space-y-2">
-                  <Label htmlFor="fullName" className="flex items-center gap-2">
-                    <User className="h-4 w-4 text-muted-foreground" />
-                    Full Name
-                  </Label>
-                  <Input
-                    id="fullName"
-                    type="text"
-                    placeholder="John Doe"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    className="trading-input"
-                    disabled={loading}
-                    required
-                  />
-                </div>
-
-                {/* Date of Birth */}
-                <div className="space-y-2">
-                  <Label htmlFor="dateOfBirth" className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4 text-muted-foreground" />
-                    Date of Birth
-                  </Label>
-                  <Input
-                    id="dateOfBirth"
-                    type="date"
-                    value={dateOfBirth}
-                    onChange={(e) => setDateOfBirth(e.target.value)}
-                    className="trading-input"
-                    disabled={loading}
-                    required
-                    max={new Date(new Date().setFullYear(new Date().getFullYear() - 18)).toISOString().split('T')[0]}
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    You must be at least 18 years old to use this service.
-                  </p>
-                </div>
-
-                {/* Consent Section */}
-                <div className="space-y-4 pt-4 border-t border-border">
-                  <div className="flex items-center gap-2 text-sm font-medium text-foreground">
-                    <Shield className="h-4 w-4 text-primary" />
-                    Privacy & Legal Agreements
-                  </div>
-
-                  {/* GDPR Consent */}
-                  <div className="flex items-start gap-3">
-                    <Checkbox
-                      id="gdpr"
-                      checked={consentGdpr}
-                      onCheckedChange={(checked) => setConsentGdpr(checked === true)}
-                      disabled={loading}
-                    />
-                    <div className="grid gap-1.5 leading-none">
-                      <Label htmlFor="gdpr" className="text-sm font-normal cursor-pointer">
-                        I consent to the processing of my personal data in accordance with GDPR.
-                      </Label>
-                    </div>
-                  </div>
-
-                  {/* Privacy Policy */}
-                  <div className="flex items-start gap-3">
-                    <Checkbox
-                      id="privacy"
-                      checked={consentPrivacy}
-                      onCheckedChange={(checked) => setConsentPrivacy(checked === true)}
-                      disabled={loading}
-                    />
-                    <div className="grid gap-1.5 leading-none">
-                      <Label htmlFor="privacy" className="text-sm font-normal cursor-pointer">
-                        I have read and accept the{' '}
-                        <Link to="/privacy" className="text-primary hover:underline" target="_blank">
-                          Privacy Policy
-                        </Link>
-                        {' '}(v{LEGAL_VERSIONS.privacy_policy.version}).
-                      </Label>
-                    </div>
-                  </div>
-
-                  {/* Terms of Service */}
-                  <div className="flex items-start gap-3">
-                    <Checkbox
-                      id="terms"
-                      checked={consentTerms}
-                      onCheckedChange={(checked) => setConsentTerms(checked === true)}
-                      disabled={loading}
-                    />
-                    <div className="grid gap-1.5 leading-none">
-                      <Label htmlFor="terms" className="text-sm font-normal cursor-pointer">
-                        I have read and accept the{' '}
-                        <Link to="/terms" className="text-primary hover:underline" target="_blank">
-                          Terms of Service
-                        </Link>
-                        {' '}(v{LEGAL_VERSIONS.terms_of_service.version}).
-                      </Label>
-                    </div>
-                  </div>
-                </div>
-              </>
+              <div className="p-4 rounded-lg bg-primary/5 border border-primary/20">
+                <p className="text-sm text-muted-foreground">
+                  <Sparkles className="h-4 w-4 inline mr-2 text-primary" />
+                  Quick signup - you'll complete your profile after your first analysis.
+                </p>
+              </div>
             )}
 
             <Button type="submit" className="w-full" disabled={loading || isBlocked}>
