@@ -12,11 +12,15 @@ import {
   Activity,
   Lock,
   ChevronRight,
-  BookOpen
+  BookOpen,
+  Play
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Layout } from '@/components/layout/Layout';
+import { InteractivePreview } from '@/components/landing/InteractivePreview';
+import { DataProviderLogos } from '@/components/landing/DataProviderLogos';
+
 const features = [
   {
     icon: Activity,
@@ -109,27 +113,26 @@ export default function Landing() {
             </div>
 
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-foreground font-brand leading-tight">
-              Know Your Risk{' '}
+              See Every Outcome{' '}
               <span className="text-primary">Before You Trade</span>
             </h1>
             
             <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto">
-              See the full probability distribution of your trade outcomes in seconds. 
-              Powered by 10,000-path Monte Carlo simulation with live volatility data.
+              10,000 Monte Carlo simulations in 2 seconds. Know your worst case, best case, and everything in between.
             </p>
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
               <Button size="lg" asChild className="px-8 py-6 text-lg shadow-lg hover:shadow-xl transition-all">
-                <Link to="/auth?mode=signup">
-                  Get Your First Analysis Free
-                  <ArrowRight className="ml-2 h-5 w-5" />
+                <Link to="/demo">
+                  <Play className="mr-2 h-5 w-5" />
+                  See Live Demo
                 </Link>
               </Button>
               <Button size="lg" variant="outline" asChild className="px-8 py-6 text-lg">
-                <Link to="/methodology">
-                  How It Works
-                  <ChevronRight className="ml-1 h-5 w-5" />
+                <Link to="/auth?mode=signup">
+                  Get Started Free
+                  <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
             </div>
@@ -139,76 +142,14 @@ export default function Landing() {
             </p>
           </div>
 
-          {/* Hero Visual - Sample Analysis Card */}
+          {/* Hero Visual - Interactive Preview */}
           <div className="mt-12 max-w-3xl mx-auto">
-            <div className="glass-card p-6 md:p-8 shadow-2xl border-primary/20">
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <BarChart3 className="h-5 w-5 text-primary" />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-foreground">Live Analysis Preview</p>
-                    <p className="text-sm text-muted-foreground">AAPL Long • 5-Day Horizon</p>
-                  </div>
-                </div>
-                <Badge className="bg-bullish/10 text-bullish border-bullish/20">
-                  Live Data
-                </Badge>
-              </div>
+            <InteractivePreview />
+          </div>
 
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                <div className="text-center p-3 rounded-lg bg-muted/30">
-                  <p className="text-xs text-muted-foreground mb-1">Win Probability</p>
-                  <p className="text-xl font-bold font-mono text-bullish">62%</p>
-                </div>
-                <div className="text-center p-3 rounded-lg bg-muted/30">
-                  <p className="text-xs text-muted-foreground mb-1">Expected Return</p>
-                  <p className="text-xl font-bold font-mono text-foreground">+1.8%</p>
-                </div>
-                <div className="text-center p-3 rounded-lg bg-muted/30">
-                  <p className="text-xs text-muted-foreground mb-1">95% VaR</p>
-                  <p className="text-xl font-bold font-mono text-bearish">-4.2%</p>
-                </div>
-                <div className="text-center p-3 rounded-lg bg-muted/30">
-                  <p className="text-xs text-muted-foreground mb-1">Risk Score</p>
-                  <p className="text-xl font-bold font-mono text-foreground">4/10</p>
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                <div className="flex justify-between items-center p-3 rounded-lg bg-bullish/5 border border-bullish/20">
-                  <div className="flex items-center gap-2">
-                    <TrendingUp className="h-4 w-4 text-bullish" />
-                    <span className="text-sm font-medium">Upside Scenario</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="font-mono text-bullish">+3% to +8%</span>
-                    <Badge variant="outline" className="text-bullish">24% prob</Badge>
-                  </div>
-                </div>
-                <div className="flex justify-between items-center p-3 rounded-lg bg-muted">
-                  <div className="flex items-center gap-2">
-                    <BarChart3 className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm font-medium">Base Case</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="font-mono">-2% to +3%</span>
-                    <Badge variant="outline">50% prob</Badge>
-                  </div>
-                </div>
-                <div className="flex justify-between items-center p-3 rounded-lg bg-bearish/5 border border-bearish/20">
-                  <div className="flex items-center gap-2">
-                    <Shield className="h-4 w-4 text-bearish" />
-                    <span className="text-sm font-medium">Downside Risk</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="font-mono text-bearish">-8% to -2%</span>
-                    <Badge variant="outline" className="text-bearish">24% prob</Badge>
-                  </div>
-                </div>
-              </div>
-            </div>
+          {/* Data Provider Logos */}
+          <div className="mt-12">
+            <DataProviderLogos />
           </div>
         </div>
       </section>
