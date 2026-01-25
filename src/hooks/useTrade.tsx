@@ -11,6 +11,8 @@ interface TradeContextType {
   submitTrade: (input: EnhancedTradeInput) => void;
   clearAnalysis: () => void;
   isLoading: boolean;
+  isHistorical: boolean;
+  loadHistoricalAnalysis: (historyId: string) => Promise<boolean>;
 }
 
 const TradeContext = createContext<TradeContextType | undefined>(undefined);
@@ -42,7 +44,36 @@ function flattenScenarios(scenarios: EnhancedTradeAnalysis['scenarios']): Dynami
 export function TradeProvider({ children }: { children: ReactNode }) {
   const [analysis, setAnalysis] = useState<EnhancedTradeAnalysis | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isHistorical, setIsHistorical] = useState(false);
   const { fetchMarketData } = useMarketData();
+
+  /**
+   * Load a historical analysis from the database by ID
+   */
+  const loadHistoricalAnalysis = async (historyId: string): Promise<boolean> => {
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('analysis_history')
+        .select('results')
+        .eq('id', historyId)
+        .maybeSingle();
+      
+      if (error || !data?.results) {
+        console.error('Failed to load historical analysis:', error);
+        return false;
+      }
+      
+      setAnalysis(data.results as unknown as EnhancedTradeAnalysis);
+      setIsHistorical(true);
+      return true;
+    } catch (err) {
+      console.error('Error loading historical analysis:', err);
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const submitTrade = async (input: EnhancedTradeInput) => {
     setIsLoading(true);
@@ -187,10 +218,18 @@ export function TradeProvider({ children }: { children: ReactNode }) {
 
   const clearAnalysis = () => {
     setAnalysis(null);
+    setIsHistorical(false);
   };
 
   return (
-    <TradeContext.Provider value={{ analysis, submitTrade, clearAnalysis, isLoading }}>
+    <TradeContext.Provider value={{ 
+      analysis, 
+      submitTrade, 
+      clearAnalysis, 
+      isLoading, 
+      isHistorical, 
+      loadHistoricalAnalysis 
+    }}>
       {children}
     </TradeContext.Provider>
   );

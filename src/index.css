@@ -55,6 +55,10 @@
     --navy: 222 47% 20%;
     --navy-deep: 222 50% 15%;
     --brand-blue: 230 70% 53%;
+
+    /* Logo exact colors */
+    --logo-navy: 222 47% 20%;
+    --logo-blue: 225 83% 53%;
   }
 
   .dark {
@@ -100,6 +104,10 @@
     --navy: 210 40% 98%;
     --navy-deep: 215 20% 80%;
     --brand-blue: 225 75% 65%;
+
+    /* Logo colors - dark mode */
+    --logo-navy: 210 40% 98%;
+    --logo-blue: 225 80% 70%;
   }
 }
 

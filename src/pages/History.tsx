@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Calendar, TrendingUp, TrendingDown, Loader2, BarChart3 } from 'lucide-react';
+import { ArrowLeft, Calendar, TrendingUp, TrendingDown, Loader2, BarChart3, ChevronRight, Eye } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
@@ -45,6 +45,10 @@ export default function History() {
     fetchHistory();
   }, [navigate]);
 
+  const handleViewAnalysis = (historyId: string) => {
+    navigate(`/results?history=${historyId}`);
+  };
+
   return (
     <Layout>
       <div className="section-container py-8">
@@ -57,8 +61,8 @@ export default function History() {
               </Link>
             </Button>
             <div>
-              <h1 className="text-2xl font-bold text-foreground">Analysis History</h1>
-              <p className="text-muted-foreground">Your recent trade analyses</p>
+              <h1 className="text-2xl font-bold text-foreground font-brand">Analysis History</h1>
+              <p className="text-muted-foreground">Click any trade to view the full analysis</p>
             </div>
           </div>
 
@@ -84,9 +88,10 @@ export default function History() {
                 const date = new Date(item.created_at);
                 
                 return (
-                  <div
+                  <button
                     key={item.id}
-                    className="glass-card p-4 hover:border-primary/30 transition-colors"
+                    onClick={() => handleViewAnalysis(item.id)}
+                    className="w-full glass-card p-4 hover:border-primary/40 hover:bg-muted/30 transition-all duration-200 cursor-pointer text-left group"
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-4">
@@ -121,12 +126,18 @@ export default function History() {
                           </div>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Calendar className="h-4 w-4" />
-                        <span>{date.toLocaleDateString()}</span>
+                      <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Calendar className="h-4 w-4" />
+                          <span>{date.toLocaleDateString()}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-primary opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Eye className="h-4 w-4" />
+                          <ChevronRight className="h-4 w-4" />
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  </button>
                 );
               })}
             </div>

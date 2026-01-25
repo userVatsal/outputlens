@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X, LogOut, User, Languages } from 'lucide-react';
+import { Menu, X, LogOut, User, Languages, History } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import {
@@ -11,7 +11,7 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { User as SupabaseUser } from '@supabase/supabase-js';
 import { useLanguage, Language } from '@/contexts/LanguageContext';
-import logo from '@/assets/logo.png';
+import { BrandLogo } from '@/components/BrandLogo';
 
 const navLinks = [
   { href: '/analyze', labelKey: 'analyze' },
@@ -54,7 +54,7 @@ export function Header() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center">
-            <img src={logo} alt="OutputLens" className="h-7 md:h-8" />
+            <BrandLogo size="md" />
           </Link>
 
           {/* Desktop Navigation */}
@@ -102,6 +102,12 @@ export function Header() {
 
             {user ? (
               <>
+                <Button variant="ghost" size="sm" asChild>
+                  <Link to="/history" className="flex items-center gap-2">
+                    <History className="h-4 w-4" />
+                    History
+                  </Link>
+                </Button>
                 <Button variant="ghost" size="sm" asChild>
                   <Link to="/account" className="flex items-center gap-2">
                     <User className="h-4 w-4" />
@@ -171,6 +177,11 @@ export function Header() {
               <div className="flex flex-col gap-2 pt-4 border-t border-border">
                 {user ? (
                   <>
+                    <Button variant="ghost" size="sm" asChild>
+                      <Link to="/history" onClick={() => setMobileMenuOpen(false)}>
+                        History
+                      </Link>
+                    </Button>
                     <Button variant="ghost" size="sm" asChild>
                       <Link to="/account" onClick={() => setMobileMenuOpen(false)}>
                         Account
