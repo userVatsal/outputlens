@@ -13,7 +13,8 @@ import {
   Lock,
   ChevronRight,
   BookOpen,
-  Play
+  Play,
+  Sparkles
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -131,14 +132,14 @@ export default function Landing() {
               </Button>
               <Button size="lg" variant="outline" asChild className="px-8 py-6 text-lg">
                 <Link to="/auth?mode=signup">
-                  Get Started Free
+                  Analyze Your First Trade Free
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
             </div>
 
             <p className="text-sm text-muted-foreground">
-              ✓ 10 free analyses/month • ✓ No credit card required • ✓ Results in under 2 seconds
+              ✓ 10 free analyses/month • ✓ No credit card required • ✓ Avoid one bad trade and it pays for itself
             </p>
           </div>
 
@@ -280,13 +281,20 @@ export default function Landing() {
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4 font-brand">
               Stop Guessing. Start Quantifying.
             </h2>
-            <p className="text-muted-foreground mb-8 max-w-xl mx-auto">
+            <p className="text-muted-foreground mb-6 max-w-xl mx-auto">
               Your first analysis is free. See the probability distribution of your next trade in under 2 seconds.
             </p>
+            
+            {/* ROI Hook */}
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-bullish/10 border border-bullish/20 text-bullish text-sm font-medium mb-6">
+              <Sparkles className="h-4 w-4" />
+              Avoid one bad trade per month and OutputLens pays for itself
+            </div>
+            
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Button size="lg" asChild className="px-8 py-6 text-lg">
                 <Link to="/auth?mode=signup">
-                  Analyze Your First Trade
+                  Analyze Your First Trade Free
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
