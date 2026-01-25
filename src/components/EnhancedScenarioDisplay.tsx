@@ -23,15 +23,17 @@ function RiskBadge({ level }: { level: RiskLevel }) {
 }
 
 function ProbabilityBadge({ probability, label }: { probability: number; label: string }) {
-  const pct = (probability * 100).toFixed(0);
+  // Probability can be in percentage form (50) or decimal form (0.50)
+  const pct = probability > 1 ? probability : probability * 100;
+  const pctDecimal = probability > 1 ? probability / 100 : probability;
   const colors = 
-    probability >= 0.3 ? 'bg-primary/10 text-primary' :
-    probability >= 0.1 ? 'bg-muted text-foreground' :
+    pctDecimal >= 0.3 ? 'bg-primary/10 text-primary' :
+    pctDecimal >= 0.1 ? 'bg-muted text-foreground' :
     'bg-muted/50 text-muted-foreground';
   
   return (
     <span className={`px-2 py-0.5 rounded text-xs font-medium ${colors}`}>
-      {pct}% • {label}
+      {pct.toFixed(0)}% • {label}
     </span>
   );
 }
@@ -69,7 +71,9 @@ function ScenarioCategory({
   if (results.length === 0) return null;
 
   // Calculate combined probability for this category
-  const totalProbability = results.reduce((sum, s) => sum + s.probability, 0);
+  // Probability can be in percentage form (50) or decimal form (0.50)
+  const rawTotal = results.reduce((sum, s) => sum + s.probability, 0);
+  const totalProbability = rawTotal > 1 ? rawTotal : rawTotal * 100;
 
   return (
     <div className="glass-card overflow-hidden">
@@ -92,7 +96,7 @@ function ScenarioCategory({
         <div className="flex items-center gap-3">
           <div className="text-right">
             <div className="text-sm font-medium text-foreground">
-              {(totalProbability * 100).toFixed(0)}% combined
+              {totalProbability.toFixed(0)}% combined
             </div>
           </div>
           {isOpen ? (

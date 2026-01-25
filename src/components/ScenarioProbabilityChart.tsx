@@ -19,10 +19,14 @@ const COLORS = {
 function aggregateCategory(scenarios: DynamicScenario[]): { probability: number; avgReturn: number } {
   if (scenarios.length === 0) return { probability: 0, avgReturn: 0 };
   
-  const totalProbability = scenarios.reduce((sum, s) => sum + s.probability, 0);
+  const rawTotal = scenarios.reduce((sum, s) => sum + s.probability, 0);
+  // Normalize probability: if >1, it's already in percentage form
+  const totalProbability = rawTotal > 1 ? rawTotal : rawTotal * 100;
+  
   const weightedReturn = scenarios.reduce((sum, s) => {
     const avgReturn = (s.returnRangeMin + s.returnRangeMax) / 2;
-    return sum + avgReturn * s.probability;
+    const prob = s.probability > 1 ? s.probability : s.probability * 100;
+    return sum + avgReturn * prob;
   }, 0);
   
   return {
@@ -86,7 +90,9 @@ export function ScenarioProbabilityChart({ scenarios, currencySymbol }: Scenario
     }))
   , [chartData]);
 
-  const CustomTooltip = ({ active, payload }: any) => {
+  // Use a regular function to avoid forwardRef warning from Recharts
+  const renderTooltip = (props: { active?: boolean; payload?: any[] }) => {
+    const { active, payload } = props;
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
@@ -159,7 +165,7 @@ export function ScenarioProbabilityChart({ scenarios, currencySymbol }: Scenario
                     />
                   ))}
                 </Pie>
-                <Tooltip content={<CustomTooltip />} />
+                <Tooltip content={renderTooltip} />
                 <Legend content={<CustomLegend />} />
               </PieChart>
             </ResponsiveContainer>
@@ -194,7 +200,7 @@ export function ScenarioProbabilityChart({ scenarios, currencySymbol }: Scenario
                   width={70}
                   tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }}
                 />
-                <Tooltip content={<CustomTooltip />} />
+                <Tooltip content={renderTooltip} />
                 <Bar 
                   dataKey="Expected Return" 
                   radius={[0, 4, 4, 0]}
