@@ -107,6 +107,7 @@ function isIndex(symbol: string): boolean {
 
 /**
  * Classify an asset and determine the best data provider
+ * Note: Finnhub free tier only supports US stocks - non-US markets use Twelve Data
  */
 export function classifyAsset(symbol: string, market: string = 'US'): AssetClassification {
   const normalized = normalizeSymbol(symbol);
@@ -140,21 +141,65 @@ export function classifyAsset(symbol: string, market: string = 'US'): AssetClass
   
   // Check indices
   if (isIndex(symbol)) {
+    // Use Twelve Data for non-US indices, Finnhub for US
+    const provider = market === 'US' ? 'finnhub' : 'twelvedata';
     return {
       type: 'index',
-      provider: 'finnhub',
+      provider,
       normalizedSymbol: normalized,
       displaySymbol: display
     };
   }
   
-  // Default to stock via Finnhub
+  // For stocks: Finnhub free tier only supports US stocks
+  // Route UK, EU, Asia markets to Twelve Data
+  if (market !== 'US' && market !== 'Crypto') {
+    return {
+      type: 'stock',
+      provider: 'twelvedata',
+      normalizedSymbol: formatTwelveDataSymbol(symbol, market),
+      displaySymbol: display
+    };
+  }
+  
+  // Default to stock via Finnhub (US market)
   return {
     type: 'stock',
     provider: 'finnhub',
     normalizedSymbol: normalized,
     displaySymbol: display
   };
+}
+
+/**
+ * Format symbol for Twelve Data API based on market
+ */
+export function formatTwelveDataSymbol(symbol: string, market: string): string {
+  // Clean the symbol - remove common exchange suffixes first
+  let cleaned = symbol.toUpperCase().trim();
+  
+  // Remove common exchange suffixes that might be in the input
+  cleaned = cleaned.replace(/\.(L|LN|LSE)$/i, ''); // UK suffixes
+  cleaned = cleaned.replace(/\.(DE|XETR|F)$/i, ''); // German suffixes
+  cleaned = cleaned.replace(/\.(T|TYO|TSE)$/i, ''); // Tokyo suffixes
+  cleaned = cleaned.replace(/\.(PA|EUR)$/i, ''); // Paris/Euro suffixes
+  
+  // Remove any remaining non-alphanumeric characters
+  cleaned = cleaned.replace(/[^A-Z0-9]/g, '');
+  
+  switch (market) {
+    case 'UK':
+      // London Stock Exchange - Twelve Data uses symbol:exchange format
+      return `${cleaned}:LSE`;
+    case 'EU':
+      // European exchanges - try Frankfurt (XETR) by default
+      return `${cleaned}:XETR`;
+    case 'Asia':
+      // Default to Tokyo Stock Exchange  
+      return `${cleaned}:TSE`;
+    default:
+      return cleaned;
+  }
 }
 
 /**
@@ -215,16 +260,18 @@ export function getCoinGeckoId(symbol: string): string {
 
 /**
  * Format symbol for Finnhub API based on market
+ * Note: Finnhub free tier only supports US stocks
  */
 export function formatFinnhubSymbol(symbol: string, market: string): string {
   const normalized = normalizeSymbol(symbol);
   
+  // Finnhub free tier only supports US - other markets should use Twelve Data
+  // This function is kept for backwards compatibility
   switch (market) {
     case 'UK':
-      // London Stock Exchange suffix
+      // London Stock Exchange suffix (requires paid Finnhub plan)
       return `${normalized}.L`;
     case 'EU':
-      // For EU, we'll use the symbol as-is (user should specify exchange)
       return normalized;
     case 'US':
     default:

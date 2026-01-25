@@ -85,21 +85,26 @@ export function LivePriceIndicator({
     );
   }
 
-  // Error state
+  // Error state - provide helpful context for non-US markets
   if (error && !priceData) {
+    const isNonUSMarket = market !== 'US';
+    const errorMessage = isNonUSMarket 
+      ? `Live pricing for ${market} stocks requires a premium data plan. Enter price manually below.`
+      : `Price unavailable for ${symbol.toUpperCase()}`;
+    
     return (
       <div className="flex items-center justify-between gap-2 p-3 rounded-lg bg-muted/30 border border-border/50">
-        <div className="flex items-center gap-2">
-          <WifiOff className="h-4 w-4 text-muted-foreground" />
+        <div className="flex items-center gap-2 flex-1">
+          <WifiOff className="h-4 w-4 text-muted-foreground shrink-0" />
           <span className="text-sm text-muted-foreground">
-            Price unavailable for {symbol.toUpperCase()}
+            {errorMessage}
           </span>
         </div>
         <Button 
           variant="ghost" 
           size="sm" 
           onClick={handleRefresh}
-          className="h-7 px-2"
+          className="h-7 px-2 shrink-0"
         >
           <RefreshCw className="h-3 w-3" />
         </Button>

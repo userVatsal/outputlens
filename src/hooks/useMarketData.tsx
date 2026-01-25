@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { classifyAsset, getCoinGeckoId, formatFinnhubSymbol, type AssetClassification } from '@/lib/assetClassifier';
+import { classifyAsset, getCoinGeckoId, formatFinnhubSymbol, formatTwelveDataSymbol, type AssetClassification } from '@/lib/assetClassifier';
 import { Market } from '@/types/trade';
 
 export interface LiveMarketData {
@@ -46,6 +46,12 @@ export function useMarketData(): UseMarketDataReturn {
         apiSymbol = getCoinGeckoId(symbol);
       } else if (classification.provider === 'finnhub') {
         apiSymbol = formatFinnhubSymbol(symbol, market);
+      } else if (classification.provider === 'twelvedata') {
+        // For Twelve Data, use the already formatted symbol from classification
+        // or format it specifically for the market
+        apiSymbol = classification.normalizedSymbol.includes(':') 
+          ? classification.normalizedSymbol 
+          : formatTwelveDataSymbol(symbol, market);
       }
 
       console.log(`Fetching market data for ${symbol} via ${classification.provider} (${apiSymbol})`);
