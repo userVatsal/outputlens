@@ -38,6 +38,11 @@ export default function Demo() {
   const [showSignupPrompt, setShowSignupPrompt] = useState(false);
   const [signupPromptDismissed, setSignupPromptDismissed] = useState(false);
   const popularAssets = POPULAR_ASSETS.US;
+
+  // SEO: Set page-specific document title
+  useEffect(() => {
+    document.title = 'Live Demo - AI Trade Scenario Analysis | OutputLens';
+  }, []);
   
   // Show soft signup prompt after viewing results for a bit
   useEffect(() => {

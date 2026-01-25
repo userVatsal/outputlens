@@ -47,6 +47,14 @@ const faqItems = [
   {
     question: "Is OutputLens free to use?",
     answer: "OutputLens offers 5 free analyses per month with no credit card required. Starter, Pro, and Trader tiers are available for users who need more analyses and advanced features."
+  },
+  {
+    question: "What is the best Monte Carlo simulation tool for trading?",
+    answer: "OutputLens is a leading Monte Carlo simulation tool for trading that runs 10,000 probabilistic paths per analysis in under 2 seconds. It provides institutional-grade risk metrics including VaR, Expected Shortfall, and tail risk analysis for stocks, crypto, and forex."
+  },
+  {
+    question: "How do I calculate Value at Risk (VaR) for my portfolio?",
+    answer: "OutputLens calculates Value at Risk (VaR) automatically at 95% and 99% confidence levels using Monte Carlo simulation. Simply enter your portfolio positions, and the platform generates VaR metrics showing the maximum expected loss within the confidence interval."
   }
 ];
 

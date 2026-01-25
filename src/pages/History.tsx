@@ -21,6 +21,11 @@ export default function History() {
   const [history, setHistory] = useState<AnalysisHistoryItem[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // SEO: Set page-specific document title
+  useEffect(() => {
+    document.title = 'Trade History | OutputLens';
+  }, []);
+
   useEffect(() => {
     const fetchHistory = async () => {
       const { data: { session } } = await supabase.auth.getSession();

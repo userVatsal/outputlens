@@ -56,6 +56,11 @@ export default function Portfolio() {
   const [loading, setLoading] = useState(true);
   const [showPaywall, setShowPaywall] = useState(false);
 
+  // SEO: Set page-specific document title
+  useEffect(() => {
+    document.title = 'Portfolio Analysis - Multi-Asset Risk Assessment | OutputLens';
+  }, []);
+
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {

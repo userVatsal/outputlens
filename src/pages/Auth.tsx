@@ -76,6 +76,13 @@ export default function Auth() {
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const pendingSubmitRef = useRef(false);
 
+  // SEO: Set page-specific document title
+  useEffect(() => {
+    document.title = mode === 'signup' 
+      ? 'Sign Up - OutputLens Risk Analysis Platform' 
+      : 'Sign In - OutputLens Risk Analysis Platform';
+  }, [mode]);
+
   useEffect(() => {
     // Check if already logged in
     supabase.auth.getSession().then(({ data: { session } }) => {

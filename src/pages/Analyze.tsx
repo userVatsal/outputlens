@@ -30,6 +30,11 @@ export default function Analyze() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [welcomeDismissed, setWelcomeDismissed] = useState(false);
 
+  // SEO: Set page-specific document title
+  useEffect(() => {
+    document.title = 'Analyze Trade - Monte Carlo Risk Simulation | OutputLens';
+  }, []);
+
   useEffect(() => {
     // Check auth state
     const { data: { subscription } } = supabase.auth.onAuthStateChange(

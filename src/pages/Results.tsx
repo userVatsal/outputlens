@@ -39,6 +39,11 @@ const Results = () => {
   
   const { analysis, clearAnalysis, isHistorical, loadHistoricalAnalysis, isLoading } = useTrade();
 
+  // SEO: Set page-specific document title
+  useEffect(() => {
+    document.title = 'Analysis Results | OutputLens';
+  }, []);
+
   // Load historical analysis if historyId is present
   useEffect(() => {
     if (historyId && !analysis) {

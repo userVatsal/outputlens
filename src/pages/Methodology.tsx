@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Layout } from '@/components/layout/Layout';
 import { 
@@ -80,6 +81,11 @@ const dataPoints = [
 ];
 
 export default function Methodology() {
+  // SEO: Set page-specific document title
+  useEffect(() => {
+    document.title = 'Methodology - How Monte Carlo Simulation Works | OutputLens';
+  }, []);
+
   return (
     <Layout>
       {/* Hero Section */}

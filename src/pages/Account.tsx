@@ -37,6 +37,11 @@ export default function Account() {
   
   const { usage, loading: usageLoading } = useUsage();
 
+  // SEO: Set page-specific document title
+  useEffect(() => {
+    document.title = 'Account Settings | OutputLens';
+  }, []);
+
   useEffect(() => {
     // Check auth
     supabase.auth.getSession().then(({ data: { session } }) => {
