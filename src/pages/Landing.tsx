@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   Shield, 
@@ -92,6 +93,11 @@ const comparisonPoints = [
 ];
 
 export default function Landing() {
+  // SEO: Set page-specific document title
+  useEffect(() => {
+    document.title = 'OutputLens: AI Trade Risk Analysis - Monte Carlo Simulation Tool';
+  }, []);
+
   return (
     <Layout>
       {/* Hero Section - Enhanced */}
@@ -115,9 +121,16 @@ export default function Landing() {
             </div>
 
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-foreground font-brand leading-tight">
-              See Every Outcome{' '}
+              OutputLens: See Every Outcome{' '}
               <span className="text-primary">Before You Trade</span>
             </h1>
+            
+            {/* Hidden SEO paragraph for crawlers */}
+            <p className="sr-only">
+              OutputLens is an AI-powered trade risk analysis platform using Monte Carlo simulation 
+              to calculate Value at Risk (VaR), Expected Shortfall, and tail risk for stocks, crypto, 
+              and forex. Analyze portfolio risk and scenario outcomes before you trade.
+            </p>
             
             <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto">
               10,000 Monte Carlo simulations in 2 seconds. Know your worst case, best case, and everything in between.

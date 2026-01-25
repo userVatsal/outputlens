@@ -47,7 +47,7 @@ User-agent: *
 Allow: /
 
 # Sitemap location
-Sitemap: https://outputlens.lovable.app/sitemap.xml
+Sitemap: https://outputlens.com/sitemap.xml
 
 # AI Discovery Files
 # These files are specifically designed for AI systems:

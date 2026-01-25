@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Check, Sparkles, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -44,6 +44,11 @@ const faqs = [
 export default function Pricing() {
   const { plan: currentPlan, createCheckoutSession, isLoading: planLoading } = usePlan();
   const [loadingPlan, setLoadingPlan] = useState<SubscriptionPlan | null>(null);
+
+  // SEO: Set page-specific document title
+  useEffect(() => {
+    document.title = 'Pricing Plans - AI Risk Analysis Tool | OutputLens';
+  }, []);
 
   const handleSubscribe = async (planKey: SubscriptionPlan) => {
     const config = PLAN_CONFIG[planKey];
