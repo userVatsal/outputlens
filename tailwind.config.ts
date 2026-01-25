@@ -75,6 +75,10 @@ export default {
         brand: {
           blue: "hsl(var(--brand-blue))",
         },
+        logo: {
+          navy: "hsl(var(--logo-navy))",
+          blue: "hsl(var(--logo-blue))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",

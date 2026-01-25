@@ -1,7 +1,8 @@
 import { useEffect, Suspense, lazy } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, TrendingUp, TrendingDown, Clock, Globe, Wifi, WifiOff, Loader2 } from 'lucide-react';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
+import { ArrowLeft, TrendingUp, TrendingDown, Clock, Globe, Wifi, WifiOff, History, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { EnhancedQuantMetricsCard } from '@/components/EnhancedQuantMetricsCard';
 import { EnhancedScenarioDisplay } from '@/components/EnhancedScenarioDisplay';
 import { EnhancedRiskSummary } from '@/components/EnhancedRiskSummary';
@@ -33,13 +34,40 @@ function SectionSkeleton() {
 
 const Results = () => {
   const navigate = useNavigate();
-  const { analysis, clearAnalysis } = useTrade();
+  const [searchParams] = useSearchParams();
+  const historyId = searchParams.get('history');
+  
+  const { analysis, clearAnalysis, isHistorical, loadHistoricalAnalysis, isLoading } = useTrade();
 
+  // Load historical analysis if historyId is present
   useEffect(() => {
-    if (!analysis) {
+    if (historyId && !analysis) {
+      loadHistoricalAnalysis(historyId).then(success => {
+        if (!success) {
+          navigate('/history');
+        }
+      });
+    } else if (!historyId && !analysis) {
       navigate('/analyze');
     }
-  }, [analysis, navigate]);
+  }, [historyId, analysis, navigate, loadHistoricalAnalysis]);
+
+  if (isLoading) {
+    return (
+      <Layout hideFooter>
+        <div className="section-container py-6">
+          <div className="max-w-5xl mx-auto">
+            <div className="flex items-center justify-center py-20">
+              <div className="text-center">
+                <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent mx-auto mb-4" />
+                <p className="text-muted-foreground">Loading analysis...</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
 
   if (!analysis) {
     return null;
@@ -60,6 +88,11 @@ const Results = () => {
     navigate('/analyze');
   };
 
+  const handleBackToHistory = () => {
+    clearAnalysis();
+    navigate('/history');
+  };
+
   return (
     <Layout hideFooter>
       <div className="section-container py-6">
@@ -69,15 +102,28 @@ const Results = () => {
             <Button
               variant="ghost"
               size="icon"
-              onClick={handleNewAnalysis}
+              onClick={isHistorical ? handleBackToHistory : handleNewAnalysis}
               className="flex-shrink-0"
             >
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <div className="flex-1">
-              <h1 className="text-2xl font-bold text-foreground font-brand">Trade Analysis Results</h1>
+              <div className="flex items-center gap-3">
+                <h1 className="text-2xl font-bold text-foreground font-brand">Trade Analysis Results</h1>
+                {isHistorical && (
+                  <Badge variant="secondary" className="flex items-center gap-1">
+                    <Eye className="h-3 w-3" />
+                    View Only
+                  </Badge>
+                )}
+              </div>
               <p className="text-sm text-muted-foreground">
                 Monte Carlo simulation with {simulation.paths.toLocaleString()} paths
+                {isHistorical && analysis.analyzedAt && (
+                  <span className="ml-2 text-muted-foreground/70">
+                    • Analyzed {new Date(analysis.analyzedAt).toLocaleDateString()}
+                  </span>
+                )}
               </p>
             </div>
             {/* Data quality indicator */}
@@ -245,11 +291,23 @@ const Results = () => {
             </Suspense>
           </div>
 
-          {/* New Analysis Button */}
-          <div className="text-center animate-fade-in" style={{ animationDelay: '0.55s' }}>
-            <Button onClick={handleNewAnalysis} className="px-8">
-              Analyze Another Trade
-            </Button>
+          {/* Action Buttons */}
+          <div className="text-center animate-fade-in flex items-center justify-center gap-4" style={{ animationDelay: '0.55s' }}>
+            {isHistorical ? (
+              <>
+                <Button variant="outline" onClick={handleBackToHistory} className="px-6">
+                  <History className="h-4 w-4 mr-2" />
+                  Back to History
+                </Button>
+                <Button onClick={handleNewAnalysis} className="px-8">
+                  Analyze New Trade
+                </Button>
+              </>
+            ) : (
+              <Button onClick={handleNewAnalysis} className="px-8">
+                Analyze Another Trade
+              </Button>
+            )}
           </div>
 
           {/* Disclaimer */}
