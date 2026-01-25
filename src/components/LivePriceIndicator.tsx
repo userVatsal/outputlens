@@ -1,8 +1,19 @@
 import { useState, useEffect, useCallback } from 'react';
-import { TrendingUp, TrendingDown, Loader2, Wifi, WifiOff, RefreshCw } from 'lucide-react';
+import { TrendingUp, TrendingDown, Loader2, Wifi, WifiOff, RefreshCw, DollarSign } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useMarketData, LiveMarketData } from '@/hooks/useMarketData';
 import { Market } from '@/types/trade';
+
+// Check if error indicates paid tier is required
+const checkPaidTierError = (errorMsg: string): boolean => {
+  const lowerError = errorMsg.toLowerCase();
+  return lowerError.includes('paid_tier_required') || 
+         lowerError.includes('grow plan') || 
+         lowerError.includes('grow (grow plan)') ||
+         lowerError.includes('upgrade') ||
+         lowerError.includes('premium') ||
+         lowerError.includes('consider upgrading');
+};
 
 interface LivePriceIndicatorProps {
   symbol: string;
@@ -85,19 +96,40 @@ export function LivePriceIndicator({
     );
   }
 
-  // Error state - provide helpful context for non-US markets
+  // Error state - check for paid tier requirement
   if (error && !priceData) {
+    const isPaidRequired = checkPaidTierError(error);
     const isNonUSMarket = market !== 'US';
-    const errorMessage = isNonUSMarket 
-      ? `Live pricing for ${market} stocks requires a premium data plan. Enter price manually below.`
-      : `Price unavailable for ${symbol.toUpperCase()}`;
     
+    // Show premium data message for paid tier errors or non-US markets
+    if (isPaidRequired || isNonUSMarket) {
+      return (
+        <div className="p-4 rounded-lg bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20">
+          <div className="flex items-start gap-3">
+            <div className="p-2 rounded-full bg-amber-500/20 shrink-0">
+              <DollarSign className="h-4 w-4 text-amber-500" />
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-medium text-foreground mb-1">
+                Premium Data Required
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Live pricing for {market} market symbols requires a premium data subscription. 
+                Enter your entry price manually in the form below.
+              </p>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    
+    // Generic error for US market failures
     return (
       <div className="flex items-center justify-between gap-2 p-3 rounded-lg bg-muted/30 border border-border/50">
         <div className="flex items-center gap-2 flex-1">
           <WifiOff className="h-4 w-4 text-muted-foreground shrink-0" />
           <span className="text-sm text-muted-foreground">
-            {errorMessage}
+            Price unavailable for {symbol.toUpperCase()}
           </span>
         </div>
         <Button 

@@ -265,6 +265,11 @@ async function fetchTwelveDataQuote(symbol: string, apiKey: string): Promise<Mar
   const data = await response.json();
   
   if (data.status === 'error' || data.code) {
+    // Check if this is a paid-tier-only symbol error
+    const message = data.message || '';
+    if (message.includes('Grow') || message.includes('upgrade') || message.includes('plan')) {
+      throw new Error('PAID_TIER_REQUIRED: This symbol requires a premium data subscription');
+    }
     throw new Error(data.message || 'Forex data not available');
   }
   
