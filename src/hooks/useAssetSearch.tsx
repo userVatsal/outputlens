@@ -79,9 +79,11 @@ export function useAssetSearch(
 
       if (data?.results && Array.isArray(data.results)) {
         setResults(data.results);
+        setError(null); // Clear any previous error on success
         setIsOpen(data.results.length > 0);
       } else {
         setResults([]);
+        setError(null); // Clear error even if no results
       }
     } catch (err: any) {
       if (err?.name === 'AbortError') {

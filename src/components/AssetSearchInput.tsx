@@ -263,8 +263,8 @@ export function AssetSearchInput({
         </div>
       )}
 
-      {/* Error Message */}
-      {error && (
+      {/* Error Message - only show when there are no results */}
+      {error && results.length === 0 && !isSearching && (
         <p className="text-xs text-destructive flex items-center gap-1">
           <AlertCircle className="h-3 w-3" />
           {error}
