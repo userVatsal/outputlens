@@ -1,3 +1,4 @@
+import { forwardRef } from 'react';
 import { Sparkles, TrendingUp } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
@@ -9,7 +10,8 @@ interface UsageIndicatorProps {
   usage: UsageData;
 }
 
-export function UsageIndicator({ usage }: UsageIndicatorProps) {
+export const UsageIndicator = forwardRef<HTMLDivElement, UsageIndicatorProps>(
+  function UsageIndicator({ usage }, ref) {
   const planConfig = PLAN_CONFIG[usage.plan];
   const isPaid = usage.plan !== 'free';
   const percentage = (usage.analysisCount / usage.limit) * 100;
@@ -18,7 +20,7 @@ export function UsageIndicator({ usage }: UsageIndicatorProps) {
   const isAtLimit = remaining <= 0;
 
   return (
-    <div className="glass-card p-4 space-y-3">
+    <div ref={ref} className="glass-card p-4 space-y-3">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           {isPaid ? (
@@ -70,4 +72,4 @@ export function UsageIndicator({ usage }: UsageIndicatorProps) {
       </div>
     </div>
   );
-}
+});

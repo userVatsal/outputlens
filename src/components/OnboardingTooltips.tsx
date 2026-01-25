@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, forwardRef } from 'react';
 import { X, ChevronRight, ChevronLeft, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -47,7 +47,8 @@ interface OnboardingTooltipsProps {
   isVisible: boolean;
 }
 
-export function OnboardingTooltips({ onComplete, isVisible }: OnboardingTooltipsProps) {
+export const OnboardingTooltips = forwardRef<HTMLDivElement, OnboardingTooltipsProps>(
+  function OnboardingTooltips({ onComplete, isVisible }, ref) {
   const [currentStep, setCurrentStep] = useState(0);
   const [dismissed, setDismissed] = useState(false);
 
@@ -89,7 +90,7 @@ export function OnboardingTooltips({ onComplete, isVisible }: OnboardingTooltips
   };
 
   return (
-    <>
+    <div ref={ref}>
       {/* Backdrop */}
       <div 
         className="fixed inset-0 bg-background/60 backdrop-blur-sm z-40"
@@ -167,9 +168,9 @@ export function OnboardingTooltips({ onComplete, isVisible }: OnboardingTooltips
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
-}
+});
 
 // Welcome card for first-time users
 interface WelcomeCardProps {
@@ -177,9 +178,10 @@ interface WelcomeCardProps {
   onDismiss: () => void;
 }
 
-export function WelcomeCard({ assetFromUrl, onDismiss }: WelcomeCardProps) {
+export const WelcomeCard = forwardRef<HTMLDivElement, WelcomeCardProps>(
+  function WelcomeCard({ assetFromUrl, onDismiss }, ref) {
   return (
-    <div className="glass-card p-6 mb-6 border-primary/30 animate-fade-in">
+    <div ref={ref} className="glass-card p-6 mb-6 border-primary/30 animate-fade-in">
       <div className="flex items-start justify-between">
         <div className="flex items-start gap-4">
           <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center shrink-0">
@@ -208,4 +210,4 @@ export function WelcomeCard({ assetFromUrl, onDismiss }: WelcomeCardProps) {
       </div>
     </div>
   );
-}
+});
