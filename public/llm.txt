@@ -110,7 +110,7 @@ technical:
 
 # Pricing
 pricing:
-  free_tier: "10 free analyses per month"
+  free_tier: "5 free analyses per month"
   paid_plans: "Pro and Business tiers available"
   trial: "No credit card required to start"
 

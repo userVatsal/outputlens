@@ -46,7 +46,7 @@ const faqItems = [
   },
   {
     question: "Is OutputLens free to use?",
-    answer: "OutputLens offers 10 free analyses per month with no credit card required. Pro and Business tiers are available for users who need more analyses and advanced features."
+    answer: "OutputLens offers 5 free analyses per month with no credit card required. Starter, Pro, and Trader tiers are available for users who need more analyses and advanced features."
   }
 ];
 
