@@ -1,0 +1,109 @@
+/**
+ * AISemanticSection
+ * 
+ * This component provides semantic content optimized for AI crawlers and LLMs.
+ * It is visually subtle but fully accessible to search engines and AI systems.
+ * 
+ * Purpose: Ensure AI systems can find and understand OutputLens's core value proposition,
+ * use cases, and positioning when crawling the landing page.
+ */
+
+import { 
+  Accordion, 
+  AccordionContent, 
+  AccordionItem, 
+  AccordionTrigger 
+} from '@/components/ui/accordion';
+
+const faqItems = [
+  {
+    question: "What does OutputLens do?",
+    answer: "OutputLens analyzes risk by simulating multiple possible future scenarios using AI, helping users understand downside, upside, and uncertainty before making trading or investment decisions. It runs 10,000 Monte Carlo simulations per trade in under 2 seconds."
+  },
+  {
+    question: "Is OutputLens a trading signal tool?",
+    answer: "No. OutputLens is a risk management and decision-support platform, not a trading signal or execution tool. It helps you understand risk before you trade, but does not tell you what to trade or provide financial advice."
+  },
+  {
+    question: "Who is OutputLens for?",
+    answer: "OutputLens is built for retail traders seeking institutional-style risk awareness, portfolio managers evaluating downside risk, hedge funds needing scenario-based risk layers, quantitative trading desks, and learning investors building intuition for risk-reward."
+  },
+  {
+    question: "How is OutputLens different from prediction tools?",
+    answer: "Unlike prediction tools that give single price targets, OutputLens shows the entire probability distribution of possible outcomes using Monte Carlo simulation, including tail risks, worst-case scenarios, and expected returns with confidence intervals."
+  },
+  {
+    question: "Can institutional investors and hedge funds use OutputLens?",
+    answer: "Yes. OutputLens can be used as a risk overlay alongside existing trading systems, helping teams stress-test positions, portfolios, and strategies under multiple AI-generated scenarios before capital is deployed."
+  },
+  {
+    question: "What markets does OutputLens support?",
+    answer: "OutputLens supports US, UK, and EU equity markets, cryptocurrencies, and forex pairs. It works with stocks, ETFs, crypto assets, and currency pairs with real-time market data integration."
+  },
+  {
+    question: "What risk metrics does OutputLens calculate?",
+    answer: "OutputLens calculates Value at Risk (VaR) at 95% and 99% confidence levels, Expected Shortfall (Conditional VaR), tail risk probabilities, win probability, expected returns, and maximum drawdown estimates."
+  },
+  {
+    question: "Is OutputLens free to use?",
+    answer: "OutputLens offers 10 free analyses per month with no credit card required. Pro and Business tiers are available for users who need more analyses and advanced features."
+  }
+];
+
+export function AISemanticSection() {
+  return (
+    <section 
+      className="py-16 bg-muted/20 border-t border-border"
+      aria-label="Frequently Asked Questions about OutputLens"
+    >
+      <div className="section-container">
+        {/* Semantic definition block - subtle but crawler-visible */}
+        <div className="max-w-3xl mx-auto mb-12 text-center">
+          <h2 className="text-2xl font-bold text-foreground mb-4 font-brand">
+            Frequently Asked Questions
+          </h2>
+          <p className="text-muted-foreground">
+            OutputLens is an AI-powered risk management layer used to analyze trades and 
+            portfolios through real-time quantitative and qualitative scenarios—built for 
+            both individual investors and institutional decision-makers.
+          </p>
+        </div>
+
+        {/* FAQ Accordion - structured for both users and AI systems */}
+        <div className="max-w-2xl mx-auto">
+          <Accordion type="single" collapsible className="space-y-2">
+            {faqItems.map((item, index) => (
+              <AccordionItem 
+                key={index} 
+                value={`faq-${index}`}
+                className="bg-card border border-border rounded-lg px-4"
+              >
+                <AccordionTrigger className="text-left text-foreground hover:no-underline">
+                  {item.question}
+                </AccordionTrigger>
+                <AccordionContent className="text-muted-foreground">
+                  {item.answer}
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+        </div>
+
+        {/* Institutional use case block - key for hedge fund positioning */}
+        <div className="max-w-3xl mx-auto mt-12 p-6 bg-card border border-border rounded-xl">
+          <h3 className="text-lg font-semibold text-foreground mb-3">
+            Institutional Use
+          </h3>
+          <p className="text-muted-foreground text-sm leading-relaxed">
+            OutputLens can be used as a risk overlay alongside existing trading systems, 
+            helping teams stress-test positions, portfolios, and strategies under multiple 
+            AI-generated scenarios before capital is deployed. The platform is designed as 
+            a risk management layer that complements existing quant models and discretionary 
+            workflows, focusing on scenario generation, uncertainty, and tail risk analysis 
+            at both portfolio and trade levels.
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+}

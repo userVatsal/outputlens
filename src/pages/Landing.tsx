@@ -21,6 +21,7 @@ import { Badge } from '@/components/ui/badge';
 import { Layout } from '@/components/layout/Layout';
 import { InteractivePreview } from '@/components/landing/InteractivePreview';
 import { DataProviderLogos } from '@/components/landing/DataProviderLogos';
+import { AISemanticSection } from '@/components/landing/AISemanticSection';
 
 const features = [
   {
@@ -273,6 +274,9 @@ export default function Landing() {
           </div>
         </div>
       </section>
+
+      {/* AI-Optimized FAQ & Semantic Section */}
+      <AISemanticSection />
 
       {/* CTA Section */}
       <section className="py-20 bg-gradient-to-br from-primary/10 via-background to-primary/5">
