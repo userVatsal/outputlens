@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { 
   ArrowRight, 
   Play,
@@ -10,29 +10,49 @@ import {
   AlertTriangle,
   Shield,
   Sparkles,
-  ChevronRight
+  ChevronRight,
+  Search
 } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
+import { Input } from '@/components/ui/input';
 import { EnhancedQuantMetricsCard } from '@/components/EnhancedQuantMetricsCard';
 import { EnhancedRiskSummary } from '@/components/EnhancedRiskSummary';
 import { ReturnDistributionChart } from '@/components/ReturnDistributionChart';
 import { ScenarioProbabilityChart } from '@/components/ScenarioProbabilityChart';
 import { EnhancedScenarioDisplay } from '@/components/EnhancedScenarioDisplay';
 import { DEMO_ANALYSIS } from '@/lib/demoData';
+import { POPULAR_ASSETS } from '@/lib/popularAssets';
 
 export default function Demo() {
   const analysis = DEMO_ANALYSIS;
+  const navigate = useNavigate();
   const [showingResults, setShowingResults] = useState(false);
+  const [tryYourOwnQuery, setTryYourOwnQuery] = useState('');
+  const popularAssets = POPULAR_ASSETS.US;
   
   // Simulate analysis loading for engagement
   useEffect(() => {
     const timer = setTimeout(() => setShowingResults(true), 500);
     return () => clearTimeout(timer);
   }, []);
+
+  // Handle "try your own" search
+  const handleTryYourOwn = () => {
+    if (tryYourOwnQuery.trim()) {
+      navigate(`/auth?mode=signup&asset=${encodeURIComponent(tryYourOwnQuery.trim())}`);
+    } else {
+      navigate('/auth?mode=signup');
+    }
+  };
+
+  // Handle popular asset click in "try your own"
+  const handlePopularClick = (symbol: string) => {
+    navigate(`/auth?mode=signup&asset=${encodeURIComponent(symbol)}`);
+  };
 
   return (
     <Layout>
@@ -184,6 +204,52 @@ export default function Demo() {
                     <div className="whitespace-pre-wrap text-muted-foreground leading-relaxed">
                       {analysis.explanation}
                     </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </section>
+
+            {/* Try Your Own Section */}
+            <section className="py-6">
+              <Card className="border-dashed border-2 border-border hover:border-primary/30 transition-colors">
+                <CardContent className="py-6">
+                  <div className="text-center space-y-4">
+                    <h3 className="text-lg font-semibold text-foreground">
+                      Want to try your own?
+                    </h3>
+                    <div className="flex flex-col sm:flex-row items-center justify-center gap-3 max-w-md mx-auto">
+                      <div className="relative flex-1 w-full">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          type="text"
+                          placeholder="Search for Apple, Tesla, Bitcoin..."
+                          value={tryYourOwnQuery}
+                          onChange={(e) => setTryYourOwnQuery(e.target.value)}
+                          onKeyDown={(e) => e.key === 'Enter' && handleTryYourOwn()}
+                          className="pl-10"
+                        />
+                      </div>
+                      <Button onClick={handleTryYourOwn} className="shrink-0">
+                        Analyze
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </Button>
+                    </div>
+                    <div className="flex flex-wrap items-center justify-center gap-2">
+                      <span className="text-xs text-muted-foreground">Or try:</span>
+                      {popularAssets.slice(0, 4).map((asset) => (
+                        <button
+                          key={asset.symbol}
+                          onClick={() => handlePopularClick(asset.symbol)}
+                          className="inline-flex items-center gap-1 px-2 py-1 text-xs rounded-full border border-border/50 bg-muted/30 hover:bg-accent transition-colors"
+                        >
+                          <span>{asset.icon}</span>
+                          <span>{asset.name}</span>
+                        </button>
+                      ))}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Sign up to see the full analysis for any asset.
+                    </p>
                   </div>
                 </CardContent>
               </Card>

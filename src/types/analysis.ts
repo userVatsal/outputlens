@@ -14,11 +14,14 @@ import { DynamicScenario, DynamicScenarioSet, SimulationResult } from '@/lib/sce
 import { AdvancedRiskMetrics } from '@/lib/riskMetrics';
 
 /**
- * Enhanced trade input with confidence and assumptions
+ * Enhanced trade input with confidence, assumptions, and precise timing
  */
 export interface EnhancedTradeInput extends TradeInput {
   confidence?: number;        // 1-10 scale, default 5
   assumptions?: string;       // Free-text qualitative notes
+  assetName?: string;         // Human-readable company name
+  entryDateTime?: Date;       // Precise entry timestamp (includes time)
+  exitDateTime?: Date;        // Precise exit timestamp (includes time)
 }
 
 /**
