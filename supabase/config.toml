@@ -50,3 +50,12 @@ verify_jwt = false
 
 [functions.update-profile]
 verify_jwt = false
+
+[functions.behavior-insights]
+verify_jwt = false
+
+[functions.sentinel-ai]
+verify_jwt = false
+
+[functions.search-symbols]
+verify_jwt = false

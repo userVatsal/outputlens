@@ -188,6 +188,105 @@ export type Database = {
         }
         Relationships: []
       }
+      behavior_events: {
+        Row: {
+          created_at: string
+          event_data: Json
+          event_type: string
+          id: string
+          page_type: string | null
+          page_url: string
+          session_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_data?: Json
+          event_type: string
+          id?: string
+          page_type?: string | null
+          page_url: string
+          session_id: string
+        }
+        Update: {
+          created_at?: string
+          event_data?: Json
+          event_type?: string
+          id?: string
+          page_type?: string | null
+          page_url?: string
+          session_id?: string
+        }
+        Relationships: []
+      }
+      behavior_sessions: {
+        Row: {
+          converted: boolean | null
+          ended_at: string | null
+          entry_referrer: string | null
+          entry_url: string
+          exit_page: string | null
+          exit_reason: string | null
+          id: string
+          screen_height: number | null
+          screen_width: number | null
+          started_at: string
+          total_pages: number | null
+          total_time_seconds: number | null
+          user_agent: string | null
+          user_id: string | null
+          utm_campaign: string | null
+          utm_content: string | null
+          utm_medium: string | null
+          utm_source: string | null
+          utm_term: string | null
+          visitor_id: string
+        }
+        Insert: {
+          converted?: boolean | null
+          ended_at?: string | null
+          entry_referrer?: string | null
+          entry_url: string
+          exit_page?: string | null
+          exit_reason?: string | null
+          id?: string
+          screen_height?: number | null
+          screen_width?: number | null
+          started_at?: string
+          total_pages?: number | null
+          total_time_seconds?: number | null
+          user_agent?: string | null
+          user_id?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
+          visitor_id: string
+        }
+        Update: {
+          converted?: boolean | null
+          ended_at?: string | null
+          entry_referrer?: string | null
+          entry_url?: string
+          exit_page?: string | null
+          exit_reason?: string | null
+          id?: string
+          screen_height?: number | null
+          screen_width?: number | null
+          started_at?: string
+          total_pages?: number | null
+          total_time_seconds?: number | null
+          user_agent?: string | null
+          user_id?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
+          visitor_id?: string
+        }
+        Relationships: []
+      }
       captcha_challenges: {
         Row: {
           action: string
@@ -235,6 +334,74 @@ export type Database = {
           verified_at?: string | null
         }
         Relationships: []
+      }
+      cursor_heatmap: {
+        Row: {
+          id: string
+          page_url: string
+          positions: Json
+          recorded_at: string
+          session_id: string
+          viewport_height: number | null
+          viewport_width: number | null
+        }
+        Insert: {
+          id?: string
+          page_url: string
+          positions?: Json
+          recorded_at?: string
+          session_id: string
+          viewport_height?: number | null
+          viewport_width?: number | null
+        }
+        Update: {
+          id?: string
+          page_url?: string
+          positions?: Json
+          recorded_at?: string
+          session_id?: string
+          viewport_height?: number | null
+          viewport_width?: number | null
+        }
+        Relationships: []
+      }
+      exit_survey_responses: {
+        Row: {
+          additional_feedback: string | null
+          created_at: string
+          exit_page: string
+          id: string
+          looking_for: string | null
+          reason: string | null
+          session_id: string | null
+        }
+        Insert: {
+          additional_feedback?: string | null
+          created_at?: string
+          exit_page: string
+          id?: string
+          looking_for?: string | null
+          reason?: string | null
+          session_id?: string | null
+        }
+        Update: {
+          additional_feedback?: string | null
+          created_at?: string
+          exit_page?: string
+          id?: string
+          looking_for?: string | null
+          reason?: string | null
+          session_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exit_survey_responses_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "behavior_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       ip_reputation: {
         Row: {

@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { TradeProvider } from "@/hooks/useTrade";
 import { LanguageProvider } from "@/contexts/LanguageContext";
+import { TrackingProvider } from "@/components/tracking/TrackingProvider";
 import Landing from "./pages/Landing";
 import Auth from "./pages/Auth";
 import Analyze from "./pages/Analyze";
@@ -26,25 +27,27 @@ const App = () => (
     <LanguageProvider>
       <TooltipProvider>
         <TradeProvider>
-          <Toaster />
-          <Sonner />
           <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Landing />} />
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/analyze" element={<Analyze />} />
-              <Route path="/results" element={<Results />} />
-              <Route path="/portfolio" element={<Portfolio />} />
-              <Route path="/history" element={<History />} />
-              <Route path="/methodology" element={<Methodology />} />
-              <Route path="/pricing" element={<Pricing />} />
-              <Route path="/privacy" element={<Privacy />} />
-              <Route path="/terms" element={<Terms />} />
-              <Route path="/account" element={<Account />} />
-              <Route path="/demo" element={<Demo />} />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+            <TrackingProvider>
+              <Toaster />
+              <Sonner />
+              <Routes>
+                <Route path="/" element={<Landing />} />
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/analyze" element={<Analyze />} />
+                <Route path="/results" element={<Results />} />
+                <Route path="/portfolio" element={<Portfolio />} />
+                <Route path="/history" element={<History />} />
+                <Route path="/methodology" element={<Methodology />} />
+                <Route path="/pricing" element={<Pricing />} />
+                <Route path="/privacy" element={<Privacy />} />
+                <Route path="/terms" element={<Terms />} />
+                <Route path="/account" element={<Account />} />
+                <Route path="/demo" element={<Demo />} />
+                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </TrackingProvider>
           </BrowserRouter>
         </TradeProvider>
       </TooltipProvider>
