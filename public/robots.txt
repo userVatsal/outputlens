@@ -1,3 +1,7 @@
+# OutputLens Robots.txt
+# Last Updated: 2025-01-25
+
+# Standard Search Engine Crawlers
 User-agent: Googlebot
 Allow: /
 
@@ -10,5 +14,43 @@ Allow: /
 User-agent: facebookexternalhit
 Allow: /
 
+# AI and LLM Crawlers
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: Anthropic-AI
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Applebot
+Allow: /
+
+User-agent: Amazonbot
+Allow: /
+
+User-agent: cohere-ai
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+# Default rule for all other crawlers
 User-agent: *
 Allow: /
+
+# Sitemap location
+Sitemap: https://outputlens.lovable.app/sitemap.xml
+
+# AI Discovery Files
+# These files are specifically designed for AI systems:
+# /ai.txt - YAML-format AI reference file
+# /llm.txt - Duplicate for alternative lookups
+# /.well-known/ai.json - Structured JSON for programmatic access
