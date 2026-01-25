@@ -140,7 +140,7 @@ export default function Landing() {
             </div>
 
             <p className="text-sm text-muted-foreground">
-              ✓ 10 free analyses/month • ✓ No credit card required • ✓ Avoid one bad trade and it pays for itself
+              ✓ 5 free analyses/month • ✓ No credit card required • ✓ Avoid one bad trade and it pays for itself
             </p>
           </div>
 
