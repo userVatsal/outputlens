@@ -32,12 +32,59 @@ export default function Demo() {
   const navigate = useNavigate();
   const [showingResults, setShowingResults] = useState(false);
   const [tryYourOwnQuery, setTryYourOwnQuery] = useState('');
+  const [loadingProgress, setLoadingProgress] = useState(0);
+  const [loadingPhase, setLoadingPhase] = useState<'fetching' | 'simulating' | 'generating'>('fetching');
+  const [simulationCount, setSimulationCount] = useState(0);
   const popularAssets = POPULAR_ASSETS.US;
   
-  // Simulate analysis loading for engagement
+  // Simulate analysis loading with phases for engagement
   useEffect(() => {
-    const timer = setTimeout(() => setShowingResults(true), 500);
-    return () => clearTimeout(timer);
+    // Phase 1: Fetching market data (0-30%)
+    const phase1 = setTimeout(() => {
+      setLoadingPhase('fetching');
+    }, 0);
+    
+    // Progress animation
+    const progressInterval = setInterval(() => {
+      setLoadingProgress(prev => {
+        if (prev >= 100) return 100;
+        return prev + 2;
+      });
+    }, 30);
+    
+    // Simulation counter animation
+    const simInterval = setInterval(() => {
+      setSimulationCount(prev => {
+        if (prev >= 10000) return 10000;
+        return prev + Math.floor(Math.random() * 400) + 200;
+      });
+    }, 100);
+    
+    // Phase 2: Running Monte Carlo (30%)
+    const phase2 = setTimeout(() => {
+      setLoadingPhase('simulating');
+    }, 600);
+    
+    // Phase 3: Generating insights (70%)
+    const phase3 = setTimeout(() => {
+      setLoadingPhase('generating');
+    }, 1200);
+    
+    // Show results
+    const showTimer = setTimeout(() => {
+      setShowingResults(true);
+      clearInterval(progressInterval);
+      clearInterval(simInterval);
+    }, 1800);
+    
+    return () => {
+      clearTimeout(phase1);
+      clearTimeout(phase2);
+      clearTimeout(phase3);
+      clearTimeout(showTimer);
+      clearInterval(progressInterval);
+      clearInterval(simInterval);
+    };
   }, []);
 
   // Handle "try your own" search
@@ -289,12 +336,44 @@ export default function Demo() {
           </div>
         ) : (
           <div className="flex items-center justify-center py-20">
-            <div className="text-center space-y-4">
-              <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center mx-auto animate-pulse">
-                <BarChart3 className="h-8 w-8 text-primary" />
+            <div className="text-center space-y-6 max-w-md">
+              {/* Animated icon */}
+              <div className="w-20 h-20 rounded-full bg-primary/20 flex items-center justify-center mx-auto relative">
+                <BarChart3 className="h-10 w-10 text-primary animate-pulse" />
+                <div className="absolute inset-0 rounded-full border-2 border-primary/30 animate-ping" />
               </div>
-              <p className="text-muted-foreground">Running 10,000 simulations...</p>
-              <Progress value={75} className="w-48 mx-auto" />
+              
+              {/* Phase indicator */}
+              <div className="space-y-2">
+                <p className="text-foreground font-medium">
+                  {loadingPhase === 'fetching' && 'Fetching live market data...'}
+                  {loadingPhase === 'simulating' && 'Running Monte Carlo simulation...'}
+                  {loadingPhase === 'generating' && 'Generating AI insights...'}
+                </p>
+                <p className="text-sm text-muted-foreground font-mono">
+                  {loadingPhase === 'simulating' 
+                    ? `Scenario ${Math.min(simulationCount, 10000).toLocaleString()} of 10,000`
+                    : loadingPhase === 'generating'
+                    ? 'Analyzing 10,000 scenarios...'
+                    : 'Connecting to data providers...'}
+                </p>
+              </div>
+              
+              {/* Progress bar */}
+              <div className="w-64 mx-auto">
+                <Progress value={loadingProgress} className="h-2" />
+                <div className="flex justify-between mt-2 text-xs text-muted-foreground">
+                  <span>Market Data</span>
+                  <span>Simulation</span>
+                  <span>AI Analysis</span>
+                </div>
+              </div>
+              
+              {/* Trust indicator */}
+              <p className="text-xs text-muted-foreground">
+                <Sparkles className="h-3 w-3 inline mr-1" />
+                Powered by institutional-grade analytics
+              </p>
             </div>
           </div>
         )}
