@@ -2,13 +2,13 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { TradeProvider } from "@/hooks/useTrade";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { TrackingProvider } from "@/components/tracking/TrackingProvider";
 import Landing from "./pages/Landing";
 import Auth from "./pages/Auth";
-import Analyze from "./pages/Analyze";
+import Workspace from "./pages/Workspace";
 import Results from "./pages/Results";
 import Portfolio from "./pages/Portfolio";
 import History from "./pages/History";
@@ -34,9 +34,10 @@ const App = () => (
               <Routes>
                 <Route path="/" element={<Landing />} />
                 <Route path="/auth" element={<Auth />} />
-                <Route path="/analyze" element={<Analyze />} />
+                <Route path="/workspace" element={<Workspace />} />
+                <Route path="/analyze" element={<Navigate to="/workspace" replace />} />
                 <Route path="/results" element={<Results />} />
-                <Route path="/portfolio" element={<Portfolio />} />
+                <Route path="/portfolio" element={<Navigate to="/workspace?mode=portfolio" replace />} />
                 <Route path="/history" element={<History />} />
                 <Route path="/methodology" element={<Methodology />} />
                 <Route path="/pricing" element={<Pricing />} />

@@ -53,7 +53,7 @@ const Results = () => {
         }
       });
     } else if (!historyId && !analysis) {
-      navigate('/analyze');
+      navigate('/workspace');
     }
   }, [historyId, analysis, navigate, loadHistoricalAnalysis]);
 
@@ -90,7 +90,7 @@ const Results = () => {
 
   const handleNewAnalysis = () => {
     clearAnalysis();
-    navigate('/analyze');
+    navigate('/workspace');
   };
 
   const handleBackToHistory = () => {
