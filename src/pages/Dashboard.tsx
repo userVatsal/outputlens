@@ -8,6 +8,7 @@ import { useUsage } from '@/hooks/useUsage';
 import { usePlan } from '@/hooks/usePlan';
 import { useTrackedAssets } from '@/hooks/useTrackedAssets';
 import {
+  AccountHeader,
   DashboardHero,
   AlertsPanel,
   TrackedAssetsGrid,
@@ -98,6 +99,9 @@ export default function Dashboard() {
     <Layout>
       <div className="section-container py-8">
         <div className="max-w-7xl mx-auto space-y-6">
+          {/* Account Header - Top of Dashboard */}
+          <AccountHeader profile={profile} plan={planData} />
+
           {/* Onboarding Guide for new users */}
           {shouldShowOnboarding && (
             <OnboardingGuide 
