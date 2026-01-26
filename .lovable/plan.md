@@ -1,152 +1,80 @@
 
-# Contact Form & Email Updates
+
+# Remove Lovable Badge & Add OutputLens Favicon
 
 ## Overview
 
-This plan implements three changes:
-1. **Update Welcome Email** - Change from address to `contact@outputlens.com` and personalize the intro with "Hi, I am the founder Vatsal Pareshkumar, welcome to OutputLens"
-2. **Update Alert Email** - Change from address to `contact@outputlens.com` for consistency
-3. **Add Footer Contact Form** - A compact contact form in the footer that sends submissions to `outputlens@gmail.com`
+This plan implements two quick changes:
+1. **Hide the "Edit with Lovable" badge** on the published website using a CSS rule
+2. **Use the OutputLens logo as the favicon** for browser tabs and bookmarks
 
 ---
 
-## What We're Building
+## What We're Changing
 
-### Contact Form in Footer
+### 1. Hide Lovable Badge
 
-A clean, embedded contact form with:
-- **Name** (required)
-- **Email** (required, validated)
-- **Subject** dropdown (Support, Bug Report, Feature Request, General Inquiry)
-- **Message** (required, max 1000 characters)
-- **Send button** with loading state
+The "Edit with Lovable" badge is injected with ID `lovable-badge`. We'll hide it globally via CSS.
 
-When submitted → Email sent to `outputlens@gmail.com` with all details
+**File**: `src/index.css`
 
----
-
-## Technical Implementation
-
-### 1. Update Welcome Email Function
-
-**File**: `supabase/functions/send-welcome-email/index.ts`
-
-**Changes**:
-- From: `Vatsal <vatsal@outputlens.com>` → `Vatsal Pareshkumar <contact@outputlens.com>`
-- Reply-to: `contact@outputlens.com`
-- Email intro updated to: "Hi, I am the founder Vatsal Pareshkumar. Welcome to OutputLens!"
-
-### 2. Update Alert Email Function
-
-**File**: `supabase/functions/send-alert-email/index.ts`
-
-**Changes**:
-- From: `Vatsal @ OutputLens <alerts@outputlens.com>` → `Vatsal Pareshkumar <contact@outputlens.com>`
-- Reply-to: `contact@outputlens.com`
-
-### 3. Create Contact Form Edge Function
-
-**New File**: `supabase/functions/send-contact-email/index.ts`
-
-Receives form data and sends email to `outputlens@gmail.com`:
-
-```text
-Subject: [OutputLens Contact] {Subject Type} from {Name}
-
----
-
-New contact form submission:
-
-From: {Name} ({Email})
-Subject: {Subject Type}
-
-Message:
-{User's message}
-
----
-Sent via OutputLens Contact Form
+Add to the existing `@layer base` block:
+```css
+#lovable-badge {
+  display: none !important;
+}
 ```
 
-### 4. Update Footer Component
+### 2. Update Favicon to OutputLens Logo
 
-**File**: `src/components/layout/Footer.tsx`
+Currently using a generic `favicon.ico`. We'll:
+1. Copy the existing `src/assets/logo.png` to `public/` for static access
+2. Update `index.html` to reference the logo as favicon
 
-Add a new "Contact Us" column with:
-- Compact form with proper input validation (using zod)
-- Subject dropdown with 4 options
-- Textarea for message
-- Submit button with loading/success states
-- Toast notifications for success/error
+**Files**:
+- Copy `src/assets/logo.png` → `public/logo.png`
+- Update `index.html` to add favicon link
 
 ---
 
-## Files to Create/Modify
+## Files to Modify
 
 | File | Action | Description |
 |------|--------|-------------|
-| `supabase/functions/send-welcome-email/index.ts` | Modify | Update from address and intro text |
-| `supabase/functions/send-alert-email/index.ts` | Modify | Update from address |
-| `supabase/functions/send-contact-email/index.ts` | Create | New function to send contact form emails |
-| `supabase/config.toml` | Modify | Add config for new contact email function |
-| `src/components/layout/Footer.tsx` | Modify | Add contact form section |
+| `src/index.css` | Modify | Add CSS rule to hide `#lovable-badge` |
+| `public/logo.png` | Create | Copy logo from src/assets for static serving |
+| `index.html` | Modify | Add favicon link to logo.png |
 
 ---
 
-## Contact Form Validation
+## Technical Details
 
-Using zod for secure input validation:
-- **Name**: 2-100 characters, trimmed
-- **Email**: Valid email format, max 255 characters
-- **Subject**: One of predefined options
-- **Message**: 10-1000 characters, trimmed
+### CSS Change (index.css)
 
-All inputs sanitized before sending to prevent injection attacks.
+```css
+@layer base {
+  /* ... existing styles ... */
+  
+  #lovable-badge {
+    display: none !important;
+  }
+}
+```
 
----
+### Favicon HTML (index.html)
 
-## Updated Footer Layout
-
-```text
-┌─────────────────────────────────────────────────────────────────┐
-│  Brand     │  Product    │  Legal      │  Contact Us           │
-│  ────────  │  ────────   │  ────────   │  ─────────────────    │
-│  Logo      │  Workspace  │  Privacy    │  Name: [_________]    │
-│  Tagline   │  Method     │  Terms      │  Email: [________]    │
-│            │  Pricing    │             │  Subject: [dropdown]  │
-│            │  About      │             │  Message: [_______]   │
-│            │             │             │        [____Send____] │
-└─────────────────────────────────────────────────────────────────┘
-│  Disclaimer section spanning full width                         │
-└─────────────────────────────────────────────────────────────────┘
-│  © 2026 OutputLens                 Risk analysis disclaimer     │
-└─────────────────────────────────────────────────────────────────┘
+Add inside `<head>`:
+```html
+<link rel="icon" type="image/png" href="/logo.png" />
+<link rel="apple-touch-icon" href="/logo.png" />
 ```
 
 ---
 
-## User Experience Flow
+## Result
 
-1. User scrolls to footer
-2. Fills out contact form fields
-3. Clicks "Send Message"
-4. Button shows loading spinner
-5. On success: Toast notification "Message sent! We'll get back to you soon."
-6. On error: Toast notification with error message
-7. Form resets on success
+After these changes:
+- The "Edit with Lovable" badge will be hidden on all pages
+- Browser tabs will show the OutputLens logo instead of a generic icon
+- Bookmarks and mobile home screen icons will use the OutputLens logo
 
----
-
-## Email Deliverability Note
-
-**Important**: For emails to `outputlens@gmail.com` to work reliably:
-- The sending domain (`outputlens.com`) must be verified in Resend
-- The from address `contact@outputlens.com` must be on a verified domain
-
----
-
-## Estimated Changes
-
-- **2 Modified Edge Functions**: ~10 lines each
-- **1 New Edge Function**: ~80 lines
-- **1 Modified Component**: ~100 lines added
-- **1 Config Update**: ~3 lines
