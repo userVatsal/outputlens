@@ -44,6 +44,19 @@ export default function Dashboard() {
         navigate('/');
         return;
       }
+      
+      // Check if onboarding is completed
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('onboarding_completed')
+        .eq('user_id', session.user.id)
+        .single();
+      
+      if (!profileData?.onboarding_completed) {
+        navigate('/onboarding');
+        return;
+      }
+      
       setIsAuthenticated(true);
       
       // Check if user has any analysis history
