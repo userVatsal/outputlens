@@ -122,8 +122,8 @@ export function AlertsPanel({ alerts, onDismiss, onMarkRead }: AlertsPanelProps)
         {alerts.length === 0 ? (
           <div className="text-center py-6 text-muted-foreground">
             <Bell className="h-8 w-8 mx-auto mb-2 opacity-50" />
-            <p className="text-sm">No active alerts</p>
-            <p className="text-xs">You'll be notified when risk metrics change significantly</p>
+            <p className="text-sm font-medium">No active alerts</p>
+            <p className="text-xs">Stay ahead of market surprises. You'll be notified when risk metrics change significantly.</p>
           </div>
         ) : (
           <div className="space-y-2">

@@ -108,6 +108,9 @@ export function MarketIntelligence() {
             <RefreshCw className={cn("h-4 w-4", refreshing && "animate-spin")} />
           </Button>
         </div>
+        <p className="text-sm text-muted-foreground mt-1">
+          Get AI-driven insights across your tracked assets.
+        </p>
       </CardHeader>
       <CardContent>
         {loading ? (
@@ -119,8 +122,8 @@ export function MarketIntelligence() {
         ) : insights.length === 0 ? (
           <div className="text-center py-6 text-muted-foreground">
             <Newspaper className="h-8 w-8 mx-auto mb-2 opacity-50" />
-            <p className="text-sm">No market intelligence available</p>
-            <p className="text-xs">Sentiment data will appear as signals are processed</p>
+            <p className="text-sm font-medium">No market intelligence available</p>
+            <p className="text-xs">Sentiment data will appear as signals are processed.</p>
           </div>
         ) : (
           <div className="space-y-3">
