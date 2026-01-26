@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X, LogOut, User, Languages, History } from 'lucide-react';
+import { Menu, X, LogOut, User, Languages, History, Bookmark } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import {
@@ -10,8 +10,9 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { supabase } from '@/integrations/supabase/client';
 import { User as SupabaseUser } from '@supabase/supabase-js';
-import { useLanguage, Language } from '@/contexts/LanguageContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { BrandLogo } from '@/components/BrandLogo';
+import { RiskAlertBell } from '@/components/RiskAlertBell';
 
 const navLinks = [
   { href: '/workspace', labelKey: 'workspace' },
@@ -101,6 +102,13 @@ export function Header() {
 
             {user ? (
               <>
+                <RiskAlertBell />
+                <Button variant="ghost" size="sm" asChild>
+                  <Link to="/tracked-assets" className="flex items-center gap-2">
+                    <Bookmark className="h-4 w-4" />
+                    Tracked
+                  </Link>
+                </Button>
                 <Button variant="ghost" size="sm" asChild>
                   <Link to="/history" className="flex items-center gap-2">
                     <History className="h-4 w-4" />
