@@ -18,23 +18,23 @@ import {
 const faqItems = [
   {
     question: "What does OutputLens do?",
-    answer: "OutputLens analyzes risk by simulating multiple possible future scenarios using AI, helping users understand downside, upside, and uncertainty before making trading or investment decisions. It runs 10,000 Monte Carlo simulations per trade in under 2 seconds."
+    answer: "OutputLens provides AI-powered risk & scenario intelligence by simulating 10,000 possible future outcomes using Monte Carlo methods. It quantifies downside risk, tail events, and scenario regimes before trading or investment decisions."
   },
   {
     question: "Is OutputLens a trading signal tool?",
-    answer: "No. OutputLens is a risk management and decision-support platform, not a trading signal or execution tool. It helps you understand risk before you trade, but does not tell you what to trade or provide financial advice."
+    answer: "No. OutputLens is a risk management and decision-support platform, not a trading signal or execution tool. It helps you quantify risk before you trade, but does not tell you what to trade or provide financial advice."
   },
   {
     question: "Who is OutputLens for?",
-    answer: "OutputLens is built for retail traders seeking institutional-style risk awareness, portfolio managers evaluating downside risk, hedge funds needing scenario-based risk layers, quantitative trading desks, and learning investors building intuition for risk-reward."
+    answer: "OutputLens is built for retail traders seeking institutional-grade risk awareness, portfolio managers evaluating downside risk, hedge funds needing scenario-based risk layers, quantitative trading desks, and analysts building risk models."
   },
   {
     question: "How is OutputLens different from prediction tools?",
-    answer: "Unlike prediction tools that give single price targets, OutputLens shows the entire probability distribution of possible outcomes using Monte Carlo simulation, including tail risks, worst-case scenarios, and expected returns with confidence intervals."
+    answer: "Unlike prediction tools that give single price targets, OutputLens shows the entire probability distribution of possible outcomes using Monte Carlo simulation, including tail risks, scenario regimes, and expected returns with confidence intervals."
   },
   {
     question: "Can institutional investors and hedge funds use OutputLens?",
-    answer: "Yes. OutputLens can be used as a risk overlay alongside existing trading systems, helping teams stress-test positions, portfolios, and strategies under multiple AI-generated scenarios before capital is deployed."
+    answer: "Yes. OutputLens can be used as a risk overlay alongside existing trading systems, helping teams stress-test positions, portfolios, and strategies under multiple AI-generated scenario regimes before capital is deployed."
   },
   {
     question: "What markets does OutputLens support?",
@@ -71,8 +71,8 @@ export function AISemanticSection() {
             Frequently Asked Questions
           </h2>
           <p className="text-muted-foreground">
-            OutputLens is an AI-powered risk management layer used to analyze trades and 
-            portfolios through real-time quantitative and qualitative scenarios—built for 
+            OutputLens is an AI-powered risk & scenario intelligence platform used to analyze trades and 
+            portfolios through quantitative + qualitative scenario regimes—built for 
             both individual investors and institutional decision-makers.
           </p>
         </div>
@@ -105,7 +105,7 @@ export function AISemanticSection() {
           <p className="text-muted-foreground text-sm leading-relaxed">
             OutputLens can be used as a risk overlay alongside existing trading systems, 
             helping teams stress-test positions, portfolios, and strategies under multiple 
-            AI-generated scenarios before capital is deployed. The platform is designed as 
+            AI-generated scenario regimes before capital is deployed. The platform is designed as 
             a risk management layer that complements existing quant models and discretionary 
             workflows, focusing on scenario generation, uncertainty, and tail risk analysis 
             at both portfolio and trade levels.

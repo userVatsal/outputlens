@@ -194,22 +194,22 @@ Your AAPL long position has a **62% probability of profit** over the next week, 
 
 ### Key Risk Metrics
 
-- **95% Value at Risk (VaR)**: You have a 5% chance of losing more than 4.2%
-- **Expected Shortfall**: If things go wrong, expect an average loss of 5.6%
-- **Risk/Reward Ratio**: 2.1:1 — favorable risk-adjusted setup
+- **95% Value at Risk (VaR)**: 5% chance of losing more than 4.2%
+- **Expected Shortfall**: If tail risk materializes, expect an average loss of 5.6%
+- **Risk/Reward Ratio**: 2.1:1 — favorable risk-adjusted profile
 
-### Scenario Breakdown
+### Scenario Regime Breakdown
 
 The Monte Carlo simulation ran 10,000 paths using live volatility data:
 
 - **Base Case (50%)**: Price stays between $181.79 - $189.21
 - **Upside (24%)**: Could rally to $196+ on positive catalysts
 - **Downside (24%)**: Pullback to $174 support possible
-- **Tail Risk (2%)**: Black swan could push below $167
+- **Tail Risk (2%)**: Black swan event could push below $167
 
-### Recommendation
+### Risk Interpretation
 
-This trade shows a **moderate risk profile** with slightly positive skew. The 2.1:1 risk/reward suggests the setup is favorable, but position sizing should account for the 4.2% VaR threshold.
+This trade shows a **moderate risk profile** with slightly negative skew. The 2.1:1 risk/reward suggests the setup is favorable, but position sizing should account for the 4.2% VaR threshold.
 
 *Analysis powered by 10,000-path Monte Carlo simulation with live Finnhub market data.*`,
   analyzedAt: Date.now(),

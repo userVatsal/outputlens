@@ -13,7 +13,7 @@ import {
   Activity,
   Lock,
   ChevronRight,
-  BookOpen,
+  Target,
   Play,
   Sparkles
 } from 'lucide-react';
@@ -33,12 +33,12 @@ const features = [
   {
     icon: Shield,
     title: 'Advanced Risk Metrics',
-    description: 'Calculate VaR, Expected Shortfall, and tail risk before you enter. Know your worst-case scenario upfront.',
+    description: 'Calculate VaR, Expected Shortfall, and tail risk before you enter. Quantify your worst-case exposure upfront.',
   },
   {
     icon: Brain,
-    title: 'AI-Powered Insights',
-    description: 'Complex quantitative results translated into plain language. Understand what the numbers actually mean for your trade.',
+    title: 'AI Risk Interpretation',
+    description: 'Complex quantitative results translated into clear risk interpretations. Understand what the numbers mean for your decision.',
   },
   {
     icon: LineChart,
@@ -58,35 +58,35 @@ const features = [
 ];
 
 const metrics = [
-  { value: '10,000', label: 'Scenarios Simulated', sublabel: 'Per Trade' },
+  { value: '10,000', label: 'Simulation Paths', sublabel: 'Per Analysis' },
   { value: '95%', label: 'Confidence Metrics', sublabel: 'VaR Coverage' },
   { value: '<2s', label: 'Results Delivered', sublabel: 'Edge Functions' },
   { value: '24/7', label: 'Global Market Data', sublabel: 'Live Feeds' },
 ];
 
-// Use cases instead of fake testimonials
+// Use cases with institutional positioning
 const useCases = [
   {
     persona: 'Active Trader',
-    useCase: 'See the probability distribution before sizing your position. Know your max drawdown before you enter.',
+    useCase: 'See the probability distribution before sizing your position. Quantify your max drawdown before you enter.',
     icon: TrendingUp,
   },
   {
     persona: 'Portfolio Manager',
-    useCase: 'Run multi-asset scenarios to understand correlation risk. Quantify tail events across your book.',
+    useCase: 'Run multi-asset scenario regimes to understand correlation risk. Quantify tail events across your book.',
     icon: BarChart3,
   },
   {
-    persona: 'Learning Investor',
-    useCase: 'Understand how volatility affects potential outcomes. Build intuition for risk-reward without real capital at stake.',
-    icon: BookOpen,
+    persona: 'Quantitative Analyst',
+    useCase: 'Build intuition for risk-reward through simulation. Stress-test positions under multiple scenario regimes.',
+    icon: Target,
   },
 ];
 
 const comparisonPoints = [
   { feature: 'Monte Carlo Simulation', us: true, others: false },
   { feature: 'Live Volatility Data', us: true, others: false },
-  { feature: 'AI-Powered Explanations', us: true, others: false },
+  { feature: 'AI Risk Interpretation', us: true, others: false },
   { feature: 'Multi-Market Support', us: true, others: 'Limited' },
   { feature: 'Tail Risk Analysis', us: true, others: false },
   { feature: 'Sentiment Integration', us: true, others: false },
@@ -95,7 +95,7 @@ const comparisonPoints = [
 export default function Landing() {
   // SEO: Set page-specific document title
   useEffect(() => {
-    document.title = 'OutputLens: AI Trade Risk Analysis - Monte Carlo Simulation Tool';
+    document.title = 'OutputLens: AI Risk & Scenario Intelligence | Monte Carlo Simulation';
   }, []);
 
   return (
@@ -121,19 +121,19 @@ export default function Landing() {
             </div>
 
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-foreground font-brand leading-tight">
-              OutputLens: See Every Outcome{' '}
-              <span className="text-primary">Before You Trade</span>
+              OutputLens: AI-Powered{' '}
+              <span className="text-primary">Risk & Scenario Intelligence</span>
             </h1>
             
             {/* Hidden SEO paragraph for crawlers */}
             <p className="sr-only">
-              OutputLens is an AI-powered trade risk analysis platform using Monte Carlo simulation 
+              OutputLens is an AI-powered risk & scenario intelligence platform using Monte Carlo simulation 
               to calculate Value at Risk (VaR), Expected Shortfall, and tail risk for stocks, crypto, 
-              and forex. Analyze portfolio risk and scenario outcomes before you trade.
+              and forex. Quantify portfolio risk and scenario regimes before you trade.
             </p>
             
             <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto">
-              10,000 Monte Carlo simulations in 2 seconds. Know your worst case, best case, and everything in between.
+              10,000 Monte Carlo simulations in 2 seconds. Quantify downside, tail risk, and scenario regimes before you deploy capital.
             </p>
 
             {/* CTA Buttons */}
@@ -141,19 +141,19 @@ export default function Landing() {
               <Button size="lg" asChild className="px-8 py-6 text-lg shadow-lg hover:shadow-xl transition-all">
                 <Link to="/demo">
                   <Play className="mr-2 h-5 w-5" />
-                  See Live Demo
+                  See Live Analysis
                 </Link>
               </Button>
               <Button size="lg" variant="outline" asChild className="px-8 py-6 text-lg">
                 <Link to="/auth?mode=signup">
-                  Analyze Your First Trade Free
+                  Run Your First Risk Analysis
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
             </div>
 
             <p className="text-sm text-muted-foreground">
-              ✓ 5 free analyses/month • ✓ No credit card required • ✓ Avoid one bad trade and it pays for itself
+              ✓ 5 free analyses/month • ✓ No credit card required • ✓ Institutional-grade methodology
             </p>
           </div>
 
@@ -190,12 +190,12 @@ export default function Landing() {
       <section className="py-20 bg-background">
         <div className="section-container">
           <div className="text-center mb-16">
-            <Badge variant="outline" className="mb-4">Features</Badge>
+            <Badge variant="outline" className="mb-4">Capabilities</Badge>
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4 font-brand">
-              Institutional-Grade Analysis
+              Institutional-Grade Risk Analysis
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              The same quantitative methods used by hedge funds and prop desks—now accessible to everyone.
+              The same quantitative + qualitative methods used by hedge funds and prop desks—now accessible to everyone.
             </p>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -268,10 +268,10 @@ export default function Landing() {
           <div className="text-center mb-12">
             <Badge variant="outline" className="mb-4">Use Cases</Badge>
             <h2 className="text-3xl font-bold text-foreground mb-4 font-brand">
-              Built for Every Trader
+              Built for Serious Decision-Making
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Whether you're sizing a position, managing a portfolio, or learning the ropes.
+              Whether you're sizing a position, managing a portfolio, or stress-testing strategies.
             </p>
           </div>
           <div className="grid md:grid-cols-3 gap-6">
@@ -305,13 +305,13 @@ export default function Landing() {
             {/* ROI Hook */}
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-bullish/10 border border-bullish/20 text-bullish text-sm font-medium mb-6">
               <Sparkles className="h-4 w-4" />
-              Avoid one bad trade per month and OutputLens pays for itself
+              Quantify risk before you deploy capital
             </div>
             
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Button size="lg" asChild className="px-8 py-6 text-lg">
                 <Link to="/auth?mode=signup">
-                  Analyze Your First Trade Free
+                  Run Your First Risk Analysis
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>

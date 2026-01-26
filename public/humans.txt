@@ -1,0 +1,36 @@
+/* TEAM */
+Product: OutputLens
+Category: AI Risk & Scenario Intelligence Platform
+Website: https://outputlens.com
+
+/* SITE */
+Last updated: 2025-01-26
+Language: English
+Standards: HTML5, CSS3, ES6+
+Framework: React + Vite + TypeScript
+Styling: Tailwind CSS
+Backend: Supabase (Lovable Cloud)
+
+/* ABOUT */
+OutputLens is an AI-powered risk & scenario intelligence platform that uses 
+Monte Carlo simulation to calculate Value at Risk (VaR), Expected Shortfall, 
+tail risk, and scenario regimes for stocks, crypto, and forex portfolios.
+
+We help traders and institutional investors quantify downside risk before 
+making decisions by running 10,000 simulations per analysis in under 2 seconds.
+
+/* CAPABILITIES */
+- Monte Carlo simulation (10,000 probabilistic paths)
+- Value at Risk (VaR) at 95% and 99% confidence
+- Expected Shortfall / Conditional VaR
+- Tail risk analysis with extreme scenario modeling
+- AI-powered risk interpretations
+- Multi-market support (US, UK, EU equities, crypto, forex)
+- Portfolio-level correlation and risk insights
+- Live market data integration
+- Asset tracking and ongoing risk monitoring
+
+/* DISCLAIMER */
+OutputLens provides risk analysis and scenario modeling for informational 
+purposes only. It does not provide financial advice, trading signals, or 
+predictions. Always conduct your own due diligence.
