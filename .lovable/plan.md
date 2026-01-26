@@ -1,132 +1,82 @@
 
-# Personalized Email Experience - Welcome & Risk Alerts
+# Contact Form & Email Updates
 
 ## Overview
 
-Implement a founder-personal email experience where:
-1. **Welcome Email**: When users sign up, they receive a personalized email from "Vatsal" (the founder) welcoming them to OutputLens
-2. **Risk Alert Emails**: When the `monitor-assets` function detects risk threshold breaches, users receive email notifications
+This plan implements three changes:
+1. **Update Welcome Email** - Change from address to `contact@outputlens.com` and personalize the intro with "Hi, I am the founder Vatsal Pareshkumar, welcome to OutputLens"
+2. **Update Alert Email** - Change from address to `contact@outputlens.com` for consistency
+3. **Add Footer Contact Form** - A compact contact form in the footer that sends submissions to `outputlens@gmail.com`
 
 ---
 
-## Current State Analysis
+## What We're Building
 
-### What Exists
-- **Profiles table** has `contact_preferences: { email: true, push: false }` - users can opt-in/out
-- **Risk alerts** are created in `risk_alerts` table by `monitor-assets` Edge Function
-- **AlertsPanel** displays alerts in the dashboard UI
-- **No email integration** currently exists (no Resend API key configured)
+### Contact Form in Footer
 
-### What's Needed
-- Resend API key for email sending
-- Edge function for sending welcome emails (triggered after signup)
-- Modify `monitor-assets` function to also send email alerts
-- Email preference toggle in Account settings (already exists in schema!)
+A clean, embedded contact form with:
+- **Name** (required)
+- **Email** (required, validated)
+- **Subject** dropdown (Support, Bug Report, Feature Request, General Inquiry)
+- **Message** (required, max 1000 characters)
+- **Send button** with loading state
+
+When submitted → Email sent to `outputlens@gmail.com` with all details
 
 ---
 
-## Implementation Plan
+## Technical Implementation
 
-### Phase 1: Setup Resend Integration
+### 1. Update Welcome Email Function
 
-**Prerequisite**: You'll need to:
-1. Sign up at https://resend.com (free tier: 100 emails/day)
-2. Verify your domain at https://resend.com/domains (required for deliverability)
-3. Create an API key at https://resend.com/api-keys
-4. Add the `RESEND_API_KEY` secret to your backend
+**File**: `supabase/functions/send-welcome-email/index.ts`
 
-### Phase 2: Create Welcome Email Edge Function
+**Changes**:
+- From: `Vatsal <vatsal@outputlens.com>` → `Vatsal Pareshkumar <contact@outputlens.com>`
+- Reply-to: `contact@outputlens.com`
+- Email intro updated to: "Hi, I am the founder Vatsal Pareshkumar. Welcome to OutputLens!"
 
-Create `supabase/functions/send-welcome-email/index.ts`:
+### 2. Update Alert Email Function
 
-**Trigger**: Called from the frontend after successful signup, or via database webhook
+**File**: `supabase/functions/send-alert-email/index.ts`
 
-**Email Content** (from Vatsal):
+**Changes**:
+- From: `Vatsal @ OutputLens <alerts@outputlens.com>` → `Vatsal Pareshkumar <contact@outputlens.com>`
+- Reply-to: `contact@outputlens.com`
+
+### 3. Create Contact Form Edge Function
+
+**New File**: `supabase/functions/send-contact-email/index.ts`
+
+Receives form data and sends email to `outputlens@gmail.com`:
+
 ```text
-Subject: Welcome to OutputLens - Let's make smarter trades together
-
-From: Vatsal <vatsal@yourdomain.com>
+Subject: [OutputLens Contact] {Subject Type} from {Name}
 
 ---
 
-Hey [Name or "there"],
+New contact form submission:
 
-I'm Vatsal, the founder of OutputLens.
+From: {Name} ({Email})
+Subject: {Subject Type}
 
-I built this because I was tired of entering trades blind — not knowing 
-if my gut feel aligned with real market conditions. Now you have a tool 
-that shows you probabilities before you commit capital.
-
-Here's what you can do right now:
-→ Run your first analysis: Head to the Workspace and enter any trade idea
-→ Track an asset: Save it to your dashboard and get alerts when risk changes
-→ Build a portfolio: Add multiple positions and see aggregate risk
-
-If you ever have questions or feedback, just reply to this email. 
-I read every one.
-
-Let's make better trades together.
-
-— Vatsal
-Founder, OutputLens
-
-P.S. Your first 3 analyses are on me. No credit card needed.
-```
-
-### Phase 3: Modify Monitor-Assets for Email Alerts
-
-Update `supabase/functions/monitor-assets/index.ts` to:
-
-1. After creating a `risk_alert` record, check user's `contact_preferences.email`
-2. If enabled, fetch user's email from `auth.users` (via service role)
-3. Call a new `send-alert-email` function with alert details
-
-**Email Content** (from Vatsal):
-```text
-Subject: ⚠️ Risk Alert: [SYMBOL] - Your position risk has changed
-
-From: Vatsal @ OutputLens <alerts@yourdomain.com>
+Message:
+{User's message}
 
 ---
-
-Hey [Name],
-
-I wanted to give you a heads up — the risk profile for your 
-[SYMBOL] position just changed significantly.
-
-📊 What happened:
-• Previous Risk Score: [X.X]
-• Current Risk Score: [Y.Y]  
-• Change: [+/-Z.Z] points
-
-🎯 What this means:
-[Dynamic interpretation based on alert type]
-
-→ View Full Analysis: [Link to /tracked-assets]
-
-You're getting this because you enabled email alerts for tracked assets.
-Manage your preferences: [Link to /account]
-
-Stay sharp,
-Vatsal
-
----
-OutputLens - Know your risk before you trade
+Sent via OutputLens Contact Form
 ```
 
-### Phase 4: Trigger Welcome Email on Signup
+### 4. Update Footer Component
 
-**Option A: Call from Frontend** (simpler)
-After successful signup in `Auth.tsx`, call the welcome email function:
-```typescript
-// After successful signup
-await supabase.functions.invoke('send-welcome-email', {
-  body: { email: email }
-});
-```
+**File**: `src/components/layout/Footer.tsx`
 
-**Option B: Database Webhook** (more robust)
-Create a database trigger that fires on profile creation and calls the edge function.
+Add a new "Contact Us" column with:
+- Compact form with proper input validation (using zod)
+- Subject dropdown with 4 options
+- Textarea for message
+- Submit button with loading/success states
+- Toast notifications for success/error
 
 ---
 
@@ -134,116 +84,69 @@ Create a database trigger that fires on profile creation and calls the edge func
 
 | File | Action | Description |
 |------|--------|-------------|
-| `supabase/functions/send-welcome-email/index.ts` | Create | Personalized founder welcome email |
-| `supabase/functions/send-alert-email/index.ts` | Create | Risk alert notification email |
-| `supabase/functions/monitor-assets/index.ts` | Modify | Add email alert integration |
-| `src/pages/Auth.tsx` | Modify | Trigger welcome email after signup |
-| `supabase/config.toml` | Modify | Add new function configs |
+| `supabase/functions/send-welcome-email/index.ts` | Modify | Update from address and intro text |
+| `supabase/functions/send-alert-email/index.ts` | Modify | Update from address |
+| `supabase/functions/send-contact-email/index.ts` | Create | New function to send contact form emails |
+| `supabase/config.toml` | Modify | Add config for new contact email function |
+| `src/components/layout/Footer.tsx` | Modify | Add contact form section |
 
 ---
 
-## Email Design Guidelines
+## Contact Form Validation
 
-**From Name**: "Vatsal" or "Vatsal @ OutputLens" — personal, not corporate
-**Reply-To**: A real email you monitor (builds trust)
-**Tone**: Conversational, helpful, founder-direct
-**CTAs**: One primary action per email
-**Footer**: Unsubscribe link + email preference link
+Using zod for secure input validation:
+- **Name**: 2-100 characters, trimmed
+- **Email**: Valid email format, max 255 characters
+- **Subject**: One of predefined options
+- **Message**: 10-1000 characters, trimmed
 
----
-
-## Database Additions (Optional Enhancement)
-
-Consider adding to `profiles` table:
-```sql
-ALTER TABLE profiles ADD COLUMN IF NOT EXISTS 
-  email_preferences jsonb DEFAULT '{
-    "welcome": true,
-    "risk_alerts": true,
-    "weekly_digest": false,
-    "product_updates": true
-  }'::jsonb;
-```
-
-This gives granular control over email types.
+All inputs sanitized before sending to prevent injection attacks.
 
 ---
 
-## Technical Architecture
+## Updated Footer Layout
 
 ```text
-┌─────────────────┐         ┌──────────────────────┐
-│  User Signup    │────────▶│ send-welcome-email   │
-│  (Auth.tsx)     │         │   Edge Function      │
-└─────────────────┘         └──────────────────────┘
-                                      │
-                                      ▼
-                              ┌───────────────┐
-                              │    Resend     │
-                              │     API       │
-                              └───────────────┘
-                                      │
-                                      ▼
-                              ┌───────────────┐
-                              │  User Inbox   │
-                              └───────────────┘
-
-┌─────────────────┐         ┌──────────────────────┐
-│ monitor-assets  │────────▶│  send-alert-email    │
-│ (CRON job)      │         │   Edge Function      │
-└─────────────────┘         └──────────────────────┘
-        │                             │
-        ▼                             ▼
-┌───────────────┐             ┌───────────────┐
-│ risk_alerts   │             │    Resend     │
-│   table       │             │     API       │
-└───────────────┘             └───────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│  Brand     │  Product    │  Legal      │  Contact Us           │
+│  ────────  │  ────────   │  ────────   │  ─────────────────    │
+│  Logo      │  Workspace  │  Privacy    │  Name: [_________]    │
+│  Tagline   │  Method     │  Terms      │  Email: [________]    │
+│            │  Pricing    │             │  Subject: [dropdown]  │
+│            │  About      │             │  Message: [_______]   │
+│            │             │             │        [____Send____] │
+└─────────────────────────────────────────────────────────────────┘
+│  Disclaimer section spanning full width                         │
+└─────────────────────────────────────────────────────────────────┘
+│  © 2026 OutputLens                 Risk analysis disclaimer     │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
 ## User Experience Flow
 
-### Signup → Welcome Email
-1. User signs up with email/password
-2. Account created, redirected to dashboard
-3. Within 30 seconds, welcome email arrives
-4. Email feels personal (from Vatsal, founder)
-5. Clear CTA to run first analysis
-
-### Risk Alert → Email Notification
-1. User tracks an asset with alerts enabled
-2. `monitor-assets` runs on schedule (daily/weekly)
-3. Risk threshold breached → alert created in DB
-4. If `contact_preferences.email = true`:
-   - Fetch user email from auth
-   - Send personalized alert email
-5. Email includes direct link to view analysis
+1. User scrolls to footer
+2. Fills out contact form fields
+3. Clicks "Send Message"
+4. Button shows loading spinner
+5. On success: Toast notification "Message sent! We'll get back to you soon."
+6. On error: Toast notification with error message
+7. Form resets on success
 
 ---
 
-## Required Secrets
+## Email Deliverability Note
 
-| Secret | Purpose |
-|--------|---------|
-| `RESEND_API_KEY` | Email sending API authentication |
-
----
-
-## Estimated Effort
-
-- **2 New Edge Functions**: ~100 lines each
-- **1 Modified Edge Function**: ~30 lines added
-- **1 Modified Frontend File**: ~10 lines added
-- **1 Config Update**: ~6 lines
+**Important**: For emails to `outputlens@gmail.com` to work reliably:
+- The sending domain (`outputlens.com`) must be verified in Resend
+- The from address `contact@outputlens.com` must be on a verified domain
 
 ---
 
-## Next Step
+## Estimated Changes
 
-Before I can implement this, you'll need to set up Resend:
-
-1. Go to https://resend.com and create a free account
-2. Verify your domain (e.g., `outputlens.com`) at https://resend.com/domains
-3. Create an API key at https://resend.com/api-keys
-4. Let me know when ready, and I'll prompt you to add the `RESEND_API_KEY` secret
+- **2 Modified Edge Functions**: ~10 lines each
+- **1 New Edge Function**: ~80 lines
+- **1 Modified Component**: ~100 lines added
+- **1 Config Update**: ~3 lines
