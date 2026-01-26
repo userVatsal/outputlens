@@ -1,9 +1,11 @@
 import { TrendingUp, TrendingDown, AlertTriangle, Target, Activity } from 'lucide-react';
 import { EnhancedTradeAnalysis } from '@/types/analysis';
+import { formatCurrencyWithSign, calculatePnL, investmentToShares } from '@/lib/positionCalculations';
 import { cn } from '@/lib/utils';
 
 interface RiskSnapshotProps {
   analysis: EnhancedTradeAnalysis;
+  currencySymbol: string;
 }
 
 function RiskGauge({ score, label }: { score: number; label: string }) {
@@ -79,30 +81,37 @@ function TailRiskIndicator({ probability }: { probability: number }) {
   );
 }
 
-function ExpectedReturn({ expectedReturn }: { expectedReturn: number }) {
+function ExpectedReturn({ 
+  expectedReturn, 
+  expectedPnL, 
+  currencySymbol 
+}: { 
+  expectedReturn: number; 
+  expectedPnL: number;
+  currencySymbol: string;
+}) {
   const isPositive = expectedReturn >= 0;
   const color = isPositive ? 'text-bullish' : 'text-bearish';
   const bgColor = isPositive ? 'bg-bullish/10' : 'bg-bearish/10';
-  const Icon = isPositive ? TrendingUp : TrendingDown;
 
   return (
     <div className={cn("rounded-xl p-5 text-center", bgColor)}>
       <div className="flex items-center justify-center gap-2 mb-2">
         <Target className={cn("h-5 w-5", color)} />
-        <span className="text-sm font-medium text-muted-foreground">Expected Return</span>
+        <span className="text-sm font-medium text-muted-foreground">Expected P&L</span>
       </div>
-      <div className={cn("text-3xl font-bold", color)}>
-        {isPositive ? '+' : ''}{expectedReturn.toFixed(1)}%
+      <div className={cn("text-2xl font-bold font-mono", color)}>
+        {formatCurrencyWithSign(expectedPnL, currencySymbol)}
       </div>
       <div className={cn("text-sm font-semibold mt-1", color)}>
-        {isPositive ? 'Positive EV' : 'Negative EV'}
+        {isPositive ? '+' : ''}{expectedReturn.toFixed(1)}%
       </div>
     </div>
   );
 }
 
-export function RiskSnapshot({ analysis }: RiskSnapshotProps) {
-  const { riskMetrics, scenarios } = analysis;
+export function RiskSnapshot({ analysis, currencySymbol }: RiskSnapshotProps) {
+  const { riskMetrics, scenarios, input, simulation } = analysis;
   
   // Calculate tail risk as sum of all tail scenario probabilities
   const tailRiskProbability = scenarios.tail.reduce((sum, s) => {
@@ -110,6 +119,14 @@ export function RiskSnapshot({ analysis }: RiskSnapshotProps) {
     const prob = s.probability > 1 ? s.probability : s.probability * 100;
     return sum + prob;
   }, 0);
+
+  // Calculate shares from position
+  const shares = input.positionType === 'dollars' && input.positionSize
+    ? investmentToShares(input.positionSize, input.entryPrice)
+    : (input.positionSize || 1);
+  
+  // Calculate expected P&L in dollars
+  const expectedPnL = calculatePnL(input.entryPrice, simulation.meanReturn, shares);
 
   return (
     <div className="mb-8">
@@ -129,7 +146,11 @@ export function RiskSnapshot({ analysis }: RiskSnapshotProps) {
         />
         <WinProbability probability={riskMetrics.probabilityOfProfit} />
         <TailRiskIndicator probability={tailRiskProbability} />
-        <ExpectedReturn expectedReturn={riskMetrics.expectedReturn} />
+        <ExpectedReturn 
+          expectedReturn={riskMetrics.expectedReturn} 
+          expectedPnL={expectedPnL.totalPnl}
+          currencySymbol={currencySymbol}
+        />
       </div>
     </div>
   );

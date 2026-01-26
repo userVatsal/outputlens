@@ -5,3 +5,4 @@ export { ScenarioRegimeCards } from './ScenarioRegimeCards';
 export { RiskInterpretation } from './RiskInterpretation';
 export { ActionPanel } from './ActionPanel';
 export { AdvancedMetrics } from './AdvancedMetrics';
+export { PnLSummary } from './PnLSummary';

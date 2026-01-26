@@ -71,6 +71,8 @@ export function TradeInputForm({ onSubmit, isLoading = false }: TradeInputFormPr
   const [assumptions, setAssumptions] = useState('');
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [showMarketDetails, setShowMarketDetails] = useState(false);
+  const [positionSize, setPositionSize] = useState('100');
+  const [positionType, setPositionType] = useState<'shares' | 'dollars'>('shares');
 
   const selectedMarket = MARKETS[market];
 
@@ -116,6 +118,8 @@ export function TradeInputForm({ onSubmit, isLoading = false }: TradeInputFormPr
       exitDateTime,
       confidence,
       assumptions: assumptions.trim() || undefined,
+      positionSize: parseFloat(positionSize) || 100,
+      positionType,
     };
     onSubmit(input);
   };
@@ -176,7 +180,7 @@ export function TradeInputForm({ onSubmit, isLoading = false }: TradeInputFormPr
         </div>
       )}
 
-      {/* Step 3: Timing & Price */}
+      {/* Step 3: Timing, Price & Position Size */}
       {selectedAsset && direction && (
         <div className="space-y-6 animate-in fade-in slide-in-from-top-2">
           <DateTimePicker entryDateTime={entryDateTime} exitDateTime={exitDateTime} onEntryChange={setEntryDateTime} onExitChange={setExitDateTime} market={market} disabled={isLoading} />
@@ -191,6 +195,125 @@ export function TradeInputForm({ onSubmit, isLoading = false }: TradeInputFormPr
               <div className="relative">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-mono">{selectedMarket.currencySymbol}</span>
                 <Input type="number" step="0.01" min="0" placeholder="0.00" value={entryPrice} onChange={(e) => { setEntryPrice(e.target.value); setPriceAutoFilled(false); }} className="trading-input font-mono text-lg pl-8" disabled={isLoading} />
+              </div>
+            )}
+          </div>
+
+          {/* Position Size Input */}
+          <div className="space-y-3">
+            <Label className="flex items-center gap-2 text-sm font-medium">
+              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+              Position size
+            </Label>
+            
+            {/* Type Toggle */}
+            <div className="flex items-center rounded-lg border border-border bg-muted/30 p-1 w-fit">
+              <button
+                type="button"
+                onClick={() => setPositionType('shares')}
+                className={cn(
+                  "px-3 py-1.5 rounded-md text-sm font-medium transition-all",
+                  positionType === 'shares' 
+                    ? "bg-background text-foreground shadow-sm" 
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                Shares
+              </button>
+              <button
+                type="button"
+                onClick={() => setPositionType('dollars')}
+                className={cn(
+                  "px-3 py-1.5 rounded-md text-sm font-medium transition-all",
+                  positionType === 'dollars' 
+                    ? "bg-background text-foreground shadow-sm" 
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                {selectedMarket.currencySymbol} Amount
+              </button>
+            </div>
+
+            {/* Quick Select Chips */}
+            <div className="flex flex-wrap gap-2">
+              {positionType === 'shares' ? (
+                <>
+                  {[10, 50, 100, 500].map((qty) => (
+                    <button
+                      key={qty}
+                      type="button"
+                      onClick={() => setPositionSize(qty.toString())}
+                      className={cn(
+                        "px-3 py-1.5 rounded-full text-sm font-medium transition-all border",
+                        positionSize === qty.toString()
+                          ? "bg-primary/10 text-primary border-primary/30"
+                          : "bg-muted/30 text-muted-foreground border-border hover:border-primary/50"
+                      )}
+                    >
+                      {qty} shares
+                    </button>
+                  ))}
+                </>
+              ) : (
+                <>
+                  {[1000, 5000, 10000, 25000].map((amount) => (
+                    <button
+                      key={amount}
+                      type="button"
+                      onClick={() => setPositionSize(amount.toString())}
+                      className={cn(
+                        "px-3 py-1.5 rounded-full text-sm font-medium transition-all border",
+                        positionSize === amount.toString()
+                          ? "bg-primary/10 text-primary border-primary/30"
+                          : "bg-muted/30 text-muted-foreground border-border hover:border-primary/50"
+                      )}
+                    >
+                      {selectedMarket.currencySymbol}{amount.toLocaleString()}
+                    </button>
+                  ))}
+                </>
+              )}
+            </div>
+
+            {/* Custom Input */}
+            <div className="relative">
+              {positionType === 'dollars' && (
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-mono">
+                  {selectedMarket.currencySymbol}
+                </span>
+              )}
+              <Input
+                type="number"
+                min="1"
+                placeholder={positionType === 'shares' ? 'Number of shares' : 'Investment amount'}
+                value={positionSize}
+                onChange={(e) => setPositionSize(e.target.value)}
+                className={cn("trading-input font-mono", positionType === 'dollars' && "pl-8")}
+                disabled={isLoading}
+              />
+              {positionType === 'shares' && (
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">
+                  shares
+                </span>
+              )}
+            </div>
+
+            {/* Position Value Summary */}
+            {entryPrice && positionSize && (
+              <div className="text-sm text-muted-foreground bg-muted/20 rounded-lg px-3 py-2">
+                {positionType === 'shares' ? (
+                  <>
+                    Total investment: <span className="font-mono font-medium text-foreground">
+                      {selectedMarket.currencySymbol}{(parseFloat(positionSize) * parseFloat(entryPrice)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    ≈ <span className="font-mono font-medium text-foreground">
+                      {Math.floor(parseFloat(positionSize) / parseFloat(entryPrice))}
+                    </span> shares
+                  </>
+                )}
               </div>
             )}
           </div>

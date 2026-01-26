@@ -1,11 +1,14 @@
 import { useState } from 'react';
 import { Target, TrendingUp, TrendingDown, ChevronDown, ChevronUp } from 'lucide-react';
 import { DynamicScenarioSet, DynamicScenario } from '@/lib/scenarioEngine';
+import { calculatePriceRange, formatPrice, formatCurrencyWithSign, calculatePnL } from '@/lib/positionCalculations';
 import { cn } from '@/lib/utils';
 
 interface ScenarioRegimeCardsProps {
   scenarios: DynamicScenarioSet;
   currencySymbol: string;
+  entryPrice: number;
+  shares: number;
 }
 
 interface RegimeCardProps {
@@ -15,6 +18,8 @@ interface RegimeCardProps {
   borderColor: string;
   bgColor: string;
   currencySymbol: string;
+  entryPrice: number;
+  shares: number;
 }
 
 function probabilityToLabel(probability: number): string {
@@ -25,7 +30,7 @@ function probabilityToLabel(probability: number): string {
   return 'Rare';
 }
 
-function RegimeCard({ title, scenarios, icon, borderColor, bgColor, currencySymbol }: RegimeCardProps) {
+function RegimeCard({ title, scenarios, icon, borderColor, bgColor, currencySymbol, entryPrice, shares }: RegimeCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   
   if (scenarios.length === 0) return null;
@@ -41,6 +46,11 @@ function RegimeCard({ title, scenarios, icon, borderColor, bgColor, currencySymb
   const maxReturn = Math.max(...scenarios.map(s => s.returnRangeMax));
 
   const returnIsPositive = (minReturn + maxReturn) / 2 >= 0;
+  
+  // Calculate price range and P&L
+  const priceRange = calculatePriceRange(entryPrice, minReturn, maxReturn);
+  const pnlMin = calculatePnL(entryPrice, minReturn, shares);
+  const pnlMax = calculatePnL(entryPrice, maxReturn, shares);
 
   return (
     <div className={cn(
@@ -70,21 +80,35 @@ function RegimeCard({ title, scenarios, icon, borderColor, bgColor, currencySymb
       </div>
 
       {/* Summary Stats */}
-      <div className="grid grid-cols-2 gap-3 mb-3">
+      <div className="grid grid-cols-1 gap-2 mb-3">
+        {/* Price Targets */}
         <div className="bg-background/50 rounded-lg px-3 py-2">
-          <div className="text-xs text-muted-foreground">Return Range</div>
+          <div className="text-xs text-muted-foreground">Price Target</div>
+          <div className="font-mono font-semibold text-sm text-foreground">
+            {formatPrice(priceRange.priceMin, currencySymbol)} – {formatPrice(priceRange.priceMax, currencySymbol)}
+          </div>
+        </div>
+        
+        {/* P&L Range */}
+        <div className="bg-background/50 rounded-lg px-3 py-2">
+          <div className="text-xs text-muted-foreground">P&L Range ({shares} share{shares !== 1 ? 's' : ''})</div>
           <div className={cn(
             "font-mono font-semibold text-sm",
             returnIsPositive ? "text-bullish" : "text-bearish"
           )}>
-            {minReturn >= 0 ? '+' : ''}{minReturn.toFixed(1)}% to {maxReturn >= 0 ? '+' : ''}{maxReturn.toFixed(1)}%
+            {formatCurrencyWithSign(pnlMin.totalPnl, currencySymbol)} to {formatCurrencyWithSign(pnlMax.totalPnl, currencySymbol)}
           </div>
         </div>
-        <div className="bg-background/50 rounded-lg px-3 py-2">
-          <div className="text-xs text-muted-foreground">Risk Level</div>
-          <div className="font-semibold text-sm text-foreground">
-            {scenarios[0].riskLevel}
-          </div>
+        
+        {/* Return % */}
+        <div className="flex justify-between items-center bg-background/50 rounded-lg px-3 py-2">
+          <span className="text-xs text-muted-foreground">Return</span>
+          <span className={cn(
+            "font-mono text-sm",
+            returnIsPositive ? "text-bullish" : "text-bearish"
+          )}>
+            {minReturn >= 0 ? '+' : ''}{minReturn.toFixed(1)}% to {maxReturn >= 0 ? '+' : ''}{maxReturn.toFixed(1)}%
+          </span>
         </div>
       </div>
 
@@ -113,6 +137,7 @@ function RegimeCard({ title, scenarios, icon, borderColor, bgColor, currencySymb
         <div className="mt-3 pt-3 border-t border-border/50 space-y-2">
           {scenarios.map((scenario) => {
             const prob = scenario.probability > 1 ? scenario.probability : scenario.probability * 100;
+            const scenarioPriceRange = calculatePriceRange(entryPrice, scenario.returnRangeMin, scenario.returnRangeMax);
             return (
               <div 
                 key={scenario.id}
@@ -121,6 +146,9 @@ function RegimeCard({ title, scenarios, icon, borderColor, bgColor, currencySymb
                 <div className="flex justify-between items-start mb-1">
                   <span className="font-medium text-sm text-foreground">{scenario.name}</span>
                   <span className="text-xs font-mono text-muted-foreground">{prob.toFixed(1)}%</span>
+                </div>
+                <div className="text-xs text-muted-foreground mb-1">
+                  Target: {formatPrice(scenarioPriceRange.priceMin, currencySymbol)} – {formatPrice(scenarioPriceRange.priceMax, currencySymbol)}
                 </div>
                 <p className="text-xs text-muted-foreground leading-relaxed">
                   {scenario.description}
@@ -146,7 +174,7 @@ function RegimeCard({ title, scenarios, icon, borderColor, bgColor, currencySymb
   );
 }
 
-export function ScenarioRegimeCards({ scenarios, currencySymbol }: ScenarioRegimeCardsProps) {
+export function ScenarioRegimeCards({ scenarios, currencySymbol, entryPrice, shares }: ScenarioRegimeCardsProps) {
   return (
     <div className="mb-6">
       <h3 className="text-lg font-semibold text-foreground mb-4">Scenario Regimes</h3>
@@ -159,6 +187,8 @@ export function ScenarioRegimeCards({ scenarios, currencySymbol }: ScenarioRegim
           borderColor="border-primary/30"
           bgColor="bg-primary/5"
           currencySymbol={currencySymbol}
+          entryPrice={entryPrice}
+          shares={shares}
         />
         
         <RegimeCard
@@ -168,6 +198,8 @@ export function ScenarioRegimeCards({ scenarios, currencySymbol }: ScenarioRegim
           borderColor="border-bullish/30"
           bgColor="bg-bullish/5"
           currencySymbol={currencySymbol}
+          entryPrice={entryPrice}
+          shares={shares}
         />
         
         <RegimeCard
@@ -177,6 +209,8 @@ export function ScenarioRegimeCards({ scenarios, currencySymbol }: ScenarioRegim
           borderColor="border-bearish/30"
           bgColor="bg-bearish/5"
           currencySymbol={currencySymbol}
+          entryPrice={entryPrice}
+          shares={shares}
         />
       </div>
     </div>

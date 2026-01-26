@@ -12,8 +12,10 @@ import {
   ScenarioRegimeCards, 
   RiskInterpretation, 
   ActionPanel,
-  AdvancedMetrics 
+  AdvancedMetrics,
+  PnLSummary
 } from '@/components/workspace';
+import { investmentToShares } from '@/lib/positionCalculations';
 import { supabase } from '@/integrations/supabase/client';
 import { useTrade } from '@/hooks/useTrade';
 import { useUsage } from '@/hooks/useUsage';
@@ -93,7 +95,13 @@ export default function Workspace() {
   }
 
   const currencySymbol = analysis ? MARKETS[analysis.input.market].currencySymbol : '$';
-
+  
+  // Calculate shares for position display
+  const shares = analysis 
+    ? (analysis.input.positionType === 'dollars' && analysis.input.positionSize
+        ? investmentToShares(analysis.input.positionSize, analysis.input.entryPrice)
+        : (analysis.input.positionSize || 1))
+    : 1;
   return (
     <Layout>
       <div className="section-container py-8">
@@ -211,7 +219,14 @@ export default function Workspace() {
                   )}
 
                   {/* Risk Snapshot - Above the fold */}
-                  <RiskSnapshot analysis={analysis} />
+                  <RiskSnapshot analysis={analysis} currencySymbol={currencySymbol} />
+
+                  {/* P&L Summary - Position economics */}
+                  <PnLSummary 
+                    analysis={analysis} 
+                    shares={shares} 
+                    currencySymbol={currencySymbol} 
+                  />
 
                   {/* Tail Risk Panel - First-class, emphasized */}
                   <TailRiskPanel 
@@ -226,6 +241,8 @@ export default function Workspace() {
                   <ScenarioRegimeCards 
                     scenarios={analysis.scenarios}
                     currencySymbol={currencySymbol}
+                    entryPrice={analysis.input.entryPrice}
+                    shares={shares}
                   />
 
                   {/* Distribution Chart */}
