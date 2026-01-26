@@ -1,9 +1,11 @@
 import { useState } from 'react';
-import { Bookmark, Bell, FolderPlus, FileText, Download, RotateCcw, Loader2 } from 'lucide-react';
+import { Bookmark, Bell, FolderPlus, FileText, Download, RotateCcw, Loader2, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { usePlan } from '@/hooks/usePlan';
 import { useToast } from '@/hooks/use-toast';
 import { EnhancedTradeAnalysis } from '@/types/analysis';
+import { useTrackedAssets } from '@/hooks/useTrackedAssets';
+import { TrackAssetModal } from './TrackAssetModal';
 
 interface ActionPanelProps {
   analysis: EnhancedTradeAnalysis;
@@ -12,22 +14,17 @@ interface ActionPanelProps {
 }
 
 export function ActionPanel({ analysis, onNewAnalysis, isHistorical }: ActionPanelProps) {
-  const { plan, canExport } = usePlan();
+  const { canExport } = usePlan();
   const { toast } = useToast();
+  const { isAssetTracked } = useTrackedAssets();
   const [isExporting, setIsExporting] = useState(false);
+  const [showTrackModal, setShowTrackModal] = useState(false);
 
-  const handleTrackAsset = () => {
-    toast({
-      title: "Coming Soon",
-      description: "Asset tracking will be available in an upcoming release.",
-    });
-  };
+  const existingTrack = isAssetTracked(analysis.input.asset, analysis.input.market);
 
   const handleMonitorRisk = () => {
-    toast({
-      title: "Coming Soon", 
-      description: "Risk monitoring alerts will be available in an upcoming release.",
-    });
+    // Open track modal - monitoring is part of tracking
+    setShowTrackModal(true);
   };
 
   const handleAddToPortfolio = () => {
@@ -120,11 +117,15 @@ export function ActionPanel({ analysis, onNewAnalysis, isHistorical }: ActionPan
         <Button
           variant="outline"
           size="sm"
-          onClick={handleTrackAsset}
-          className="flex flex-col items-center gap-1.5 h-auto py-3"
+          onClick={() => setShowTrackModal(true)}
+          className="flex flex-col items-center gap-1.5 h-auto py-3 relative"
         >
-          <Bookmark className="h-4 w-4" />
-          <span className="text-xs">Track Asset</span>
+          {existingTrack ? (
+            <Check className="h-4 w-4 text-emerald-500" />
+          ) : (
+            <Bookmark className="h-4 w-4" />
+          )}
+          <span className="text-xs">{existingTrack ? 'Tracking' : 'Track Asset'}</span>
         </Button>
 
         <Button
@@ -191,6 +192,13 @@ export function ActionPanel({ analysis, onNewAnalysis, isHistorical }: ActionPan
           </p>
         </div>
       )}
+
+      {/* Track Asset Modal */}
+      <TrackAssetModal
+        open={showTrackModal}
+        onOpenChange={setShowTrackModal}
+        analysis={analysis}
+      />
     </div>
   );
 }
