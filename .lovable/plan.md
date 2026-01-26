@@ -1,143 +1,81 @@
 
-# Implementation Plan: Account Page Redesign, Dashboard Cleanup, and About/Blog Expansion
+# Plan: Enhance OutputLens Google Search Appearance
 
 ## Overview
 
-This plan covers multiple interconnected changes to improve the user experience:
-1. **Account Page Redesign** - Add profile picture upload directly on Account page with improved design
-2. **Dashboard Cleanup** - Rename to "Home", remove duplicate account info, replace Market Intelligence with Latest Articles
-3. **About Page Enhancement** - Add formal mission statement and create 2 detailed educational articles
-4. **Blog Infrastructure** - Set up structure for monthly finance articles
+Your current SEO setup is already solid. This plan adds specific enhancements to ensure the OutputLens logo appears in Google search results and improves overall search visibility.
 
----
+## Current Status (Already Configured)
+- Title: "OutputLens: AI Risk & Scenario Intelligence | Monte Carlo Simulation"
+- Meta description with OutputLens branding
+- Favicon set to `/logo.png`
+- Open Graph image for social sharing
+- Basic Schema.org structured data
 
-## 1. Account Page Redesign
+## Enhancements to Make
 
-### Current Issues
-- No direct profile picture upload on Account page (users must click through to complete this)
-- Design feels basic compared to other institutional-grade pages
+### 1. Add Logo URL to Organization Schema
+Google uses the `logo` property in Organization schema to display logos in Knowledge Panels and search results.
 
-### Changes
-- **Add ProfilePhotoCard** at the top of the Profile tab with the existing `AvatarUpload` component
-- Add a visually prominent avatar section with:
-  - Large avatar preview (128px)
-  - Drag-and-drop upload zone
-  - Clear "Change Photo" button
-- Improve overall card styling to match the institutional design system
+**Change in `index.html`:**
+Add `"logo": "https://outputlens.com/logo.png"` to the Organization schema
 
-### Files to Modify
-- `src/pages/Account.tsx` - Add profile photo section
-- `src/components/account/ProfileSection.tsx` - Integrate avatar upload at top of card
+### 2. Add WebSite Schema for Sitelinks
+This helps Google understand the site structure and may enable sitelinks in search results.
 
----
+**Add to Schema.org in `index.html`:**
+```json
+{
+  "@type": "WebSite",
+  "name": "OutputLens",
+  "url": "https://outputlens.com",
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": "https://outputlens.com/workspace?q={search_term_string}",
+    "query-input": "required name=search_term_string"
+  }
+}
+```
 
-## 2. Dashboard Page Updates
+### 3. Add Additional Favicon Sizes
+For better cross-platform support, add multiple favicon sizes:
+- 16x16, 32x32 (standard)
+- 192x192, 512x512 (Android/PWA)
 
-### Changes
+**Note:** This requires creating additional logo sizes. For now, I'll add references that will work with your existing `/logo.png`.
 
-**a) Rename to "Home" in Navigation**
-- Update Header to show "Home" instead of "Dashboard"
-- Update translation keys in LanguageContext
+### 4. Ensure Logo in SoftwareApplication Schema
+Add `"image"` property to link the logo for the application listing.
 
-**b) Remove Duplicate Account Info**
-The `DashboardHero` component currently shows:
-- Avatar + display name + plan badge + remaining analyses
+## Technical Changes
 
-This duplicates the `AccountHeader` component. We will:
-- Keep `AccountHeader` at the top (compact profile summary with photo)
-- Modify `DashboardHero` to ONLY show:
-  - The headline "AI-Powered Risk & Scenario Intelligence"
-  - The tagline
-  - Usage info (remaining analyses)
-  - Settings + Upgrade buttons
-- Remove the duplicate avatar/name/plan from `DashboardHero`
+| File | Change |
+|------|--------|
+| `index.html` | Add `logo` to Organization schema |
+| `index.html` | Add `WebSite` schema for sitelinks |
+| `index.html` | Add `image` to SoftwareApplication schema |
+| `index.html` | Add additional favicon link tags for various sizes |
 
-**c) Replace Market Intelligence with Latest Articles**
-- Create new `LatestArticles` component that links to the About page articles
-- Display 2-3 article cards with title, category badge, and read time
-- Link to `/about#learn` for "See All"
+## Implementation Details
 
-### Files to Modify
-- `src/components/layout/Header.tsx` - Rename Dashboard to Home
-- `src/contexts/LanguageContext.tsx` - Update translation key
-- `src/components/dashboard/DashboardHero.tsx` - Remove duplicate account info
-- `src/components/dashboard/MarketIntelligence.tsx` - Replace with `LatestArticles.tsx`
-- `src/components/dashboard/index.ts` - Update exports
+The Schema.org Organization will be updated to:
+```json
+{
+  "@type": "Organization",
+  "name": "OutputLens",
+  "url": "https://outputlens.com",
+  "logo": "https://outputlens.com/logo.png",
+  "description": "...",
+  "sameAs": []
+}
+```
 
----
+## Important Note About Google
 
-## 3. About Page Enhancements
+After publishing:
+1. **Indexing delay**: Google takes time to crawl and update search results (days to weeks)
+2. **Logo display**: Google doesn't guarantee logo display; it depends on various factors
+3. **Verify in Search Console**: You can use Google Search Console to verify your structured data is being read correctly
 
-### Changes
-
-**a) Add Formal Mission Statement**
-Add a dedicated mission statement section after the hero:
-> "OutputLens exists to democratize institutional-grade risk analysis. We believe every trader deserves to quantify their downside before they trade - not guess. Our mission is to close the gap between retail intuition and hedge fund precision."
-
-**b) Create 2 Detailed Educational Articles**
-
-The articles will be embedded directly in the About page (expandable or as separate sections with anchors):
-
-**Article 1: "Understanding Trading & Investment Terms"**
-- Category: Glossary
-- Read time: 10 min
-- Content structure:
-  - **OutputLens Terminology**: Win Probability, VaR (Value at Risk), Expected Shortfall, Monte Carlo Simulation, Tail Risk, Sharpe Ratio, Kurtosis, Skewness
-  - **Industry Standard Terms**: Alpha, Beta, Drawdown, Leverage, Position Sizing, Stop Loss, Take Profit, Risk-Reward Ratio
-  - Each term includes: Definition, Why it matters, How OutputLens helps
-
-**Article 2: "Trading & Hedge Fund Strategies in 2026"**
-- Category: Strategy
-- Read time: 12 min
-- Content structure:
-  - **Momentum Strategies**: Riding trends with quantified entry/exit
-  - **Mean Reversion**: Identifying overextended moves
-  - **Risk Parity**: Balancing portfolios by risk contribution
-  - **Quantitative/Systematic**: Algorithm-driven decision making
-  - **Event-Driven**: Earnings, M&A, macro events
-  - How OutputLens supports each strategy type
-
-**c) Add Monthly Finance Article Placeholder**
-- Add a "Monthly Insights" section with a placeholder card
-- Shows "Coming February 2026: [Topic TBD]"
-- Structure for future dynamic loading
-
-### Files to Modify
-- `src/pages/About.tsx` - Complete redesign with mission statement and full articles
-
----
-
-## 4. Create Article Pages (Optional Future Enhancement)
-
-For now, articles will be embedded in the About page. Later, you could:
-- Create individual article pages (`/articles/trading-terms`, `/articles/strategies-2026`)
-- Store articles in database for dynamic loading
-- Add monthly article publishing workflow
-
----
-
-## Technical Summary
-
-| File | Change Type | Description |
-|------|-------------|-------------|
-| `src/pages/Account.tsx` | Modify | Add ProfilePhotoCard section |
-| `src/components/account/ProfileSection.tsx` | Modify | Integrate avatar upload with improved UI |
-| `src/components/layout/Header.tsx` | Modify | Rename "Dashboard" to "Home" |
-| `src/contexts/LanguageContext.tsx` | Modify | Update translation keys |
-| `src/components/dashboard/DashboardHero.tsx` | Modify | Remove duplicate avatar/name/plan |
-| `src/components/dashboard/LatestArticles.tsx` | Create | New component for article cards |
-| `src/components/dashboard/MarketIntelligence.tsx` | Delete | Replace with LatestArticles |
-| `src/components/dashboard/index.ts` | Modify | Update exports |
-| `src/pages/Dashboard.tsx` | Modify | Swap MarketIntelligence for LatestArticles |
-| `src/pages/About.tsx` | Modify | Add mission statement, 2 full articles, monthly section |
-
----
-
-## Implementation Order
-
-1. **Account Page** - Add avatar upload with improved design
-2. **Header** - Rename Dashboard to Home
-3. **Dashboard cleanup** - Remove duplicate account info from DashboardHero
-4. **LatestArticles** - Create component and replace MarketIntelligence
-5. **About Page** - Add mission statement and full article content
-
+## Files to Modify
+- `index.html` - Update Schema.org structured data with logo references and WebSite schema
