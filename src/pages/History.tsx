@@ -61,7 +61,7 @@ export default function History() {
           {/* Header */}
           <div className="flex items-center gap-4 mb-8">
             <Button variant="ghost" size="icon" asChild>
-              <Link to="/analyze">
+              <Link to="/workspace">
                 <ArrowLeft className="h-5 w-5" />
               </Link>
             </Button>

@@ -335,7 +335,7 @@ export default function Demo() {
                     </Button>
                   </div>
                   <p className="text-sm text-muted-foreground mt-4">
-                    ✓ 10 free analyses/month • ✓ No credit card required
+                    ✓ 5 free analyses/month • ✓ No credit card required
                   </p>
                 </CardContent>
               </Card>

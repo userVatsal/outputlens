@@ -2,10 +2,25 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "https://outputlens.com",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+const getAllowedOrigin = (requestOrigin: string | null): string => {
+  const allowedOrigins = [
+    "https://outputlens.com",
+    "https://outputlens.lovable.app",
+    "http://localhost:5173",
+    "http://localhost:8080"
+  ];
+  if (requestOrigin?.includes('.lovable.app')) {
+    return requestOrigin;
+  }
+  return allowedOrigins.includes(requestOrigin || '') 
+    ? requestOrigin! 
+    : allowedOrigins[0];
 };
+
+const getCorsHeaders = (req: Request) => ({
+  "Access-Control-Allow-Origin": getAllowedOrigin(req.headers.get("origin")),
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+});
 
 const logStep = (step: string, details?: Record<string, unknown>) => {
   const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
@@ -13,6 +28,8 @@ const logStep = (step: string, details?: Record<string, unknown>) => {
 };
 
 serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req);
+  
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
