@@ -105,21 +105,21 @@ export function InteractivePreview({ className }: InteractivePreviewProps) {
           <div className="flex justify-between items-center p-3 rounded-lg bg-bullish/5 border border-bullish/20">
             <div className="flex items-center gap-2">
               <TrendingUp className="h-4 w-4 text-bullish" />
-              <span className="text-sm font-medium">Upside Potential</span>
+              <span className="text-sm font-medium">Bullish Continuation</span>
             </div>
             <Badge variant="outline" className="text-bullish">24% probability</Badge>
           </div>
           <div className="flex justify-between items-center p-3 rounded-lg bg-muted">
             <div className="flex items-center gap-2">
               <BarChart3 className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm font-medium">Base Case</span>
+              <span className="text-sm font-medium">Base Regime</span>
             </div>
             <Badge variant="outline">50% probability</Badge>
           </div>
           <div className="flex justify-between items-center p-3 rounded-lg bg-bearish/5 border border-bearish/20">
             <div className="flex items-center gap-2">
               <Shield className="h-4 w-4 text-bearish" />
-              <span className="text-sm font-medium">Downside Risk</span>
+              <span className="text-sm font-medium">Bearish Scenario</span>
             </div>
             <Badge variant="outline" className="text-bearish">26% probability</Badge>
           </div>
