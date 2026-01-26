@@ -181,7 +181,7 @@ export function ScenarioRegimeCards({ scenarios, currencySymbol, entryPrice, sha
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <RegimeCard
-          title="Base Case"
+          title="Base Regime"
           scenarios={scenarios.base}
           icon={<Target className="h-5 w-5 text-primary" />}
           borderColor="border-primary/30"
@@ -192,7 +192,7 @@ export function ScenarioRegimeCards({ scenarios, currencySymbol, entryPrice, sha
         />
         
         <RegimeCard
-          title="Upside"
+          title="Bullish Continuation"
           scenarios={scenarios.upside}
           icon={<TrendingUp className="h-5 w-5 text-bullish" />}
           borderColor="border-bullish/30"
@@ -203,7 +203,7 @@ export function ScenarioRegimeCards({ scenarios, currencySymbol, entryPrice, sha
         />
         
         <RegimeCard
-          title="Downside"
+          title="Bearish Scenario"
           scenarios={scenarios.downside}
           icon={<TrendingDown className="h-5 w-5 text-bearish" />}
           borderColor="border-bearish/30"

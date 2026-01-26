@@ -8,6 +8,7 @@ import { LanguageProvider } from "@/contexts/LanguageContext";
 import { TrackingProvider } from "@/components/tracking/TrackingProvider";
 import Landing from "./pages/Landing";
 import Auth from "./pages/Auth";
+import Dashboard from "./pages/Dashboard";
 import Workspace from "./pages/Workspace";
 import Results from "./pages/Results";
 import Portfolio from "./pages/Portfolio";
@@ -35,6 +36,7 @@ const App = () => (
               <Routes>
                 <Route path="/" element={<Landing />} />
                 <Route path="/auth" element={<Auth />} />
+                <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/workspace" element={<Workspace />} />
                 <Route path="/analyze" element={<Navigate to="/workspace" replace />} />
                 <Route path="/results" element={<Results />} />
