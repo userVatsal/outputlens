@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X, LogOut, User, Languages, History, Bookmark } from 'lucide-react';
+import { Menu, X, LogOut, User, Languages, History, Bookmark, LayoutDashboard } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import {
@@ -103,6 +103,12 @@ export function Header() {
             {user ? (
               <>
                 <RiskAlertBell />
+                <Button variant="ghost" size="sm" asChild>
+                  <Link to="/dashboard" className="flex items-center gap-2">
+                    <LayoutDashboard className="h-4 w-4" />
+                    Dashboard
+                  </Link>
+                </Button>
                 <Button variant="ghost" size="sm" asChild>
                   <Link to="/tracked-assets" className="flex items-center gap-2">
                     <Bookmark className="h-4 w-4" />

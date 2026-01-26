@@ -167,16 +167,16 @@ export function TradeInputForm({ onSubmit, isLoading = false }: TradeInputFormPr
       {/* Step 2: Direction */}
       {selectedAsset && (
         <div className="space-y-3 animate-in fade-in slide-in-from-top-2">
-          <Label className="flex items-center gap-2 text-sm font-medium">What's your view?</Label>
+          <Label className="flex items-center gap-2 text-sm font-medium">Market Outlook</Label>
           <div className="grid grid-cols-2 gap-3">
             <button type="button" onClick={() => setDirection('long')} disabled={isLoading} className={cn("flex flex-col items-center gap-2 rounded-lg border-2 px-4 py-4 font-medium transition-all", direction === 'long' ? "border-bullish bg-bullish/10 text-bullish" : "border-border bg-muted/30 text-muted-foreground hover:border-bullish/50")}>
-              <TrendingUp className="h-6 w-6" /><span className="text-sm">I think it will go <strong>up</strong> ↗</span>
+              <TrendingUp className="h-6 w-6" /><span className="text-sm">Bullish View ↗</span>
             </button>
             <button type="button" onClick={() => setDirection('short')} disabled={isLoading} className={cn("flex flex-col items-center gap-2 rounded-lg border-2 px-4 py-4 font-medium transition-all", direction === 'short' ? "border-bearish bg-bearish/10 text-bearish" : "border-border bg-muted/30 text-muted-foreground hover:border-bearish/50")}>
-              <TrendingDown className="h-6 w-6" /><span className="text-sm">I think it will go <strong>down</strong> ↘</span>
+              <TrendingDown className="h-6 w-6" /><span className="text-sm">Bearish View ↘</span>
             </button>
           </div>
-          {direction && <p className="text-sm text-muted-foreground flex items-center gap-2"><Check className="h-4 w-4 text-bullish" />Got it — you're betting on <strong className="text-foreground">{selectedAsset.name}</strong> going <strong className={direction === 'long' ? 'text-bullish' : 'text-bearish'}>{direction === 'long' ? 'up' : 'down'}</strong>.</p>}
+          {direction && <p className="text-sm text-muted-foreground flex items-center gap-2"><Check className="h-4 w-4 text-bullish" />Position: <strong className="text-foreground">{selectedAsset.name}</strong> — <strong className={direction === 'long' ? 'text-bullish' : 'text-bearish'}>{direction === 'long' ? 'Bullish' : 'Bearish'}</strong> outlook.</p>}
         </div>
       )}
 
@@ -336,7 +336,7 @@ export function TradeInputForm({ onSubmit, isLoading = false }: TradeInputFormPr
       )}
 
       <Button type="submit" disabled={!isValid || isLoading} className="w-full py-6 text-lg font-semibold">
-        {isLoading ? <><Loader2 className="mr-2 h-5 w-5 animate-spin" />Crunching 10,000 scenarios...</> : 'Show me the scenarios'}
+        {isLoading ? <><Loader2 className="mr-2 h-5 w-5 animate-spin" />Analyzing 10,000 scenarios...</> : 'Analyze Risk & Scenarios'}
       </Button>
     </form>
   );

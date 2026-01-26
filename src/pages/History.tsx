@@ -23,7 +23,7 @@ export default function History() {
 
   // SEO: Set page-specific document title
   useEffect(() => {
-    document.title = 'Trade History | OutputLens';
+    document.title = 'Historical Risk & Scenario Reports | OutputLens';
   }, []);
 
   useEffect(() => {
@@ -66,8 +66,8 @@ export default function History() {
               </Link>
             </Button>
             <div>
-              <h1 className="text-2xl font-bold text-foreground font-brand">Analysis History</h1>
-              <p className="text-muted-foreground">Click any trade to view the full analysis</p>
+              <h1 className="text-2xl font-bold text-foreground font-brand">Historical Risk & Scenario Reports</h1>
+              <p className="text-muted-foreground">Click any analysis to view the full risk report</p>
             </div>
           </div>
 
@@ -78,12 +78,12 @@ export default function History() {
           ) : history.length === 0 ? (
             <div className="glass-card p-12 text-center">
               <BarChart3 className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h2 className="text-lg font-semibold text-foreground mb-2">No analyses yet</h2>
+              <h2 className="text-lg font-semibold text-foreground mb-2">No risk reports yet</h2>
               <p className="text-muted-foreground mb-6">
-                Start analyzing trades to build your history
+                Perform your first risk analysis to build your history
               </p>
               <Button asChild>
-                <Link to="/analyze">Analyze Your First Trade</Link>
+                <Link to="/workspace">Perform Risk Analysis</Link>
               </Button>
             </div>
           ) : (

@@ -171,7 +171,7 @@ export default function TrackedAssets() {
   const [user, setUser] = useState<boolean>(false);
 
   useEffect(() => {
-    document.title = 'Tracked Assets - Risk Monitoring | OutputLens';
+    document.title = 'Monitored Assets - Risk Tracking | OutputLens';
   }, []);
 
   useEffect(() => {
@@ -220,17 +220,17 @@ export default function TrackedAssets() {
               <div>
                 <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
                   <Bookmark className="h-6 w-6 text-primary" />
-                  Tracked Assets
+                  Monitored Assets
                 </h1>
                 <p className="text-muted-foreground">
-                  Monitor risk changes across your positions
+                  Track risk changes across your positions
                 </p>
               </div>
             </div>
             <Button asChild>
               <Link to="/workspace">
                 <BarChart3 className="h-4 w-4 mr-2" />
-                New Analysis
+                Perform Risk Analysis
               </Link>
             </Button>
           </div>
@@ -244,14 +244,14 @@ export default function TrackedAssets() {
             <Card className="text-center py-16">
               <CardContent>
                 <Bookmark className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-50" />
-                <h3 className="text-lg font-semibold mb-2">No Tracked Assets</h3>
+                <h3 className="text-lg font-semibold mb-2">No Monitored Assets</h3>
                 <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-                  Start tracking assets from your analysis results to receive automated risk monitoring and alerts.
+                  Start monitoring assets from your risk analysis results to receive automated alerts and risk tracking.
                 </p>
                 <Button asChild>
                   <Link to="/workspace">
                     <BarChart3 className="h-4 w-4 mr-2" />
-                    Run Your First Analysis
+                    Perform Your First Risk Analysis
                   </Link>
                 </Button>
               </CardContent>
