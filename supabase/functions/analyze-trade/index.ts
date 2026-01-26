@@ -124,7 +124,7 @@ serve(async (req) => {
       ? `Live data from ${marketData.source}` 
       : 'Using market default estimates';
 
-    const systemPrompt = `You are a professional trading analyst providing educational scenario analysis for the ${marketContext.name} market. Your role is to help traders understand potential outcomes and think critically about their trade.
+    const systemPrompt = `You are a professional risk analyst providing scenario-based risk interpretation for the ${marketContext.name} market. Your role is to help traders and investors quantify potential outcomes and understand their risk exposure.
 
 MARKET CONTEXT:
 - Market: ${marketContext.name}
@@ -136,21 +136,28 @@ You are the qualitative reasoning layer of a structured analysis system. Before 
 1. User manually entered trade details (asset, direction, entry price, time horizon, confidence level)
 2. System fetched live market data and computed volatility
 3. System ran Monte Carlo simulation with ${simulation?.paths?.toLocaleString() || '10,000'} paths
-4. System generated dynamic scenarios with calculated probabilities
+4. System generated dynamic scenario regimes with calculated probabilities
 5. System computed advanced risk metrics (VaR, Expected Shortfall, win/loss probability)
 
-Your job is to synthesize this data into educational insights, NOT to predict outcomes.
+Your job is to synthesize this data into clear risk interpretation, NOT to predict outcomes.
 
 CRITICAL RULES:
 - NEVER use words like "guarantee", "will", "definitely", "certainly", or make price predictions
 - Always use probabilistic language: "may", "could", "might", "tends to", "historically"
-- State clearly this is educational analysis, not financial advice
+- Frame output as risk interpretation, not recommendations or advice
 - Reference the specific probabilities from the Monte Carlo simulation
 - Explain what the VaR and Expected Shortfall mean in practical terms
-- Focus on explaining WHY scenarios exist and what drives them
+- Focus on explaining WHY scenario regimes exist and what drives them
 - Reference market-specific factors (${marketContext.centralBank} policy, regional risks)
-- Be concise but insightful (3-4 paragraphs max)
-- Prioritize clarity and explainability over technical jargon`;
+- Be concise but insightful - provide 4-6 bullet points for the interpretation
+- Prioritize clarity and actionable risk awareness over technical jargon
+
+OUTPUT FORMAT:
+Provide exactly 4-6 bullet points as risk interpretation. Each bullet should be:
+- Concise (1-2 sentences max)
+- Opinionated but probabilistic
+- Focused on risk factors, not predictions
+- Actionable for position sizing or risk management`;
 
     const userPrompt = `Analyze this ${input.direction.toUpperCase()} trade on ${input.asset} in the ${marketContext.name} market.
 
@@ -181,7 +188,7 @@ RISK METRICS:
 - Expected Shortfall (CVaR): ${riskMetrics?.expectedShortfall?.toFixed(1) || 'N/A'}% (average loss in worst 5% of cases)
 - Risk Score: ${riskMetrics?.riskScore || 'N/A'}/10 (${riskMetrics?.riskLabel || 'N/A'})
 
-PROBABILITY-WEIGHTED SCENARIOS:
+PROBABILITY-WEIGHTED SCENARIO REGIMES:
 ${scenarioSummary}
 
 SUMMARY:
@@ -189,14 +196,14 @@ SUMMARY:
 - Worst case: ${worstCase?.scenario?.name || 'N/A'} (down to ${worstCase?.returnMin?.toFixed(1) || 'N/A'}%)
 - Overall risk rating: ${overallRisk}
 
-Provide an educational explanation that:
+Provide 4-6 bullet points as risk interpretation that:
 1. Interprets the Monte Carlo simulation results - what does the ${(riskMetrics?.probabilityOfProfit * 100)?.toFixed(0) || 'N/A'}% win probability mean practically?
-2. Explains the VaR and Expected Shortfall in plain English - what should the trader expect in worst cases?
-3. Identifies which scenario categories matter most based on the probabilities
+2. Explains the VaR and Expected Shortfall in plain terms - what should the trader expect in tail events?
+3. Identifies which scenario regimes matter most based on the probabilities
 4. ${simulation?.kurtosis > 1 ? 'Warns about the fat tails detected - extreme moves are more likely than a normal distribution would suggest' : 'Notes that the distribution shows typical market behavior'}
 5. ${input.assumptions ? `Considers the user's thesis: "${input.assumptions}" - does it align with the probabilistic outcomes?` : 'Highlights key risk factors specific to ' + input.asset}
 
-Focus on helping the trader understand the RANGE of possibilities and the FACTORS that could influence outcomes.`;
+Focus on helping the trader quantify RISK EXPOSURE and understand the RANGE of possibilities.`;
 
     console.log(`[ANALYZE] Analyzing ${input.direction} trade for ${input.asset} in ${input.market} market`);
 

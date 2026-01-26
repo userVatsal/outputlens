@@ -12,7 +12,7 @@ export function Footer() {
               <BrandLogo size="md" />
             </Link>
             <p className="text-sm text-muted-foreground">
-              Educational scenario analysis for traders. Understand potential outcomes before you trade.
+              AI-powered risk & scenario intelligence. Quantify downside before you trade.
             </p>
           </div>
 
@@ -21,8 +21,8 @@ export function Footer() {
             <h4 className="font-semibold text-foreground">Product</h4>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link to="/analyze" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Analyze Trade
+                <Link to="/workspace" className="text-muted-foreground hover:text-foreground transition-colors">
+                  Risk Workspace
                 </Link>
               </li>
               <li>
@@ -59,9 +59,9 @@ export function Footer() {
           <div className="space-y-4">
             <h4 className="font-semibold text-foreground">Disclaimer</h4>
             <p className="text-xs text-muted-foreground">
-              OutputLens is for educational purposes only. It does not provide financial advice, 
-              predictions, or recommendations. Past scenarios do not guarantee future results. 
-              Always consult a qualified financial advisor before trading.
+              OutputLens provides risk analysis and scenario modeling for informational purposes only. 
+              It does not provide financial advice, predictions, or trading signals. 
+              Past scenarios do not guarantee future results.
             </p>
           </div>
         </div>
@@ -71,7 +71,7 @@ export function Footer() {
             © {new Date().getFullYear()} OutputLens. All rights reserved.
           </p>
           <p className="text-xs text-muted-foreground">
-            Not financial advice. For educational purposes only.
+            Risk analysis for informational purposes only. Not financial advice.
           </p>
         </div>
       </div>

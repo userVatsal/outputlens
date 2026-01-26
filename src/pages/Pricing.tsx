@@ -17,7 +17,7 @@ const plans: { key: SubscriptionPlan; badge?: string }[] = [
 const faqs = [
   {
     question: 'Is this financial advice?',
-    answer: 'No. OutputLens is an educational tool that shows the probability distribution of possible outcomes using Monte Carlo simulation. It does not provide financial advice, trading signals, or predictions.',
+    answer: 'No. OutputLens is a risk analysis platform that shows the probability distribution of possible outcomes using Monte Carlo simulation. It does not provide financial advice, trading signals, or predictions.',
   },
   {
     question: 'How do the simulations work?',
@@ -33,7 +33,7 @@ const faqs = [
   },
   {
     question: 'What markets are supported?',
-    answer: 'We support US (NYSE/NASDAQ), UK (LSE), and European (Euronext/DAX) markets with region-specific scenarios and local currencies.',
+    answer: 'We support US (NYSE/NASDAQ), UK (LSE), and European (Euronext/DAX) markets with region-specific scenario regimes and local currencies.',
   },
   {
     question: 'How is my data used?',
@@ -47,7 +47,7 @@ export default function Pricing() {
 
   // SEO: Set page-specific document title
   useEffect(() => {
-    document.title = 'Pricing Plans - AI Risk Analysis Tool | OutputLens';
+    document.title = 'Pricing Plans - AI Risk & Scenario Intelligence | OutputLens';
   }, []);
 
   const handleSubscribe = async (planKey: SubscriptionPlan) => {
@@ -195,8 +195,8 @@ export default function Pricing() {
         {/* Disclaimer */}
         <div className="mt-16 text-center">
           <p className="text-xs text-muted-foreground max-w-xl mx-auto">
-            OutputLens is for educational purposes only. It does not provide financial advice
-            or trading recommendations. Past scenarios do not guarantee future results.
+            OutputLens provides risk analysis and scenario modeling for informational purposes only. 
+            It does not provide financial advice or trading signals. Past scenarios do not guarantee future results.
           </p>
         </div>
       </div>

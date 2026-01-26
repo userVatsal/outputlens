@@ -136,7 +136,7 @@ export function InteractivePreview({ className }: InteractivePreviewProps) {
         </Button>
         <Button variant="outline" asChild className="flex-1">
           <Link to="/auth?mode=signup">
-            Analyze Your Trades
+            Run Risk Analysis
             <ArrowRight className="ml-2 h-4 w-4" />
           </Link>
         </Button>

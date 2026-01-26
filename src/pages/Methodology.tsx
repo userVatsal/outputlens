@@ -63,8 +63,8 @@ const principles = [
   },
   {
     icon: Brain,
-    title: 'Think Systematically',
-    description: 'Replace gut feelings with quantified scenarios. Build intuition through simulation.',
+    title: 'Quantitative + Qualitative',
+    description: 'Combine market data with sentiment signals. Build intuition through rigorous simulation.',
   },
   {
     icon: Activity,
@@ -83,7 +83,7 @@ const dataPoints = [
 export default function Methodology() {
   // SEO: Set page-specific document title
   useEffect(() => {
-    document.title = 'Methodology - How Monte Carlo Simulation Works | OutputLens';
+    document.title = 'Methodology - Monte Carlo Simulation for Risk Analysis | OutputLens';
   }, []);
 
   return (
@@ -213,10 +213,10 @@ export default function Methodology() {
             <div className="text-center mb-10">
               <Badge variant="outline" className="mb-4">Scenario Framework</Badge>
               <h2 className="text-3xl font-bold text-foreground font-brand mb-3">
-                Four Base Scenarios
+                Four Base Scenario Regimes
               </h2>
               <p className="text-muted-foreground max-w-xl mx-auto">
-                Every analysis produces four core scenarios derived from the simulation distribution.
+                Every analysis produces four core scenario regimes derived from the simulation distribution.
               </p>
             </div>
             
@@ -257,7 +257,7 @@ export default function Methodology() {
                 Market-Specific Tail Events
               </h2>
               <p className="text-muted-foreground max-w-xl mx-auto">
-                Additional scenarios based on regional factors and central bank policies.
+                Additional scenario regimes based on regional factors and central bank policies.
               </p>
             </div>
             
@@ -361,14 +361,14 @@ export default function Methodology() {
                 <AlertTriangle className="h-5 w-5 text-caution" />
               </div>
               <div>
-                <h3 className="font-semibold text-foreground mb-2">Educational Tool Only</h3>
+                <h3 className="font-semibold text-foreground mb-2">Risk Analysis Disclaimer</h3>
                 <p className="text-sm text-muted-foreground mb-4">
                   OutputLens shows probability distributions based on mathematical models—not predictions. 
                   Markets are inherently unpredictable. Past volatility patterns do not guarantee future results. 
                   This is not financial advice.
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  Always consult a qualified financial advisor before making investment decisions.
+                  Always conduct your own due diligence before making investment decisions.
                 </p>
               </div>
             </div>
@@ -385,19 +385,19 @@ export default function Methodology() {
             
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-bullish/10 border border-bullish/20 text-bullish text-sm font-medium mb-6">
               <Sparkles className="h-4 w-4" />
-              10,000 scenarios. Zero guesswork.
+              10,000 scenario regimes. Zero guesswork.
             </div>
             
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Button size="lg" asChild className="px-8">
                 <Link to="/demo">
                   <LineChart className="mr-2 h-5 w-5" />
-                  See Live Demo
+                  See Live Analysis
                 </Link>
               </Button>
               <Button size="lg" variant="outline" asChild className="px-8">
-                <Link to="/analyze">
-                  Analyze Your Trade
+                <Link to="/workspace">
+                  Run Risk Analysis
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
