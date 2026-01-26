@@ -173,6 +173,11 @@ export default function Auth() {
           await logEvent('failed_signup', 'low', 'signup', { email });
           return;
         }
+
+        // Send welcome email (fire and forget - don't block signup)
+        supabase.functions.invoke('send-welcome-email', {
+          body: { email }
+        }).catch(err => console.error('Welcome email failed:', err));
       } else {
         const { error } = await supabase.auth.signInWithPassword({
           email,

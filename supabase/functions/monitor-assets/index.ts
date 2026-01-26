@@ -167,6 +167,53 @@ Deno.serve(async (req) => {
 
             if (!alertError) {
               results.alerts_created++;
+              
+              // Send email alert if user has email notifications enabled
+              try {
+                // Fetch user profile to check email preferences
+                const { data: profile } = await supabase
+                  .from('profiles')
+                  .select('contact_preferences, display_name, full_name')
+                  .eq('user_id', asset.user_id)
+                  .single();
+
+                const emailEnabled = profile?.contact_preferences?.email !== false;
+
+                if (emailEnabled) {
+                  // Fetch user email from auth.users
+                  const { data: authUser } = await supabase.auth.admin.getUserById(asset.user_id);
+                  
+                  if (authUser?.user?.email) {
+                    const userName = profile?.display_name || profile?.full_name || undefined;
+                    
+                    // Call the send-alert-email function
+                    await fetch(`${supabaseUrl}/functions/v1/send-alert-email`, {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${supabaseServiceKey}`,
+                      },
+                      body: JSON.stringify({
+                        userId: asset.user_id,
+                        email: authUser.user.email,
+                        name: userName,
+                        symbol: asset.symbol,
+                        alertType: alertType,
+                        severity: severity,
+                        previousValue: asset.risk_score_at_track ?? 0,
+                        currentValue: newRiskScore ?? 0,
+                        delta: riskDelta,
+                        message: message,
+                      }),
+                    });
+                    
+                    console.log(`Email alert sent for ${asset.symbol} to ${authUser.user.email}`);
+                  }
+                }
+              } catch (emailErr) {
+                console.error(`Failed to send email alert for ${asset.symbol}:`, emailErr);
+                // Don't fail the whole process if email fails
+              }
             } else {
               results.errors.push(`Alert creation failed for ${asset.symbol}: ${alertError.message}`);
             }
