@@ -6,3 +6,5 @@ export { MarketIntelligence } from './MarketIntelligence';
 export { WorkspaceCTA } from './WorkspaceCTA';
 export { AgeVerificationBanner } from './AgeVerificationBanner';
 export { OnboardingGuide } from './OnboardingGuide';
+export { DashboardHero } from './DashboardHero';
+export { WhySection } from './WhySection';

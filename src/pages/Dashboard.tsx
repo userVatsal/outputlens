@@ -8,7 +8,7 @@ import { useUsage } from '@/hooks/useUsage';
 import { usePlan } from '@/hooks/usePlan';
 import { useTrackedAssets } from '@/hooks/useTrackedAssets';
 import {
-  AccountCard,
+  DashboardHero,
   AlertsPanel,
   TrackedAssetsGrid,
   RecentReports,
@@ -16,6 +16,7 @@ import {
   WorkspaceCTA,
   AgeVerificationBanner,
   OnboardingGuide,
+  WhySection,
 } from '@/components/dashboard';
 
 export default function Dashboard() {
@@ -83,17 +84,7 @@ export default function Dashboard() {
   return (
     <Layout>
       <div className="section-container py-8">
-        <div className="max-w-7xl mx-auto">
-          {/* Page Header */}
-          <div className="mb-8">
-            <h1 className="text-2xl font-bold text-foreground font-brand">
-              Risk Intelligence Dashboard
-            </h1>
-            <p className="text-muted-foreground">
-              Your centralized command center for risk & scenario intelligence
-            </p>
-          </div>
-
+        <div className="max-w-7xl mx-auto space-y-6">
           {/* Onboarding Guide for new users */}
           {shouldShowOnboarding && (
             <OnboardingGuide 
@@ -104,45 +95,43 @@ export default function Dashboard() {
 
           {/* Age Verification Banner */}
           {needsAgeVerification && (
-            <div className="mb-6">
-              <AgeVerificationBanner onDismiss={() => setShowAgeVerification(false)} />
-            </div>
+            <AgeVerificationBanner onDismiss={() => setShowAgeVerification(false)} />
           )}
 
-          {/* Dashboard Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Left Column - Account & Alerts */}
-            <div className="space-y-6">
-              <AccountCard 
-                profile={profile} 
-                usage={usage} 
-                plan={planData} 
-              />
-              <AlertsPanel 
-                alerts={alerts} 
-                onDismiss={dismissAlert} 
-                onMarkRead={markAlertRead} 
-              />
-            </div>
+          {/* Hero Section - Full Width */}
+          <DashboardHero 
+            profile={profile} 
+            usage={usage} 
+            plan={planData} 
+          />
 
-            {/* Middle Column - Tracked Assets & History */}
-            <div className="space-y-6">
-              <TrackedAssetsGrid 
-                assets={trackedAssets} 
-                isLoading={assetsLoading} 
-              />
-              <RecentReports />
-            </div>
+          {/* Workspace CTA - Full Width, Prominent */}
+          <WorkspaceCTA />
 
-            {/* Right Column - Market Intel & CTA */}
-            <div className="space-y-6">
-              <WorkspaceCTA />
-              <MarketIntelligence />
-            </div>
+          {/* 2-Column Grid: Alerts + Tracked Assets */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <AlertsPanel 
+              alerts={alerts} 
+              onDismiss={dismissAlert} 
+              onMarkRead={markAlertRead} 
+            />
+            <TrackedAssetsGrid 
+              assets={trackedAssets} 
+              isLoading={assetsLoading} 
+            />
           </div>
 
+          {/* 2-Column Grid: Reports + Market Intelligence */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <RecentReports />
+            <MarketIntelligence />
+          </div>
+
+          {/* Why OutputLens Exists - Full Width */}
+          <WhySection />
+
           {/* Footer Disclaimer */}
-          <div className="mt-12 pt-6 border-t border-border">
+          <div className="pt-6 border-t border-border">
             <p className="text-xs text-muted-foreground text-center max-w-3xl mx-auto">
               OutputLens provides risk analysis and scenario modeling for informational purposes only. 
               It does not provide financial advice, predictions, or trading signals. 

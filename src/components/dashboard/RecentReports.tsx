@@ -87,12 +87,12 @@ export function RecentReports() {
         ) : reports.length === 0 ? (
           <div className="text-center py-6 text-muted-foreground">
             <FileText className="h-8 w-8 mx-auto mb-2 opacity-50" />
-            <p className="text-sm">No analysis history</p>
-            <p className="text-xs mb-4">Run your first analysis to build your history</p>
-            <Button variant="outline" size="sm" asChild>
+            <p className="text-sm font-medium">No analysis history</p>
+            <p className="text-xs mb-4">Run your first analysis to build your history.</p>
+            <Button size="sm" asChild>
               <Link to="/workspace">
                 <BarChart3 className="h-4 w-4 mr-1.5" />
-                Perform Analysis
+                Run Analysis
               </Link>
             </Button>
           </div>

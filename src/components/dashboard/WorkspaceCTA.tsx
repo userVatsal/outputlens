@@ -12,7 +12,7 @@ export function WorkspaceCTA() {
           Risk & Scenario Workspace
         </CardTitle>
         <CardDescription>
-          Run institutional-grade risk analysis with Monte Carlo simulation
+          Run institutional-grade risk analysis with Monte Carlo simulation:
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -20,11 +20,11 @@ export function WorkspaceCTA() {
         <ul className="space-y-2 text-sm text-muted-foreground">
           <li className="flex items-center gap-2">
             <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-            10,000 Monte Carlo paths
+            10,000 Monte Carlo paths for probabilistic scenarios
           </li>
           <li className="flex items-center gap-2">
             <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-            Scenario regimes & tail risk analysis
+            Tail risk & scenario regime modeling
           </li>
           <li className="flex items-center gap-2">
             <span className="h-1.5 w-1.5 rounded-full bg-primary" />
