@@ -97,6 +97,9 @@ export function MarketIntelligence() {
           <CardTitle className="text-base flex items-center gap-2">
             <Newspaper className="h-4 w-4 text-primary" />
             Market Intelligence
+            <span className="text-[10px] px-1.5 py-0.5 bg-primary/20 text-primary rounded font-semibold">
+              STARTER
+            </span>
           </CardTitle>
           <Button
             variant="ghost"

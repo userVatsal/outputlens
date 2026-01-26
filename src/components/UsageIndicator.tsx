@@ -1,5 +1,5 @@
 import { forwardRef } from 'react';
-import { Sparkles, TrendingUp } from 'lucide-react';
+import { Sparkles, TrendingUp, Zap, FileDown, Brain } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
@@ -10,6 +10,25 @@ interface UsageIndicatorProps {
   usage: UsageData;
 }
 
+const UPGRADE_BENEFITS = {
+  free: {
+    nextPlan: 'Starter',
+    nextPrice: 12,
+    highlights: ['30 analyses/mo', 'Live data', 'AI explanations'],
+  },
+  starter: {
+    nextPlan: 'Pro',
+    nextPrice: 29,
+    highlights: ['100 analyses/mo', 'Portfolio analysis', 'PDF exports'],
+  },
+  pro: {
+    nextPlan: 'Trader',
+    nextPrice: 79,
+    highlights: ['500 analyses/mo', 'API access', 'Priority support'],
+  },
+  trader: null,
+};
+
 export const UsageIndicator = forwardRef<HTMLDivElement, UsageIndicatorProps>(
   function UsageIndicator({ usage }, ref) {
   const planConfig = PLAN_CONFIG[usage.plan];
@@ -18,6 +37,7 @@ export const UsageIndicator = forwardRef<HTMLDivElement, UsageIndicatorProps>(
   const remaining = usage.limit - usage.analysisCount;
   const isNearLimit = remaining <= 3;
   const isAtLimit = remaining <= 0;
+  const upgradeBenefits = UPGRADE_BENEFITS[usage.plan as keyof typeof UPGRADE_BENEFITS];
 
   return (
     <div ref={ref} className="glass-card p-4 space-y-3">
@@ -70,6 +90,36 @@ export const UsageIndicator = forwardRef<HTMLDivElement, UsageIndicatorProps>(
           </Button>
         )}
       </div>
+
+      {/* Value proposition for upgrade */}
+      {upgradeBenefits && !isAtLimit && !isNearLimit && (
+        <div className="pt-2 border-t border-border/50">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <Zap className="h-3 w-3 text-primary" />
+              <span>
+                Upgrade to <span className="font-medium text-foreground">{upgradeBenefits.nextPlan}</span> for:
+              </span>
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-1.5 mt-1.5">
+            {upgradeBenefits.highlights.map((benefit) => (
+              <span 
+                key={benefit} 
+                className="text-[10px] px-1.5 py-0.5 bg-muted text-muted-foreground rounded"
+              >
+                {benefit}
+              </span>
+            ))}
+            <Link 
+              to="/pricing" 
+              className="text-[10px] px-1.5 py-0.5 bg-primary/10 text-primary rounded font-medium hover:bg-primary/20 transition-colors"
+            >
+              ${upgradeBenefits.nextPrice}/mo →
+            </Link>
+          </div>
+        </div>
+      )}
     </div>
   );
 });
