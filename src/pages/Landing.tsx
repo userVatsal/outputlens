@@ -2,7 +2,6 @@ import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   Shield, 
-  Zap, 
   ArrowRight, 
   Check, 
   BarChart3, 
@@ -12,7 +11,6 @@ import {
   LineChart,
   Activity,
   Lock,
-  ChevronRight,
   Target,
   Play,
   Sparkles
@@ -23,62 +21,59 @@ import { Layout } from '@/components/layout/Layout';
 import { InteractivePreview } from '@/components/landing/InteractivePreview';
 import { DataProviderLogos } from '@/components/landing/DataProviderLogos';
 import { AISemanticSection } from '@/components/landing/AISemanticSection';
+import { ProblemSolutionSection } from '@/components/landing/ProblemSolutionSection';
 
+// Streamlined to 5 features (merged Sentiment into AI Interpretation)
 const features = [
   {
     icon: Activity,
     title: 'Monte Carlo Simulation',
-    description: 'See all possible outcomes, not just one price target. 10,000 probabilistic paths reveal where your trade could realistically end up.',
+    description: '10,000 probabilistic paths reveal where your trade could realistically end up.',
   },
   {
     icon: Shield,
     title: 'Advanced Risk Metrics',
-    description: 'Calculate VaR, Expected Shortfall, and tail risk before you enter. Quantify your worst-case exposure upfront.',
+    description: 'VaR, Expected Shortfall, and tail risk quantified before you enter.',
   },
   {
     icon: Brain,
     title: 'AI Risk Interpretation',
-    description: 'Complex quantitative results translated into clear risk interpretations. Understand what the numbers mean for your decision.',
+    description: 'Complex quant results translated into clear, actionable insights.',
   },
   {
     icon: LineChart,
     title: 'Live Market Data',
-    description: 'Analysis uses current volatility from global markets. Your scenarios reflect real market conditions, not static assumptions.',
+    description: 'Current volatility from global markets—not static assumptions.',
   },
   {
     icon: Globe2,
     title: 'Multi-Market Support',
-    description: 'US, UK, and EU markets with localized currencies. Stocks, ETFs, crypto, and forex—all in one platform.',
-  },
-  {
-    icon: Zap,
-    title: 'Sentiment Analysis',
-    description: 'AI agents monitor news and social signals continuously. Qualitative data quantified into your scenario analysis.',
+    description: 'US, UK, EU stocks, ETFs, crypto, and forex in one platform.',
   },
 ];
 
 const metrics = [
   { value: '10,000', label: 'Simulation Paths', sublabel: 'Per Analysis' },
-  { value: '95%', label: 'Confidence Metrics', sublabel: 'VaR Coverage' },
+  { value: '95%', label: 'VaR Coverage', sublabel: 'Confidence Level' },
   { value: '<2s', label: 'Results Delivered', sublabel: 'Edge Functions' },
-  { value: '24/7', label: 'Global Market Data', sublabel: 'Live Feeds' },
+  { value: '24/7', label: 'Market Data', sublabel: 'Live Feeds' },
 ];
 
-// Use cases with institutional positioning
+// Compressed use cases - 1 line each
 const useCases = [
   {
     persona: 'Active Trader',
-    useCase: 'See the probability distribution before sizing your position. Quantify your max drawdown before you enter.',
+    useCase: 'Size positions with probability, not guesswork.',
     icon: TrendingUp,
   },
   {
     persona: 'Portfolio Manager',
-    useCase: 'Run multi-asset scenario regimes to understand correlation risk. Quantify tail events across your book.',
+    useCase: 'Stress-test correlation risk across your entire book.',
     icon: BarChart3,
   },
   {
-    persona: 'Quantitative Analyst',
-    useCase: 'Build intuition for risk-reward through simulation. Stress-test positions under multiple scenario regimes.',
+    persona: 'Quant Analyst',
+    useCase: 'Build intuition for risk-reward through simulation.',
     icon: Target,
   },
 ];
@@ -93,26 +88,25 @@ const comparisonPoints = [
 ];
 
 export default function Landing() {
-  // SEO: Set page-specific document title
   useEffect(() => {
     document.title = 'OutputLens: AI Risk & Scenario Intelligence | Monte Carlo Simulation';
   }, []);
 
   return (
     <Layout>
-      {/* Hero Section - Enhanced */}
+      {/* Hero Section - Problem-first, YC-style */}
       <section className="hero-gradient py-16 lg:py-24 overflow-hidden">
         <div className="section-container">
           <div className="max-w-4xl mx-auto text-center space-y-8">
-            {/* Trust badges - verifiable claims only */}
+            {/* Trust badges - reordered for relatability */}
             <div className="flex items-center justify-center gap-4 flex-wrap">
-              <Badge variant="secondary" className="px-3 py-1">
-                <Activity className="h-3 w-3 mr-1" />
-                10,000 Simulation Paths
-              </Badge>
               <Badge variant="secondary" className="px-3 py-1">
                 <LineChart className="h-3 w-3 mr-1" />
                 Live Market Data
+              </Badge>
+              <Badge variant="secondary" className="px-3 py-1">
+                <Activity className="h-3 w-3 mr-1" />
+                10,000 Simulations
               </Badge>
               <Badge variant="secondary" className="px-3 py-1">
                 <Lock className="h-3 w-3 mr-1" />
@@ -120,9 +114,10 @@ export default function Landing() {
               </Badge>
             </div>
 
+            {/* Problem-first headline */}
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-foreground font-brand leading-tight">
-              OutputLens: AI-Powered{' '}
-              <span className="text-primary">Risk & Scenario Intelligence</span>
+              Quantify Risk{' '}
+              <span className="text-primary">Before You Trade</span>
             </h1>
             
             {/* Hidden SEO paragraph for crawlers */}
@@ -132,38 +127,48 @@ export default function Landing() {
               and forex. Quantify portfolio risk and scenario regimes before you trade.
             </p>
             
+            {/* Value-focused subhead */}
             <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto">
-              10,000 Monte Carlo simulations in 2 seconds. Quantify downside, tail risk, and scenario regimes before you deploy capital.
+              AI-powered Monte Carlo risk & scenario analysis for traders and B2B firms. Know the downside before deploying capital.
+            </p>
+
+            {/* Why-line - founder voice */}
+            <p className="text-sm text-muted-foreground/80 max-w-2xl mx-auto italic">
+              Markets are unpredictable. OutputLens helps you manage uncertainty with AI-driven probabilistic scenarios.
             </p>
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
               <Button size="lg" asChild className="px-8 py-6 text-lg shadow-lg hover:shadow-xl transition-all">
-                <Link to="/demo">
-                  <Play className="mr-2 h-5 w-5" />
-                  See Live Analysis
+                <Link to="/auth?mode=signup">
+                  Run Risk Analysis – Free
+                  <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
               <Button size="lg" variant="outline" asChild className="px-8 py-6 text-lg">
-                <Link to="/auth?mode=signup">
-                  Run Your First Risk Analysis
-                  <ArrowRight className="ml-2 h-5 w-5" />
+                <Link to="/demo">
+                  <Play className="mr-2 h-5 w-5" />
+                  See Live Demo
                 </Link>
               </Button>
             </div>
 
+            {/* Microcopy */}
             <p className="text-sm text-muted-foreground">
-              ✓ 5 free analyses/month • ✓ No credit card required • ✓ Institutional-grade methodology
+              5 free analyses/month • No credit card • Institutional-grade methodology
             </p>
           </div>
+        </div>
+      </section>
 
-          {/* Hero Visual - Interactive Preview */}
-          <div className="mt-12 max-w-3xl mx-auto">
+      {/* Problem → Solution → How */}
+      <ProblemSolutionSection />
+
+      {/* Interactive Demo + Data Providers */}
+      <section className="py-16 bg-background">
+        <div className="section-container">
+          <div className="max-w-3xl mx-auto space-y-8">
             <InteractivePreview />
-          </div>
-
-          {/* Data Provider Logos */}
-          <div className="mt-12">
             <DataProviderLogos />
           </div>
         </div>
@@ -186,7 +191,7 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Features Grid - Enhanced */}
+      {/* Features Grid - Streamlined to 5 */}
       <section className="py-20 bg-background">
         <div className="section-container">
           <div className="text-center mb-16">
@@ -195,11 +200,11 @@ export default function Landing() {
               Institutional-Grade Risk Analysis
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              The same quantitative + qualitative methods used by hedge funds and prop desks—now accessible to everyone.
+              Quantitative methods used by hedge funds—now accessible to everyone.
             </p>
           </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {features.map((feature, index) => (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
+            {features.map((feature) => (
               <div
                 key={feature.title}
                 className="glass-card p-6 hover:border-primary/30 transition-all duration-300 group"
@@ -219,8 +224,40 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Comparison Section */}
+      {/* Use Cases - Compressed */}
       <section className="py-20 bg-muted/30">
+        <div className="section-container">
+          <div className="text-center mb-12">
+            <Badge variant="outline" className="mb-4">Use Cases</Badge>
+            <h2 className="text-3xl font-bold text-foreground mb-4 font-brand">
+              Who Uses OutputLens
+            </h2>
+          </div>
+          <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+            {useCases.map((item, index) => (
+              <div key={index} className="glass-card p-6 text-center">
+                <div className="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-primary/10 text-primary mb-4">
+                  <item.icon className="h-5 w-5" />
+                </div>
+                <h3 className="font-semibold text-foreground mb-2">{item.persona}</h3>
+                <p className="text-sm text-muted-foreground">{item.useCase}</p>
+              </div>
+            ))}
+          </div>
+          {/* Shared CTA */}
+          <div className="text-center mt-8">
+            <Button variant="outline" asChild>
+              <Link to="/demo">
+                See How It Works
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* Comparison Section */}
+      <section className="py-20 bg-background">
         <div className="section-container">
           <div className="text-center mb-12">
             <Badge variant="outline" className="mb-4">Why OutputLens</Badge>
@@ -262,36 +299,10 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Use Cases */}
-      <section className="py-20 bg-background">
-        <div className="section-container">
-          <div className="text-center mb-12">
-            <Badge variant="outline" className="mb-4">Use Cases</Badge>
-            <h2 className="text-3xl font-bold text-foreground mb-4 font-brand">
-              Built for Serious Decision-Making
-            </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Whether you're sizing a position, managing a portfolio, or stress-testing strategies.
-            </p>
-          </div>
-          <div className="grid md:grid-cols-3 gap-6">
-            {useCases.map((item, index) => (
-              <div key={index} className="glass-card p-6">
-                <div className="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-primary/10 text-primary mb-4">
-                  <item.icon className="h-5 w-5" />
-                </div>
-                <h3 className="font-semibold text-foreground mb-2">{item.persona}</h3>
-                <p className="text-sm text-muted-foreground">{item.useCase}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* AI-Optimized FAQ & Semantic Section */}
       <AISemanticSection />
 
-      {/* CTA Section */}
+      {/* Final CTA Section */}
       <section className="py-20 bg-gradient-to-br from-primary/10 via-background to-primary/5">
         <div className="section-container">
           <div className="glass-card p-8 md:p-12 text-center max-w-3xl mx-auto border-primary/20">
@@ -299,7 +310,7 @@ export default function Landing() {
               Stop Guessing. Start Quantifying.
             </h2>
             <p className="text-muted-foreground mb-6 max-w-xl mx-auto">
-              Your first analysis is free. See the probability distribution of your next trade in under 2 seconds.
+              Your first 5 analyses are free. Quantify your next trade in under 2 seconds.
             </p>
             
             {/* ROI Hook */}
