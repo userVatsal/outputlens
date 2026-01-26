@@ -609,6 +609,53 @@ export type Database = {
         }
         Relationships: []
       }
+      portfolio_assets: {
+        Row: {
+          asset_name: string | null
+          created_at: string
+          direction: string | null
+          entry_price: number | null
+          id: string
+          market: string | null
+          portfolio_id: string
+          symbol: string
+          user_id: string
+          weight: number
+        }
+        Insert: {
+          asset_name?: string | null
+          created_at?: string
+          direction?: string | null
+          entry_price?: number | null
+          id?: string
+          market?: string | null
+          portfolio_id: string
+          symbol: string
+          user_id: string
+          weight?: number
+        }
+        Update: {
+          asset_name?: string | null
+          created_at?: string
+          direction?: string | null
+          entry_price?: number | null
+          id?: string
+          market?: string | null
+          portfolio_id?: string
+          symbol?: string
+          user_id?: string
+          weight?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "portfolio_assets_portfolio_id_fkey"
+            columns: ["portfolio_id"]
+            isOneToOne: false
+            referencedRelation: "saved_portfolios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profile_audit_log: {
         Row: {
           change_source: string | null
@@ -798,7 +845,9 @@ export type Database = {
           dismissed_at: string | null
           id: string
           message: string
+          previous_value: number | null
           read_at: string | null
+          severity: string | null
           threshold_value: number | null
           tracked_asset_id: string | null
           user_id: string
@@ -811,7 +860,9 @@ export type Database = {
           dismissed_at?: string | null
           id?: string
           message: string
+          previous_value?: number | null
           read_at?: string | null
+          severity?: string | null
           threshold_value?: number | null
           tracked_asset_id?: string | null
           user_id: string
@@ -824,7 +875,9 @@ export type Database = {
           dismissed_at?: string | null
           id?: string
           message?: string
+          previous_value?: number | null
           read_at?: string | null
+          severity?: string | null
           threshold_value?: number | null
           tracked_asset_id?: string | null
           user_id?: string
@@ -838,6 +891,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      saved_portfolios: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_default: boolean | null
+          last_analyzed_at: string | null
+          name: string
+          time_horizon: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_default?: boolean | null
+          last_analyzed_at?: string | null
+          name: string
+          time_horizon?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_default?: boolean | null
+          last_analyzed_at?: string | null
+          name?: string
+          time_horizon?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       security_events: {
         Row: {
@@ -993,46 +1082,100 @@ export type Database = {
       }
       tracked_assets: {
         Row: {
+          alert_on_risk_change: boolean | null
+          asset_name: string | null
           baseline_risk_score: number | null
           created_at: string
+          current_risk_score: number | null
+          current_tail_risk: number | null
+          current_var95: number | null
+          current_win_prob: number | null
+          direction: string
           entry_price: number
           id: string
+          last_analysis_at: string | null
           last_checked_at: string | null
           market: string
           monitoring_frequency: string | null
           notes: string | null
+          position_size: number | null
+          position_type: string | null
+          risk_delta: number | null
+          risk_score_at_track: number | null
           risk_threshold: number | null
+          risk_threshold_delta: number | null
+          status: string | null
           symbol: string
+          tail_risk_at_track: number | null
+          track_frequency: string | null
           updated_at: string
           user_id: string
+          var95_at_track: number | null
+          win_prob_at_track: number | null
         }
         Insert: {
+          alert_on_risk_change?: boolean | null
+          asset_name?: string | null
           baseline_risk_score?: number | null
           created_at?: string
+          current_risk_score?: number | null
+          current_tail_risk?: number | null
+          current_var95?: number | null
+          current_win_prob?: number | null
+          direction?: string
           entry_price: number
           id?: string
+          last_analysis_at?: string | null
           last_checked_at?: string | null
           market?: string
           monitoring_frequency?: string | null
           notes?: string | null
+          position_size?: number | null
+          position_type?: string | null
+          risk_delta?: number | null
+          risk_score_at_track?: number | null
           risk_threshold?: number | null
+          risk_threshold_delta?: number | null
+          status?: string | null
           symbol: string
+          tail_risk_at_track?: number | null
+          track_frequency?: string | null
           updated_at?: string
           user_id: string
+          var95_at_track?: number | null
+          win_prob_at_track?: number | null
         }
         Update: {
+          alert_on_risk_change?: boolean | null
+          asset_name?: string | null
           baseline_risk_score?: number | null
           created_at?: string
+          current_risk_score?: number | null
+          current_tail_risk?: number | null
+          current_var95?: number | null
+          current_win_prob?: number | null
+          direction?: string
           entry_price?: number
           id?: string
+          last_analysis_at?: string | null
           last_checked_at?: string | null
           market?: string
           monitoring_frequency?: string | null
           notes?: string | null
+          position_size?: number | null
+          position_type?: string | null
+          risk_delta?: number | null
+          risk_score_at_track?: number | null
           risk_threshold?: number | null
+          risk_threshold_delta?: number | null
+          status?: string | null
           symbol?: string
+          tail_risk_at_track?: number | null
+          track_frequency?: string | null
           updated_at?: string
           user_id?: string
+          var95_at_track?: number | null
+          win_prob_at_track?: number | null
         }
         Relationships: []
       }
