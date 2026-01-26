@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X, LogOut, User, Languages, History, Bookmark, LayoutDashboard } from 'lucide-react';
+import { Menu, X, LogOut, User, Languages, History, Bookmark, Home } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import {
@@ -105,8 +105,8 @@ export function Header() {
                 <RiskAlertBell />
                 <Button variant="ghost" size="sm" asChild>
                   <Link to="/dashboard" className="flex items-center gap-2">
-                    <LayoutDashboard className="h-4 w-4" />
-                    Dashboard
+                    <Home className="h-4 w-4" />
+                    Home
                   </Link>
                 </Button>
                 <Button variant="ghost" size="sm" asChild>
@@ -192,8 +192,8 @@ export function Header() {
                   <>
                     <Button variant="ghost" size="sm" asChild className="justify-start">
                       <Link to="/dashboard" onClick={() => setMobileMenuOpen(false)}>
-                        <LayoutDashboard className="h-4 w-4 mr-2" />
-                        Dashboard
+                        <Home className="h-4 w-4 mr-2" />
+                        Home
                       </Link>
                     </Button>
                     <Button variant="ghost" size="sm" asChild className="justify-start">

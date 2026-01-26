@@ -13,7 +13,7 @@ import {
   AlertsPanel,
   TrackedAssetsGrid,
   RecentReports,
-  MarketIntelligence,
+  LatestArticles,
   WorkspaceCTA,
   AgeVerificationBanner,
   OnboardingGuide,
@@ -34,7 +34,7 @@ export default function Dashboard() {
 
   // SEO
   useEffect(() => {
-    document.title = 'Dashboard | OutputLens - Risk & Scenario Intelligence';
+    document.title = 'Home | OutputLens - Risk & Scenario Intelligence';
   }, []);
 
   // Auth check
@@ -138,10 +138,10 @@ export default function Dashboard() {
             />
           </div>
 
-          {/* 2-Column Grid: Reports + Market Intelligence */}
+          {/* 2-Column Grid: Reports + Latest Articles */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <RecentReports />
-            <MarketIntelligence />
+            <LatestArticles />
           </div>
 
           {/* Why OutputLens Exists - Full Width */}
