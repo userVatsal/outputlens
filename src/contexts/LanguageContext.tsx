@@ -12,6 +12,7 @@ interface LanguageContextType {
 
 const translations: Record<Language, Record<string, string>> = {
   'en-US': {
+    workspace: 'Risk Workspace',
     analyze: 'Analyze',
     portfolio: 'Portfolio',
     methodology: 'Methodology',
@@ -40,6 +41,7 @@ const translations: Record<Language, Record<string, string>> = {
     analyze_trade: 'Analyze',
   },
   'en-GB': {
+    workspace: 'Risk Workspace',
     analyze: 'Analyse',
     portfolio: 'Portfolio',
     methodology: 'Methodology',

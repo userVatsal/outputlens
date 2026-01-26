@@ -14,8 +14,7 @@ import { useLanguage, Language } from '@/contexts/LanguageContext';
 import { BrandLogo } from '@/components/BrandLogo';
 
 const navLinks = [
-  { href: '/analyze', labelKey: 'analyze' },
-  { href: '/portfolio', labelKey: 'portfolio' },
+  { href: '/workspace', labelKey: 'workspace' },
   { href: '/methodology', labelKey: 'methodology' },
   { href: '/pricing', labelKey: 'pricing' },
 ];
