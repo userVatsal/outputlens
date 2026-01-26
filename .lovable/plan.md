@@ -1,270 +1,143 @@
 
-
-# Multi-Step Signup & Onboarding Flow
+# Implementation Plan: Account Page Redesign, Dashboard Cleanup, and About/Blog Expansion
 
 ## Overview
 
-This plan transforms the current single-step signup into a modern, multi-step onboarding experience that collects user information progressively and sets the foundation for future community features.
+This plan covers multiple interconnected changes to improve the user experience:
+1. **Account Page Redesign** - Add profile picture upload directly on Account page with improved design
+2. **Dashboard Cleanup** - Rename to "Home", remove duplicate account info, replace Market Intelligence with Latest Articles
+3. **About Page Enhancement** - Add formal mission statement and create 2 detailed educational articles
+4. **Blog Infrastructure** - Set up structure for monthly finance articles
 
 ---
 
-## What We're Building
+## 1. Account Page Redesign
 
-### Signup Flow (5 Steps)
+### Current Issues
+- No direct profile picture upload on Account page (users must click through to complete this)
+- Design feels basic compared to other institutional-grade pages
 
-```text
-Step 1: Credentials           Step 2: Profile           Step 3: Legal
-┌─────────────────────┐      ┌─────────────────────┐   ┌─────────────────────┐
-│  Email & Password   │  →   │  Full Name          │ → │  ☑ GDPR Consent     │
-│                     │      │  @handle (unique)   │   │  ☑ Terms of Service │
-│  [Continue]         │      │  Date of Birth      │   │  ☑ Privacy Policy   │
-└─────────────────────┘      └─────────────────────┘   └─────────────────────┘
-          ↓                            ↓                         ↓
-Step 4: Welcome               Step 5: Profile Completion
-┌─────────────────────┐      ┌─────────────────────┐
-│  🎉 Welcome!        │  →   │  [Upload Avatar]    │
-│  Founder message    │      │  Bio (optional)     │
-│  (auto-advance 2s)  │      │  [Complete Profile] │
-└─────────────────────┘      └─────────────────────┘
-```
+### Changes
+- **Add ProfilePhotoCard** at the top of the Profile tab with the existing `AvatarUpload` component
+- Add a visually prominent avatar section with:
+  - Large avatar preview (128px)
+  - Drag-and-drop upload zone
+  - Clear "Change Photo" button
+- Improve overall card styling to match the institutional design system
 
-### Key Features
-- **Progressive disclosure**: Collect info in digestible chunks
-- **Unique handles**: Real-time validation that `@handle` is available
-- **Avatar upload**: Users can upload profile pictures (stored in Lovable Cloud Storage)
-- **Bio field**: Prepare for future community/firm features
-- **Welcome animation**: Warm, personal introduction for 2 seconds
+### Files to Modify
+- `src/pages/Account.tsx` - Add profile photo section
+- `src/components/account/ProfileSection.tsx` - Integrate avatar upload at top of card
 
 ---
 
-## Database Changes
+## 2. Dashboard Page Updates
 
-### 1. Add Bio Column to Profiles
+### Changes
 
-```sql
-ALTER TABLE profiles ADD COLUMN IF NOT EXISTS bio TEXT;
-```
+**a) Rename to "Home" in Navigation**
+- Update Header to show "Home" instead of "Dashboard"
+- Update translation keys in LanguageContext
 
-### 2. Create Avatar Storage Bucket
+**b) Remove Duplicate Account Info**
+The `DashboardHero` component currently shows:
+- Avatar + display name + plan badge + remaining analyses
 
-```sql
-INSERT INTO storage.buckets (id, name, public)
-VALUES ('avatars', 'avatars', true);
+This duplicates the `AccountHeader` component. We will:
+- Keep `AccountHeader` at the top (compact profile summary with photo)
+- Modify `DashboardHero` to ONLY show:
+  - The headline "AI-Powered Risk & Scenario Intelligence"
+  - The tagline
+  - Usage info (remaining analyses)
+  - Settings + Upgrade buttons
+- Remove the duplicate avatar/name/plan from `DashboardHero`
 
--- RLS: Users can upload their own avatar
-CREATE POLICY "Users can upload their own avatar"
-ON storage.objects FOR INSERT TO authenticated
-WITH CHECK (bucket_id = 'avatars' AND (storage.foldername(name))[1] = auth.uid()::text);
+**c) Replace Market Intelligence with Latest Articles**
+- Create new `LatestArticles` component that links to the About page articles
+- Display 2-3 article cards with title, category badge, and read time
+- Link to `/about#learn` for "See All"
 
--- RLS: Users can update their own avatar
-CREATE POLICY "Users can update their own avatar"
-ON storage.objects FOR UPDATE TO authenticated
-USING (bucket_id = 'avatars' AND (storage.foldername(name))[1] = auth.uid()::text);
-
--- RLS: Users can delete their own avatar
-CREATE POLICY "Users can delete their own avatar"
-ON storage.objects FOR DELETE TO authenticated
-USING (bucket_id = 'avatars' AND (storage.foldername(name))[1] = auth.uid()::text);
-
--- Public can view avatars
-CREATE POLICY "Avatars are publicly viewable"
-ON storage.objects FOR SELECT TO public
-USING (bucket_id = 'avatars');
-```
-
-### 3. Add Username Uniqueness Index
-
-```sql
-CREATE UNIQUE INDEX IF NOT EXISTS profiles_username_unique 
-ON profiles (LOWER(username)) WHERE username IS NOT NULL;
-```
+### Files to Modify
+- `src/components/layout/Header.tsx` - Rename Dashboard to Home
+- `src/contexts/LanguageContext.tsx` - Update translation key
+- `src/components/dashboard/DashboardHero.tsx` - Remove duplicate account info
+- `src/components/dashboard/MarketIntelligence.tsx` - Replace with `LatestArticles.tsx`
+- `src/components/dashboard/index.ts` - Update exports
 
 ---
 
-## File Changes
+## 3. About Page Enhancements
 
-### New Files
+### Changes
 
-| File | Description |
-|------|-------------|
-| `src/components/onboarding/OnboardingWizard.tsx` | Multi-step wizard container with step navigation |
-| `src/components/onboarding/StepCredentials.tsx` | Email/password form (Step 1) |
-| `src/components/onboarding/StepProfile.tsx` | Name, handle, DOB form (Step 2) |
-| `src/components/onboarding/StepLegal.tsx` | GDPR/Terms/Privacy checkboxes (Step 3) |
-| `src/components/onboarding/StepWelcome.tsx` | Animated welcome screen (Step 4) |
-| `src/components/onboarding/StepComplete.tsx` | Avatar upload & bio (Step 5) |
-| `src/components/onboarding/AvatarUpload.tsx` | Drag-and-drop avatar upload component |
-| `src/pages/Onboarding.tsx` | New page that shows the wizard after signup |
+**a) Add Formal Mission Statement**
+Add a dedicated mission statement section after the hero:
+> "OutputLens exists to democratize institutional-grade risk analysis. We believe every trader deserves to quantify their downside before they trade - not guess. Our mission is to close the gap between retail intuition and hedge fund precision."
 
-### Modified Files
+**b) Create 2 Detailed Educational Articles**
 
-| File | Changes |
-|------|---------|
-| `src/pages/Auth.tsx` | After signup success, redirect to `/onboarding` instead of `/dashboard` |
-| `src/pages/Dashboard.tsx` | Check if `onboarding_completed` is false, redirect to `/onboarding` |
-| `src/hooks/useProfile.tsx` | Add `bio` field to `ProfileData` and `ProfileUpdateData` interfaces |
-| `src/App.tsx` | Add `/onboarding` route |
-| `src/components/account/ProfileSection.tsx` | Add bio editing capability |
+The articles will be embedded directly in the About page (expandable or as separate sections with anchors):
 
----
+**Article 1: "Understanding Trading & Investment Terms"**
+- Category: Glossary
+- Read time: 10 min
+- Content structure:
+  - **OutputLens Terminology**: Win Probability, VaR (Value at Risk), Expected Shortfall, Monte Carlo Simulation, Tail Risk, Sharpe Ratio, Kurtosis, Skewness
+  - **Industry Standard Terms**: Alpha, Beta, Drawdown, Leverage, Position Sizing, Stop Loss, Take Profit, Risk-Reward Ratio
+  - Each term includes: Definition, Why it matters, How OutputLens helps
 
-## Component Architecture
+**Article 2: "Trading & Hedge Fund Strategies in 2026"**
+- Category: Strategy
+- Read time: 12 min
+- Content structure:
+  - **Momentum Strategies**: Riding trends with quantified entry/exit
+  - **Mean Reversion**: Identifying overextended moves
+  - **Risk Parity**: Balancing portfolios by risk contribution
+  - **Quantitative/Systematic**: Algorithm-driven decision making
+  - **Event-Driven**: Earnings, M&A, macro events
+  - How OutputLens supports each strategy type
 
-### OnboardingWizard
+**c) Add Monthly Finance Article Placeholder**
+- Add a "Monthly Insights" section with a placeholder card
+- Shows "Coming February 2026: [Topic TBD]"
+- Structure for future dynamic loading
 
-```text
-OnboardingWizard (container)
-├── Step indicator (1 of 5, progress bar)
-├── Current step component
-│   ├── StepCredentials (creates account via Supabase Auth)
-│   ├── StepProfile (updates profile table)
-│   ├── StepLegal (updates consent fields)
-│   ├── StepWelcome (2 second delay, auto-advance)
-│   └── StepComplete (avatar upload, bio, marks onboarding_completed)
-└── Navigation (Back/Continue buttons)
-```
-
-### Step Flow Logic
-
-1. **StepCredentials**: User enters email/password → Supabase `signUp()` → Creates auth user + profile row
-2. **StepProfile**: User enters name, @handle, DOB → Validates handle uniqueness → Updates profile
-3. **StepLegal**: User checks all consent boxes → Updates consent fields with current versions
-4. **StepWelcome**: Shows personalized welcome → Auto-advances after 2 seconds
-5. **StepComplete**: User optionally uploads avatar and adds bio → Sets `onboarding_completed = true` → Redirects to `/dashboard`
+### Files to Modify
+- `src/pages/About.tsx` - Complete redesign with mission statement and full articles
 
 ---
 
-## Handle Validation
+## 4. Create Article Pages (Optional Future Enhancement)
 
-Real-time username validation with debouncing:
-
-```text
-User types: "john"
-├── Debounce 500ms
-├── Check format (3-30 chars, alphanumeric + underscore only)
-├── Query: SELECT 1 FROM profiles WHERE LOWER(username) = 'john'
-├── If exists → Show "This handle is taken"
-└── If available → Show green checkmark
-```
+For now, articles will be embedded in the About page. Later, you could:
+- Create individual article pages (`/articles/trading-terms`, `/articles/strategies-2026`)
+- Store articles in database for dynamic loading
+- Add monthly article publishing workflow
 
 ---
 
-## Avatar Upload Flow
+## Technical Summary
 
-```text
-User clicks upload area
-├── Opens file picker (accepts: image/png, image/jpeg, image/webp)
-├── Client-side validation (max 5MB, image type)
-├── Preview shown immediately
-├── On confirm → Upload to storage.avatars/{user_id}/avatar.{ext}
-├── Get public URL
-└── Update profiles.avatar_url
-```
-
----
-
-## Welcome Screen Content
-
-The welcome step displays a warm, personal message:
-
-```text
-┌─────────────────────────────────────────────┐
-│           🎉 Welcome, {firstName}!          │
-│                                             │
-│  "I'm Vatsal, founder of OutputLens.        │
-│   I built this for traders who want to      │
-│   understand risk before they enter."       │
-│                                             │
-│  ──────────────────────────────             │
-│  What's next:                               │
-│  • Run your first analysis in seconds       │
-│  • Track assets you're watching             │
-│  • Get alerts when conditions change        │
-│                                             │
-│         [Continue to Dashboard →]           │
-└─────────────────────────────────────────────┘
-```
-
-Auto-advances after 2 seconds, or user can click to continue immediately.
+| File | Change Type | Description |
+|------|-------------|-------------|
+| `src/pages/Account.tsx` | Modify | Add ProfilePhotoCard section |
+| `src/components/account/ProfileSection.tsx` | Modify | Integrate avatar upload with improved UI |
+| `src/components/layout/Header.tsx` | Modify | Rename "Dashboard" to "Home" |
+| `src/contexts/LanguageContext.tsx` | Modify | Update translation keys |
+| `src/components/dashboard/DashboardHero.tsx` | Modify | Remove duplicate avatar/name/plan |
+| `src/components/dashboard/LatestArticles.tsx` | Create | New component for article cards |
+| `src/components/dashboard/MarketIntelligence.tsx` | Delete | Replace with LatestArticles |
+| `src/components/dashboard/index.ts` | Modify | Update exports |
+| `src/pages/Dashboard.tsx` | Modify | Swap MarketIntelligence for LatestArticles |
+| `src/pages/About.tsx` | Modify | Add mission statement, 2 full articles, monthly section |
 
 ---
 
-## Validation Rules
+## Implementation Order
 
-### Handle Validation
-- 3-30 characters
-- Lowercase letters, numbers, underscores only
-- Must be unique (case-insensitive)
-- Starts with letter
-
-### Date of Birth Validation
-- User must be 18+ years old
-- Cannot be in the future
-
-### Avatar Validation
-- Max file size: 5MB
-- Accepted formats: PNG, JPEG, WebP
-- Recommended size: 200x200px (auto-cropped/resized on display)
-
-### Bio Validation
-- Max 500 characters
-- Optional field
-
----
-
-## Route Protection
-
-Dashboard will check onboarding status:
-
-```text
-User lands on /dashboard
-├── Check if authenticated → No → Redirect to /auth
-├── Check if onboarding_completed → No → Redirect to /onboarding
-└── Yes → Show dashboard
-```
-
----
-
-## Future Community Context
-
-The bio and handle fields prepare for:
-- **Firm community pages**: Companies can create private communities
-- **Admin roles**: Firm owners can manage members
-- **Chat features**: Members can communicate within their firm
-- **Public profiles**: Optional profile visibility to other users
-
----
-
-## Files Summary
-
-| Action | File | Purpose |
-|--------|------|---------|
-| Create | `src/pages/Onboarding.tsx` | New onboarding page |
-| Create | `src/components/onboarding/OnboardingWizard.tsx` | Step wizard container |
-| Create | `src/components/onboarding/StepCredentials.tsx` | Email/password step |
-| Create | `src/components/onboarding/StepProfile.tsx` | Name/handle/DOB step |
-| Create | `src/components/onboarding/StepLegal.tsx` | Consent checkboxes |
-| Create | `src/components/onboarding/StepWelcome.tsx` | Welcome animation |
-| Create | `src/components/onboarding/StepComplete.tsx` | Avatar/bio step |
-| Create | `src/components/onboarding/AvatarUpload.tsx` | Avatar upload component |
-| Modify | `src/App.tsx` | Add `/onboarding` route |
-| Modify | `src/pages/Auth.tsx` | Redirect to onboarding after signup |
-| Modify | `src/pages/Dashboard.tsx` | Check onboarding status |
-| Modify | `src/hooks/useProfile.tsx` | Add bio field |
-| Modify | `src/components/account/ProfileSection.tsx` | Add bio editing |
-| DB | Migration | Add `bio` column, storage bucket, username index |
-
----
-
-## User Experience Summary
-
-1. User visits `/auth?mode=signup`
-2. Enters email + password → Account created
-3. Redirected to `/onboarding`
-4. Fills in personal details (name, unique handle, birthday)
-5. Accepts legal agreements
-6. Sees personalized welcome (2 seconds)
-7. Optionally uploads avatar and adds bio
-8. Clicks "Complete" → `onboarding_completed = true`
-9. Redirected to `/dashboard` with full experience
+1. **Account Page** - Add avatar upload with improved design
+2. **Header** - Rename Dashboard to Home
+3. **Dashboard cleanup** - Remove duplicate account info from DashboardHero
+4. **LatestArticles** - Create component and replace MarketIntelligence
+5. **About Page** - Add mission statement and full article content
 
