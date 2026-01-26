@@ -9,6 +9,7 @@ import { RiskLevel, TimeHorizon } from '@/types/trade';
 export const DEMO_ANALYSIS: EnhancedTradeAnalysis = {
   input: {
     asset: 'AAPL',
+    assetName: 'Apple Inc.',
     market: 'US',
     direction: 'long',
     entryPrice: 185.50,
@@ -16,6 +17,8 @@ export const DEMO_ANALYSIS: EnhancedTradeAnalysis = {
     timeHorizon: '3-7 days' as TimeHorizon,
     confidence: 6,
     assumptions: 'Strong Q4 expected with iPhone sales momentum',
+    positionSize: 100,
+    positionType: 'shares' as const,
   },
   marketData: {
     price: 185.50,
