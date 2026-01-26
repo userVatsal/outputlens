@@ -1,244 +1,227 @@
 
-# Update Footer Tagline + Create "About" Page
+
+# YC-Style Dashboard Improvement Plan
 
 ## Overview
 
-This plan implements two changes:
-1. Update the footer description with the new tagline
-2. Create a new "About" page combining "Why We Exist" storytelling with a Blog section
+Transform the current dashboard into a clean, professional YC-style interface with improved hierarchy, better copy, and a more scannable layout based on the provided design specifications.
 
 ---
 
-## Part 1: Update Footer Tagline
+## Current State Analysis
 
-### File: `src/components/layout/Footer.tsx`
+The existing dashboard has:
+- 3-column grid layout with AccountCard, AlertsPanel, TrackedAssetsGrid, RecentReports, WorkspaceCTA, MarketIntelligence
+- Basic header: "Risk Intelligence Dashboard"
+- Functional but lacks the polished YC-style copy and hierarchy
 
-**Change (Line 14-16):**
-```typescript
-// Before
-<p className="text-sm text-muted-foreground">
-  AI-powered risk & scenario intelligence. Quantify downside before you trade.
-</p>
+## Proposed Changes
 
-// After
-<p className="text-sm text-muted-foreground">
-  AI risk & scenario intelligence for traders: quantify loss, analyze scenarios, track positions, and trade smarter.
-</p>
-```
+### 1. New Hero Section (Above the Grid)
 
-**Also add "About" link to Product section (Line 37):**
-```typescript
-<li>
-  <Link to="/about" className="text-muted-foreground hover:text-foreground transition-colors">
-    About
-  </Link>
-</li>
-```
-
----
-
-## Part 2: Create "About" Page (Why We Exist + Blog)
-
-### New File: `src/pages/About.tsx`
-
-**Page Structure:**
+**Add a prominent hero banner** at the top of the dashboard with:
 
 ```text
-┌─────────────────────────────────────────────────────────────────┐
-│  HERO SECTION                                                   │
-│  ─────────────────────────────────────────────────────────────  │
-│  Badge: "Our Story"                                             │
-│  Headline: "Why We Built OutputLens"                           │
-│  Sub-headline: Problem-driven, YC-style                        │
-│  CTA: "Explore Risk Scenarios" | "See How It Works"            │
-└─────────────────────────────────────────────────────────────────┘
-┌─────────────────────────────────────────────────────────────────┐
-│  WHY WE EXIST                                                   │
-│  ─────────────────────────────────────────────────────────────  │
-│  Founder-led storytelling:                                      │
-│  • The problem: Traders lose money due to irrational markets,  │
-│    insufficient scenario planning, gut-based decisions          │
-│  • The insight: Institutions have quant tools, retail doesn't  │
-│  • The solution: AI + quantitative + qualitative risk analysis │
-│                                                                 │
-│  Customer Personas:                                             │
-│  [Day Trader] [Quant Analyst] [B2B/Hedge Funds]                │
-└─────────────────────────────────────────────────────────────────┘
-┌─────────────────────────────────────────────────────────────────┐
-│  OUR APPROACH                                                   │
-│  ─────────────────────────────────────────────────────────────  │
-│  4 feature cards with icons:                                    │
-│  • AI-Powered Probabilistic Risk Analysis                       │
-│  • Qualitative Scenario Planning                                │
-│  • Monte Carlo & Tail Risk Measurement                          │
-│  • Portfolio & Asset Tracking                                   │
-└─────────────────────────────────────────────────────────────────┘
-┌─────────────────────────────────────────────────────────────────┐
-│  BLOG / LEARNING SECTION                                        │
-│  ─────────────────────────────────────────────────────────────  │
-│  Featured articles (static content for now):                    │
-│  • "How to Interpret Monte Carlo Risk Scenarios"                │
-│  • "Understanding Tail Risk in Volatile Markets"                │
-│  • "Position Sizing with Quantitative Analysis"                 │
-│                                                                 │
-│  Social Links:                                                  │
-│  [X/Twitter] [Reddit] [Instagram] [YouTube]                    │
-│                                                                 │
-│  CTA: "Subscribe for updates"                                   │
-└─────────────────────────────────────────────────────────────────┘
-┌─────────────────────────────────────────────────────────────────┐
-│  CTA SECTION                                                    │
-│  ─────────────────────────────────────────────────────────────  │
-│  "Start analyzing risk today"                                   │
-│  Buttons: [Try Free Analysis] [Join Community]                  │
-└─────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  AI-Powered Risk & Scenario Intelligence                                    │
+│  ─────────────────────────────────────────────────────────────────────────  │
+│  Quantify downside before you trade. Monitor assets, simulate outcomes,    │
+│  and anticipate market shocks—all in one workspace.                         │
+│                                                                             │
+│  [User Avatar] Vatsal | Free Plan – 5 Analyses Remaining [Settings] [Upgrade]│
+└─────────────────────────────────────────────────────────────────────────────┘
 ```
 
-### Content Details
+**Implementation:**
+- Create new `DashboardHero.tsx` component
+- Integrate user profile, plan, and usage info into the hero
+- Remove separate AccountCard (merge into hero)
 
-**Hero Section:**
-- Headline: "Why We Built OutputLens"
-- Sub-headline: "Markets are irrational. Drawdowns are inevitable. We built the tools to quantify what others guess."
+---
 
-**Why We Exist Section:**
-```typescript
-const story = {
-  problem: "Most traders lose money because they trade on gut feeling. " +
-           "Institutional players have quantitative tools. Retail traders don't.",
-  insight: "We saw a gap: Monte Carlo simulation, tail risk analysis, and scenario planning " +
-           "were locked behind Bloomberg terminals and prop desk infrastructure.",
-  solution: "OutputLens brings institutional-grade risk analysis to every trader. " +
-            "AI-powered. Quantitative + qualitative. In your browser."
-};
-```
+### 2. Updated Component Copy
 
-**Customer Personas:**
-```typescript
-const personas = [
-  {
-    title: "Active Day Traders",
-    description: "Size positions with probability distributions, not hunches.",
-    icon: TrendingUp
-  },
-  {
-    title: "Quantitative Analysts",
-    description: "Build intuition through Monte Carlo simulation and tail risk metrics.",
-    icon: BarChart3
-  },
-  {
-    title: "Hedge Funds & Asset Managers",
-    description: "B2B scenario planning and portfolio risk assessment.",
-    icon: Building2
-  }
-];
-```
+#### AlertsPanel.tsx
+- Empty state: "Stay ahead of market surprises. You'll be notified when risk metrics change significantly."
 
-**Our Approach Features:**
-```typescript
-const approach = [
-  {
-    icon: Brain,
-    title: "AI-Powered Risk Analysis",
-    description: "10,000 Monte Carlo simulations powered by live market volatility."
-  },
-  {
-    icon: Target,
-    title: "Qualitative Scenario Planning",
-    description: "Translate complex quant outputs into actionable risk interpretations."
-  },
-  {
-    icon: Activity,
-    title: "Tail Risk Measurement",
-    description: "VaR, Expected Shortfall, and black swan probability analysis."
-  },
-  {
-    icon: LineChart,
-    title: "Portfolio & Asset Tracking",
-    description: "Monitor positions with real-time alerts and sentiment signals."
-  }
-];
-```
+#### TrackedAssetsGrid.tsx  
+- Title: "Monitored Assets"
+- Empty state: "Track positions directly from your analysis results."
+- CTA: "Run Analysis"
 
-**Blog Section (Static Articles):**
-```typescript
-const articles = [
-  {
-    title: "How to Interpret Monte Carlo Risk Scenarios",
-    excerpt: "Learn to read probability distributions and make smarter sizing decisions.",
-    readTime: "5 min read",
-    category: "Tutorial"
-  },
-  {
-    title: "Understanding Tail Risk in Volatile Markets",
-    excerpt: "Why 95% VaR isn't enough—and how Expected Shortfall protects you.",
-    readTime: "7 min read",
-    category: "Insights"
-  },
-  {
-    title: "Position Sizing with Quantitative Analysis",
-    excerpt: "From gut feeling to probability-based risk management.",
-    readTime: "6 min read",
-    category: "Strategy"
-  }
-];
-```
+#### RecentReports.tsx
+- Title: "Historical Risk Reports"
+- Add table-style display with columns: Asset | Position | Date | Value
+- CTA: "View Full History"
 
-**Social Links:**
-```typescript
-const socialLinks = [
-  { name: "X / Twitter", icon: Twitter, url: "#" },
-  { name: "Reddit", icon: MessageSquare, url: "#" },
-  { name: "Instagram", icon: Instagram, url: "#" },
-  { name: "YouTube", icon: Youtube, url: "#" }
-];
+#### WorkspaceCTA.tsx
+- Title: "Risk & Scenario Workspace"
+- Description: "Run institutional-grade risk analysis with Monte Carlo simulation:"
+- Bullet points:
+  - "10,000 Monte Carlo paths for probabilistic scenarios"
+  - "Tail risk & scenario regime modeling"  
+  - "Live market data integration"
+- CTAs: "Perform Risk Analysis" | "Portfolio Mode"
+
+#### MarketIntelligence.tsx
+- Title: "Market Intelligence"
+- Description: "Get AI-driven insights across your tracked assets."
+- Add table-style headers: Symbol | Trend | Signals | Updated
+
+---
+
+### 3. New "Why OutputLens Exists" Micro-Section
+
+Add a small section at the bottom of the main content area:
+
+```text
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  Why OutputLens Exists                                                      │
+│  ─────────────────────────────────────────────────────────────────────────  │
+│  Markets are irrational, liquidity is fragmented, and drawdowns happen     │
+│  faster than most traders anticipate. OutputLens equips traders and B2B    │
+│  firms with AI-powered, probabilistic risk analysis so you can see the     │
+│  downside before you trade.                                                 │
+└─────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Part 3: Add Route
+### 4. Improved Dashboard Layout
 
-### File: `src/App.tsx`
+Restructure the grid for better visual hierarchy:
 
-**Add import:**
-```typescript
-import About from "./pages/About";
-```
+```text
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  HERO: AI-Powered Risk & Scenario Intelligence                              │
+│  User: Vatsal | Free Plan – 5 Analyses Remaining [Settings] [Upgrade]       │
+└─────────────────────────────────────────────────────────────────────────────┘
 
-**Add route (before catch-all):**
-```typescript
-<Route path="/about" element={<About />} />
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  RISK & SCENARIO WORKSPACE CTA (full width, prominent)                      │
+│  10,000 Monte Carlo paths | Tail risk & scenario regimes | Live data        │
+│  [Perform Risk Analysis] [Portfolio Mode]                                    │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────┐  ┌───────────────────────────────────────────────┐
+│  RISK ALERTS             │  │  MONITORED ASSETS                             │
+│  Stay ahead of market    │  │  Track positions from analysis results        │
+│  surprises               │  │  [Asset cards or empty state]                 │
+│  [No active alerts]      │  │  [Run Analysis]                               │
+└──────────────────────────┘  └───────────────────────────────────────────────┘
+
+┌──────────────────────────┐  ┌───────────────────────────────────────────────┐
+│  HISTORICAL RISK REPORTS │  │  MARKET INTELLIGENCE                          │
+│  Asset|Position|Date|Val │  │  AI-driven insights across tracked assets     │
+│  BTC  | SHORT  |Jan25|$5 │  │  Symbol | Trend | Signals | Updated           │
+│  AAPL | LONG   |Jan24|$50│  │  [Table rows]                                 │
+│  [View Full History]     │  │                                               │
+└──────────────────────────┘  └───────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  WHY OUTPUTLENS EXISTS (micro-section)                                      │
+│  Markets are irrational... [full copy]                                      │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  FOOTER: Disclaimer + Quick Links                                           │
+└─────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Files Summary
+## Files to Create/Modify
 
 | File | Action | Changes |
 |------|--------|---------|
-| `src/components/layout/Footer.tsx` | Modify | Update tagline + add About link |
-| `src/pages/About.tsx` | Create | New page with Why We Exist + Blog |
-| `src/App.tsx` | Modify | Add /about route |
+| `src/components/dashboard/DashboardHero.tsx` | Create | New hero component with headline, sub-headline, user status |
+| `src/components/dashboard/WhySection.tsx` | Create | New micro-section explaining why OutputLens exists |
+| `src/components/dashboard/index.ts` | Modify | Export new components |
+| `src/pages/Dashboard.tsx` | Modify | New layout structure, integrate hero, remove AccountCard placement |
+| `src/components/dashboard/AlertsPanel.tsx` | Modify | Update empty state copy |
+| `src/components/dashboard/TrackedAssetsGrid.tsx` | Modify | Update copy and empty state |
+| `src/components/dashboard/RecentReports.tsx` | Modify | Add table headers, improve layout |
+| `src/components/dashboard/WorkspaceCTA.tsx` | Modify | Update copy to match YC style |
+| `src/components/dashboard/MarketIntelligence.tsx` | Modify | Add table headers, update copy |
+
+---
+
+## Technical Details
+
+### DashboardHero.tsx
+
+```typescript
+interface DashboardHeroProps {
+  profile: ProfileData | null;
+  usage: UsageData | null;
+  plan: PlanData;
+}
+
+// Structure:
+// - Headline: "AI-Powered Risk & Scenario Intelligence"
+// - Sub-headline: "Quantify downside before you trade..."
+// - User row: Avatar, Name, Plan badge, usage remaining, [Settings] [Upgrade]
+```
+
+### Layout Changes in Dashboard.tsx
+
+```typescript
+// Before: 3-column grid with AccountCard
+// After: 
+//   1. DashboardHero (full width)
+//   2. WorkspaceCTA (full width, prominent)
+//   3. 2-column grid: Alerts + Tracked Assets
+//   4. 2-column grid: Reports + Market Intelligence
+//   5. WhySection (full width)
+//   6. Footer disclaimer (existing)
+```
+
+### Updated Copy Snippets
+
+**AlertsPanel empty state:**
+```typescript
+<p className="text-sm font-medium">No active alerts</p>
+<p className="text-xs text-muted-foreground">
+  Stay ahead of market surprises. You'll be notified when risk metrics change significantly.
+</p>
+```
+
+**TrackedAssetsGrid empty state:**
+```typescript
+<p className="text-sm font-medium">No assets tracked yet</p>
+<p className="text-xs text-muted-foreground">
+  Track positions directly from your analysis results.
+</p>
+<Button>Run Analysis</Button>
+```
+
+**WorkspaceCTA bullets:**
+```typescript
+const features = [
+  "10,000 Monte Carlo paths for probabilistic scenarios",
+  "Tail risk & scenario regime modeling",
+  "Live market data integration"
+];
+```
 
 ---
 
 ## Design Notes
 
-- **Colors**: White background, navy blue headings, primary blue accents, subtle burgundy/orange for highlights
-- **Typography**: font-brand for headings, standard body text
-- **Tone**: Professional, approachable, founder-led voice ("We built this because...")
-- **Layout**: Consistent with Methodology page structure (hero-gradient, glass-cards, section-container)
+- **Clean, minimal interface**: White background, navy blue headings, primary blue accents
+- **High scannability**: Tables for reports/intelligence, bullets for features
+- **Action-focused CTAs**: Bold, visible buttons
+- **Founder-led voice**: "Why We Exist" micro-section adds trust
+- **Micro-copy for trust**: Small disclaimers at bottom
 
 ---
 
-## Social Links Note
+## Expected Outcome
 
-The social links (X, Reddit, Instagram, YouTube) will use placeholder `#` URLs. You can update these with actual social profile URLs once they're created.
+After implementation:
+- Dashboard feels like a professional YC-backed SaaS product
+- Clear visual hierarchy with hero → CTA → data → story → footer
+- Copy is consistent with institutional positioning
+- Empty states guide users to take action
+- User status (plan, usage) is prominent but not cluttered
 
----
-
-## SEO
-
-Page title set via useEffect:
-```typescript
-document.title = 'About OutputLens - Why We Built AI Risk Intelligence | OutputLens';
-```
