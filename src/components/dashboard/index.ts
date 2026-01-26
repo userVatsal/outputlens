@@ -3,7 +3,7 @@ export { AccountHeader } from './AccountHeader';
 export { AlertsPanel } from './AlertsPanel';
 export { TrackedAssetsGrid } from './TrackedAssetsGrid';
 export { RecentReports } from './RecentReports';
-export { MarketIntelligence } from './MarketIntelligence';
+export { LatestArticles } from './LatestArticles';
 export { WorkspaceCTA } from './WorkspaceCTA';
 export { AgeVerificationBanner } from './AgeVerificationBanner';
 export { OnboardingGuide } from './OnboardingGuide';

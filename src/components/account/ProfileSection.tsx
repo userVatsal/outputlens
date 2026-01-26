@@ -1,4 +1,4 @@
-import { User, Calendar, AtSign, Globe, FileText } from 'lucide-react';
+import { User, Calendar, AtSign, Globe, FileText, Camera } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { EditableField } from './EditableField';
 import { ProfileData, ProfileUpdateData } from '@/hooks/useProfile';
@@ -8,7 +8,10 @@ import { Label } from '@/components/ui/label';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
-
+import { AvatarUpload } from '@/components/onboarding/AvatarUpload';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 interface ProfileSectionProps {
   profile: ProfileData;
   onUpdate: (updates: ProfileUpdateData) => Promise<boolean>;
@@ -85,18 +88,78 @@ export function ProfileSection({
     }
   };
 
+  const displayName = profile.display_name || profile.full_name || 'User';
+  const initials = displayName
+    .split(' ')
+    .map(n => n[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
+
+  const handleAvatarUpload = async (url: string) => {
+    const success = await onUpdate({ avatar_url: url || null });
+    if (success) {
+      toast.success('Profile photo updated!');
+    }
+  };
+
+  const handleAvatarError = (error: string) => {
+    toast.error(error);
+  };
+
   return (
-    <Card className="glass-card">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <User className="h-5 w-5 text-primary" />
-          Personal Information
-        </CardTitle>
-        <CardDescription>
-          Manage your personal details and display preferences
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-6">
+    <div className="space-y-6">
+      {/* Profile Photo Card */}
+      <Card className="glass-card">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Camera className="h-5 w-5 text-primary" />
+            Profile Photo
+          </CardTitle>
+          <CardDescription>
+            Upload a profile photo to personalize your account
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col sm:flex-row items-center gap-6">
+            {/* Large Avatar Preview */}
+            <div className="relative">
+              <Avatar className="h-32 w-32 border-4 border-background shadow-lg">
+                <AvatarImage src={profile.avatar_url || undefined} alt={displayName} />
+                <AvatarFallback className="text-3xl font-bold bg-primary/10 text-primary">
+                  {initials}
+                </AvatarFallback>
+              </Avatar>
+            </div>
+            
+            {/* Upload Zone */}
+            <div className="flex-1 w-full">
+              <AvatarUpload
+                userId={profile.user_id}
+                currentAvatarUrl={profile.avatar_url}
+                onUploadComplete={handleAvatarUpload}
+                onError={handleAvatarError}
+              />
+              <p className="mt-3 text-xs text-muted-foreground">
+                Recommended: Square image, at least 256x256px. Max 5MB.
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Personal Information Card */}
+      <Card className="glass-card">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <User className="h-5 w-5 text-primary" />
+            Personal Information
+          </CardTitle>
+          <CardDescription>
+            Manage your personal details and display preferences
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
         <div className="grid gap-6 sm:grid-cols-2">
           <EditableField
             label="Full Name"
@@ -200,5 +263,6 @@ export function ProfileSection({
         </div>
       </CardContent>
     </Card>
+    </div>
   );
 }
