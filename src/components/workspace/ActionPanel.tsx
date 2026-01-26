@@ -6,6 +6,7 @@ import { useToast } from '@/hooks/use-toast';
 import { EnhancedTradeAnalysis } from '@/types/analysis';
 import { useTrackedAssets } from '@/hooks/useTrackedAssets';
 import { TrackAssetModal } from './TrackAssetModal';
+import { AddToPortfolioModal } from './AddToPortfolioModal';
 
 interface ActionPanelProps {
   analysis: EnhancedTradeAnalysis;
@@ -184,6 +185,7 @@ export function ActionPanel({ analysis, onNewAnalysis, isHistorical }: ActionPan
   const { isAssetTracked } = useTrackedAssets();
   const [isExporting, setIsExporting] = useState(false);
   const [showTrackModal, setShowTrackModal] = useState(false);
+  const [showPortfolioModal, setShowPortfolioModal] = useState(false);
 
   const existingTrack = isAssetTracked(analysis.input.asset, analysis.input.market);
 
@@ -193,10 +195,7 @@ export function ActionPanel({ analysis, onNewAnalysis, isHistorical }: ActionPan
   };
 
   const handleAddToPortfolio = () => {
-    toast({
-      title: "Coming Soon",
-      description: "Portfolio integration will be available in an upcoming release.",
-    });
+    setShowPortfolioModal(true);
   };
 
   const handleExportPDF = async () => {
@@ -398,6 +397,13 @@ export function ActionPanel({ analysis, onNewAnalysis, isHistorical }: ActionPan
       <TrackAssetModal
         open={showTrackModal}
         onOpenChange={setShowTrackModal}
+        analysis={analysis}
+      />
+
+      {/* Add to Portfolio Modal */}
+      <AddToPortfolioModal
+        open={showPortfolioModal}
+        onOpenChange={setShowPortfolioModal}
         analysis={analysis}
       />
     </div>

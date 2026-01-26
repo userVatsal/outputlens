@@ -7,3 +7,4 @@ export { ActionPanel } from './ActionPanel';
 export { AdvancedMetrics } from './AdvancedMetrics';
 export { PnLSummary } from './PnLSummary';
 export { TrackAssetModal } from './TrackAssetModal';
+export { AddToPortfolioModal } from './AddToPortfolioModal';
