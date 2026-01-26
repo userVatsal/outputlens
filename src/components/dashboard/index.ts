@@ -1,4 +1,5 @@
 export { AccountCard } from './AccountCard';
+export { AccountHeader } from './AccountHeader';
 export { AlertsPanel } from './AlertsPanel';
 export { TrackedAssetsGrid } from './TrackedAssetsGrid';
 export { RecentReports } from './RecentReports';
