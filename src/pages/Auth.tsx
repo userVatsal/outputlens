@@ -87,7 +87,7 @@ export default function Auth() {
     // Check if already logged in
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
-        navigate('/analyze');
+        navigate('/dashboard');
       }
     });
 
@@ -95,7 +95,7 @@ export default function Auth() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         if (session) {
-          navigate('/analyze');
+          navigate('/dashboard');
         }
       }
     );
@@ -155,7 +155,7 @@ export default function Auth() {
           email,
           password,
           options: {
-            emailRedirectTo: `${window.location.origin}/analyze`,
+            emailRedirectTo: `${window.location.origin}/dashboard`,
             data: {
               // Minimal data for quick signup - user will complete profile later
               onboarding_completed: false
