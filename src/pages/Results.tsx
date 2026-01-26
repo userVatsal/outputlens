@@ -1,22 +1,27 @@
 import { useEffect, Suspense, lazy } from 'react';
-import { useNavigate, useSearchParams, Link } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, TrendingUp, TrendingDown, Clock, Globe, Wifi, WifiOff, History, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { EnhancedQuantMetricsCard } from '@/components/EnhancedQuantMetricsCard';
-import { EnhancedScenarioDisplay } from '@/components/EnhancedScenarioDisplay';
-import { EnhancedRiskSummary } from '@/components/EnhancedRiskSummary';
 import { ReturnDistributionChart } from '@/components/ReturnDistributionChart';
-import { ScenarioProbabilityChart } from '@/components/ScenarioProbabilityChart';
 import { FeatureGate } from '@/components/FeatureGate';
 import { Layout } from '@/components/layout/Layout';
 import { useTrade } from '@/hooks/useTrade';
 import { MARKETS } from '@/types/trade';
 import { Skeleton } from '@/components/ui/skeleton';
+import { 
+  RiskSnapshot, 
+  PnLSummary, 
+  TailRiskPanel, 
+  ScenarioRegimeCards, 
+  AdvancedMetrics, 
+  RiskInterpretation,
+  ActionPanel 
+} from '@/components/workspace';
+import { investmentToShares } from '@/lib/positionCalculations';
 
 // Lazy load heavy components for performance
 const SentimentIndicator = lazy(() => import('@/components/SentimentIndicator').then(m => ({ default: m.SentimentIndicator })));
-const AIExplanation = lazy(() => import('@/components/AIExplanation').then(m => ({ default: m.AIExplanation })));
 
 // Loading skeleton for lazy-loaded components
 function SectionSkeleton() {
@@ -80,13 +85,14 @@ const Results = () => {
 
   const { input, riskMetrics, scenarios, simulation, marketData } = analysis;
   const marketInfo = MARKETS[input.market];
-
-  // Count all scenarios
-  const totalScenarios = 
-    scenarios.base.length + 
-    scenarios.upside.length + 
-    scenarios.downside.length + 
-    scenarios.tail.length;
+  const currencySymbol = marketInfo.currencySymbol;
+  
+  // Calculate shares for P&L display
+  const shares = input.positionSize 
+    ? (input.positionType === 'shares' 
+        ? input.positionSize 
+        : investmentToShares(input.positionSize, input.entryPrice))
+    : 100; // Default for legacy analyses without position size
 
   const handleNewAnalysis = () => {
     clearAnalysis();
@@ -114,7 +120,7 @@ const Results = () => {
             </Button>
             <div className="flex-1">
               <div className="flex items-center gap-3">
-                <h1 className="text-2xl font-bold text-foreground font-brand">Trade Analysis Results</h1>
+                <h1 className="text-2xl font-bold text-foreground font-brand">Risk Analysis Results</h1>
                 {isHistorical && (
                   <Badge variant="secondary" className="flex items-center gap-1">
                     <Eye className="h-3 w-3" />
@@ -179,7 +185,7 @@ const Results = () => {
               <div className="flex items-center gap-2">
                 <span className="text-sm text-muted-foreground">Entry:</span>
                 <span className="font-mono font-semibold text-foreground">
-                  {marketInfo.currencySymbol}{input.entryPrice.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                  {currencySymbol}{input.entryPrice.toLocaleString('en-US', { minimumFractionDigits: 2 })}
                 </span>
               </div>
               <div className="flex items-center gap-2">
@@ -203,78 +209,70 @@ const Results = () => {
             )}
           </div>
 
-          {/* Step 1: Advanced Risk Metrics */}
-          <div className="mb-8 animate-fade-in" style={{ animationDelay: '0.15s' }}>
-            <div className="flex items-center gap-2 mb-4">
-              <div className="flex items-center justify-center w-6 h-6 rounded-full bg-primary/10 text-primary text-xs font-bold">1</div>
-              <h2 className="text-lg font-semibold text-foreground font-brand">Risk Metrics</h2>
-            </div>
-            <p className="text-sm text-muted-foreground mb-4">
-              Computed from Monte Carlo simulation using {marketData.dataQuality === 'live' ? 'live' : 'estimated'} volatility data.
-            </p>
-            <EnhancedQuantMetricsCard 
-              riskMetrics={riskMetrics} 
-              simulation={simulation}
-              currencySymbol={marketInfo.currencySymbol} 
+          {/* Risk Snapshot - Above the fold */}
+          <div className="animate-fade-in" style={{ animationDelay: '0.15s' }}>
+            <RiskSnapshot 
+              analysis={analysis} 
+              currencySymbol={currencySymbol}
             />
-            {/* Distribution Chart */}
-            <div className="mt-4">
-              <ReturnDistributionChart 
-                riskMetrics={riskMetrics}
-                simulation={simulation}
-              />
-            </div>
           </div>
 
-          {/* Step 2: Risk Overview */}
-          <div className="mb-8 animate-fade-in" style={{ animationDelay: '0.2s' }}>
-            <div className="flex items-center gap-2 mb-4">
-              <div className="flex items-center justify-center w-6 h-6 rounded-full bg-primary/10 text-primary text-xs font-bold">2</div>
-              <h2 className="text-lg font-semibold text-foreground font-brand">Risk Overview</h2>
-            </div>
-            <p className="text-sm text-muted-foreground mb-4">
-              Best and worst case outcomes with simulated probabilities.
-            </p>
-            <EnhancedRiskSummary analysis={analysis} />
+          {/* P&L Summary */}
+          <div className="animate-fade-in mb-6" style={{ animationDelay: '0.2s' }}>
+            <PnLSummary 
+              analysis={analysis}
+              shares={shares}
+              currencySymbol={currencySymbol}
+            />
           </div>
 
-          {/* Step 3: Scenario Probability Charts */}
-          <div className="mb-8 animate-fade-in" style={{ animationDelay: '0.3s' }}>
-            <div className="flex items-center gap-2 mb-4">
-              <div className="flex items-center justify-center w-6 h-6 rounded-full bg-primary/10 text-primary text-xs font-bold">3</div>
-              <h2 className="text-lg font-semibold text-foreground font-brand">
-                Scenario Probabilities
-              </h2>
-            </div>
-            <p className="text-sm text-muted-foreground mb-4">
-              Visual breakdown of outcome probabilities and expected returns.
-            </p>
-            <ScenarioProbabilityChart scenarios={scenarios} currencySymbol={marketInfo.currencySymbol} />
+          {/* Tail Risk Panel */}
+          <div className="animate-fade-in" style={{ animationDelay: '0.25s' }}>
+            <TailRiskPanel 
+              scenarios={scenarios}
+              expectedShortfall={riskMetrics.expectedShortfall}
+              kurtosis={simulation.kurtosis}
+              currencySymbol={currencySymbol}
+              entryPrice={input.entryPrice}
+            />
           </div>
 
-          {/* Step 4: Structured Scenarios */}
-          <div className="mb-8 animate-fade-in" style={{ animationDelay: '0.35s' }}>
-            <div className="flex items-center gap-2 mb-4">
-              <div className="flex items-center justify-center w-6 h-6 rounded-full bg-primary/10 text-primary text-xs font-bold">4</div>
-              <h2 className="text-lg font-semibold text-foreground font-brand">
-                Detailed Scenarios ({totalScenarios} scenarios)
-              </h2>
-            </div>
-            <p className="text-sm text-muted-foreground mb-4">
-              Dynamic scenarios generated from simulation, organized by outcome type.
-            </p>
-            <EnhancedScenarioDisplay scenarios={scenarios} currencySymbol={marketInfo.currencySymbol} />
+          {/* Scenario Regime Cards */}
+          <div className="animate-fade-in" style={{ animationDelay: '0.3s' }}>
+            <ScenarioRegimeCards 
+              scenarios={scenarios}
+              shares={shares}
+              currencySymbol={currencySymbol}
+              entryPrice={input.entryPrice}
+            />
           </div>
 
-          {/* Step 5: Market Sentiment - Feature Gated */}
-          <div className="mb-8 animate-fade-in" style={{ animationDelay: '0.4s' }}>
-            <div className="flex items-center gap-2 mb-4">
-              <div className="flex items-center justify-center w-6 h-6 rounded-full bg-primary/10 text-primary text-xs font-bold">5</div>
-              <h2 className="text-lg font-semibold text-foreground font-brand">Market Sentiment</h2>
-            </div>
-            <p className="text-sm text-muted-foreground mb-4">
-              AI-analyzed sentiment from news and qualitative signals.
-            </p>
+          {/* Return Distribution Chart */}
+          <div className="animate-fade-in mb-6" style={{ animationDelay: '0.35s' }}>
+            <ReturnDistributionChart 
+              riskMetrics={riskMetrics}
+              simulation={simulation}
+            />
+          </div>
+
+          {/* Advanced Metrics - Collapsed */}
+          <div className="animate-fade-in" style={{ animationDelay: '0.4s' }}>
+            <AdvancedMetrics 
+              metrics={riskMetrics}
+              kurtosis={simulation.kurtosis}
+              skewness={simulation.skewness}
+            />
+          </div>
+
+          {/* Risk Interpretation */}
+          <div className="animate-fade-in" style={{ animationDelay: '0.45s' }}>
+            <RiskInterpretation 
+              analysis={analysis}
+            />
+          </div>
+
+          {/* Sentiment - Feature Gated */}
+          <div className="animate-fade-in mb-6" style={{ animationDelay: '0.5s' }}>
             <FeatureGate feature="sentiment">
               <Suspense fallback={<SectionSkeleton />}>
                 <SentimentIndicator asset={input.asset} market={input.market} />
@@ -282,24 +280,10 @@ const Results = () => {
             </FeatureGate>
           </div>
 
-          {/* Step 6: AI Explanation - Lazy Loaded */}
-          <div className="mb-8 animate-fade-in" style={{ animationDelay: '0.45s' }}>
-            <div className="flex items-center gap-2 mb-4">
-              <div className="flex items-center justify-center w-6 h-6 rounded-full bg-primary/10 text-primary text-xs font-bold">6</div>
-              <h2 className="text-lg font-semibold text-foreground font-brand">AI Explanation</h2>
-            </div>
-            <p className="text-sm text-muted-foreground mb-4">
-              Qualitative reasoning based on Monte Carlo results and risk metrics.
-            </p>
-            <Suspense fallback={<SectionSkeleton />}>
-              <AIExplanation analysis={analysis} />
-            </Suspense>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="text-center animate-fade-in flex items-center justify-center gap-4" style={{ animationDelay: '0.55s' }}>
+          {/* Action Panel */}
+          <div className="animate-fade-in" style={{ animationDelay: '0.55s' }}>
             {isHistorical ? (
-              <>
+              <div className="text-center flex items-center justify-center gap-4">
                 <Button variant="outline" onClick={handleBackToHistory} className="px-6">
                   <History className="h-4 w-4 mr-2" />
                   Back to History
@@ -307,18 +291,19 @@ const Results = () => {
                 <Button onClick={handleNewAnalysis} className="px-8">
                   Analyze New Trade
                 </Button>
-              </>
+              </div>
             ) : (
-              <Button onClick={handleNewAnalysis} className="px-8">
-                Analyze Another Trade
-              </Button>
+              <ActionPanel 
+                analysis={analysis}
+                onNewAnalysis={handleNewAnalysis}
+              />
             )}
           </div>
 
           {/* Disclaimer */}
           <div className="mt-8 p-4 rounded-lg bg-muted/30 border border-border/50">
             <p className="text-xs text-muted-foreground text-center">
-              <strong>Educational Disclaimer:</strong> This analysis uses Monte Carlo simulation with {simulation.paths.toLocaleString()} paths 
+              This analysis uses Monte Carlo simulation with {simulation.paths.toLocaleString()} paths 
               and {marketData.dataQuality === 'live' ? 'live market data' : 'estimated volatility'}. 
               It does not predict actual outcomes and is not financial advice. 
               Markets are inherently unpredictable. Always consult a qualified financial advisor before trading.

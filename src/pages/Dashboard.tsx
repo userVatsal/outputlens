@@ -15,12 +15,15 @@ import {
   MarketIntelligence,
   WorkspaceCTA,
   AgeVerificationBanner,
+  OnboardingGuide,
 } from '@/components/dashboard';
 
 export default function Dashboard() {
   const navigate = useNavigate();
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [showAgeVerification, setShowAgeVerification] = useState(true);
+  const [hasAnalysisHistory, setHasAnalysisHistory] = useState<boolean | null>(null);
+  const [showOnboarding, setShowOnboarding] = useState(true);
   
   const { profile, loading: profileLoading } = useProfile();
   const { usage, loading: usageLoading } = useUsage();
@@ -41,6 +44,16 @@ export default function Dashboard() {
         return;
       }
       setIsAuthenticated(true);
+      
+      // Check if user has any analysis history
+      const { count, error } = await supabase
+        .from('analysis_history')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', session.user.id);
+      
+      if (!error) {
+        setHasAnalysisHistory((count || 0) > 0);
+      }
     };
     checkAuth();
 
@@ -65,6 +78,7 @@ export default function Dashboard() {
   }
 
   const needsAgeVerification = !profile?.date_of_birth && showAgeVerification;
+  const shouldShowOnboarding = hasAnalysisHistory === false && showOnboarding;
 
   return (
     <Layout>
@@ -79,6 +93,14 @@ export default function Dashboard() {
               Your centralized command center for risk & scenario intelligence
             </p>
           </div>
+
+          {/* Onboarding Guide for new users */}
+          {shouldShowOnboarding && (
+            <OnboardingGuide 
+              profileName={profile?.full_name}
+              onDismiss={() => setShowOnboarding(false)}
+            />
+          )}
 
           {/* Age Verification Banner */}
           {needsAgeVerification && (
