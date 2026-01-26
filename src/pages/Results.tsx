@@ -273,7 +273,13 @@ const Results = () => {
 
           {/* Sentiment - Feature Gated */}
           <div className="animate-fade-in mb-6" style={{ animationDelay: '0.5s' }}>
-            <FeatureGate feature="sentiment">
+            <div className="flex items-center gap-2 mb-3">
+              <h3 className="font-semibold text-foreground">Market Sentiment</h3>
+              <span className="text-[10px] px-1.5 py-0.5 bg-primary/20 text-primary rounded font-semibold">
+                STARTER
+              </span>
+            </div>
+            <FeatureGate feature="sentiment" showPreview={true}>
               <Suspense fallback={<SectionSkeleton />}>
                 <SentimentIndicator asset={input.asset} market={input.market} />
               </Suspense>

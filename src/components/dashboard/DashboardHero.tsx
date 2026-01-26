@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Settings, CreditCard, Crown, Sparkles, Zap, User } from 'lucide-react';
+import { Settings, CreditCard, Crown, Sparkles, Zap, User, ChevronRight, BarChart3, FileDown, Brain } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -36,6 +36,13 @@ function PlanBadge({ plan }: { plan: string }) {
   );
 }
 
+const UPGRADE_FEATURES = [
+  { icon: BarChart3, label: '30+ analyses/mo' },
+  { icon: Zap, label: 'Live market data' },
+  { icon: Brain, label: 'AI sentiment' },
+  { icon: FileDown, label: 'PDF/CSV exports' },
+];
+
 export function DashboardHero({ profile, usage, plan }: DashboardHeroProps) {
   const displayName = profile?.display_name || profile?.full_name || 'User';
   const initials = displayName
@@ -48,6 +55,8 @@ export function DashboardHero({ profile, usage, plan }: DashboardHeroProps) {
   const remainingAnalyses = usage 
     ? Math.max(usage.limit - usage.analysisCount, 0) 
     : 0;
+
+  const isFreeUser = plan.plan === 'free';
 
   return (
     <div className="rounded-xl border border-border bg-gradient-to-br from-primary/5 via-background to-background p-6 md:p-8">
@@ -89,7 +98,7 @@ export function DashboardHero({ profile, usage, plan }: DashboardHeroProps) {
               Settings
             </Link>
           </Button>
-          {plan.plan === 'free' && (
+          {isFreeUser && (
             <Button size="sm" asChild>
               <Link to="/pricing">
                 <CreditCard className="h-4 w-4 mr-1.5" />
@@ -99,6 +108,42 @@ export function DashboardHero({ profile, usage, plan }: DashboardHeroProps) {
           )}
         </div>
       </div>
+
+      {/* Upgrade nudge for free users */}
+      {isFreeUser && (
+        <div className="mt-4 p-3 rounded-lg bg-primary/5 border border-primary/20">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-full bg-primary/10">
+                <Sparkles className="h-4 w-4 text-primary" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-foreground">Upgrade to unlock:</p>
+                <div className="flex flex-wrap gap-2 mt-1">
+                  {UPGRADE_FEATURES.map((feature) => {
+                    const Icon = feature.icon;
+                    return (
+                      <span 
+                        key={feature.label}
+                        className="inline-flex items-center gap-1 text-xs text-muted-foreground"
+                      >
+                        <Icon className="h-3 w-3 text-primary" />
+                        {feature.label}
+                      </span>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+            <Button size="sm" variant="outline" asChild className="whitespace-nowrap">
+              <Link to="/pricing">
+                See Plans
+                <ChevronRight className="h-3 w-3 ml-1" />
+              </Link>
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -13,6 +13,171 @@ interface ActionPanelProps {
   isHistorical?: boolean;
 }
 
+// Generate professional PDF content for printing
+function generatePDFContent(analysis: EnhancedTradeAnalysis): string {
+  const { input, riskMetrics, scenarios, simulation, marketData } = analysis;
+  const timestamp = new Date().toLocaleString();
+  
+  // Flatten scenarios from the DynamicScenarioSet structure
+  const allScenarios = [
+    ...scenarios.base,
+    ...scenarios.upside,
+    ...scenarios.downside,
+    ...scenarios.tail,
+  ];
+  
+  const scenarioRows = allScenarios.map(s => `
+    <tr>
+      <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;">${s.name}</td>
+      <td style="padding: 8px; border-bottom: 1px solid #e5e7eb; text-align: right;">${(s.probability * 100).toFixed(1)}%</td>
+      <td style="padding: 8px; border-bottom: 1px solid #e5e7eb; text-align: right; color: ${s.returnRangeMax >= 0 ? '#10b981' : '#ef4444'};">
+        ${s.returnRangeMin.toFixed(1)}% to ${s.returnRangeMax >= 0 ? '+' : ''}${s.returnRangeMax.toFixed(1)}%
+      </td>
+    </tr>
+  `).join('');
+
+  return `
+    <style>
+      @media print {
+        body { margin: 0; padding: 20px; font-family: system-ui, -apple-system, sans-serif; }
+        .no-print { display: none !important; }
+      }
+      .pdf-container { max-width: 800px; margin: 0 auto; }
+      .header { border-bottom: 2px solid #6366f1; padding-bottom: 16px; margin-bottom: 24px; }
+      .logo { font-size: 24px; font-weight: bold; color: #6366f1; }
+      .subtitle { color: #6b7280; font-size: 14px; margin-top: 4px; }
+      .section { margin-bottom: 24px; }
+      .section-title { font-size: 16px; font-weight: 600; color: #111827; margin-bottom: 12px; border-bottom: 1px solid #e5e7eb; padding-bottom: 8px; }
+      .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+      .metric { background: #f9fafb; padding: 12px; border-radius: 8px; }
+      .metric-label { font-size: 12px; color: #6b7280; text-transform: uppercase; }
+      .metric-value { font-size: 18px; font-weight: 600; color: #111827; margin-top: 4px; }
+      table { width: 100%; border-collapse: collapse; }
+      th { background: #f3f4f6; padding: 8px; text-align: left; font-size: 12px; text-transform: uppercase; color: #6b7280; }
+      .risk-badge { display: inline-block; padding: 4px 12px; border-radius: 9999px; font-size: 12px; font-weight: 600; }
+      .risk-low { background: #d1fae5; color: #065f46; }
+      .risk-medium { background: #fef3c7; color: #92400e; }
+      .risk-high { background: #fee2e2; color: #991b1b; }
+      .footer { margin-top: 32px; padding-top: 16px; border-top: 1px solid #e5e7eb; font-size: 11px; color: #9ca3af; }
+    </style>
+    <div class="pdf-container">
+      <div class="header">
+        <div class="logo">OutputLens</div>
+        <div class="subtitle">AI-Powered Risk Analysis Report • Generated ${timestamp}</div>
+      </div>
+      
+      <div class="section">
+        <div class="section-title">Analysis Summary</div>
+        <div class="grid">
+          <div class="metric">
+            <div class="metric-label">Asset</div>
+            <div class="metric-value">${input.asset}</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Direction</div>
+            <div class="metric-value">${input.direction.toUpperCase()}</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Entry Price</div>
+            <div class="metric-value">$${input.entryPrice.toLocaleString()}</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Time Horizon</div>
+            <div class="metric-value">${input.timeHorizon}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Risk Assessment</div>
+        <div class="grid">
+          <div class="metric">
+            <div class="metric-label">Risk Score</div>
+            <div class="metric-value">
+              ${riskMetrics.riskScore}/10
+              <span class="risk-badge ${riskMetrics.riskScore <= 3 ? 'risk-low' : riskMetrics.riskScore <= 6 ? 'risk-medium' : 'risk-high'}" style="margin-left: 8px;">
+                ${riskMetrics.riskLabel}
+              </span>
+            </div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Win Probability</div>
+            <div class="metric-value">${riskMetrics.probabilityOfProfit.toFixed(1)}%</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Expected Return</div>
+            <div class="metric-value" style="color: ${riskMetrics.expectedReturn >= 0 ? '#10b981' : '#ef4444'};">
+              ${riskMetrics.expectedReturn >= 0 ? '+' : ''}${riskMetrics.expectedReturn.toFixed(2)}%
+            </div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Value at Risk (95%)</div>
+            <div class="metric-value" style="color: #ef4444;">${riskMetrics.valueAtRisk95.toFixed(2)}%</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Value at Risk (99%)</div>
+            <div class="metric-value" style="color: #ef4444;">${riskMetrics.valueAtRisk99.toFixed(2)}%</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Expected Shortfall</div>
+            <div class="metric-value" style="color: #ef4444;">${riskMetrics.expectedShortfall.toFixed(2)}%</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Scenario Analysis</div>
+        <table>
+          <thead>
+            <tr>
+              <th>Scenario</th>
+              <th style="text-align: right;">Probability</th>
+              <th style="text-align: right;">Expected Return</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${scenarioRows}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Simulation Details</div>
+        <div class="grid">
+          <div class="metric">
+            <div class="metric-label">Monte Carlo Paths</div>
+            <div class="metric-value">${simulation.paths.toLocaleString()}</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Data Quality</div>
+            <div class="metric-value">${marketData.dataQuality === 'live' ? 'Live Market Data' : 'Estimated'}</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Volatility</div>
+            <div class="metric-value">${riskMetrics.volatilityProxy.toFixed(2)}%</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Kurtosis</div>
+            <div class="metric-value">${simulation.kurtosis?.toFixed(2) || 'N/A'}</div>
+          </div>
+        </div>
+      </div>
+
+      ${input.assumptions ? `
+      <div class="section">
+        <div class="section-title">Trade Thesis</div>
+        <p style="color: #4b5563; font-style: italic;">"${input.assumptions}"</p>
+      </div>
+      ` : ''}
+
+      <div class="footer">
+        <p><strong>Disclaimer:</strong> This analysis uses Monte Carlo simulation with ${simulation.paths.toLocaleString()} paths. It does not predict actual outcomes and is not financial advice. Markets are inherently unpredictable. Always consult a qualified financial advisor before trading.</p>
+        <p style="margin-top: 8px;">© ${new Date().getFullYear()} OutputLens. All rights reserved.</p>
+      </div>
+    </div>
+  `;
+}
+
 export function ActionPanel({ analysis, onNewAnalysis, isHistorical }: ActionPanelProps) {
   const { canExport } = usePlan();
   const { toast } = useToast();
@@ -46,11 +211,47 @@ export function ActionPanel({ analysis, onNewAnalysis, isHistorical }: ActionPan
 
     setIsExporting(true);
     try {
-      // Simulate export delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Create a new window for printing
+      const printWindow = window.open('', '_blank');
+      if (!printWindow) {
+        toast({
+          title: "Pop-up Blocked",
+          description: "Please allow pop-ups to export PDF.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Generate and write the PDF content
+      const content = generatePDFContent(analysis);
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>Risk Analysis - ${analysis.input.asset} | OutputLens</title>
+          </head>
+          <body>
+            ${content}
+            <script>
+              window.onload = function() {
+                window.print();
+              };
+            </script>
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+
       toast({
-        title: "Export Ready",
-        description: "PDF export functionality coming soon.",
+        title: "PDF Ready",
+        description: "Use the print dialog to save as PDF.",
+      });
+    } catch (error) {
+      console.error('PDF export error:', error);
+      toast({
+        title: "Export Failed",
+        description: "There was an error generating the PDF.",
+        variant: "destructive",
       });
     } finally {
       setIsExporting(false);
