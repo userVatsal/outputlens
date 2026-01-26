@@ -7,8 +7,6 @@ import {
   BarChart3,
   TrendingUp,
   TrendingDown,
-  AlertTriangle,
-  Shield,
   Sparkles,
   ChevronRight,
   Search
@@ -16,16 +14,22 @@ import {
 import { Layout } from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Input } from '@/components/ui/input';
-import { EnhancedQuantMetricsCard } from '@/components/EnhancedQuantMetricsCard';
-import { EnhancedRiskSummary } from '@/components/EnhancedRiskSummary';
+import { 
+  RiskSnapshot, 
+  PnLSummary, 
+  TailRiskPanel, 
+  ScenarioRegimeCards, 
+  AdvancedMetrics, 
+  RiskInterpretation 
+} from '@/components/workspace';
 import { ReturnDistributionChart } from '@/components/ReturnDistributionChart';
-import { ScenarioProbabilityChart } from '@/components/ScenarioProbabilityChart';
-import { EnhancedScenarioDisplay } from '@/components/EnhancedScenarioDisplay';
 import { DEMO_ANALYSIS } from '@/lib/demoData';
 import { POPULAR_ASSETS } from '@/lib/popularAssets';
+import { investmentToShares } from '@/lib/positionCalculations';
+import { MARKETS } from '@/types/trade';
 
 export default function Demo() {
   const analysis = DEMO_ANALYSIS;
@@ -38,6 +42,12 @@ export default function Demo() {
   const [showSignupPrompt, setShowSignupPrompt] = useState(false);
   const [signupPromptDismissed, setSignupPromptDismissed] = useState(false);
   const popularAssets = POPULAR_ASSETS.US;
+
+  // Calculate derived values for Workspace components
+  const currencySymbol = MARKETS[analysis.input.market].currencySymbol;
+  const shares = analysis.input.positionType === 'shares' 
+    ? analysis.input.positionSize 
+    : investmentToShares(analysis.input.positionSize, analysis.input.entryPrice);
 
   // SEO: Set page-specific document title
   useEffect(() => {
@@ -184,7 +194,7 @@ export default function Demo() {
                 </div>
                 <div>
                   <span className="text-sm text-muted-foreground">Entry Price</span>
-                  <p className="font-bold text-lg font-mono">${analysis.input.entryPrice}</p>
+                  <p className="font-bold text-lg font-mono">{currencySymbol}{analysis.input.entryPrice}</p>
                 </div>
                 <div>
                   <span className="text-sm text-muted-foreground">Horizon</span>
@@ -201,77 +211,57 @@ export default function Demo() {
         </Card>
 
         {showingResults ? (
-          <div className="space-y-8">
-            {/* Key Metrics Grid */}
-            <section>
-              <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                <BarChart3 className="h-5 w-5 text-primary" />
-                Quantitative Risk Metrics
-              </h2>
-              <EnhancedQuantMetricsCard 
-                riskMetrics={analysis.riskMetrics} 
-                simulation={analysis.simulation}
-                currencySymbol="$"
-              />
-            </section>
+          <div className="space-y-6">
+            {/* Risk Snapshot - Above the fold key metrics */}
+            <RiskSnapshot 
+              analysis={analysis} 
+              currencySymbol={currencySymbol}
+            />
 
-            {/* Distribution Chart */}
-            <section>
-              <h2 className="text-xl font-semibold mb-4">Return Distribution</h2>
+            {/* P&L Summary - Position economics */}
+            <PnLSummary 
+              analysis={analysis}
+              shares={shares}
+              currencySymbol={currencySymbol}
+            />
+
+            {/* Tail Risk Panel - Extreme scenarios */}
+            <TailRiskPanel 
+              scenarios={analysis.scenarios}
+              expectedShortfall={analysis.riskMetrics.expectedShortfall}
+              kurtosis={analysis.simulation.kurtosis}
+              currencySymbol={currencySymbol}
+              entryPrice={analysis.input.entryPrice}
+            />
+
+            {/* Scenario Regime Cards - Base/Bullish/Bearish */}
+            <ScenarioRegimeCards 
+              scenarios={analysis.scenarios}
+              currencySymbol={currencySymbol}
+              entryPrice={analysis.input.entryPrice}
+              shares={shares}
+            />
+
+            {/* Return Distribution Chart */}
+            <div className="rounded-xl border border-border bg-card p-5">
+              <h3 className="text-lg font-semibold text-foreground mb-4">Return Distribution</h3>
               <ReturnDistributionChart 
                 riskMetrics={analysis.riskMetrics}
                 simulation={analysis.simulation}
               />
-            </section>
+            </div>
 
-            {/* Risk Summary */}
-            <section>
-              <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                <Shield className="h-5 w-5 text-primary" />
-                Risk Assessment
-              </h2>
-              <EnhancedRiskSummary analysis={analysis} />
-            </section>
+            {/* Advanced Metrics - Collapsed by default */}
+            <AdvancedMetrics 
+              metrics={analysis.riskMetrics}
+              kurtosis={analysis.simulation.kurtosis}
+              skewness={analysis.simulation.skewness}
+            />
 
-            {/* Scenario Probability */}
-            <section>
-              <h2 className="text-xl font-semibold mb-4">Scenario Probabilities</h2>
-              <ScenarioProbabilityChart 
-                scenarios={analysis.scenarios} 
-                currencySymbol="$"
-              />
-            </section>
-
-            {/* Detailed Scenarios */}
-            <section>
-              <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                <AlertTriangle className="h-5 w-5 text-primary" />
-                Scenario Analysis
-              </h2>
-              <EnhancedScenarioDisplay 
-                scenarios={analysis.scenarios}
-                currencySymbol="$"
-              />
-            </section>
-
-            {/* AI Explanation */}
-            <section>
-              <Card className="border-primary/20">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Sparkles className="h-5 w-5 text-primary" />
-                    AI-Powered Analysis
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="prose prose-sm dark:prose-invert max-w-none">
-                    <div className="whitespace-pre-wrap text-muted-foreground leading-relaxed">
-                      {analysis.explanation}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </section>
+            {/* Risk Interpretation - AI explanation */}
+            <RiskInterpretation 
+              analysis={analysis}
+            />
 
             {/* Try Your Own Section */}
             <section className="py-6">
