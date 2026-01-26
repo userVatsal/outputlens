@@ -1,235 +1,244 @@
 
-
-# Fix Website Issues - Comprehensive Remediation Plan
+# Update Footer Tagline + Create "About" Page
 
 ## Overview
 
-This plan addresses all identified issues affecting security warnings, conversion rates, and UX consistency across OutputLens.
+This plan implements two changes:
+1. Update the footer description with the new tagline
+2. Create a new "About" page combining "Why We Exist" storytelling with a Blog section
 
 ---
 
-## Issue 1: CORS Configuration (Critical - Blocks Payments)
+## Part 1: Update Footer Tagline
 
-### Problem
-Edge functions `create-checkout` and `customer-portal` have hardcoded CORS origin `https://outputlens.com`, blocking requests from preview/lovable.app domains.
+### File: `src/components/layout/Footer.tsx`
 
-### Files to Modify
-- `supabase/functions/create-checkout/index.ts`
-- `supabase/functions/customer-portal/index.ts`
-
-### Solution
-Update CORS headers to dynamically allow the request origin:
-
+**Change (Line 14-16):**
 ```typescript
 // Before
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "https://outputlens.com",
-  ...
-};
+<p className="text-sm text-muted-foreground">
+  AI-powered risk & scenario intelligence. Quantify downside before you trade.
+</p>
 
 // After
-const getAllowedOrigin = (requestOrigin: string | null): string => {
-  const allowedOrigins = [
-    "https://outputlens.com",
-    "https://outputlens.lovable.app",
-    "http://localhost:5173",
-    "http://localhost:8080"
-  ];
-  // Also allow preview domains
-  if (requestOrigin?.includes('.lovable.app')) {
-    return requestOrigin;
+<p className="text-sm text-muted-foreground">
+  AI risk & scenario intelligence for traders: quantify loss, analyze scenarios, track positions, and trade smarter.
+</p>
+```
+
+**Also add "About" link to Product section (Line 37):**
+```typescript
+<li>
+  <Link to="/about" className="text-muted-foreground hover:text-foreground transition-colors">
+    About
+  </Link>
+</li>
+```
+
+---
+
+## Part 2: Create "About" Page (Why We Exist + Blog)
+
+### New File: `src/pages/About.tsx`
+
+**Page Structure:**
+
+```text
+┌─────────────────────────────────────────────────────────────────┐
+│  HERO SECTION                                                   │
+│  ─────────────────────────────────────────────────────────────  │
+│  Badge: "Our Story"                                             │
+│  Headline: "Why We Built OutputLens"                           │
+│  Sub-headline: Problem-driven, YC-style                        │
+│  CTA: "Explore Risk Scenarios" | "See How It Works"            │
+└─────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│  WHY WE EXIST                                                   │
+│  ─────────────────────────────────────────────────────────────  │
+│  Founder-led storytelling:                                      │
+│  • The problem: Traders lose money due to irrational markets,  │
+│    insufficient scenario planning, gut-based decisions          │
+│  • The insight: Institutions have quant tools, retail doesn't  │
+│  • The solution: AI + quantitative + qualitative risk analysis │
+│                                                                 │
+│  Customer Personas:                                             │
+│  [Day Trader] [Quant Analyst] [B2B/Hedge Funds]                │
+└─────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│  OUR APPROACH                                                   │
+│  ─────────────────────────────────────────────────────────────  │
+│  4 feature cards with icons:                                    │
+│  • AI-Powered Probabilistic Risk Analysis                       │
+│  • Qualitative Scenario Planning                                │
+│  • Monte Carlo & Tail Risk Measurement                          │
+│  • Portfolio & Asset Tracking                                   │
+└─────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│  BLOG / LEARNING SECTION                                        │
+│  ─────────────────────────────────────────────────────────────  │
+│  Featured articles (static content for now):                    │
+│  • "How to Interpret Monte Carlo Risk Scenarios"                │
+│  • "Understanding Tail Risk in Volatile Markets"                │
+│  • "Position Sizing with Quantitative Analysis"                 │
+│                                                                 │
+│  Social Links:                                                  │
+│  [X/Twitter] [Reddit] [Instagram] [YouTube]                    │
+│                                                                 │
+│  CTA: "Subscribe for updates"                                   │
+└─────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│  CTA SECTION                                                    │
+│  ─────────────────────────────────────────────────────────────  │
+│  "Start analyzing risk today"                                   │
+│  Buttons: [Try Free Analysis] [Join Community]                  │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Content Details
+
+**Hero Section:**
+- Headline: "Why We Built OutputLens"
+- Sub-headline: "Markets are irrational. Drawdowns are inevitable. We built the tools to quantify what others guess."
+
+**Why We Exist Section:**
+```typescript
+const story = {
+  problem: "Most traders lose money because they trade on gut feeling. " +
+           "Institutional players have quantitative tools. Retail traders don't.",
+  insight: "We saw a gap: Monte Carlo simulation, tail risk analysis, and scenario planning " +
+           "were locked behind Bloomberg terminals and prop desk infrastructure.",
+  solution: "OutputLens brings institutional-grade risk analysis to every trader. " +
+            "AI-powered. Quantitative + qualitative. In your browser."
+};
+```
+
+**Customer Personas:**
+```typescript
+const personas = [
+  {
+    title: "Active Day Traders",
+    description: "Size positions with probability distributions, not hunches.",
+    icon: TrendingUp
+  },
+  {
+    title: "Quantitative Analysts",
+    description: "Build intuition through Monte Carlo simulation and tail risk metrics.",
+    icon: BarChart3
+  },
+  {
+    title: "Hedge Funds & Asset Managers",
+    description: "B2B scenario planning and portfolio risk assessment.",
+    icon: Building2
   }
-  return allowedOrigins.includes(requestOrigin || '') 
-    ? requestOrigin! 
-    : allowedOrigins[0];
-};
-
-// In handler:
-const origin = req.headers.get("origin");
-const corsHeaders = {
-  "Access-Control-Allow-Origin": getAllowedOrigin(origin),
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+];
 ```
 
----
-
-## Issue 2: Inconsistent Free Tier Messaging
-
-### Problem
-Demo page says "10 free analyses/month" but Pricing page says "5 free analyses/month".
-
-### File to Modify
-- `src/pages/Demo.tsx`
-
-### Solution
-Update Demo page messaging to match Pricing (5 analyses):
-
+**Our Approach Features:**
 ```typescript
-// Find line with "10 free analyses" and change to:
-"5 free analyses"
-```
-
----
-
-## Issue 3: History Page Back Button
-
-### Problem
-Back button navigates to legacy `/analyze` route instead of `/workspace` or `/dashboard`.
-
-### File to Modify
-- `src/pages/History.tsx`
-
-### Solution
-Update navigation target:
-
-```typescript
-// Before
-navigate('/analyze')
-
-// After
-navigate('/workspace')
-```
-
----
-
-## Issue 4: Mobile Navigation Missing Links
-
-### Problem
-Mobile menu lacks "Dashboard" and "Tracked Assets" links that exist on desktop.
-
-### File to Modify
-- `src/components/layout/Header.tsx`
-
-### Solution
-Add missing links to mobile navigation section matching desktop nav structure.
-
----
-
-## Issue 5: Add "Forgot Password" Flow
-
-### Problem
-No password reset option on Auth page increases support burden and user frustration.
-
-### Files to Modify
-- `src/pages/Auth.tsx`
-
-### Solution
-1. Add "Forgot Password" link below password input
-2. Add password reset form state
-3. Implement Supabase `resetPasswordForEmail` call
-4. Show success message directing user to check email
-
-```typescript
-// Add state
-const [isResetMode, setIsResetMode] = useState(false);
-
-// Add reset handler
-const handlePasswordReset = async () => {
-  const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${window.location.origin}/auth?reset=true`,
-  });
-  if (!error) {
-    toast({ title: "Check your email", description: "Password reset link sent" });
+const approach = [
+  {
+    icon: Brain,
+    title: "AI-Powered Risk Analysis",
+    description: "10,000 Monte Carlo simulations powered by live market volatility."
+  },
+  {
+    icon: Target,
+    title: "Qualitative Scenario Planning",
+    description: "Translate complex quant outputs into actionable risk interpretations."
+  },
+  {
+    icon: Activity,
+    title: "Tail Risk Measurement",
+    description: "VaR, Expected Shortfall, and black swan probability analysis."
+  },
+  {
+    icon: LineChart,
+    title: "Portfolio & Asset Tracking",
+    description: "Monitor positions with real-time alerts and sentiment signals."
   }
-};
-
-// Add UI link
-<button onClick={() => setIsResetMode(true)}>
-  Forgot password?
-</button>
+];
 ```
 
----
-
-## Issue 6: Add Google OAuth (Conversion Boost)
-
-### Problem
-No social login option increases signup friction. Many users prefer one-click Google signin.
-
-### Files to Modify
-- `src/pages/Auth.tsx`
-
-### Solution
-Add Google OAuth button using Supabase's built-in provider:
-
+**Blog Section (Static Articles):**
 ```typescript
-const handleGoogleSignIn = async () => {
-  await supabase.auth.signInWithOAuth({
-    provider: 'google',
-    options: {
-      redirectTo: `${window.location.origin}/dashboard`,
-    },
-  });
-};
-
-// Add UI button with Google icon
-<Button variant="outline" onClick={handleGoogleSignIn}>
-  <GoogleIcon /> Continue with Google
-</Button>
+const articles = [
+  {
+    title: "How to Interpret Monte Carlo Risk Scenarios",
+    excerpt: "Learn to read probability distributions and make smarter sizing decisions.",
+    readTime: "5 min read",
+    category: "Tutorial"
+  },
+  {
+    title: "Understanding Tail Risk in Volatile Markets",
+    excerpt: "Why 95% VaR isn't enough—and how Expected Shortfall protects you.",
+    readTime: "7 min read",
+    category: "Insights"
+  },
+  {
+    title: "Position Sizing with Quantitative Analysis",
+    excerpt: "From gut feeling to probability-based risk management.",
+    readTime: "6 min read",
+    category: "Strategy"
+  }
+];
 ```
 
-**Note**: Requires Google OAuth to be configured in Lovable Cloud. Will add a check and prompt user to configure if not set up.
+**Social Links:**
+```typescript
+const socialLinks = [
+  { name: "X / Twitter", icon: Twitter, url: "#" },
+  { name: "Reddit", icon: MessageSquare, url: "#" },
+  { name: "Instagram", icon: Instagram, url: "#" },
+  { name: "YouTube", icon: Youtube, url: "#" }
+];
+```
 
 ---
 
-## Issue 7: SEO Domain Consistency
+## Part 3: Add Route
 
-### Problem
-Multiple domain references create confusion:
-- `index.html` references `outputlens.com`
-- App actually hosted on `outputlens.lovable.app`
-- Some edge functions reference different domains
+### File: `src/App.tsx`
 
-### Files to Review
-- `index.html` (canonical URL, og:url)
-- Edge function CORS headers (covered in Issue 1)
+**Add import:**
+```typescript
+import About from "./pages/About";
+```
 
-### Solution
-Keep `outputlens.com` as the canonical/SEO domain (assuming custom domain is configured or planned), but ensure CORS allows all valid origins. No changes needed to SEO metadata if custom domain is set up.
+**Add route (before catch-all):**
+```typescript
+<Route path="/about" element={<About />} />
+```
 
 ---
 
 ## Files Summary
 
-| File | Changes |
-|------|---------|
-| `supabase/functions/create-checkout/index.ts` | Dynamic CORS origin handling |
-| `supabase/functions/customer-portal/index.ts` | Dynamic CORS origin handling |
-| `src/pages/Demo.tsx` | Fix "10 free" → "5 free" messaging |
-| `src/pages/History.tsx` | Fix back button `/analyze` → `/workspace` |
-| `src/components/layout/Header.tsx` | Add Dashboard/Tracked Assets to mobile nav |
-| `src/pages/Auth.tsx` | Add forgot password flow + Google OAuth button |
+| File | Action | Changes |
+|------|--------|---------|
+| `src/components/layout/Footer.tsx` | Modify | Update tagline + add About link |
+| `src/pages/About.tsx` | Create | New page with Why We Exist + Blog |
+| `src/App.tsx` | Modify | Add /about route |
 
 ---
 
-## Implementation Order
+## Design Notes
 
-1. **CORS Fix** (Critical - currently blocking payments)
-2. **Messaging Consistency** (Quick fix)
-3. **Navigation Fixes** (History back button + mobile nav)
-4. **Forgot Password Flow** (Medium complexity)
-5. **Google OAuth** (Requires backend configuration check)
-
----
-
-## Expected Outcomes
-
-| Issue | Impact |
-|-------|--------|
-| CORS Fix | Payments work from all domains |
-| Messaging Fix | Consistent trust signals |
-| Navigation Fixes | Improved UX, no dead ends |
-| Forgot Password | Reduced support burden, better retention |
-| Google OAuth | 20-40% improvement in signup conversion |
+- **Colors**: White background, navy blue headings, primary blue accents, subtle burgundy/orange for highlights
+- **Typography**: font-brand for headings, standard body text
+- **Tone**: Professional, approachable, founder-led voice ("We built this because...")
+- **Layout**: Consistent with Methodology page structure (hero-gradient, glass-cards, section-container)
 
 ---
 
-## Note on "Website Not Safe" Warning
+## Social Links Note
 
-The SSL/security warning on library PCs is likely due to:
-1. Corporate/library proxy blocking unknown subdomains
-2. Missing custom domain SSL certificate
+The social links (X, Reddit, Instagram, YouTube) will use placeholder `#` URLs. You can update these with actual social profile URLs once they're created.
 
-**Recommendation**: If `outputlens.com` is your production domain, ensure it's properly configured with SSL in Lovable Cloud settings. Library/corporate networks often block `.lovable.app` subdomains as they're development-focused.
+---
 
+## SEO
+
+Page title set via useEffect:
+```typescript
+document.title = 'About OutputLens - Why We Built AI Risk Intelligence | OutputLens';
+```
