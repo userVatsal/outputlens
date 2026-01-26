@@ -789,6 +789,56 @@ export type Database = {
         }
         Relationships: []
       }
+      risk_alerts: {
+        Row: {
+          alert_type: string
+          created_at: string
+          current_value: number | null
+          delta: number | null
+          dismissed_at: string | null
+          id: string
+          message: string
+          read_at: string | null
+          threshold_value: number | null
+          tracked_asset_id: string | null
+          user_id: string
+        }
+        Insert: {
+          alert_type: string
+          created_at?: string
+          current_value?: number | null
+          delta?: number | null
+          dismissed_at?: string | null
+          id?: string
+          message: string
+          read_at?: string | null
+          threshold_value?: number | null
+          tracked_asset_id?: string | null
+          user_id: string
+        }
+        Update: {
+          alert_type?: string
+          created_at?: string
+          current_value?: number | null
+          delta?: number | null
+          dismissed_at?: string | null
+          id?: string
+          message?: string
+          read_at?: string | null
+          threshold_value?: number | null
+          tracked_asset_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "risk_alerts_tracked_asset_id_fkey"
+            columns: ["tracked_asset_id"]
+            isOneToOne: false
+            referencedRelation: "tracked_assets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       security_events: {
         Row: {
           action_taken: string | null
@@ -940,6 +990,51 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      tracked_assets: {
+        Row: {
+          baseline_risk_score: number | null
+          created_at: string
+          entry_price: number
+          id: string
+          last_checked_at: string | null
+          market: string
+          monitoring_frequency: string | null
+          notes: string | null
+          risk_threshold: number | null
+          symbol: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          baseline_risk_score?: number | null
+          created_at?: string
+          entry_price: number
+          id?: string
+          last_checked_at?: string | null
+          market?: string
+          monitoring_frequency?: string | null
+          notes?: string | null
+          risk_threshold?: number | null
+          symbol: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          baseline_risk_score?: number | null
+          created_at?: string
+          entry_price?: number
+          id?: string
+          last_checked_at?: string | null
+          market?: string
+          monitoring_frequency?: string | null
+          notes?: string | null
+          risk_threshold?: number | null
+          symbol?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       usage_tracking: {
         Row: {
