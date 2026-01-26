@@ -190,17 +190,32 @@ export function Header() {
               <div className="flex flex-col gap-2 pt-4 border-t border-border">
                 {user ? (
                   <>
-                    <Button variant="ghost" size="sm" asChild>
+                    <Button variant="ghost" size="sm" asChild className="justify-start">
+                      <Link to="/dashboard" onClick={() => setMobileMenuOpen(false)}>
+                        <LayoutDashboard className="h-4 w-4 mr-2" />
+                        Dashboard
+                      </Link>
+                    </Button>
+                    <Button variant="ghost" size="sm" asChild className="justify-start">
+                      <Link to="/tracked-assets" onClick={() => setMobileMenuOpen(false)}>
+                        <Bookmark className="h-4 w-4 mr-2" />
+                        Tracked Assets
+                      </Link>
+                    </Button>
+                    <Button variant="ghost" size="sm" asChild className="justify-start">
                       <Link to="/history" onClick={() => setMobileMenuOpen(false)}>
+                        <History className="h-4 w-4 mr-2" />
                         History
                       </Link>
                     </Button>
-                    <Button variant="ghost" size="sm" asChild>
+                    <Button variant="ghost" size="sm" asChild className="justify-start">
                       <Link to="/account" onClick={() => setMobileMenuOpen(false)}>
+                        <User className="h-4 w-4 mr-2" />
                         Account
                       </Link>
                     </Button>
                     <Button variant="outline" size="sm" onClick={handleSignOut}>
+                      <LogOut className="h-4 w-4 mr-2" />
                       {t('signOut')}
                     </Button>
                   </>
