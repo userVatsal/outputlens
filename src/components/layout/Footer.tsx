@@ -12,7 +12,7 @@ export function Footer() {
               <BrandLogo size="md" />
             </Link>
             <p className="text-sm text-muted-foreground">
-              AI-powered risk & scenario intelligence. Quantify downside before you trade.
+              AI risk & scenario intelligence for traders: quantify loss, analyze scenarios, track positions, and trade smarter.
             </p>
           </div>
 
@@ -33,6 +33,11 @@ export function Footer() {
               <li>
                 <Link to="/pricing" className="text-muted-foreground hover:text-foreground transition-colors">
                   Pricing
+                </Link>
+              </li>
+              <li>
+                <Link to="/about" className="text-muted-foreground hover:text-foreground transition-colors">
+                  About
                 </Link>
               </li>
             </ul>
