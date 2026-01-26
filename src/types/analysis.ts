@@ -22,6 +22,8 @@ export interface EnhancedTradeInput extends TradeInput {
   assetName?: string;         // Human-readable company name
   entryDateTime?: Date;       // Precise entry timestamp (includes time)
   exitDateTime?: Date;        // Precise exit timestamp (includes time)
+  positionSize?: number;      // Number of shares or dollar amount
+  positionType?: 'shares' | 'dollars';  // How to interpret positionSize
 }
 
 /**
