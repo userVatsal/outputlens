@@ -85,9 +85,9 @@ Deno.serve(async (req) => {
     const severityColor = severity === 'critical' ? '#ef4444' : severity === 'warning' ? '#f59e0b' : '#10b981';
 
     const { data, error } = await resend.emails.send({
-      from: 'Vatsal @ OutputLens <alerts@outputlens.com>',
+      from: 'Vatsal Pareshkumar <contact@outputlens.com>',
       to: [email],
-      reply_to: 'vatsal@outputlens.com',
+      reply_to: 'contact@outputlens.com',
       subject: `${emoji} Risk Alert: ${symbol} - Your position risk has changed`,
       html: `
 <!DOCTYPE html>

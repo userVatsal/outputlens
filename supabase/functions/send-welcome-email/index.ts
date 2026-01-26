@@ -33,9 +33,9 @@ Deno.serve(async (req) => {
     const appUrl = 'https://outputlens.lovable.app';
 
     const { data, error } = await resend.emails.send({
-      from: 'Vatsal <vatsal@outputlens.com>',
+      from: 'Vatsal Pareshkumar <contact@outputlens.com>',
       to: [email],
-      reply_to: 'vatsal@outputlens.com',
+      reply_to: 'contact@outputlens.com',
       subject: 'Welcome to OutputLens - Let\'s make smarter trades together',
       html: `
 <!DOCTYPE html>
@@ -66,7 +66,7 @@ Deno.serve(async (req) => {
   <div class="content">
     <p>Hey ${displayName},</p>
 
-    <p>I'm Vatsal, the founder of OutputLens.</p>
+    <p>Hi, I am the founder Vatsal Pareshkumar. Welcome to OutputLens!</p>
 
     <p>I built this because I was tired of entering trades blind — not knowing if my gut feel aligned with real market conditions. Now you have a tool that shows you probabilities <em>before</em> you commit capital.</p>
 
