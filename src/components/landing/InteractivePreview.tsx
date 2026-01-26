@@ -129,15 +129,15 @@ export function InteractivePreview({ className }: InteractivePreviewProps) {
       {/* CTA Buttons */}
       <div className="flex flex-col sm:flex-row gap-3">
         <Button asChild className="flex-1">
-          <Link to="/demo">
-            <Play className="h-4 w-4 mr-2" />
-            See Full Analysis
+          <Link to="/auth?mode=signup">
+            Run Risk Analysis – Free
+            <ArrowRight className="ml-2 h-4 w-4" />
           </Link>
         </Button>
         <Button variant="outline" asChild className="flex-1">
-          <Link to="/auth?mode=signup">
-            Run Risk Analysis
-            <ArrowRight className="ml-2 h-4 w-4" />
+          <Link to="/demo">
+            <Play className="h-4 w-4 mr-2" />
+            See Full Demo
           </Link>
         </Button>
       </div>
