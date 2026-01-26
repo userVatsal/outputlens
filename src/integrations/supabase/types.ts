@@ -690,6 +690,7 @@ export type Database = {
         Row: {
           account_status: string | null
           avatar_url: string | null
+          bio: string | null
           consent_accepted_at: string | null
           consent_gdpr: boolean | null
           consent_privacy_version: number | null
@@ -719,6 +720,7 @@ export type Database = {
         Insert: {
           account_status?: string | null
           avatar_url?: string | null
+          bio?: string | null
           consent_accepted_at?: string | null
           consent_gdpr?: boolean | null
           consent_privacy_version?: number | null
@@ -748,6 +750,7 @@ export type Database = {
         Update: {
           account_status?: string | null
           avatar_url?: string | null
+          bio?: string | null
           consent_accepted_at?: string | null
           consent_gdpr?: boolean | null
           consent_privacy_version?: number | null

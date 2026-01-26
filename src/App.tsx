@@ -21,6 +21,7 @@ import Account from "./pages/Account";
 import Demo from "./pages/Demo";
 import TrackedAssets from "./pages/TrackedAssets";
 import About from "./pages/About";
+import Onboarding from "./pages/Onboarding";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -38,6 +39,7 @@ const App = () => (
                 <Route path="/" element={<Landing />} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/onboarding" element={<Onboarding />} />
                 <Route path="/workspace" element={<Workspace />} />
                 <Route path="/analyze" element={<Navigate to="/workspace" replace />} />
                 <Route path="/results" element={<Results />} />

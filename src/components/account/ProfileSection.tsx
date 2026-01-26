@@ -1,8 +1,13 @@
-import { User, Calendar, AtSign, Globe } from 'lucide-react';
+import { User, Calendar, AtSign, Globe, FileText } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { EditableField } from './EditableField';
 import { ProfileData, ProfileUpdateData } from '@/hooks/useProfile';
-import { differenceInYears, parse, format } from 'date-fns';
+import { differenceInYears, format } from 'date-fns';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Loader2 } from 'lucide-react';
 
 interface ProfileSectionProps {
   profile: ProfileData;
@@ -15,6 +20,22 @@ export function ProfileSection({
   onUpdate,
   checkUsernameAvailable 
 }: ProfileSectionProps) {
+  const [bio, setBio] = useState(profile.bio || '');
+  const [bioSaving, setBioSaving] = useState(false);
+  const [bioChanged, setBioChanged] = useState(false);
+
+  const handleBioChange = (value: string) => {
+    setBio(value.slice(0, 500));
+    setBioChanged(value !== (profile.bio || ''));
+  };
+
+  const handleBioSave = async () => {
+    setBioSaving(true);
+    await onUpdate({ bio: bio.trim() || null });
+    setBioSaving(false);
+    setBioChanged(false);
+  };
+  
   const validateName = (value: string): string | null => {
     if (!value.trim()) return 'Name is required';
     if (value.length < 2) return 'Name must be at least 2 characters';
@@ -120,6 +141,38 @@ export function ProfileSection({
                 description="Your unique handle for the platform"
                 className="flex-1"
               />
+            </div>
+          </div>
+        </div>
+
+        {/* Bio Section */}
+        <div className="pt-4 border-t border-border">
+          <div className="flex items-center gap-2 mb-4">
+            <FileText className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm font-medium">Bio</span>
+          </div>
+          
+          <div className="space-y-2">
+            <Textarea
+              value={bio}
+              onChange={(e) => handleBioChange(e.target.value)}
+              placeholder="Tell us about yourself..."
+              className="trading-input min-h-[100px] resize-none"
+            />
+            <div className="flex justify-between items-center">
+              <span className="text-xs text-muted-foreground">{bio.length}/500 characters</span>
+              {bioChanged && (
+                <Button size="sm" onClick={handleBioSave} disabled={bioSaving}>
+                  {bioSaving ? (
+                    <>
+                      <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    'Save Bio'
+                  )}
+                </Button>
+              )}
             </div>
           </div>
         </div>

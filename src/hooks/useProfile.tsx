@@ -10,6 +10,7 @@ export interface ProfileData {
   display_name: string | null;
   username: string | null;
   avatar_url: string | null;
+  bio: string | null;
   timezone: string;
   locale: string;
   language: string;
@@ -34,6 +35,7 @@ export interface ProfileUpdateData {
   display_name?: string;
   username?: string;
   avatar_url?: string;
+  bio?: string;
   timezone?: string;
   locale?: string;
   language?: string;
