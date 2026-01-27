@@ -7,6 +7,7 @@ import { useProfile } from '@/hooks/useProfile';
 import { useUsage } from '@/hooks/useUsage';
 import { usePlan } from '@/hooks/usePlan';
 import { useTrackedAssets } from '@/hooks/useTrackedAssets';
+import { AdminAnalyticsPanel } from '@/components/admin';
 import {
   AccountHeader,
   DashboardHero,
@@ -20,17 +21,23 @@ import {
   WhySection,
 } from '@/components/dashboard';
 
+const ADMIN_EMAIL = 'uservatsal@outlook.com';
+
 export default function Dashboard() {
   const navigate = useNavigate();
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [showAgeVerification, setShowAgeVerification] = useState(true);
   const [hasAnalysisHistory, setHasAnalysisHistory] = useState<boolean | null>(null);
   const [showOnboarding, setShowOnboarding] = useState(true);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
   
   const { profile, loading: profileLoading } = useProfile();
   const { usage, loading: usageLoading } = useUsage();
   const planData = usePlan();
   const { trackedAssets, alerts, isLoading: assetsLoading, dismissAlert, markAlertRead } = useTrackedAssets();
+
+  // Check if user is admin
+  const isAdmin = userEmail?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
 
   // SEO
   useEffect(() => {
@@ -45,6 +52,9 @@ export default function Dashboard() {
         navigate('/');
         return;
       }
+      
+      // Set user email for admin check
+      setUserEmail(session.user.email || null);
       
       // Check if onboarding is completed
       const { data: profileData } = await supabase
@@ -99,6 +109,9 @@ export default function Dashboard() {
     <Layout>
       <div className="section-container py-8">
         <div className="max-w-7xl mx-auto space-y-6">
+          {/* Admin Analytics Panel - Only visible to admin */}
+          <AdminAnalyticsPanel isAdmin={isAdmin} />
+
           {/* Account Header - Top of Dashboard */}
           <AccountHeader profile={profile} plan={planData} />
 
