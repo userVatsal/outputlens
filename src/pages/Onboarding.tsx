@@ -26,7 +26,7 @@ export default function Onboarding() {
       // Check if onboarding already completed
       const { data: profile } = await supabase
         .from('profiles')
-        .select('onboarding_completed, full_name, username, consent_gdpr')
+        .select('onboarding_completed, consent_gdpr')
         .eq('user_id', session.user.id)
         .single();
 
@@ -37,12 +37,16 @@ export default function Onboarding() {
       }
 
       // Determine which step to start from based on profile completion
-      if (!profile?.full_name || !profile?.username) {
-        setInitialStep('profile');
-      } else if (!profile?.consent_gdpr) {
+      if (!profile?.consent_gdpr) {
         setInitialStep('legal');
       } else {
-        setInitialStep('complete');
+        // All done, mark complete and redirect
+        await supabase
+          .from('profiles')
+          .update({ onboarding_completed: true })
+          .eq('user_id', session.user.id);
+        navigate('/dashboard');
+        return;
       }
 
       setLoading(false);
@@ -57,7 +61,7 @@ export default function Onboarding() {
           // Check profile status after sign in
           const { data: profile } = await supabase
             .from('profiles')
-            .select('onboarding_completed, full_name, username, consent_gdpr')
+            .select('onboarding_completed, consent_gdpr')
             .eq('user_id', session.user.id)
             .single();
 
@@ -66,12 +70,15 @@ export default function Onboarding() {
             return;
           }
 
-          if (!profile?.full_name || !profile?.username) {
-            setInitialStep('profile');
-          } else if (!profile?.consent_gdpr) {
+          if (!profile?.consent_gdpr) {
             setInitialStep('legal');
           } else {
-            setInitialStep('complete');
+            await supabase
+              .from('profiles')
+              .update({ onboarding_completed: true })
+              .eq('user_id', session.user.id);
+            navigate('/dashboard');
+            return;
           }
           setLoading(false);
         }

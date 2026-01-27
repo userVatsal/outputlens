@@ -182,10 +182,10 @@ export default function Workspace() {
                 <TradeInputForm onSubmit={handleSubmitTrade} isLoading={tradeLoading} />
               </div>
 
-              {/* Disclaimer */}
+              {/* Disclaimer with tier info */}
               <p className="text-center text-xs text-muted-foreground mt-6 max-w-sm mx-auto">
-                Analysis uses Monte Carlo simulation with 10,000 paths. 
-                Probabilities are derived from historical volatility. Not financial advice.
+                Free: 5,000 Monte Carlo paths | Paid: 10,000 paths. 
+                Probabilities derived from historical volatility. Not financial advice.
               </p>
             </div>
 
@@ -194,8 +194,10 @@ export default function Workspace() {
               {tradeLoading && (
                 <div className="glass-card p-12 text-center">
                   <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto mb-4" />
-                  <p className="text-lg font-semibold text-foreground">Running 10,000 simulations...</p>
-                  <p className="text-sm text-muted-foreground mt-2">Calculating risk metrics and scenario probabilities</p>
+                  <p className="text-lg font-semibold text-foreground">Running Monte Carlo simulations...</p>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Calculating risk metrics and scenario probabilities
+                  </p>
                 </div>
               )}
 

@@ -23,57 +23,68 @@ import { DataProviderLogos } from '@/components/landing/DataProviderLogos';
 import { AISemanticSection } from '@/components/landing/AISemanticSection';
 import { ProblemSolutionSection } from '@/components/landing/ProblemSolutionSection';
 
-// Streamlined to 5 features (merged Sentiment into AI Interpretation)
+// 6 features with Free vs Paid differentiation
 const features = [
   {
     icon: Activity,
     title: 'Monte Carlo Simulation',
-    description: '10,000 probabilistic paths reveal where your trade could realistically end up.',
+    description: 'Free: 5,000 paths | Paid: 10,000 paths for full probability distribution.',
+    badge: null,
   },
   {
     icon: Shield,
     title: 'Advanced Risk Metrics',
     description: 'VaR, Expected Shortfall, and tail risk quantified before you enter.',
+    badge: null,
   },
   {
     icon: Brain,
     title: 'AI Risk Interpretation',
-    description: 'Complex quant results translated into clear, actionable insights.',
+    description: 'Free: Manual trigger | Paid: Auto-generated insights with every analysis.',
+    badge: null,
   },
   {
     icon: LineChart,
     title: 'Live Market Data',
-    description: 'Current volatility from global markets—not static assumptions.',
+    description: 'Free: 15min delay | Paid: Real-time data from global exchanges.',
+    badge: null,
   },
   {
     icon: Globe2,
     title: 'Multi-Market Support',
     description: 'US, UK, EU stocks, ETFs, crypto, and forex in one platform.',
+    badge: null,
+  },
+  {
+    icon: BarChart3,
+    title: 'Portfolio Analysis',
+    description: 'Analyze up to 20 correlated assets with correlation risk insights.',
+    badge: 'PRO',
   },
 ];
 
 const metrics = [
-  { value: '10,000', label: 'Simulation Paths', sublabel: 'Per Analysis' },
-  { value: '95%', label: 'VaR Coverage', sublabel: 'Confidence Level' },
-  { value: '<2s', label: 'Results Delivered', sublabel: 'Edge Functions' },
-  { value: '24/7', label: 'Market Data', sublabel: 'Live Feeds' },
+  { value: '10,000', label: 'Simulation Paths', sublabel: 'Up to (Paid)', tooltip: 'Free: 5,000 | Paid: 10,000' },
+  { value: '95%', label: 'VaR Coverage', sublabel: 'Confidence Level', tooltip: null },
+  { value: '<2s', label: 'Results Delivered', sublabel: 'Edge Functions', tooltip: null },
+  { value: '24/7', label: 'Market Data', sublabel: 'Live Feeds', tooltip: 'Free: 15min delay | Paid: Real-time' },
 ];
 
-// Compressed use cases - 1 line each
+// Compressed use cases with value props
 const useCases = [
   {
     persona: 'Active Trader',
-    useCase: 'Size positions with probability, not guesswork.',
+    useCase: 'Size positions with probability, not guesswork. Free tier available.',
     icon: TrendingUp,
   },
   {
     persona: 'Portfolio Manager',
-    useCase: 'Stress-test correlation risk across your entire book.',
+    useCase: 'Stress-test correlation risk. Upgrade for full portfolio features.',
     icon: BarChart3,
   },
   {
     persona: 'Quant Analyst',
-    useCase: 'Build intuition for risk-reward through simulation.',
+    useCase: 'Build intuition through simulation. API access on Trader tier.',
     icon: Target,
   },
 ];
@@ -127,14 +138,14 @@ export default function Landing() {
               and forex. Quantify portfolio risk and scenario regimes before you trade.
             </p>
             
-            {/* Value-focused subhead */}
+            {/* Value-focused subhead with tier info */}
             <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto">
-              AI-powered Monte Carlo risk & scenario analysis for traders and B2B firms. Know the downside before deploying capital.
+              Free: 5 analyses/mo. Starter & Pro: Unlimited analyses + advanced simulations. Know the downside before deploying capital.
             </p>
 
-            {/* Why-line - founder voice */}
-            <p className="text-sm text-muted-foreground/80 max-w-2xl mx-auto italic">
-              Markets are unpredictable. OutputLens helps you manage uncertainty with AI-driven probabilistic scenarios.
+            {/* FOMO microcopy */}
+            <p className="text-sm text-muted-foreground/80 max-w-2xl mx-auto">
+              ⚡ Only 5 free analyses/month — start quantifying now.
             </p>
 
             {/* CTA Buttons */}
@@ -153,9 +164,9 @@ export default function Landing() {
               </Button>
             </div>
 
-            {/* Microcopy */}
+            {/* Microcopy with value prop */}
             <p className="text-sm text-muted-foreground">
-              5 free analyses/month • No credit card • Institutional-grade methodology
+              ✓ 5 free analyses/month • ✓ No credit card • ✓ Up to 10,000 Monte Carlo paths
             </p>
           </div>
         </div>
@@ -207,8 +218,13 @@ export default function Landing() {
             {features.map((feature) => (
               <div
                 key={feature.title}
-                className="glass-card p-6 hover:border-primary/30 transition-all duration-300 group"
+                className="glass-card p-6 hover:border-primary/30 transition-all duration-300 group relative"
               >
+                {feature.badge && (
+                  <span className="absolute top-3 right-3 text-[10px] px-2 py-0.5 bg-primary text-primary-foreground rounded-full font-semibold">
+                    {feature.badge}
+                  </span>
+                )}
                 <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-primary/10 text-primary mb-4 group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
                   <feature.icon className="h-6 w-6" />
                 </div>
@@ -309,14 +325,17 @@ export default function Landing() {
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4 font-brand">
               Stop Guessing. Start Quantifying.
             </h2>
-            <p className="text-muted-foreground mb-6 max-w-xl mx-auto">
+            <p className="text-muted-foreground mb-4 max-w-xl mx-auto">
               Your first 5 analyses are free. Quantify your next trade in under 2 seconds.
+            </p>
+            <p className="text-sm text-muted-foreground/80 mb-6">
+              Limited free tier — 5 analyses/month
             </p>
             
             {/* ROI Hook */}
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-bullish/10 border border-bullish/20 text-bullish text-sm font-medium mb-6">
               <Sparkles className="h-4 w-4" />
-              Quantify risk before you deploy capital
+              Up to 10,000 Monte Carlo paths • Institutional methodology
             </div>
             
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">

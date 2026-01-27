@@ -14,17 +14,17 @@ const UPGRADE_BENEFITS = {
   free: {
     nextPlan: 'Starter',
     nextPrice: 12,
-    highlights: ['30 analyses/mo', 'Live data', 'AI explanations'],
+    highlights: ['30 analyses/mo', '10,000 paths', 'Live data'],
   },
   starter: {
     nextPlan: 'Pro',
     nextPrice: 29,
-    highlights: ['100 analyses/mo', 'Portfolio analysis', 'PDF exports'],
+    highlights: ['100 analyses/mo', 'Portfolio (5)', 'Exports'],
   },
   pro: {
     nextPlan: 'Trader',
     nextPrice: 79,
-    highlights: ['500 analyses/mo', 'API access', 'Priority support'],
+    highlights: ['500 analyses/mo', 'Portfolio (20)', 'API'],
   },
   trader: null,
 };

@@ -15,6 +15,7 @@ import { BrandLogo } from '@/components/BrandLogo';
 import { RiskAlertBell } from '@/components/RiskAlertBell';
 
 const navLinks = [
+  { href: '/demo', labelKey: 'demo' },
   { href: '/workspace', labelKey: 'workspace' },
   { href: '/methodology', labelKey: 'methodology' },
   { href: '/pricing', labelKey: 'pricing' },
