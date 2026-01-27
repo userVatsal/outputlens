@@ -15,9 +15,6 @@ import Legal from "./pages/Legal";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
-// Keep onboarding for legal consent
-import Onboarding from "./pages/Onboarding";
-
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -38,7 +35,6 @@ const App = () => (
                 
                 {/* Auth flow */}
                 <Route path="/auth" element={<Auth />} />
-                <Route path="/onboarding" element={<Onboarding />} />
                 
                 {/* Redirects for deprecated routes */}
                 <Route path="/landing" element={<Navigate to="/" replace />} />
@@ -46,6 +42,7 @@ const App = () => (
                 <Route path="/workspace" element={<Navigate to="/" replace />} />
                 <Route path="/analyze" element={<Navigate to="/" replace />} />
                 <Route path="/results" element={<Navigate to="/" replace />} />
+                <Route path="/onboarding" element={<Navigate to="/" replace />} />
                 <Route path="/pricing" element={<Navigate to="/account" replace />} />
                 <Route path="/methodology" element={<Navigate to="/legal" replace />} />
                 <Route path="/about" element={<Navigate to="/" replace />} />

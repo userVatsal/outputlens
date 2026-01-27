@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { AssetSearchInput } from '@/components/AssetSearchInput';
-import { LivePriceIndicator } from '@/components/LivePriceIndicator';
 import { SelectedAsset } from '@/hooks/useAssetSearch';
 import { EnhancedTradeInput } from '@/types/analysis';
 import { cn } from '@/lib/utils';
@@ -36,21 +35,14 @@ export function DecisionInput({ onSubmit, isLoading = false }: DecisionInputProp
   const [direction, setDirection] = useState<'long' | 'short' | null>(null);
   const [capital, setCapital] = useState('');
   const [entryPrice, setEntryPrice] = useState('');
-  const [priceAutoFilled, setPriceAutoFilled] = useState(false);
   const [timeHorizon, setTimeHorizon] = useState<TimeHorizon>('1w');
 
   const handleAssetSelect = useCallback((asset: SelectedAsset | null) => {
     setSelectedAsset(asset);
     if (!asset) {
       setEntryPrice('');
-      setPriceAutoFilled(false);
       setDirection(null);
     }
-  }, []);
-
-  const handleUsePrice = useCallback((price: number) => {
-    setEntryPrice(price.toString());
-    setPriceAutoFilled(true);
   }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -74,7 +66,7 @@ export function DecisionInput({ onSubmit, isLoading = false }: DecisionInputProp
     onSubmit(input);
   };
 
-  const isValid = selectedAsset && direction !== null && entryPrice && capital && parseFloat(capital) > 0;
+  const isValid = selectedAsset && direction !== null && entryPrice && capital && parseFloat(capital) > 0 && parseFloat(entryPrice) > 0;
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -87,14 +79,6 @@ export function DecisionInput({ onSubmit, isLoading = false }: DecisionInputProp
           disabled={isLoading} 
           selectedAsset={selectedAsset} 
         />
-        {selectedAsset && (
-          <LivePriceIndicator 
-            symbol={selectedAsset.symbol} 
-            market="US" 
-            currencySymbol="$" 
-            onUsePrice={handleUsePrice} 
-          />
-        )}
       </div>
 
       {/* Direction */}
@@ -132,47 +116,51 @@ export function DecisionInput({ onSubmit, isLoading = false }: DecisionInputProp
         </div>
       )}
 
-      {/* Capital at risk */}
+      {/* Price and Capital */}
       {selectedAsset && direction && (
-        <div className="space-y-2">
-          <Label className="text-sm text-muted-foreground">Capital at risk</Label>
-          {!priceAutoFilled && (
-            <div className="relative mb-3">
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label className="text-sm text-muted-foreground">Price per share</Label>
+            <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-mono">$</span>
               <Input
                 type="number"
                 step="0.01"
-                min="0"
-                placeholder="Price per share"
+                min="0.01"
+                placeholder="Current price"
                 value={entryPrice}
                 onChange={(e) => setEntryPrice(e.target.value)}
                 className="trading-input font-mono pl-7"
                 disabled={isLoading}
               />
             </div>
-          )}
-          <div className="relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-mono">$</span>
-            <Input
-              type="number"
-              min="1"
-              placeholder="Amount to invest"
-              value={capital}
-              onChange={(e) => setCapital(e.target.value)}
-              className="trading-input font-mono pl-7 text-lg"
-              disabled={isLoading}
-            />
           </div>
-          {capital && entryPrice && (
-            <p className="text-xs text-muted-foreground">
-              ≈ {Math.floor(parseFloat(capital) / parseFloat(entryPrice))} shares
-            </p>
-          )}
+          
+          <div className="space-y-2">
+            <Label className="text-sm text-muted-foreground">Capital at risk</Label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-mono">$</span>
+              <Input
+                type="number"
+                min="1"
+                placeholder="Amount to invest"
+                value={capital}
+                onChange={(e) => setCapital(e.target.value)}
+                className="trading-input font-mono pl-7 text-lg"
+                disabled={isLoading}
+              />
+            </div>
+            {capital && entryPrice && parseFloat(entryPrice) > 0 && (
+              <p className="text-xs text-muted-foreground">
+                ≈ {Math.floor(parseFloat(capital) / parseFloat(entryPrice))} shares
+              </p>
+            )}
+          </div>
         </div>
       )}
 
       {/* Time horizon */}
-      {selectedAsset && direction && capital && (
+      {selectedAsset && direction && capital && entryPrice && (
         <div className="space-y-2">
           <Label className="text-sm text-muted-foreground">Time horizon</Label>
           <div className="grid grid-cols-4 gap-2">
