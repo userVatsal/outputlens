@@ -12,9 +12,9 @@ interface DashboardHeroProps {
 }
 
 const UPGRADE_FEATURES = [
-  { icon: BarChart3, label: '30+ analyses/mo' },
+  { icon: BarChart3, label: '10,000 paths' },
   { icon: Zap, label: 'Live market data' },
-  { icon: Brain, label: 'AI sentiment' },
+  { icon: Brain, label: 'Auto AI insights' },
   { icon: FileDown, label: 'PDF/CSV exports' },
 ];
 

@@ -16,28 +16,36 @@ const plans: { key: SubscriptionPlan; badge?: string }[] = [
 
 const faqs = [
   {
-    question: 'Is this financial advice?',
-    answer: 'No. OutputLens is a risk analysis platform that shows the probability distribution of possible outcomes using Monte Carlo simulation. It does not provide financial advice, trading signals, or predictions.',
+    question: 'How many Monte Carlo simulations do I get?',
+    answer: 'Free tier runs 5,000 Monte Carlo paths per analysis. Paid tiers (Starter, Pro, Trader) run the full 10,000 paths for more accurate probability distributions and better tail risk analysis.',
   },
   {
-    question: 'How do the simulations work?',
-    answer: 'We run up to 10,000 Monte Carlo paths using Geometric Brownian Motion, incorporating live volatility data when available. The result is a probability distribution of possible outcomes—not a single prediction.',
+    question: 'Is this financial advice?',
+    answer: 'No. OutputLens is a risk analysis platform that shows the probability distribution of possible outcomes using Monte Carlo simulation. It does not provide financial advice, trading signals, or predictions.',
   },
   {
     question: "What's the difference between VaR and Expected Shortfall?",
     answer: "VaR (Value at Risk) tells you the maximum expected loss at a given confidence level (e.g., 95%). Expected Shortfall goes further—it shows the average loss when things are worse than VaR.",
   },
   {
-    question: 'Can I cancel anytime?',
-    answer: "Yes. All subscriptions can be cancelled at any time from your Account page. You'll retain access until the end of your billing period.",
+    question: 'Can I upgrade or downgrade anytime?',
+    answer: "Yes. All subscriptions can be changed at any time from your Account page. Changes take effect immediately with prorated billing.",
   },
   {
     question: 'What markets are supported?',
-    answer: 'We support US (NYSE/NASDAQ), UK (LSE), and European (Euronext/DAX) markets with region-specific scenario regimes and local currencies.',
+    answer: 'We support US (NYSE/NASDAQ), UK (LSE), and European (Euronext/DAX) markets, plus crypto and forex pairs with live data.',
+  },
+  {
+    question: 'What data is live vs delayed?',
+    answer: 'Free tier receives 15-minute delayed data. All paid tiers (Starter, Pro, Trader) receive real-time market data.',
   },
   {
     question: 'How is my data used?',
     answer: "We store your analysis history to show you past trades. We don't sell your data. See our Privacy Policy for full details.",
+  },
+  {
+    question: 'What portfolio features are included?',
+    answer: 'Pro includes portfolio analysis for up to 5 assets. Trader includes up to 20 assets with correlation risk insights.',
   },
 ];
 
@@ -83,8 +91,11 @@ export default function Pricing() {
           <h1 className="text-4xl font-bold text-foreground mb-4">
             Simple, Transparent Pricing
           </h1>
-          <p className="text-lg text-muted-foreground max-w-xl mx-auto">
-            Start free, upgrade when you need more. No hidden fees. Cancel anytime.
+          <p className="text-lg text-muted-foreground max-w-xl mx-auto mb-4">
+            Start free with 5 analyses/month. Upgrade for more analyses, live data, and advanced features.
+          </p>
+          <p className="text-sm text-muted-foreground">
+            No hidden fees • Cancel anytime • Upgrade or downgrade instantly
           </p>
         </div>
 

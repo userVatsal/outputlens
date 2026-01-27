@@ -130,7 +130,7 @@ export default function Demo() {
 
   return (
     <Layout>
-      {/* Demo Header */}
+      {/* Demo Header with tier visibility */}
       <div className="bg-gradient-to-r from-primary/10 via-background to-primary/5 border-b border-border">
         <div className="section-container py-6">
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
@@ -145,19 +145,22 @@ export default function Demo() {
                   </h1>
                   <Badge className="bg-primary/20 text-primary">
                     <Play className="h-3 w-3 mr-1" />
-                    Sample Analysis
+                    10,000 Paths
                   </Badge>
                 </div>
                 <p className="text-muted-foreground text-sm">
-                  This is a real analysis output. Sign up to analyze your own trades.
+                  This demo shows a full 10,000-path analysis. Free tier runs 5,000 paths.
                 </p>
               </div>
             </div>
             
             <div className="flex items-center gap-3">
+              <Badge variant="outline" className="text-xs">
+                Free: 5,000 paths | Paid: 10,000 paths
+              </Badge>
               <Button size="lg" asChild className="shadow-lg">
                 <Link to="/auth?mode=signup">
-                  Analyze Your Trades
+                  Analyze Your Trades (5 Free/Mo)
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
@@ -269,8 +272,11 @@ export default function Demo() {
                 <CardContent className="py-6">
                   <div className="text-center space-y-4">
                     <h3 className="text-lg font-semibold text-foreground">
-                      Want to try your own?
+                      Ready to try your own assets?
                     </h3>
+                    <p className="text-sm text-muted-foreground">
+                      Sign up free to analyze your own assets (5/month)
+                    </p>
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-3 max-w-md mx-auto">
                       <div className="relative flex-1 w-full">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -284,12 +290,12 @@ export default function Demo() {
                         />
                       </div>
                       <Button onClick={handleTryYourOwn} className="shrink-0">
-                        Analyze
+                        Analyze Free
                         <ArrowRight className="ml-2 h-4 w-4" />
                       </Button>
                     </div>
                     <div className="flex flex-wrap items-center justify-center gap-2">
-                      <span className="text-xs text-muted-foreground">Or try:</span>
+                      <span className="text-xs text-muted-foreground">Popular:</span>
                       {popularAssets.slice(0, 4).map((asset) => (
                         <button
                           key={asset.symbol}
@@ -302,7 +308,7 @@ export default function Demo() {
                       ))}
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      Sign up to see the full analysis for any asset.
+                      ✓ 5 free analyses/month • ✓ Track assets • ✓ Get alerts • ✓ Build history
                     </p>
                   </div>
                 </CardContent>

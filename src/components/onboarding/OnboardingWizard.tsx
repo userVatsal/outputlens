@@ -3,25 +3,22 @@ import { useNavigate } from 'react-router-dom';
 import { Progress } from '@/components/ui/progress';
 import { supabase } from '@/integrations/supabase/client';
 import { StepCredentials } from './StepCredentials';
-import { StepProfile } from './StepProfile';
 import { StepLegal } from './StepLegal';
-import { StepWelcome } from './StepWelcome';
-import { StepComplete } from './StepComplete';
 
-export type OnboardingStep = 'credentials' | 'profile' | 'legal' | 'welcome' | 'complete';
+// Simplified 3-step onboarding: Credentials → Legal → Dashboard
+export type OnboardingStep = 'credentials' | 'legal' | 'complete';
 
 interface OnboardingWizardProps {
   initialStep?: OnboardingStep;
 }
 
-const STEPS: OnboardingStep[] = ['credentials', 'profile', 'legal', 'welcome', 'complete'];
+const STEPS: OnboardingStep[] = ['credentials', 'legal', 'complete'];
 
 export function OnboardingWizard({ initialStep = 'credentials' }: OnboardingWizardProps) {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState<OnboardingStep>(initialStep);
   const [userId, setUserId] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState<string | null>(null);
-  const [userName, setUserName] = useState<string | null>(null);
 
   const currentStepIndex = STEPS.indexOf(currentStep);
   const progress = ((currentStepIndex + 1) / STEPS.length) * 100;
@@ -34,7 +31,7 @@ export function OnboardingWizard({ initialStep = 'credentials' }: OnboardingWiza
         setUserEmail(session.user.email || null);
         // If already logged in, skip credentials step
         if (currentStep === 'credentials') {
-          setCurrentStep('profile');
+          setCurrentStep('legal');
         }
       }
     });
@@ -60,12 +57,15 @@ export function OnboardingWizard({ initialStep = 'credentials' }: OnboardingWiza
     handleNext();
   };
 
-  const handleProfileComplete = (name: string) => {
-    setUserName(name);
-    handleNext();
-  };
-
-  const handleComplete = () => {
+  const handleLegalComplete = async () => {
+    if (!userId) return;
+    
+    // Mark onboarding as completed and redirect to dashboard
+    await supabase
+      .from('profiles')
+      .update({ onboarding_completed: true })
+      .eq('user_id', userId);
+    
     navigate('/dashboard');
   };
 
@@ -73,14 +73,10 @@ export function OnboardingWizard({ initialStep = 'credentials' }: OnboardingWiza
     switch (currentStep) {
       case 'credentials':
         return 'Create Your Account';
-      case 'profile':
-        return 'Tell Us About Yourself';
       case 'legal':
-        return 'Legal Agreements';
-      case 'welcome':
-        return '';
+        return 'Almost There!';
       case 'complete':
-        return 'Complete Your Profile';
+        return '';
       default:
         return '';
     }
@@ -89,15 +85,11 @@ export function OnboardingWizard({ initialStep = 'credentials' }: OnboardingWiza
   const getStepDescription = () => {
     switch (currentStep) {
       case 'credentials':
-        return 'Start with your email and password';
-      case 'profile':
-        return 'Your personal details help us personalize your experience';
+        return '5 free analyses/month • No credit card • Start in 30 seconds';
       case 'legal':
-        return 'Please review and accept our policies';
-      case 'welcome':
-        return '';
+        return 'Quick legal agreements, then you\'re ready to analyze';
       case 'complete':
-        return 'Add your photo and bio (optional)';
+        return '';
       default:
         return '';
     }
@@ -105,11 +97,11 @@ export function OnboardingWizard({ initialStep = 'credentials' }: OnboardingWiza
 
   return (
     <div className="w-full max-w-md mx-auto">
-      {/* Progress indicator - hide on welcome step */}
-      {currentStep !== 'welcome' && (
+      {/* Progress indicator */}
+      {currentStep !== 'complete' && (
         <div className="mb-8">
           <div className="flex justify-between text-sm text-muted-foreground mb-2">
-            <span>Step {currentStepIndex + 1} of {STEPS.length}</span>
+            <span>Step {currentStepIndex + 1} of {STEPS.length - 1}</span>
             <span>{Math.round(progress)}%</span>
           </div>
           <Progress value={progress} className="h-2" />
@@ -131,33 +123,10 @@ export function OnboardingWizard({ initialStep = 'credentials' }: OnboardingWiza
         <StepCredentials onComplete={handleCredentialsComplete} />
       )}
       
-      {currentStep === 'profile' && userId && (
-        <StepProfile 
-          userId={userId} 
-          onComplete={handleProfileComplete} 
-          onBack={handleBack}
-        />
-      )}
-      
       {currentStep === 'legal' && userId && (
         <StepLegal 
           userId={userId} 
-          onComplete={handleNext} 
-          onBack={handleBack}
-        />
-      )}
-      
-      {currentStep === 'welcome' && (
-        <StepWelcome 
-          userName={userName} 
-          onComplete={handleNext}
-        />
-      )}
-      
-      {currentStep === 'complete' && userId && (
-        <StepComplete 
-          userId={userId} 
-          onComplete={handleComplete}
+          onComplete={handleLegalComplete} 
           onBack={handleBack}
         />
       )}
