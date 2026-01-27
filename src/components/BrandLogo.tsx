@@ -24,7 +24,8 @@ export function BrandLogo({ size = 'md', className }: BrandLogoProps) {
         className
       )}
     >
-      OutputLens
+      <span className="text-logo-navy">Output</span>
+      <span className="text-logo-blue">Lens</span>
     </span>
   );
 }
