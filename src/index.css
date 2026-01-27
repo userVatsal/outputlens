@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -44,7 +44,7 @@
     --radius: 0.5rem;
 
     /* Risk color - THE key color for loss numbers */
-    --risk: 0 60% 42%;
+    --risk: 0 60% 35%;
     --risk-foreground: 0 0% 100%;
 
     /* Minimal accent colors - used sparingly */
@@ -56,6 +56,13 @@
     --caution-foreground: 0 0% 10%;
     --neutral: 220 10% 50%;
     --neutral-foreground: 0 0% 100%;
+
+    /* Logo and brand colors */
+    --logo-navy: 213 33% 17%;
+    --logo-blue: 217 91% 60%;
+    --brand-blue: 217 91% 60%;
+    --navy: 213 33% 17%;
+    --navy-deep: 220 39% 10%;
   }
 
   .dark {
