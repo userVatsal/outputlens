@@ -1,177 +1,182 @@
 
+# Admin Analytics Panel for OutputLens Dashboard
 
-# Fix Disclaimers, Header Demo Link, and Account Plan Display
+## Overview
 
-## Summary of Issues Found
+This plan adds an **Admin Analytics Panel** to your Dashboard page at `/home`, visible **only** when you're logged in as `uservatsal@outlook.com`. The panel provides real-time insights into user signups, traffic sources, and user behavior - all in one place.
 
-After thorough investigation, I identified three distinct problems:
+## What You'll See
 
-### Issue 1: Disclaimers on Too Many Pages
-Disclaimers currently appear in 10+ locations across the app. Based on your preference, they should only remain on **Methodology + Terms** pages.
-
-**Pages with disclaimers to remove:**
-- `Footer.tsx` - Lines 211-228 (global footer disclaimer)
-- `Results.tsx` - Lines 309-317 (Monte Carlo disclaimer)
-- `Workspace.tsx` - Lines 185-191 (Layer 1-3 disclaimer)
-- `Analyze.tsx` - Lines 157-161 (educational disclaimer)
-- `Portfolio.tsx` - Lines 222-231 (correlation disclaimer)
-- `PortfolioAnalyzer.tsx` - Lines 543-548 (educational disclaimer)
-- `Dashboard.tsx` - Lines 150-157 (informational disclaimer)
-- `Pricing.tsx` - Lines 426-431 (probability disclaimer)
-- `AIExplanation.tsx` - Lines 83-88 (probabilistic warning)
-- `RiskInterpretation.tsx` - Lines 157-164 (Monte Carlo disclaimer)
-- `ActionPanel.tsx` - Lines 174-179 (PDF export disclaimer)
-
-**Pages to KEEP disclaimers:**
-- `Methodology.tsx` - Already has appropriate disclaimers
-- `Terms.tsx` - Keep legal disclaimers
-
-### Issue 2: Demo Link in Header Navigation
-The header navigation at `Header.tsx` line 18 still shows:
-```typescript
-{ href: '/demo', labelKey: 'demo' }
+```text
+Dashboard Layout (Admin View Only):
++--------------------------------------------------+
+|  ADMIN ANALYTICS (Collapsible)                   |
+|  +--------------------------------------------+  |
+|  | Summary Cards: Signups | Sessions | Users  |  |
+|  +--------------------------------------------+  |
+|  | Traffic Sources Chart | Recent Signups     |  |
+|  | (Pie Chart)           | (Expandable List)  |  |
+|  +--------------------------------------------+  |
++--------------------------------------------------+
+|  [Normal Dashboard - visible to all users]       |
+|  - Account Header                                |
+|  - Hero Section                                  |
+|  - Workspace CTA                                 |
+|  - etc...                                        |
++--------------------------------------------------+
 ```
 
-This should be changed to point to the landing page demo section:
-```typescript
-{ href: '/#demo', labelKey: 'demo' }
-```
+### Metrics Displayed
 
-### Issue 3: Account Shows "Free" Despite Trader Access
-**Root Cause Identified:**
+| Metric | Description |
+|--------|-------------|
+| **Total Users** | Count of registered users |
+| **New Signups (24h/7d)** | Recent registration activity |
+| **Total Sessions** | Visitor sessions tracked |
+| **Conversion Rate** | Sessions that led to signups |
+| **Traffic Sources** | Where visitors come from (Reddit, Google, Direct, etc.) |
+| **Recent Signups** | List of recent users with activity counts |
+| **User Journey** | Click to view timeline of any user's page visits and actions |
 
-The `usePlan` hook calls the `check-subscription` Edge Function, which queries Stripe for active subscriptions. Since test@outputlens.com and uservatsal@outlook.com were granted Trader access via a **database override** (not a Stripe subscription), the Edge Function finds no Stripe subscription and returns "free".
+### Security
 
-Meanwhile, `useUsage` correctly reads `subscription_plan` from the `profiles` table and shows the 500-analysis limit.
+The admin panel uses **dual-layer security**:
 
-**The Fix:**
-
-Modify the `check-subscription` Edge Function to check the `profiles.subscription_plan` column FIRST before checking Stripe. If the database has a manual override (e.g., 'trader'), return that plan. Only fall back to Stripe check if no override exists.
+1. **Client-side**: Only renders if session email matches `uservatsal@outlook.com`
+2. **Server-side**: Edge function rejects all requests from non-admin users with 403 Forbidden
 
 ---
 
 ## Implementation Details
 
-### Phase 1: Remove Disclaimers from Non-Essential Pages
+### Files to Create
 
-Remove disclaimer sections from these 11 files:
+| File | Purpose |
+|------|---------|
+| `supabase/functions/admin-analytics/index.ts` | Backend function that aggregates data from `behavior_sessions`, `behavior_events`, `profiles`, and `analysis_history` |
+| `src/components/admin/AdminAnalyticsPanel.tsx` | Main collapsible panel with summary cards, chart, and table |
+| `src/components/admin/TrafficSourcesChart.tsx` | Pie chart showing traffic breakdown using Recharts |
+| `src/components/admin/RecentSignupsTable.tsx` | Table of recent signups with "View Journey" buttons |
+| `src/components/admin/UserJourneyModal.tsx` | Dialog showing timeline of user events |
+| `src/components/admin/index.ts` | Export barrel file |
+| `src/hooks/useAdminAnalytics.tsx` | React Query hook for fetching/caching admin data |
 
-| File | Lines to Remove | Description |
-|------|-----------------|-------------|
-| `src/components/layout/Footer.tsx` | 211-228 | Three-layer architecture + "Not financial advice" |
-| `src/pages/Results.tsx` | 309-317 | Monte Carlo disclaimer box |
-| `src/pages/Workspace.tsx` | 185-191 | Layer 1-3 architecture note |
-| `src/pages/Analyze.tsx` | 157-161 | Educational disclaimer |
-| `src/pages/Portfolio.tsx` | 222-231 | Correlation disclaimer |
-| `src/components/PortfolioAnalyzer.tsx` | 543-548 | Educational disclaimer |
-| `src/pages/Dashboard.tsx` | 150-157 | Risk analysis disclaimer |
-| `src/pages/Pricing.tsx` | 426-431 | Probability disclaimer |
-| `src/components/AIExplanation.tsx` | 83-88 | Probabilistic warning |
-| `src/components/workspace/RiskInterpretation.tsx` | 157-164 | Monte Carlo disclaimer |
-| `src/components/workspace/ActionPanel.tsx` | 174-179 | PDF disclaimer (in template) |
+### Files to Modify
 
-### Phase 2: Update Header Demo Link
-
-Modify `src/components/layout/Header.tsx`:
-
-**Before (line 17-22):**
-```typescript
-const navLinks = [
-  { href: '/demo', labelKey: 'demo' },
-  { href: '/workspace', labelKey: 'workspace' },
-  { href: '/methodology', labelKey: 'methodology' },
-  { href: '/pricing', labelKey: 'pricing' },
-];
-```
-
-**After:**
-```typescript
-const navLinks = [
-  { href: '/#demo', labelKey: 'demo' },
-  { href: '/workspace', labelKey: 'workspace' },
-  { href: '/methodology', labelKey: 'methodology' },
-  { href: '/pricing', labelKey: 'pricing' },
-];
-```
-
-### Phase 3: Fix Plan Display for Database Overrides
-
-Modify `supabase/functions/check-subscription/index.ts` to respect database overrides:
-
-**New Logic Flow:**
-1. Authenticate user
-2. Query `profiles.subscription_plan` directly from database
-3. If database has a non-free, non-null plan AND no active Stripe subscription exists → return the database plan (this handles testing/demo accounts)
-4. If Stripe subscription exists → return Stripe-based plan (normal flow)
-5. If neither → return "free"
-
-**Code changes needed:**
-
-After line 82 (after user authentication), add a database check:
-
-```typescript
-// Check for database override first (for testing/demo accounts)
-const { data: profileData } = await supabaseClient
-  .from("profiles")
-  .select("subscription_plan")
-  .eq("user_id", user.id)
-  .single();
-
-const dbPlan = profileData?.subscription_plan;
-```
-
-Then, after the Stripe check (around line 120), if no active Stripe subscription but database has a plan:
-
-```typescript
-if (subscriptions.data.length === 0) {
-  // No Stripe subscription - check for database override
-  if (dbPlan && dbPlan !== 'free') {
-    logStep("Using database plan override", { plan: dbPlan });
-    return new Response(JSON.stringify({ 
-      subscribed: true,
-      plan: dbPlan,
-      subscription_end: null
-    }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 200,
-    });
-  }
-  // Otherwise return free tier
-  ...
-}
-```
-
-This ensures manually-granted Trader access displays correctly in the UI.
+| File | Change |
+|------|--------|
+| `src/pages/Dashboard.tsx` | Add admin email check and render `AdminAnalyticsPanel` at top |
 
 ---
 
-## Files to Modify
+## Technical Architecture
 
-| File | Change Type |
-|------|-------------|
-| `src/components/layout/Header.tsx` | Update demo link to `/#demo` |
-| `src/components/layout/Footer.tsx` | Remove disclaimer section |
-| `src/pages/Results.tsx` | Remove disclaimer box |
-| `src/pages/Workspace.tsx` | Remove Layer 1-3 note |
-| `src/pages/Analyze.tsx` | Remove educational disclaimer |
-| `src/pages/Portfolio.tsx` | Remove correlation disclaimer |
-| `src/components/PortfolioAnalyzer.tsx` | Remove educational disclaimer |
-| `src/pages/Dashboard.tsx` | Remove informational disclaimer |
-| `src/pages/Pricing.tsx` | Remove probability disclaimer |
-| `src/components/AIExplanation.tsx` | Remove probabilistic warning |
-| `src/components/workspace/RiskInterpretation.tsx` | Remove Monte Carlo disclaimer |
-| `src/components/workspace/ActionPanel.tsx` | Remove PDF disclaimer from template |
-| `supabase/functions/check-subscription/index.ts` | Add database override check |
+### Edge Function: `admin-analytics`
+
+Handles multiple actions via query parameter:
+
+```text
+GET /admin-analytics?action=overview     -> Summary metrics
+GET /admin-analytics?action=traffic      -> Traffic sources breakdown
+GET /admin-analytics?action=signups      -> Recent signups with activity
+GET /admin-analytics?action=journey&userId=xxx -> User event timeline
+```
+
+**Security Check** (runs first on every request):
+- Extracts JWT from Authorization header
+- Verifies user email is `uservatsal@outlook.com`
+- Returns 403 if not admin
+
+**Queries Used**:
+
+Overview metrics:
+- Total users from `profiles`
+- Signups in last 24h/7d from `profiles.created_at`
+- Total sessions from `behavior_sessions`
+- Conversion rate: sessions with `user_id` / total sessions
+
+Traffic sources:
+- Groups `behavior_sessions` by `utm_source` or extracted domain from `entry_referrer`
+- Returns top 10 sources with session counts
+
+Recent signups:
+- Joins `profiles` with `behavior_sessions` and counts `analysis_history`
+- Shows last 20 signups with their source and activity
+
+User journey:
+- Fetches `behavior_events` for sessions linked to the user
+- Orders by timestamp to show timeline
+
+### Frontend Components
+
+**AdminAnalyticsPanel.tsx**:
+- Collapsible card with "Admin Analytics" header and shield icon
+- Uses Radix Collapsible for expand/collapse
+- Contains summary stat cards, chart, and table
+- Only rendered when `isAdmin` is true
+
+**TrafficSourcesChart.tsx**:
+- Recharts PieChart with custom colors per source
+- Shows session counts and percentages
+- Responsive sizing
+
+**RecentSignupsTable.tsx**:
+- Displays masked email (first 3 chars + domain)
+- Shows signup date, traffic source, analysis count
+- "View" button opens UserJourneyModal
+
+**UserJourneyModal.tsx**:
+- Dialog with vertical timeline of events
+- Shows page visits, clicks, scroll depth
+- Color-coded event types
+
+### Dashboard Integration
+
+```typescript
+// In Dashboard.tsx
+const ADMIN_EMAIL = 'uservatsal@outlook.com';
+const [userEmail, setUserEmail] = useState<string | null>(null);
+
+// Fetch email from auth session
+useEffect(() => {
+  supabase.auth.getUser().then(({ data }) => {
+    setUserEmail(data?.user?.email?.toLowerCase() || null);
+  });
+}, []);
+
+const isAdmin = userEmail === ADMIN_EMAIL.toLowerCase();
+
+// In render:
+{isAdmin && <AdminAnalyticsPanel />}
+```
+
+---
+
+## Data Privacy
+
+- User emails are **masked** in the table (e.g., `use***@outlook.com`)
+- Full email only visible when expanding user journey
+- All data stays within your backend - no external services
+
+---
+
+## Visual Design
+
+- Uses existing glass-card styling from dashboard components
+- Dark theme compatible
+- Collapsible by default to not clutter the dashboard
+- Admin badge/icon to clearly mark the section
+- Consistent with OutputLens institutional design language
 
 ---
 
 ## Testing Checklist
 
 After implementation:
-- [ ] Disclaimers only appear on Methodology and Terms pages
-- [ ] Header "Demo" link scrolls to landing page `/#demo` section
-- [ ] test@outputlens.com shows "Trader" plan in Account
-- [ ] uservatsal@outlook.com shows "Trader" plan in Account
-- [ ] Usage indicator shows correct 500-analysis limit
-- [ ] Stripe-based subscribers still work correctly
-
+- [ ] Panel only visible when logged in as `uservatsal@outlook.com`
+- [ ] Other users (like `test@outputlens.com`) see normal dashboard without panel
+- [ ] Traffic sources chart displays real data
+- [ ] Recent signups table shows correct information
+- [ ] User journey modal opens and shows event timeline
+- [ ] Panel collapse/expand works smoothly
+- [ ] Date range filter (24h/7d/30d) updates metrics
