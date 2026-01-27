@@ -1,523 +1,219 @@
 
-# OutputLens PMF-First Redesign - Implementation Plan
+
+# PMF-Friendly Landing Page Implementation Plan
 
 ## Overview
+Transform the current Decision page (`/`) into a clean, single-scroll landing experience that keeps the focus on the core value proposition: knowing your downside before you trade. This redesign follows your exact specifications for layout, colors, typography, and psychology.
 
-This plan transforms OutputLens from a 17+ page feature-rich platform into a focused **4-page pre-decision risk lens** that answers one question: *"What's the worst-case loss if I do this trade?"*
+## Current State Analysis
+- The Decision page already has the core structure (header, input form, results, footer)
+- CSS variables exist for the clinical design system (warm off-white, muted red for risk)
+- Logo colors (`--logo-navy`, `--logo-blue`) are referenced in tailwind.config.ts but **missing** from index.css
+- The `Plus Jakarta Sans` font for branding is referenced but **not imported**
+- The page currently requires sign-in to see the input form
 
-The redesign eliminates 80% of the current UI to create a product that changes behavior - making users pause before committing capital.
+## Changes Summary
 
----
+### 1. Add Missing CSS Variables and Font Import
 
-## Phase 1: Core Decision Page (/) - The Entire Product
+**File: `src/index.css`**
 
-### New Single-Screen Design
+Add the missing logo and brand color variables, plus import Plus Jakarta Sans:
 
-The main page becomes the complete product - no layout wrapper, no navigation, no distractions.
+```css
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+:root {
+  /* Existing variables... */
+  
+  /* Logo colors from brand (using your spec colors) */
+  --logo-navy: 213 33% 17%;    /* Deep navy #1F2933 */
+  --logo-blue: 217 91% 60%;    /* Royal blue accent */
+  
+  /* Brand colors */
+  --brand-blue: 217 91% 60%;
+  --navy: 213 33% 17%;
+  --navy-deep: 220 39% 10%;
+}
+```
+
+### 2. Simplify the Decision Page Layout
+
+**File: `src/pages/Decision.tsx`**
+
+Restructure to match your wireframe:
 
 ```text
-+-------------------------------------------------------+
-|  [small, muted]                                       |
-|  "Risk analysis before you deploy capital"            |
-+-------------------------------------------------------+
-|                                                       |
-|  What's the worst-case loss if I do this trade?       |
-|                                                       |
-+-------------------------------------------------------+
-|  Asset:          [ AAPL                  ]            |
-|  Direction:      [ Buy / Sell            ]            |
-|  Capital at risk:[ $2,000                ]            |
-|  Time horizon:   [ 1d | 1w | 1m | 3m     ]            |
-|                                                       |
-|  [ Analyze downside risk ]                            |
-+-------------------------------------------------------+
-|  RESULTS:                                             |
-|                                                       |
-|  Worst-case loss (5% probability)                     |
-|  -$412                 <- BIG, RED, UNAVOIDABLE       |
-|                                                       |
-|  Probability of loss:    61%                          |
-|  Expected drawdown:      -$180                        |
-|  Stress scenario loss:   -$690                        |
-|                                                       |
-|  [ ] Stress this position                             |
-|                                                       |
-|  "In similar volatility conditions, losses of this    |
-|   size occurred roughly 1 in 20 times."               |
-|                                                       |
-|  [ Save this decision ]  [ Close ]                    |
-+-------------------------------------------------------+
-|  Probabilistic analysis. Not financial advice.        |
-+-------------------------------------------------------+
++------------------------------------------------+
+| LOGO (small, subtle color accent)              |
++------------------------------------------------+
+| HERO / HEADLINE                                |
+| "Know your downside before you trade."         |
++------------------------------------------------+
+| SUBHEAD (small, supportive)                    |
+| "Enter your trade details..."                  |
++------------------------------------------------+
+| DECISION INTERFACE                             |
+| [Asset] [Buy/Sell] [Capital] [Time horizon]    |
+| [Analyze downside risk]                        |
++------------------------------------------------+
+| FOOTER (legal + reassurance)                   |
+| "Probabilistic analysis. Not financial advice."|
+| [Sign in / Sign up]                            |
++------------------------------------------------+
 ```
 
-### Files to Create
-- `src/pages/Decision.tsx` - New single decision page with embedded form and results
+Key changes:
+- Remove the header border for cleaner look
+- Change headline to "Know your downside before you trade."
+- Add supportive subhead
+- **Show input form to all visitors** (not just signed-in users)
+- Move sign-in CTA to footer (minimal, optional)
+- Authenticated users still see full nav in header
 
-### What This Page Removes
-- Header navigation (logo only, minimal)
-- Portfolio/Single Asset toggle
-- Usage indicator (move to paywall only)
-- All charts and visualizations
-- Scenario Regime Cards
-- Advanced Metrics accordion
-- P&L Summary section
-- Tail Risk Panel complexity
-- Long-form AI Risk Interpretation (reduce to 3-5 lines)
-- "Monitor Asset" button
-- All badges and PRO labels
+### 3. Update Color Palette per Your Spec
 
-### Loading State
-Replace the current spinner with an educational sequence:
-1. "Simulating thousands of possible outcomes..."
-2. "Measuring worst-case losses..."
-3. "Quantifying tail risk..."
+| Element | Color | HSL Value |
+|---------|-------|-----------|
+| Background | Warm off-white #F9FAF7 | Already set (60 10% 97%) |
+| Headline text | Near-black #111827 | Already set (220 39% 10%) |
+| Subhead | Gray #6B7280 | Already set (muted-foreground) |
+| CTA Button | Deep slate #1F2933 | Already set (primary) |
+| Risk numbers | Muted red #9B2C2C | Update to 0 60% 35% |
+| Logo "Output" | Deep navy #1F2933 | Add --logo-navy |
+| Logo "Lens" | Brand accent | Add --logo-blue |
 
----
+### 4. Typography Updates
 
-## Phase 2: Design System Overhaul
+| Element | Current | Target |
+|---------|---------|--------|
+| Logo | text-xl to text-2xl | Bold 24px (keep as-is) |
+| Hero headline | 2xl to 3xl | 32-36px (increase slightly) |
+| Subhead | text-xs | 16px (increase for readability) |
+| CTA button | text-base | 18px |
+| Footer | text-xs | 12px (keep) |
 
-### New Color Palette
+### 5. UX Flow Changes
 
-| Element | Current | New Hex | Purpose |
-|---------|---------|---------|---------|
-| Background | `hsl(220 30% 98%)` | `#F9FAF7` | Warm off-white, analytical |
-| Primary Text | `hsl(222 47% 15%)` | `#111827` | Near-black, soft |
-| Secondary Text | Various | `#6B7280` | Labels, context |
-| Risk/Loss Color | `bearish` red | `#9B2C2C` | Muted red, danger signal |
-| CTA Button | Primary blue | `#1F2933` | Deep slate, authority |
-| Borders | Various | `#E5E7EB` | Thin, minimal |
+**For unauthenticated visitors:**
+1. See full input form immediately (no "Sign in to analyze" blocker)
+2. Can fill out form and click "Analyze"
+3. On submit, prompt to sign up/sign in to see results
+4. Footer has subtle "Sign in" link
 
-### Colors to Remove
-- Bright green (`bullish`) for success
-- Gradients (`hero-gradient`)
-- Purple/brand accents
-- Gold premium cues
-- All trading platform aesthetics
-
-### Typography Changes
-- Hero question: 32-36px, bold
-- Big risk number: 40-44px, bold, red
-- Body/labels: 14-15px
-- Disclaimer: 12px, faint
-
-### Files to Modify
-- `src/index.css` - New CSS variables and base styles
-- `tailwind.config.ts` - Simplified color tokens
+**For authenticated users:**
+1. See minimal nav (Decisions, Account, Sign out)
+2. Full input + results flow as current
 
 ---
 
-## Phase 3: Simplified Form Component
+## Detailed File Changes
 
-### Current TradeInputForm (343 lines) → New DecisionInput (~150 lines)
+### File 1: `src/index.css`
 
-**Remove:**
-- Step indicators (1-2-3 progress)
-- Market selector (default to US, hide complexity)
-- Advanced options (confidence, assumptions)
-- Position type toggle (shares vs dollars) - default to capital
-- Date/time pickers (simplify to preset horizons)
-- Quick select chips for position size
-- All animations and transitions
-
-**Keep (Simplified):**
-- Asset search (autocomplete)
-- Direction: Buy / Sell (simple buttons)
-- Capital at risk: Single input
-- Time horizon: 1d / 1w / 1m / 3m buttons
-
-### Files to Modify
-- `src/components/TradeInputForm.tsx` - Drastically simplify to 4 inputs
-
----
-
-## Phase 4: Results Display Redesign
-
-### Current Output Components → New DecisionResult (~100 lines)
-
-**Remove:**
-- `RiskSnapshot.tsx` (4-card grid, too complex)
-- `TailRiskPanel.tsx` (delete)
-- `ScenarioRegimeCards.tsx` (delete)
-- `PnLSummary.tsx` (delete)
-- `AdvancedMetrics.tsx` (delete)
-- `ReturnDistributionChart.tsx` (delete)
-- `RiskInterpretation.tsx` (simplify to 3-5 lines)
-- `ActionPanel.tsx` (simplify to 2 buttons)
-
-**New Output (Single Component):**
-1. **Hero Number**: Worst-case loss (5% probability) - BIG, RED
-2. **Supporting Context**: 
-   - Probability of loss: X%
-   - Expected drawdown: -$X
-   - Stress scenario loss: -$X
-3. **Stress Toggle**: Single checkbox
-4. **Plain English**: 3-5 lines maximum
-5. **Decision Buttons**: Save | Close
-
-### Files to Delete
-- `src/components/workspace/TailRiskPanel.tsx`
-- `src/components/workspace/ScenarioRegimeCards.tsx`
-- `src/components/workspace/PnLSummary.tsx`
-- `src/components/workspace/AdvancedMetrics.tsx`
-- `src/components/workspace/TrackAssetModal.tsx`
-- `src/components/workspace/AddToPortfolioModal.tsx`
-- `src/components/ReturnDistributionChart.tsx`
-- `src/components/ScenarioProbabilityChart.tsx`
-- `src/components/PortfolioAnalyzer.tsx`
-- `src/components/EnhancedQuantMetricsCard.tsx`
-- `src/components/EnhancedRiskSummary.tsx`
-- `src/components/EnhancedScenarioDisplay.tsx`
-
----
-
-## Phase 5: Navigation & Routing Overhaul
-
-### New Route Structure (4 pages only)
-
-| Route | Component | Purpose |
-|-------|-----------|---------|
-| `/` | `Decision.tsx` | Core product - the decision page |
-| `/decisions` | `Decisions.tsx` | Decision log (renamed from History) |
-| `/account` | `Account.tsx` | Minimal account + billing |
-| `/legal` | `Legal.tsx` | Terms, Privacy, Disclaimer combined |
-| `/auth` | `Auth.tsx` | Authentication (keep) |
-
-### Pages to DELETE
-- `src/pages/Landing.tsx`
-- `src/pages/Dashboard.tsx`
-- `src/pages/Workspace.tsx`
-- `src/pages/Results.tsx`
-- `src/pages/Pricing.tsx`
-- `src/pages/Methodology.tsx`
-- `src/pages/About.tsx`
-- `src/pages/Portfolio.tsx`
-- `src/pages/TrackedAssets.tsx`
-- `src/pages/Demo.tsx`
-- `src/pages/Analyze.tsx`
-
-### Redirects to Add
-All deprecated routes redirect to `/` or `/auth`:
-- `/landing` → `/`
-- `/dashboard` → `/`
-- `/workspace` → `/`
-- `/pricing` → `/account`
-- `/methodology` → `/legal`
-- `/about` → `/`
-- `/portfolio` → `/`
-- `/tracked-assets` → `/`
-- `/demo` → `/`
-- `/history` → `/decisions`
-
-### Files to Modify
-- `src/App.tsx` - New route structure with redirects
-
----
-
-## Phase 6: Header Simplification
-
-### Current Header (244 lines) → New MinimalHeader (~60 lines)
-
-**Logged-in users see:**
-- Logo (links to /)
-- Decisions (link to /decisions)
-- Account (link to /account)
-- Sign out
-
-**Logged-out users see:**
-- Logo
-- Sign in
-
-**Remove:**
-- Demo link
-- Workspace link
-- Methodology link
-- Pricing link
-- Language toggle
-- Home link
-- Tracked link
-- History link (rename to Decisions)
-- Risk alert bell
-- Mobile menu complexity
-
-### Files to Modify
-- `src/components/layout/Header.tsx` - Minimal navigation
-
-### Files to DELETE
-- `src/components/layout/Footer.tsx` - Remove entirely
-- `src/components/RiskAlertBell.tsx` - Feature creep
-
----
-
-## Phase 7: Decision Log Page (/decisions)
-
-### Purpose
-Behavior reinforcement - make users respect their own caution.
-
-### Content
-- List of past decisions (date, asset, worst-case loss shown)
-- Simple outcome tag: Avoided / Entered / Ignored risk
-- No charts, no PnL, no performance stats
-
-### Files to Create
-- `src/pages/Decisions.tsx` - Renamed and simplified History page
-
-### Database Schema Addition
-Add `decision_outcome` column to `analysis_history` table:
-- Values: `avoided`, `entered`, `ignored`
-- Nullable (user can optionally mark outcome)
-
----
-
-## Phase 8: Account Page Simplification
-
-### Current Account (153 lines) → Minimal Account (~80 lines)
-
-**Keep:**
-- Email display
-- Usage counter
-- Upgrade/downgrade button
-- Delete account
-
-**Remove:**
-- Profile section (avatar, bio, username)
-- Tabs navigation
-- Privacy/Legal tab (move to /legal)
-- All profile customization
-
-### Files to Modify
-- `src/pages/Account.tsx` - Minimal version
-
-### Files to DELETE
-- `src/components/account/ProfileSection.tsx`
-- `src/components/account/LegalSection.tsx` (move to /legal)
-
----
-
-## Phase 9: Legal Page Creation
-
-### New Combined Legal Page
-
-Consolidates all trust/legal content:
-- **Important Disclaimer** (prominent, top)
-- Data usage summary
-- Model limitations
-- Privacy policy (full text)
-- Terms of service (full text)
-
-This is the ONLY place disclaimers exist.
-
-### Files to Create
-- `src/pages/Legal.tsx` - Combined legal page
-
-### Files to Modify
-- Remove disclaimers from all other pages
-
----
-
-## Phase 10: Copy & Messaging Overhaul
-
-### Key Copy Changes
-
-| Location | Current | New |
-|----------|---------|-----|
-| Page title | "Analyse - Probabilistic Risk Analysis" | "OutputLens - Know Your Downside" |
-| Hero question | "Quantify Uncertainty Before You Trade" | "What's the worst-case loss if I do this trade?" |
-| Subtext | "Three-layer intelligence: Stochastic..." | "Risk analysis before you deploy capital" |
-| CTA button | "Analyze Risk & Scenarios" | "Analyze downside risk" |
-| Direction | "Bullish View / Bearish View" | "Buy / Sell" |
-| Results header | "Risk Snapshot" | (Remove - just show the number) |
-| Risk explanation | Multi-paragraph AI interpretation | 3-5 lines, plain English |
-
-### Phrases to DELETE Everywhere
-- "AI-powered"
-- "Three-layer intelligence"
-- "Institutional-grade"
-- "Monte Carlo paths"
-- "GBM/GARCH/HMM"
-- "Neural Database"
-- "Regime detection"
-- "Scenario regimes"
-- "Layer 1/2/3"
-- "PRO" badges
-
----
-
-## Phase 11: Paywall Redesign
-
-### Current Approach
-- Prominent pricing page
-- Upgrade CTAs everywhere
-- Feature comparison tables
-- PRO badges
-
-### New Approach
-Inline paywall ONLY after value delivered.
-
-**Triggers:**
-- Usage limit reached (5 analyses/month)
-- Stress scenario toggle (premium feature)
-- Non-US market selected
-
-**Paywall Copy:**
-```
-Free users can run 5 US market analyses per month.
-Upgrade to unlock stress scenarios and global markets.
-
-[ Upgrade ]
+**Add font import** (line 1):
+```css
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
 ```
 
-No pricing table. No feature list. No comparison.
-
-### Files to Modify
-- `src/components/PaywallModal.tsx` - Simplify drastically
-
----
-
-## Phase 12: Component Cleanup
-
-### Files to DELETE (Complete List)
-
-**Dashboard Components:**
-- `src/components/dashboard/AccountCard.tsx`
-- `src/components/dashboard/AccountHeader.tsx`
-- `src/components/dashboard/AgeVerificationBanner.tsx`
-- `src/components/dashboard/AlertsPanel.tsx`
-- `src/components/dashboard/DashboardHero.tsx`
-- `src/components/dashboard/LatestArticles.tsx`
-- `src/components/dashboard/OnboardingGuide.tsx`
-- `src/components/dashboard/RecentReports.tsx`
-- `src/components/dashboard/TrackedAssetsGrid.tsx`
-- `src/components/dashboard/WorkspaceCTA.tsx`
-- `src/components/dashboard/WhySection.tsx`
-- `src/components/dashboard/index.ts`
-
-**Landing Components:**
-- `src/components/landing/AISemanticSection.tsx`
-- `src/components/landing/DataProviderLogos.tsx`
-- `src/components/landing/InteractivePreview.tsx`
-- `src/components/landing/ProblemSolutionSection.tsx`
-
-**Admin Components:**
-- `src/components/admin/AdminAnalyticsPanel.tsx`
-- `src/components/admin/RecentSignupsTable.tsx`
-- `src/components/admin/TrafficSourcesChart.tsx`
-- `src/components/admin/UserJourneyModal.tsx`
-- `src/components/admin/index.ts`
-
-**Onboarding Components:**
-- `src/components/onboarding/AvatarUpload.tsx`
-- `src/components/onboarding/OnboardingWizard.tsx`
-- `src/components/onboarding/StepComplete.tsx`
-- `src/components/onboarding/StepCredentials.tsx`
-- `src/components/onboarding/StepLegal.tsx`
-- `src/components/onboarding/StepProfile.tsx`
-- `src/components/onboarding/StepWelcome.tsx`
-- `src/components/onboarding/index.ts`
-
-**Other Components:**
-- `src/components/AIExplanation.tsx`
-- `src/components/QuantMetricsCard.tsx`
-- `src/components/ScenarioTable.tsx`
-- `src/components/StructuredScenarioDisplay.tsx`
-- `src/components/SentimentIndicator.tsx`
-- `src/components/UsageIndicator.tsx`
-- `src/components/FeatureGate.tsx`
-- `src/components/OnboardingTooltips.tsx`
-
----
-
-## Phase 13: Onboarding Redesign
-
-### Current Flow
-3-step wizard: Credentials → Legal → Dashboard
-
-### New Flow
-No onboarding wizard. The first analysis IS onboarding.
-
-**Flow:**
-1. User signs up via `/auth`
-2. Redirect immediately to `/`
-3. Pre-fill example asset (AAPL)
-4. First analysis creates the "click" moment
-
-### Files to Modify
-- `src/pages/Onboarding.tsx` - DELETE or simplify to just legal consent
-- `src/pages/Auth.tsx` - Redirect to `/` after auth
-
----
-
-## Phase 14: Database Changes
-
-### New Column for Decision Tracking
-```sql
-ALTER TABLE analysis_history 
-ADD COLUMN decision_outcome TEXT CHECK (decision_outcome IN ('avoided', 'entered', 'ignored'));
+**Add missing CSS variables** inside `:root` (after line 58):
+```css
+/* Logo and brand colors */
+--logo-navy: 213 33% 17%;
+--logo-blue: 217 91% 60%;
+--brand-blue: 217 91% 60%;
+--navy: 213 33% 17%;
+--navy-deep: 220 39% 10%;
 ```
 
-### Clean Up Unused Tables (Optional - defer)
-Consider archiving:
-- `tracked_assets` (feature removed)
-- `saved_portfolios` (feature removed)
+**Update risk color** (line 47):
+```css
+--risk: 0 60% 35%;  /* Muted red #9B2C2C */
+```
 
 ---
 
-## Technical Summary
+### File 2: `src/pages/Decision.tsx`
 
-### Files to CREATE (4 new files)
-1. `src/pages/Decision.tsx` - Main product page
-2. `src/pages/Decisions.tsx` - Decision log
-3. `src/pages/Legal.tsx` - Combined legal page
-4. `src/components/decision/DecisionInput.tsx` - Simplified input form
-5. `src/components/decision/DecisionResult.tsx` - Simplified results
+**Major structural changes:**
 
-### Files to MODIFY (8 files)
-1. `src/App.tsx` - New routes
-2. `src/index.css` - New design system
-3. `tailwind.config.ts` - New colors
-4. `src/components/layout/Header.tsx` - Minimal nav
-5. `src/pages/Account.tsx` - Simplified
-6. `src/pages/Auth.tsx` - New redirect flow
-7. `src/components/PaywallModal.tsx` - Simplified
-8. `src/components/layout/Layout.tsx` - Remove footer
+1. **Remove header border** - cleaner, more minimal
+2. **Update headline** - "Know your downside before you trade."
+3. **Add subhead** - "Enter your trade details to see the worst-case loss."
+4. **Show form to everyone** - Remove the sign-in blocker for input form
+5. **Handle auth on submit** - Redirect to auth only when they try to analyze
+6. **Update footer** - Add optional sign-in CTA for guests
 
-### Files to DELETE (~60 files)
-All dashboard, landing, onboarding, admin, and feature-bloat components listed in Phase 12.
+```tsx
+// Simplified structure
+return (
+  <div className="min-h-screen bg-background flex flex-col">
+    {/* Minimal header - no border */}
+    <header className="py-4">
+      <div className="section-container flex items-center justify-between">
+        <BrandLogo size="md" />
+        {user ? (
+          // Authenticated nav
+        ) : (
+          // Small "Sign in" text link
+        )}
+      </div>
+    </header>
+
+    {/* Main content - centered vertically */}
+    <main className="flex-1 flex flex-col justify-center section-container py-8">
+      {/* Hero */}
+      <h1 className="text-3xl sm:text-4xl font-semibold text-center text-foreground mb-3">
+        Know your downside before you trade.
+      </h1>
+      
+      {/* Subhead */}
+      <p className="text-base text-muted-foreground text-center mb-10">
+        Enter your trade details to see the worst-case loss.
+      </p>
+
+      {/* Decision interface */}
+      <div className="max-w-md mx-auto w-full">
+        {/* Always show form */}
+        {/* Results or input based on state */}
+      </div>
+    </main>
+
+    {/* Footer */}
+    <footer className="py-6">
+      <p className="text-xs text-muted-foreground text-center">
+        Probabilistic analysis. Not financial advice. <Link>Legal</Link>
+        {!user && <> · <Link>Sign in</Link></>}
+      </p>
+    </footer>
+  </div>
+);
+```
 
 ---
 
-## PMF Kill Metrics (Post-Implementation)
+### File 3: `src/App.css`
 
-Track these to validate the redesign:
-
-| Metric | Kill Threshold | Target |
-|--------|----------------|--------|
-| Pre-trade usage | <15% run 2+ analyses/month | >30% |
-| Stress toggle usage | <30% of analyses | >40% |
-| Decision saves | <20% save decisions | >30% |
-| Paid user habit | <25% run 3+ analyses/month | >40% |
-
-### Language Test
-**Good signals:**
-- "This stopped me"
-- "This scared me"
-- "This made me think twice"
-
-**Kill signals:**
-- "Cool"
-- "Nice charts"
-- "Interesting"
+**Clean up unused Vite boilerplate** - remove the old logo animation and card styles that are no longer relevant to the minimal design.
 
 ---
 
-## Implementation Order
+## Optional Enhancements (Phase 2)
 
-1. **Phase 1-2**: Create new Decision page with new design system
-2. **Phase 3-4**: Simplify form and results components
-3. **Phase 5-6**: Update routing and navigation
-4. **Phase 7-9**: Create supporting pages (Decisions, Legal)
-5. **Phase 10-11**: Update copy and paywall
-6. **Phase 12-13**: Delete unused components and simplify onboarding
-7. **Phase 14**: Database migration
+These can be added after the core landing page is working:
 
-Total estimated scope: Major rewrite affecting ~70% of frontend codebase.
+1. **Micro-animations**: Subtle fade-in on form fields (using existing `animate-fade-in`)
+2. **Logo hover**: Slightly brighter accent on hover (CSS transition)
+3. **Progress indicator**: "First analysis done" toast for new users
+4. **CTA hover state**: Slightly deeper slate on button hover
+
+---
+
+## Technical Notes
+
+- No new dependencies required
+- Reuses existing `DecisionInput` and `DecisionResult` components
+- Maintains all existing functionality (auth, usage limits, paywall)
+- Mobile-responsive with existing Tailwind breakpoints
+- Clean separation: landing experience vs authenticated dashboard
+
