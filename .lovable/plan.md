@@ -1,438 +1,559 @@
 
-# Complete YC-Style Master Technical Overhaul
 
-## Overview
+# Complete YC-Style Landing Page + Three Critical Gaps Implementation
 
-This plan implements the complete **OutputLens Master Project Instructions** across the entire frontend and backend, establishing OutputLens as a **YC-grade risk infrastructure company** with clear IP boundaries, explicit math/physics models, controlled AI, and credit-efficient monetization.
+## Executive Summary
 
----
-
-## Strategic Positioning (Applied Throughout)
-
-### Core Identity
-- **What we are**: Risk infrastructure + probabilistic education + explainable AI
-- **What we're NOT**: Trading signals, price predictions, black-box AI
-- **Mission**: "Quantify uncertainty before capital is deployed"
-
-### Three-Layer Intelligence Stack (Architecture Philosophy)
-1. **Layer 1**: Deterministic Math/Physics (CORE IP) - Must work without AI
-2. **Layer 2**: Statistical & ML Adaptation (regime detection, volatility adjustment)
-3. **Layer 3**: LLM Interpretation & RAG - Never hallucinate numbers, always cite internal logic
+This plan addresses the **three critical gaps** identified in the gap analysis while updating the landing page to achieve **YC-grade investor readiness**. The result: OutputLens becomes a licensable, defensible, regulator-safe probabilistic risk infrastructure company.
 
 ---
 
-## Implementation Batches (Credit-Efficient)
+## Gap Analysis Summary
 
-### BATCH 1: Core Configuration & SEO (Highest ROI)
+| Gap | Problem | Solution |
+|-----|---------|----------|
+| **Gap 1** | Core math is described, not owned | Create modular engine with deterministic, reproducible TypeScript math modules |
+| **Gap 2** | Neural DB technically undefined | Define explicit embedding schema + similarity query architecture |
+| **Gap 3** | Monetization is UI-level, not compute-level | Implement cost units per operation + backend enforcement |
 
-#### 1.1 Update `index.html` - Enhanced SEO Structured Data
-- Add explicit model references to schema: GBM, GARCH, regime switching, fat-tailed distributions
-- Add new FAQ schema items:
-  - "What stochastic models do you use?"
-  - "How does the neural database work?"
-  - "Why don't you predict prices?"
-  - "What is the three-layer intelligence architecture?"
-- Update `priceRange`: "$0 - $79/month"
-- Add `BreadcrumbList` schema for navigation signals
-- Update `dateModified` to current date
+---
 
-#### 1.2 Update `src/lib/stripe.ts` - Enhanced Plan Configuration
-Add new configuration fields to `PlanConfig`:
+## Implementation Architecture
+
+### Current State (What Exists)
+The codebase already has good foundations:
+- `src/lib/scenarioEngine.ts` - GBM Monte Carlo implementation
+- `src/lib/riskMetrics.ts` - VaR, CVaR, Sharpe/Sortino calculations
+- `src/lib/stripe.ts` - Three-layer plan configuration
+- Edge function `analyze-trade` - AI interpretation with Layer 3 constraints
+
+### Target State (What We're Building)
+
+```text
+src/lib/
+├── engine/                    ← GAP 1: Deterministic Risk Engine
+│   ├── index.ts              ← Main orchestrator (CORE IP)
+│   ├── stochastic/
+│   │   ├── gbm.ts            ← Geometric Brownian Motion (refactored from scenarioEngine)
+│   │   ├── garch.ts          ← GARCH-like volatility (new)
+│   │   └── regimeGbm.ts      ← Regime-switched GBM (new)
+│   ├── risk/
+│   │   ├── var.ts            ← Value at Risk (refactored from riskMetrics)
+│   │   ├── cvar.ts           ← Expected Shortfall
+│   │   └── drawdown.ts       ← Max drawdown estimation
+│   ├── regimes/
+│   │   └── hmm.ts            ← Hidden Markov Model regime detection (new)
+│   └── scenarios/
+│       ├── base.ts           ← Scenario parameter transformers
+│       ├── volSpike.ts       ← Volatility spike scenario
+│       └── stressTail.ts     ← Black swan tail fattening
+│
+├── neural/                    ← GAP 2: Neural Database Architecture
+│   ├── embeddings.ts         ← Embedding vector schema
+│   ├── index.ts              ← Vector index management
+│   ├── similarity.ts         ← Cosine similarity + k-NN
+│   └── query.ts              ← Context retrieval (NOT prediction)
+│
+├── billing/                   ← GAP 3: Compute-Based Monetization
+│   ├── costModel.ts          ← Internal cost units per operation
+│   ├── usageMeter.ts         ← Real-time usage tracking
+│   └── enforcement.ts        ← Backend limit enforcement
+│
+└── (existing files unchanged)
+```
+
+---
+
+## Phase 1: Landing Page Enhancement
+
+### 1.1 Update Hero Section
+Add explicit "Why Now?" urgency and three-layer architecture messaging:
+
 ```typescript
-interface PlanConfig {
-  // Existing fields...
-  
-  // Layer 1: Math/Physics
-  stochasticModels: 'basic_gbm' | 'gbm_garch' | 'full_suite' | 'api';
-  jumpDiffusion: boolean;
-  regimeSwitching: boolean;
-  
-  // Layer 2: Statistical/ML
-  neuralDatabase: 'limited' | 'full' | 'auto';
+// Hero badges update
+const trustBadges = [
+  { icon: Target, text: 'Probabilities, Not Predictions' },
+  { icon: Layers, text: 'Three-Layer Intelligence' },  // NEW
+  { icon: Shield, text: 'Open Methodology' },
+];
+
+// Add "Why Now?" urgency paragraph
+<p className="text-sm text-primary/90 font-medium">
+  Markets are more volatile, correlated, and regime-driven than ever. 
+  Traditional indicators fail during tail events. Probabilistic risk modeling is no longer optional.
+</p>
+```
+
+### 1.2 Update Features Grid - Technical Specificity
+
+Replace vague descriptions with YC-grade technical terminology:
+
+| Feature | Updated Description |
+|---------|---------------------|
+| Monte Carlo Simulation | "Free: 5,000 paths (US only). Paid: 10,000+ paths (Global). GBM with fixed seeding for reproducibility." |
+| Stochastic Modeling | "Fat-tailed distributions, regime switching via HMM, mean reversion (Ornstein-Uhlenbeck). Layer 1 IP." |
+| Risk Metrics | "VaR (90/95/99%), Expected Shortfall (CVaR), tail loss density, max drawdown. Deterministic math." |
+| Neural Database + RAG | "Stores embeddings of volatility regimes, return distributions, correlation states. Retrieves context, never predicts." |
+| AI Interpretation Layer | "Layer 3 only: LLMs explain distributions. Never compute prices. Every number cited from Layer 1-2." |
+| Global Market Access | "Free: US Only. Paid: UK, EU, Crypto, Forex. Monetized by compute + data, not UI." |
+
+### 1.3 Add Three-Layer Architecture Visualization
+
+New section showing the intelligence stack:
+
+```text
+┌─────────────────────────────────────────────────────────────┐
+│  LAYER 3: AI Interpretation (LLM + RAG)                     │
+│  • Explains distributions • Never predicts • Cites Layer 1-2│
+├─────────────────────────────────────────────────────────────┤
+│  LAYER 2: Statistical Adaptation (ML)                       │
+│  • HMM regime detection • Neural DB similarity • Volatility │
+├─────────────────────────────────────────────────────────────┤
+│  LAYER 1: Deterministic Math/Physics (CORE IP)              │
+│  • GBM simulation • VaR/CVaR • Scenarios • Reproducible     │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### 1.4 Update ISP Use Cases with Technical Value Props
+
+| ISP | Problem | Technical Value |
+|-----|---------|-----------------|
+| Active Traders | Overconfidence, gut decisions | "5,000 Monte Carlo paths + VaR quantifies tail exposure before you trade" |
+| Quant Analysts | Tools fragmented & opaque | "Modular engine: GBM, GARCH, HMM, scenario transformers. API-ready." |
+| B2B / Funds | Legacy tooling expensive | "Deterministic engine runs without OpenAI. License the math, not the UI." |
+
+### 1.5 Add IP Transparency Section
+
+New callout component on landing page:
+
+```typescript
+<Card className="border-primary/30 bg-primary/5">
+  <CardContent className="p-6">
+    <h3 className="font-semibold text-foreground mb-2">IP Transparency</h3>
+    <p className="text-sm text-muted-foreground">
+      The mathematics are public. Our IP is how we orchestrate, interpret, 
+      and operationalize them at scale. The engine runs independently of 
+      Supabase and OpenAI—benchmarkable, testable, licensable.
+    </p>
+  </CardContent>
+</Card>
+```
+
+---
+
+## Phase 2: Deterministic Risk Engine (GAP 1)
+
+### 2.1 Engine Orchestrator (`src/lib/engine/index.ts`)
+
+This is the **CORE IP** - the central orchestrator that ties all math modules together:
+
+```typescript
+export interface EngineConfig {
+  seed?: number;           // Fixed seed for reproducibility
+  paths: number;           // Monte Carlo paths
+  stochasticModel: 'gbm' | 'garch' | 'regime_gbm';
   regimeDetection: boolean;
-  volatilityAdaptation: boolean;
-  
-  // Layer 3: AI
-  aiInterpretation: 'manual' | 'auto' | 'advanced';
-  ragAccess: boolean;
-  
-  // Market access
-  globalMarkets: boolean;
-  marketsList: string[]; // ['US'] for free, ['US','UK','EU','Crypto','Forex'] for paid
+  jumpDiffusion: boolean;
+}
+
+export interface EngineResult {
+  simulation: SimulationResult;
+  riskMetrics: AdvancedRiskMetrics;
+  scenarios: DynamicScenarioSet;
+  regime?: 'bull' | 'neutral' | 'bear' | 'stress';
+  computeCost: number;     // Internal cost units for billing
+  reproducible: boolean;   // True if seeded
+}
+
+export function runRiskEngine(params: TradeInput, config: EngineConfig): EngineResult {
+  // Layer 1: Deterministic math only - no AI calls
+  // Reproducible with fixed seed
+  // Computes cost units for backend billing
 }
 ```
 
-Update each plan's features:
-- **Free**: `basic_gbm`, US only, limited neural DB, manual AI
-- **Starter**: `gbm_garch`, global, full neural DB, auto AI
-- **Pro**: `full_suite`, global, auto neural DB, advanced AI, portfolio
-- **Trader**: `full_suite` + API, all features, priority processing
+### 2.2 Refactored GBM Module (`src/lib/engine/stochastic/gbm.ts`)
 
----
-
-### BATCH 2: Landing Page Overhaul (`src/pages/Landing.tsx`)
-
-#### 2.1 Hero Section Updates
-- Add "Why Now?" urgency statement:
-  > "Markets are more volatile, correlated, and regime-driven than ever. Traditional indicators fail during tail events. Probabilistic risk modeling is no longer optional."
-- Update trust badges to three-layer architecture:
-  - "Deterministic Math First"
-  - "AI Interprets, Never Predicts"
-  - "Open Methodology"
-- Add market access clarity to subhead
-
-#### 2.2 Features Grid (6 Features Matching Architecture)
-1. **Stochastic Price Models**: "GBM + GARCH-like dynamics + regime switching. Free: 5,000 paths | Paid: 10,000+"
-2. **Advanced Risk Metrics**: "VaR (90/95/99%), Expected Shortfall, tail loss probability, max drawdown"
-3. **Regime Detection**: "Hidden Markov Model detects bull/bear/stress regimes. Parameters adapt automatically."
-4. **Neural Database + RAG**: "Retrieves historically similar volatility patterns—does not predict markets."
-5. **AI Interpretation Layer**: "LLMs explain distributions—never predict prices or give signals."
-6. **Global Market Access**: "Free: US Only | Paid: UK, EU, Crypto, Forex"
-
-#### 2.3 Use Cases Section (Explicit 3 ISPs)
-- **ISP 1 - Active Traders (Retail → Semi-Pro)**: 
-  - Problem: "Overconfidence, gut decisions, no tail awareness"
-  - Value: "Monte Carlo distributions, VaR/CVaR, US Free tier as education"
-- **ISP 2 - Quant/Technical Analysts**: 
-  - Problem: "Tools fragmented & opaque"
-  - Value: "GBM + regime switching, physics-inspired intuition, neural similarity search"
-- **ISP 3 - B2B / Funds / Fintechs**: 
-  - Problem: "Risk tooling expensive, slow, legacy"
-  - Value: "Deterministic engine, explainable AI, API + licensing"
-
-#### 2.4 Comparison Table Updates
-Add new rows:
-- "Three-Layer Intelligence Architecture" ✓
-- "Regime-Switching Stochastic Models" ✓
-- "Physics-Inspired Risk Framing" ✓
-- "Transparent IP Boundaries" ✓
-
----
-
-### BATCH 3: Methodology Page Overhaul (`src/pages/Methodology.tsx`)
-
-#### 3.1 New Section: Three-Layer Architecture Diagram
-Visual representation of the intelligence stack with clear boundaries
-
-#### 3.2 Section A: Stochastic Price Models (Layer 1 - CORE IP)
-- **Geometric Brownian Motion (GBM)**: Base price evolution, risk-neutral & real-drift modes
-- **Regime-Switched GBM**: Drift & volatility depend on detected market regime (bull/neutral/bear/stress)
-- **GARCH-like Dynamics**: Stochastic volatility extensions
-- **Fat-Tailed Distributions**: Non-Gaussian returns modeling
-
-Code file references:
-```
-src/lib/scenarioEngine.ts  ← GBM implementation
-src/lib/riskMetrics.ts     ← VaR, CVaR calculations
-```
-
-#### 3.3 Section B: Risk Metrics (Deterministic Math)
-1. Value at Risk (VaR) - 90%, 95%, 99%
-2. Expected Shortfall (CVaR)
-3. Downside Probability
-4. Tail Loss Density
-5. Drawdown Distribution
-
-#### 3.4 Section C: Scenario Engine (IP Core)
-- "Scenario engine modifies model parameters, not outputs"
-- Scenarios: Rate shock, volatility spike, liquidity crunch, black-swan tail fattening
-
-#### 3.5 Section D: Machine Learning (Layer 2 - Non-LLM)
-- **Hidden Markov Model (HMM)**: Market regime detection
-- **PCA / Eigen Decomposition**: Correlation compression
-- Purpose: "ML is used ONLY to classify regimes, adjust parameters, learn correlations"
-
-#### 3.6 Section E: AI/LLM System (Layer 3 - Strictly Controlled)
-What AI DOES:
-- Explain risk outputs
-- Translate metrics into human language
-- Select scenarios based on user intent
-
-What AI NEVER DOES:
-- ❌ Compute prices
-- ❌ Generate numbers
-- ❌ Replace simulations
-
-#### 3.7 IP Boundary Statement (Prominent Callout)
-> "The mathematics are public. Our IP is how we orchestrate, interpret, and operationalize them at scale."
-
----
-
-### BATCH 4: About Page Overhaul (`src/pages/About.tsx`)
-
-#### 4.1 Mission Section Enhancement
-> "Build the world's most trustworthy, AI-powered probabilistic risk intelligence platform—giving traders and institutions the same mathematical tools used by hedge funds, without hype or black-box predictions."
-
-#### 4.2 Core Principles Section (NEW)
-1. Truth over hype
-2. Probabilities, not predictions
-3. Deterministic math first, AI second
-4. Transparent methodology
-5. Clear free vs paid boundaries
-
-#### 4.3 Non-Goals Section (NEW - Critical for Compliance)
-- No trading execution
-- No price predictions
-- No hype indicators
-- No social trading
-- No black-box AI
-
-#### 4.4 Why We Win Section (NEW)
-- "Others show targets → we show distributions"
-- "Others predict → we quantify downside"
-- "Others hide math → we explain it"
-
-#### 4.5 What is OutputLens IP (NEW)
-✔ Scenario parameter engine
-✔ Regime → volatility mapping
-✔ Risk composition logic
-✔ RAG knowledge base
-✔ Compute-based pricing logic
-
-❌ Raw Monte Carlo (public math)
-❌ VaR formula (public math)
-
-#### 4.6 Glossary Expansion
-Add new terms from Master Prompt:
-- Geometric Brownian Motion
-- GARCH
-- Regime switching
-- Hidden Markov Model
-- Neural embeddings
-- RAG (Retrieval-Augmented Generation)
-- Ornstein-Uhlenbeck process
-
----
-
-### BATCH 5: Workspace & Results Updates
-
-#### 5.1 `src/pages/Workspace.tsx` - Enhanced Loading States
-Phase messages reflecting three-layer architecture:
-1. "Fetching live market data..."
-2. "Running Geometric Brownian Motion simulation..."
-3. "Applying regime switching models..."
-4. "Querying neural database for scenario similarity..."
-5. "Generating AI interpretation (explains, never predicts)..."
-
-#### 5.2 Tier Indicator Enhancement
-- Free users see: "Layer 1: Basic GBM | 5,000 paths | US Only"
-- Paid users see: "Layers 1-3: Full Suite | 10,000 paths | Global"
-
-#### 5.3 Results Panel - Neural Context (Paid Users)
-- "Similar historical regimes detected: [regime name]"
-- "Pattern match confidence: [percentage]"
-- "Regime state: Bull/Neutral/Bear/Stress"
-
----
-
-### BATCH 6: Edge Function Updates
-
-#### 6.1 Update `supabase/functions/analyze-trade/index.ts`
-Enhance system prompt with three-layer context:
+Extract and enhance from `scenarioEngine.ts`:
 
 ```typescript
-const systemPrompt = `You are the qualitative reasoning layer (Layer 3) of OutputLens, a structured risk analysis system.
+export interface GBMParams {
+  currentPrice: number;
+  volatility: number;       // Annualized (%)
+  holdingPeriodDays: number;
+  drift?: number;
+  paths?: number;
+  seed?: number;            // NEW: Fixed seed for reproducibility
+}
 
-ARCHITECTURE CONTEXT:
-Layer 1 (Deterministic): GBM simulation, VaR/CVaR calculations, scenario parameters
-Layer 2 (Statistical): HMM regime detection, volatility adaptation
-Layer 3 (You): Interpret and explain Layer 1-2 outputs in human language
-
-YOUR ROLE:
-- Synthesize simulation data into clear risk interpretation
-- Reference specific probabilities from Monte Carlo simulation
-- Explain regime states and their implications
-- NEVER predict prices or generate numbers
-
-CRITICAL RULES:
-- Every number you cite must come from the input data
-- Use probabilistic language: "may", "could", "might", "historically"
-- Frame output as risk interpretation, not recommendations
-- Reference the three-layer architecture when appropriate`;
+export function runGBM(params: GBMParams): SimulationResult {
+  // Deterministic with optional fixed seed
+  // Returns full distribution + percentiles
+}
 ```
 
----
+### 2.3 GARCH-like Volatility Module (`src/lib/engine/stochastic/garch.ts`)
 
-### BATCH 7: Pricing Page Updates (`src/pages/Pricing.tsx`)
+New module for stochastic volatility:
 
-#### 7.1 Updated Tier Table with Layer Access
-
-| Feature | Free | Starter ($12) | Pro ($29) | Trader ($79) |
-|---------|------|---------------|-----------|--------------|
-| **Layer 1: Stochastic Models** | Basic GBM | GBM + GARCH | Full Suite | Full + API |
-| Monte Carlo Paths | 5,000 | 10,000 | 10,000 | 10,000 |
-| Regime Switching | ❌ | ✓ | ✓ | ✓ |
-| Jump Diffusion | ❌ | ❌ | ✓ | ✓ |
-| **Layer 2: ML Adaptation** | Limited | Full | Full | Full |
-| Neural Database | Limited | Full | Auto | Auto |
-| Regime Detection | ❌ | ✓ | ✓ | ✓ |
-| **Layer 3: AI Interpretation** | Manual | Auto | Advanced | Advanced |
-| RAG Knowledge Access | ❌ | ✓ | ✓ | ✓ |
-| **Markets** | US Only | Global | Global | Global |
-| **API Access** | ❌ | ❌ | ❌ | 100/mo |
-
-#### 7.2 New FAQ Items
-- "What is the three-layer intelligence architecture?"
-- "How does regime detection work?"
-- "What's the difference between basic GBM and full stochastic suite?"
-- "Why don't you predict prices?"
-
----
-
-### BATCH 8: Component Updates
-
-#### 8.1 `src/components/PaywallModal.tsx` - Enhanced Triggers
-Add new trigger types:
 ```typescript
-type PaywallTrigger = 
-  | 'usage_limit' 
-  | 'portfolio' 
-  | 'neural_database'  // NEW
-  | 'regime_detection' // NEW
-  | 'global_markets'   // NEW
-  | 'advanced_ai'      // NEW
-  | 'api';
+export interface GARCHParams {
+  currentVolatility: number;
+  alpha: number;            // ARCH term weight
+  beta: number;             // GARCH term weight
+  omega: number;            // Unconditional variance
+  holdingPeriodDays: number;
+}
+
+export function runGARCH(params: GARCHParams, returns: number[]): number[] {
+  // Returns volatility path - NOT prices
+  // Layer 1: Pure math, no AI
+}
 ```
 
-Each trigger references the three-layer architecture:
-- `neural_database`: "Unlock full neural database for historical regime similarity search (Layer 2)"
-- `regime_detection`: "Enable Hidden Markov Model for automatic regime classification (Layer 2)"
-- `advanced_ai`: "Get advanced AI interpretations with RAG knowledge access (Layer 3)"
+### 2.4 HMM Regime Detection (`src/lib/engine/regimes/hmm.ts`)
 
-#### 8.2 `src/components/FeatureGate.tsx` - New Gatable Features
+New module for market regime classification:
+
 ```typescript
-type GatableFeature = 
-  | 'sentiment' 
-  | 'portfolio' 
-  | 'api' 
-  | 'exports' 
-  | 'alerts'
-  | 'neural_database'  // NEW
-  | 'regime_detection' // NEW
-  | 'global_markets'   // NEW
-  | 'advanced_ai';     // NEW
+export type MarketRegime = 'bull' | 'neutral' | 'bear' | 'stress';
+
+export interface HMMParams {
+  priceHistory: number[];
+  volatilityHistory: number[];
+  lookback?: number;
+}
+
+export interface HMMResult {
+  currentRegime: MarketRegime;
+  regimeProbabilities: Record<MarketRegime, number>;
+  transitionMatrix: number[][];
+}
+
+export function detectRegime(params: HMMParams): HMMResult {
+  // Layer 2: ML-based regime detection
+  // No prediction - classification only
+}
 ```
 
-#### 8.3 `src/components/landing/ProblemSolutionSection.tsx`
-Update "How We Do It" card:
-> "Three-layer intelligence: (1) GBM + GARCH stochastic simulation, (2) HMM regime detection + neural database, (3) LLM interpretation with RAG. Deterministic math first. AI interprets, never predicts. Institutional methodology, delivered in 2 seconds."
+### 2.5 Scenario Parameter Transformers (`src/lib/engine/scenarios/`)
+
+These modify model parameters, not outputs:
+
+```typescript
+// volSpike.ts
+export function applyVolatilitySpike(
+  baseVolatility: number, 
+  severity: 'mild' | 'moderate' | 'severe'
+): number {
+  // Returns adjusted volatility for stress scenario
+}
+
+// stressTail.ts
+export function applyTailFattening(
+  kurtosis: number,
+  stressLevel: number
+): number {
+  // Returns adjusted kurtosis for black swan scenarios
+}
+```
 
 ---
 
-### BATCH 9: Dashboard & Footer Updates
+## Phase 3: Neural Database Architecture (GAP 2)
 
-#### 9.1 `src/components/dashboard/WhySection.tsx`
-Replace with YC-style positioning:
-> "OutputLens is not a trading tool. It is risk infrastructure for decisions under uncertainty. We quantify the downside before you trade—using the same mathematical models hedge funds use, but accessible in your browser."
+### 3.1 Embedding Schema (`src/lib/neural/embeddings.ts`)
 
-#### 9.2 `src/components/layout/Footer.tsx`
-Update disclaimer to reflect three-layer architecture:
-> "OutputLens provides probabilistic risk analysis using a three-layer intelligence architecture: (1) deterministic stochastic models for simulation, (2) machine learning for regime detection, (3) AI for interpretation only. It shows probability distributions, not predictions. The neural database retrieves historical patterns—it does NOT predict markets. LLMs explain math—they never predict prices or give trading signals. Not financial advice."
+Define exactly what gets embedded:
 
-Add social links section (prominent):
-- X (Founder): @ivatsal1
-- X (OutputLens): @outputlens
-- Instagram: @outputlens
-- YouTube: @outputlens
+```typescript
+export interface RegimeEmbedding {
+  // Distribution characteristics
+  meanReturn: number;
+  volatility: number;
+  skewness: number;
+  kurtosis: number;
+  
+  // Risk metrics
+  maxDrawdown: number;
+  var95: number;
+  
+  // Regime labels
+  regimeLabel: MarketRegime;
+  correlationScore: number;
+  
+  // Metadata
+  assetClass: string;
+  timeframe: string;
+  timestamp: number;
+}
+
+export function createEmbeddingVector(data: RegimeEmbedding): number[] {
+  // Returns normalized vector for similarity search
+  // Typically 8-16 dimensions
+}
+```
+
+### 3.2 Similarity Search (`src/lib/neural/similarity.ts`)
+
+```typescript
+export interface SimilarityResult {
+  matchedRegime: RegimeEmbedding;
+  similarity: number;       // 0-1 cosine similarity
+  historicalDate: string;
+  outcomeAfter30Days: {
+    actualReturn: number;
+    worstDrawdown: number;
+  };
+}
+
+export function findSimilarRegimes(
+  currentEmbedding: number[],
+  k: number = 5
+): SimilarityResult[] {
+  // k-NN cosine similarity search
+  // Returns historical analogs for context
+  // NEVER predicts - only retrieves
+}
+```
+
+### 3.3 Context Query (`src/lib/neural/query.ts`)
+
+```typescript
+export interface NeuralContext {
+  similarRegimes: SimilarityResult[];
+  regimeLabel: string;
+  confidenceScore: number;
+  contextStatement: string;  // Human-readable context for Layer 3
+}
+
+export function queryNeuralContext(
+  simulation: SimulationResult,
+  currentRegime: MarketRegime
+): NeuralContext {
+  // Convert simulation to embedding
+  // Query similar historical regimes
+  // Return context (NOT prediction)
+}
+```
 
 ---
 
-### BATCH 10: Demo Page Updates (`src/pages/Demo.tsx`)
+## Phase 4: Compute-Based Monetization (GAP 3)
 
-#### 10.1 Banner Enhancement
-> "This demo shows probabilities from our three-layer intelligence stack—not predictions. Layer 1 runs the simulation. Layer 2 detects regime. Layer 3 explains. We quantify uncertainty, we don't forecast outcomes."
+### 4.1 Cost Model (`src/lib/billing/costModel.ts`)
 
-#### 10.2 Loading Animation Phases
-1. "Layer 1: Initializing GBM stochastic process..."
-2. "Layer 1: Generating 10,000 price paths..."
-3. "Layer 2: Detecting market regime via HMM..."
-4. "Layer 2: Querying neural database for similarity..."
-5. "Layer 3: Generating AI explanation (interprets, never predicts)..."
+Define internal cost units per operation:
+
+```typescript
+export const COST_UNITS = {
+  // Layer 1 operations
+  gbm_path: 0.001,           // Per path
+  garch_volatility: 0.5,     // Per run
+  regime_switching: 0.3,     // Per run
+  jump_diffusion: 0.5,       // Per run
+  var_calculation: 0.1,      // Per metric
+  cvar_calculation: 0.1,     // Per metric
+  
+  // Layer 2 operations
+  hmm_regime: 1.0,           // Per detection
+  neural_query: 2.0,         // Per similarity search
+  
+  // Layer 3 operations
+  ai_explanation: 1.0,       // Per LLM call
+} as const;
+
+export function calculateComputeCost(config: EngineConfig): number {
+  let cost = config.paths * COST_UNITS.gbm_path;
+  if (config.stochasticModel === 'garch') cost += COST_UNITS.garch_volatility;
+  if (config.regimeDetection) cost += COST_UNITS.hmm_regime;
+  // ... etc
+  return cost;
+}
+```
+
+### 4.2 Plan Cost Budgets (`src/lib/billing/enforcement.ts`)
+
+```typescript
+export const PLAN_COST_BUDGETS: Record<SubscriptionPlan, number> = {
+  free: 100,       // ~5 basic analyses
+  starter: 600,    // ~30 full analyses
+  pro: 2500,       // ~100 full analyses + portfolio
+  trader: 15000,   // ~500 + API calls
+};
+
+export function checkCostBudget(
+  userId: string,
+  requestedCost: number,
+  plan: SubscriptionPlan
+): { allowed: boolean; remaining: number; reason?: string } {
+  // Backend enforcement
+  // UI reflects this, doesn't define it
+}
+```
+
+### 4.3 Usage Meter (`src/lib/billing/usageMeter.ts`)
+
+```typescript
+export async function meterUsage(
+  userId: string,
+  operation: keyof typeof COST_UNITS,
+  quantity: number = 1
+): Promise<void> {
+  // Track compute usage in database
+  // Increment usage_tracking table with cost units
+}
+
+export async function getCurrentUsage(userId: string): Promise<{
+  costUsed: number;
+  costRemaining: number;
+  operationBreakdown: Record<string, number>;
+}> {
+  // Return current month's compute usage
+}
+```
 
 ---
 
-## Files to Modify (Complete List)
+## Phase 5: Update AI Semantic Section
 
-### Configuration (~3 files)
-- `index.html` - SEO structured data
-- `src/lib/stripe.ts` - Plan configuration with three-layer access
-- `supabase/functions/analyze-trade/index.ts` - AI prompt with architecture context
+### 5.1 New FAQ Items for YC/Investor Audience
 
-### Core Pages (~8 files)
-- `src/pages/Landing.tsx` - Hero, features, ISPs, comparison
-- `src/pages/Methodology.tsx` - Three-layer architecture, math/physics sections
-- `src/pages/About.tsx` - Mission, principles, non-goals, IP, glossary
-- `src/pages/Pricing.tsx` - Tier table with layer access
-- `src/pages/Demo.tsx` - Banners, loading phases
-- `src/pages/Workspace.tsx` - Loading states, tier indicator
-- `src/pages/Dashboard.tsx` - Minor updates
-- `src/pages/Auth.tsx` - Value prop updates
+Add these questions to `AISemanticSection.tsx`:
 
-### Components (~8 files)
-- `src/components/PaywallModal.tsx` - New triggers
-- `src/components/FeatureGate.tsx` - New gatable features
-- `src/components/UsageIndicator.tsx` - Layer access display
-- `src/components/layout/Footer.tsx` - Disclaimer, social links
-- `src/components/dashboard/WhySection.tsx` - YC positioning
-- `src/components/dashboard/DashboardHero.tsx` - Upgrade messaging
-- `src/components/landing/ProblemSolutionSection.tsx` - Three-layer explanation
-- `src/components/landing/AISemanticSection.tsx` - FAQ expansion
+```typescript
+{
+  question: "What is the three-layer intelligence architecture?",
+  answer: "Layer 1 (Deterministic Math): GBM simulation, VaR/CVaR, scenario parameters - runs without AI. Layer 2 (Statistical Adaptation): HMM regime detection, neural database similarity, volatility adjustment. Layer 3 (AI Interpretation): LLMs explain distributions but never compute prices or give signals."
+},
+{
+  question: "Can the engine run without AI?",
+  answer: "Yes. Layer 1 is fully deterministic and runs independently of Supabase, OpenAI, or any external services. This is critical for reproducibility, testing, and B2B licensing. AI is last-mile interpretation only."
+},
+{
+  question: "What is your compute-based pricing model?",
+  answer: "Revenue comes from compute, not UI. Each operation has internal cost units: GBM paths, regime detection, neural queries, AI explanations. Plans map to monthly cost budgets, not feature counts. This is risk infrastructure pricing."
+},
+{
+  question: "What exactly is stored in the neural database?",
+  answer: "Embeddings of: volatility regimes, return distributions, drawdown profiles, correlation states. Vector format: [mean_return, volatility, skew, kurtosis, max_drawdown, regime_label, correlation_score]. Used for cosine similarity and k-NN retrieval. Never stores predictions."
+}
+```
 
 ---
 
-## Key Terminology Reference (Apply Consistently)
+## Phase 6: Edge Function Updates
 
-### Architecture Terms
-- **"Three-layer intelligence"** (core differentiator)
-- **"Layer 1: Deterministic math"** (stochastic models)
-- **"Layer 2: Statistical adaptation"** (ML/neural DB)
-- **"Layer 3: AI interpretation"** (LLM/RAG)
+### 6.1 Update `analyze-trade` System Prompt
 
-### Model Terms
-- **"Geometric Brownian Motion (GBM)"** - primary simulation model
-- **"GARCH-like dynamics"** - stochastic volatility
-- **"Hidden Markov Model (HMM)"** - regime detection
-- **"Fat-tailed distributions"** - non-Gaussian modeling
-- **"Regime switching"** - bull/bear/stress states
+Add engine context to make architecture explicit:
 
-### Positioning Terms
-- **"Probabilities, not predictions"** - core differentiator
-- **"Quantify uncertainty"** - mission statement
-- **"AI interprets, never predicts"** - Layer 3 constraint
-- **"Deterministic math first, AI second"** - methodology
-- **"Truth over hype"** - brand positioning
-- **"Risk infrastructure"** - company category
+```typescript
+const systemPrompt = `You are the qualitative reasoning layer (Layer 3) of OutputLens.
+
+ENGINE CONTEXT (Layer 1-2 ran before you):
+- Deterministic engine ran ${config.paths} GBM paths with seed ${config.seed || 'random'}
+- Stochastic model: ${config.stochasticModel}
+- Regime detection: ${regime?.currentRegime || 'disabled'}
+- Neural context: ${neuralContext?.similarRegimes?.length || 0} similar historical regimes found
+- Compute cost: ${computeCost} units
+
+YOUR CONSTRAINTS:
+- Every number you cite MUST come from the input data
+- You are Layer 3 - interpretation only
+- Layer 1-2 output is deterministic and reproducible
+- You explain WHY, not WHAT will happen`;
+```
+
+---
+
+## Files to Create/Modify
+
+### New Files (GAP 1: Engine)
+1. `src/lib/engine/index.ts` - Main orchestrator
+2. `src/lib/engine/stochastic/gbm.ts` - Refactored GBM
+3. `src/lib/engine/stochastic/garch.ts` - GARCH volatility
+4. `src/lib/engine/stochastic/regimeGbm.ts` - Regime-switched GBM
+5. `src/lib/engine/risk/var.ts` - Value at Risk
+6. `src/lib/engine/risk/cvar.ts` - Expected Shortfall
+7. `src/lib/engine/risk/drawdown.ts` - Max drawdown
+8. `src/lib/engine/regimes/hmm.ts` - HMM detection
+9. `src/lib/engine/scenarios/base.ts` - Base scenarios
+10. `src/lib/engine/scenarios/volSpike.ts` - Vol spike scenario
+11. `src/lib/engine/scenarios/stressTail.ts` - Tail fattening
+
+### New Files (GAP 2: Neural DB)
+12. `src/lib/neural/embeddings.ts` - Embedding schema
+13. `src/lib/neural/index.ts` - Vector index
+14. `src/lib/neural/similarity.ts` - Cosine similarity
+15. `src/lib/neural/query.ts` - Context retrieval
+
+### New Files (GAP 3: Billing)
+16. `src/lib/billing/costModel.ts` - Cost units
+17. `src/lib/billing/usageMeter.ts` - Usage tracking
+18. `src/lib/billing/enforcement.ts` - Backend limits
+
+### Modified Files
+19. `src/pages/Landing.tsx` - Full overhaul
+20. `src/components/landing/AISemanticSection.tsx` - New FAQs
+21. `src/components/landing/ProblemSolutionSection.tsx` - Architecture diagram
+22. `src/components/landing/InteractivePreview.tsx` - Three-layer context
+23. `supabase/functions/analyze-trade/index.ts` - Engine context in prompt
 
 ---
 
 ## Expected Outcomes
 
-1. **Investor Clarity**: YC-grade three-layer architecture explanation
-2. **Technical Credibility**: Explicit math/physics model documentation
-3. **IP Protection**: Clear boundaries between public math and proprietary orchestration
-4. **Compliance Safety**: LLM constraints prevent "AI trading tool" accusations
-5. **Tier Clarity**: Layer access maps directly to subscription tiers
-6. **Monetization Logic**: Compute + data + models = revenue, not UI
-7. **ISP Alignment**: Three customer profiles with specific value props
-8. **SEO Enhancement**: Architecture keywords improve search visibility
+### Investor Readiness
+- Three-layer architecture is explicit and documented
+- IP boundaries are crystal clear
+- Engine runs independently of AI services
+- Compute-based monetization is defensible
+
+### Technical Credibility
+- Deterministic, reproducible simulations with fixed seeding
+- Modular engine for B2B licensing
+- Neural DB technically specified (not buzzwordy)
+- Cost units tied to actual compute
+
+### Compliance Safety
+- AI never generates numbers
+- Every output traceable to Layer 1-2
+- No prediction claims anywhere
+- "Probabilities, not predictions" enforced in code
+
+### YC Alignment
+- "Why Now?" urgency statement present
+- 3 ISPs explicitly named with technical value
+- IP transparency section visible
+- Revenue from compute, not UI
 
 ---
 
-## Strategic Truth (Implementation Principle)
+## Strategic Summary
+
+After this implementation:
 
 **OutputLens is not a trading app. It is:**
-> Risk infrastructure + probabilistic education + explainable AI
+> Probabilistic risk infrastructure with a modular, licensable engine
 
 **Revenue comes from:**
-- Compute (Monte Carlo paths)
+- Compute (Monte Carlo paths, regime detection, neural queries)
 - Data (neural database access)
-- Models (stochastic suite)
+- Models (stochastic suite licensing)
 - APIs (B2B integration)
 
-**NOT from:**
-- UI
-- Dashboards
-- Charts
-- Predictions
+**What we own:**
+- Engine orchestration logic
+- Regime → volatility mapping
+- Neural embeddings of market behavior
+- Risk interpretation framework
+- Compute-based pricing logic
 
-This plan closes all gaps from the Master Project Instructions and establishes OutputLens as a YC-grade risk intelligence infrastructure company.
+**What we don't own (and don't pretend to):**
+- Raw Monte Carlo math (public)
+- VaR formula (public)
+- GBM equation (public)
+
+This is YC-grade, regulator-safe, licensable infrastructure.
+
