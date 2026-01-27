@@ -80,13 +80,35 @@ serve(async (req) => {
       });
     }
     logStep("User authenticated", { userId: user.id, email: user.email });
-    logStep("User authenticated", { userId: user.id, email: user.email });
+
+    // Check for database override first (for testing/demo accounts)
+    const { data: profileData } = await supabaseClient
+      .from("profiles")
+      .select("subscription_plan")
+      .eq("user_id", user.id)
+      .single();
+
+    const dbPlan = profileData?.subscription_plan;
+    logStep("Database plan check", { dbPlan });
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
     const customers = await stripe.customers.list({ email: user.email, limit: 1 });
 
     if (customers.data.length === 0) {
-      logStep("No Stripe customer found, returning free tier");
+      logStep("No Stripe customer found");
+      
+      // Check for database override before returning free
+      if (dbPlan && dbPlan !== 'free') {
+        logStep("Using database plan override (no Stripe customer)", { plan: dbPlan });
+        return new Response(JSON.stringify({ 
+          subscribed: true,
+          plan: dbPlan,
+          subscription_end: null
+        }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 200,
+        });
+      }
       
       // Update profile to free
       await supabaseClient
@@ -119,7 +141,20 @@ serve(async (req) => {
     });
 
     if (subscriptions.data.length === 0) {
-      logStep("No active subscription found");
+      logStep("No active Stripe subscription found");
+      
+      // Check for database override before returning free
+      if (dbPlan && dbPlan !== 'free') {
+        logStep("Using database plan override (no Stripe subscription)", { plan: dbPlan });
+        return new Response(JSON.stringify({ 
+          subscribed: true,
+          plan: dbPlan,
+          subscription_end: null
+        }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 200,
+        });
+      }
       
       // Update profile to free
       await supabaseClient

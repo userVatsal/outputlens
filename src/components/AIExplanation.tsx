@@ -80,12 +80,6 @@ export function AIExplanation({ analysis }: AIExplanationProps) {
         </div>
       )}
 
-      <div className="pt-2 border-t border-border/50">
-        <p className="text-xs text-muted-foreground italic">
-          ⚠️ This analysis is probabilistic based on Monte Carlo simulation. Markets are unpredictable. 
-          This is not financial advice and no outcomes are guaranteed.
-        </p>
-      </div>
     </div>
   );
 }

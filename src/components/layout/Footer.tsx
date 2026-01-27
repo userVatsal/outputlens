@@ -208,22 +208,9 @@ export function Footer() {
           </div>
         </div>
 
-        {/* Disclaimer - Three-layer architecture */}
-        <div className="mt-8 pt-6 border-t border-border">
-          <p className="text-xs text-muted-foreground">
-            <span className="font-semibold">Disclaimer:</span> OutputLens provides probabilistic risk analysis using a three-layer intelligence architecture: 
-            (1) deterministic stochastic models for simulation, (2) machine learning for regime detection, (3) AI for interpretation only. 
-            It shows probability distributions, not predictions. The neural database retrieves historical patterns—it does NOT predict markets.
-            LLMs explain math—they never predict prices or give trading signals. Not financial advice.
-          </p>
-        </div>
-
-        <div className="mt-6 pt-6 border-t border-border flex flex-col sm:flex-row justify-between items-center gap-4">
+        <div className="mt-8 pt-6 border-t border-border flex flex-col sm:flex-row justify-between items-center gap-4">
           <p className="text-sm text-muted-foreground">
             © {new Date().getFullYear()} OutputLens. All rights reserved.
-          </p>
-          <p className="text-xs text-muted-foreground">
-            Risk analysis for informational purposes only. Not financial advice.
           </p>
         </div>
       </div>
