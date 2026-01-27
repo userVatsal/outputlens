@@ -1,4 +1,4 @@
-import { AlertTriangle, Target, Zap, Database } from 'lucide-react';
+import { AlertTriangle, Target, Zap, Database, Layers } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 
@@ -23,10 +23,10 @@ const cards = [
   },
   {
     step: 'Three-Layer Intelligence',
-    icon: Zap,
+    icon: Layers,
     iconBg: 'bg-bullish/10',
     iconColor: 'text-bullish',
-    content: '(1) GBM + GARCH stochastic simulation, (2) HMM regime detection + neural database, (3) LLM interpretation with RAG. Deterministic math first. AI interprets, never predicts.',
+    content: '(1) GBM + GARCH stochastic simulation with fixed seeding, (2) HMM regime detection + neural database, (3) LLM interpretation with RAG. Deterministic math first. AI interprets, never predicts.',
   },
 ];
 
@@ -65,6 +65,7 @@ export function ProblemSolutionSection({ className }: ProblemSolutionSectionProp
           <p className="text-xs text-muted-foreground max-w-2xl mx-auto">
             <Database className="h-3 w-3 inline mr-1" />
             The neural database does not predict markets. It retrieves historically similar volatility and regime patterns to contextualize risk.
+            All simulations are reproducible with fixed seeding.
           </p>
         </div>
       </div>
