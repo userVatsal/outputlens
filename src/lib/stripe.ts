@@ -70,8 +70,8 @@ export const PLAN_CONFIG: Record<SubscriptionPlan, PlanConfig> = {
   starter: {
     name: 'Starter',
     price: 12,
-    priceId: 'price_1Ssy5t6fOimPgR7zJgd4EFI8',
-    productId: 'prod_TqfQu2gGDuzYwB',
+    priceId: 'price_1SuEvy6fOimPgR7zEMm58xaG',
+    productId: 'prod_TrythZDLRcM1Df',
     analysesLimit: 30,
     portfolioAssetsLimit: 0,
     apiCallsLimit: 0,
@@ -103,8 +103,8 @@ export const PLAN_CONFIG: Record<SubscriptionPlan, PlanConfig> = {
   pro: {
     name: 'Pro',
     price: 29,
-    priceId: 'price_1SsyBi6fOimPgR7z2E4ylccp',
-    productId: 'prod_TqfWL1KQ91RU1B',
+    priceId: 'price_1SuFAb6fOimPgR7zOqOhB67x',
+    productId: 'prod_Trz8F237n1udxv',
     analysesLimit: 100,
     portfolioAssetsLimit: 5,
     apiCallsLimit: 0,
@@ -137,8 +137,8 @@ export const PLAN_CONFIG: Record<SubscriptionPlan, PlanConfig> = {
   trader: {
     name: 'Trader',
     price: 79,
-    priceId: 'price_1SsyBw6fOimPgR7zbOqcUQuo',
-    productId: 'prod_TqfW4TNxviN7w5',
+    priceId: 'price_1SuFBC6fOimPgR7zy8NOODxI',
+    productId: 'prod_Trz9TGqW9escEk',
     analysesLimit: 500,
     portfolioAssetsLimit: 20,
     apiCallsLimit: 100,
@@ -171,9 +171,9 @@ export const PLAN_CONFIG: Record<SubscriptionPlan, PlanConfig> = {
 
 // Map product IDs to plans (for webhook/subscription checking)
 export const PRODUCT_TO_PLAN: Record<string, SubscriptionPlan> = {
-  'prod_TqfQu2gGDuzYwB': 'starter',
-  'prod_TqfWL1KQ91RU1B': 'pro',
-  'prod_TqfW4TNxviN7w5': 'trader',
+  'prod_TrythZDLRcM1Df': 'starter',
+  'prod_Trz8F237n1udxv': 'pro',
+  'prod_Trz9TGqW9escEk': 'trader',
 };
 
 // Helper to get plan from product ID
