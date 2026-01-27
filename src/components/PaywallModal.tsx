@@ -10,6 +10,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { usePlan } from '@/hooks/usePlan';
 import { PLAN_CONFIG, SubscriptionPlan } from '@/lib/stripe';
+import { toast } from 'sonner';
 
 export type PaywallTrigger = 
   | 'usage_limit' 
@@ -119,7 +120,8 @@ export function PaywallModal({ open, onOpenChange, trigger = 'generic' }: Paywal
       await createCheckoutSession(planConfig.priceId);
       onOpenChange(false);
     } catch (err) {
-      console.error('Checkout error:', err);
+      const message = err instanceof Error ? err.message : 'Unable to start checkout. Please try again.';
+      toast.error(message);
     }
   };
 
