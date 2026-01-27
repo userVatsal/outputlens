@@ -1,182 +1,514 @@
 
-# Admin Analytics Panel for OutputLens Dashboard
+# OutputLens PMF-First Redesign Plan
 
-## Overview
+## Executive Summary
 
-This plan adds an **Admin Analytics Panel** to your Dashboard page at `/home`, visible **only** when you're logged in as `uservatsal@outlook.com`. The panel provides real-time insights into user signups, traffic sources, and user behavior - all in one place.
+This plan transforms OutputLens from a feature-rich "institutional trading platform" into a focused **pre-decision risk lens** that answers one question: *"What's the worst-case loss if I do this trade?"*
 
-## What You'll See
+The redesign strips away complexity, marketing language, and engagement-focused features to create a product that changes behavior - making users pause before committing capital.
+
+---
+
+## 1. Page Architecture Overhaul
+
+### Current State (17+ pages)
+- Landing, Dashboard, Workspace, Results, Pricing, History, Account, Portfolio, TrackedAssets, Methodology, About, Privacy, Terms, Auth, Onboarding, Demo, NotFound
+
+### Target State (4 core pages)
+
+| Route | Purpose | PMF Role |
+|-------|---------|----------|
+| `/` | Single Decision Page (THE PRODUCT) | Core value delivery |
+| `/decisions` | Decision Log (replaces History) | Behavior reinforcement |
+| `/account` | Minimal account + billing | Necessary infrastructure |
+| `/legal` | Trust page (Terms, Privacy, Disclaimer) | Legal compliance |
+
+### Pages to DELETE
+- `/landing` - Marketing pages destroy focus
+- `/dashboard` - Dashboards invite browsing, not decisions
+- `/pricing` - Replace with inline paywall after value
+- `/methodology` - If it works, it explains itself
+- `/about` - Remove until PMF proven
+- `/portfolio` - Portfolios delay accountability
+- `/tracked-assets` - Feature creep
+- `/demo` - The product IS the demo
+
+### Pages to REDIRECT
+- All existing routes redirect to `/` or `/auth` (if unauthenticated)
+
+---
+
+## 2. Single Decision Page (/) - The Entire Product
+
+### Design Philosophy
+- One screen, one decision, one outcome
+- Must work in under 20 seconds
+- Every element must make someone hesitate
+
+### Wireframe Structure (Top to Bottom)
 
 ```text
-Dashboard Layout (Admin View Only):
-+--------------------------------------------------+
-|  ADMIN ANALYTICS (Collapsible)                   |
-|  +--------------------------------------------+  |
-|  | Summary Cards: Signups | Sessions | Users  |  |
-|  +--------------------------------------------+  |
-|  | Traffic Sources Chart | Recent Signups     |  |
-|  | (Pie Chart)           | (Expandable List)  |  |
-|  +--------------------------------------------+  |
-+--------------------------------------------------+
-|  [Normal Dashboard - visible to all users]       |
-|  - Account Header                                |
-|  - Hero Section                                  |
-|  - Workspace CTA                                 |
-|  - etc...                                        |
-+--------------------------------------------------+
++-------------------------------------------------------+
+|  [small, muted text]                                  |
+|  "Risk analysis before you deploy capital"            |
++-------------------------------------------------------+
+|                                                       |
+|  [HERO - large, bold]                                 |
+|  What's the worst-case loss if I do this trade?       |
+|                                                       |
++-------------------------------------------------------+
+|                                                       |
+|  Describe the trade you're considering                |
+|  +-------------------------------------------+        |
+|  | Asset:          [ AAPL                  ] |        |
+|  | Direction:      [ Buy / Sell            ] |        |
+|  | Capital at risk (currency): [ 2,000     ] |        |
+|  | Time horizon:   [ 1d | 1w | 1m | 3m     ] |        |
+|  +-------------------------------------------+        |
+|                                                       |
+|  [ Analyze downside risk ]  <- Single, calm button    |
+|                                                       |
++-------------------------------------------------------+
+|                                                       |
+|  RESULTS (after analysis):                            |
+|                                                       |
+|  [Based on probabilistic scenarios, not predictions]  |
+|                                                       |
+|  +-------------------+                                |
+|  | Worst-case loss   |                                |
+|  | (5% probability)  |                                |
+|  |                   |                                |
+|  |    -$412          |  <- BIG, RED, UNAVOIDABLE      |
+|  +-------------------+                                |
+|                                                       |
+|  Probability of loss:    61%                          |
+|  Expected drawdown:      -$180                        |
+|  Stress scenario loss:   -$690                        |
+|                                                       |
++-------------------------------------------------------+
+|                                                       |
+|  [ ] Stress this position  <- One toggle              |
+|                                                       |
+|  [Plain English Explanation - 3-5 lines max]          |
+|  "In similar volatility conditions, losses of this    |
+|   size occurred roughly 1 in 20 times. Risk is        |
+|   driven more by volatility than direction."          |
+|                                                       |
++-------------------------------------------------------+
+|                                                       |
+|  [ Save this decision ]  [ Close ]                    |
+|                                                       |
++-------------------------------------------------------+
+|                                                       |
+|  [Micro disclaimer - faint, bottom]                   |
+|  "Probabilistic analysis. Not financial advice."      |
+|                                                       |
++-------------------------------------------------------+
 ```
 
-### Metrics Displayed
+### What We Remove from Current Workspace
+- Header navigation
+- Portfolio/Single Asset toggle
+- History button
+- Mode toggle
+- Usage indicator (move to paywall moment only)
+- All charts and visualizations
+- Scenario Regime Cards
+- Advanced Metrics accordion
+- P&L Summary section
+- Tail Risk Panel (simplified into main output)
+- Risk Interpretation long-form AI explanation
+- "Monitor Asset" button
+- All badges and labels
 
-| Metric | Description |
-|--------|-------------|
-| **Total Users** | Count of registered users |
-| **New Signups (24h/7d)** | Recent registration activity |
-| **Total Sessions** | Visitor sessions tracked |
-| **Conversion Rate** | Sessions that led to signups |
-| **Traffic Sources** | Where visitors come from (Reddit, Google, Direct, etc.) |
-| **Recent Signups** | List of recent users with activity counts |
-| **User Journey** | Click to view timeline of any user's page visits and actions |
-
-### Security
-
-The admin panel uses **dual-layer security**:
-
-1. **Client-side**: Only renders if session email matches `uservatsal@outlook.com`
-2. **Server-side**: Edge function rejects all requests from non-admin users with 403 Forbidden
-
----
-
-## Implementation Details
-
-### Files to Create
-
-| File | Purpose |
-|------|---------|
-| `supabase/functions/admin-analytics/index.ts` | Backend function that aggregates data from `behavior_sessions`, `behavior_events`, `profiles`, and `analysis_history` |
-| `src/components/admin/AdminAnalyticsPanel.tsx` | Main collapsible panel with summary cards, chart, and table |
-| `src/components/admin/TrafficSourcesChart.tsx` | Pie chart showing traffic breakdown using Recharts |
-| `src/components/admin/RecentSignupsTable.tsx` | Table of recent signups with "View Journey" buttons |
-| `src/components/admin/UserJourneyModal.tsx` | Dialog showing timeline of user events |
-| `src/components/admin/index.ts` | Export barrel file |
-| `src/hooks/useAdminAnalytics.tsx` | React Query hook for fetching/caching admin data |
-
-### Files to Modify
-
-| File | Change |
-|------|--------|
-| `src/pages/Dashboard.tsx` | Add admin email check and render `AdminAnalyticsPanel` at top |
+### Loading State
+Replace spinner with educational sequence:
+1. "Simulating thousands of possible outcomes..."
+2. "Measuring worst-case losses..."
+3. "Quantifying tail risk..."
 
 ---
 
-## Technical Architecture
+## 3. Design System Overhaul
 
-### Edge Function: `admin-analytics`
+### Color Palette
 
-Handles multiple actions via query parameter:
+| Element | Color | Hex | Purpose |
+|---------|-------|-----|---------|
+| Primary Background | Warm Off-White | `#F9FAF7` | Less fatiguing, analytical |
+| Primary Text | Near-Black (Soft) | `#111827` | High contrast, not harsh |
+| Secondary Text | Gray | `#6B7280` | Labels, context |
+| Risk/Loss Color | Muted Red | `#9B2C2C` | Danger signal, not panic |
+| Dividers/Borders | Light Gray | `#E5E7EB` | Thin, 1px, no shadows |
+| CTA Button | Deep Slate | `#1F2933` | Authority, "commit decision" |
 
+### Colors to REMOVE
+- Neon green (bullish indicators)
+- Bright success colors
+- Gradients
+- Purple AI branding
+- Gold "premium" cues
+- All "trading platform" aesthetics
+
+### Typography
+
+| Element | Font | Size | Purpose |
+|---------|------|------|---------|
+| Hero question | Inter/System | 32-36px | Confrontational clarity |
+| Big risk number | Inter/System | 40-44px | Unavoidable truth |
+| Section headers | Inter/System | 18px | Structure |
+| Body/labels | Inter/System | 14-15px | Readability |
+| Disclaimer | Inter/System | 12px | Legal, unobtrusive |
+
+### Interaction Rules
+- No hover animations
+- No bounce effects
+- Fade transitions only (150-200ms)
+- Focus state: darker border only
+- Disabled looks disabled
+
+---
+
+## 4. Copy & Messaging Overhaul
+
+### Current Copy Problems
+- "Three-layer intelligence: Stochastic simulation -> Regime detection -> AI interpretation"
+- "AI-Powered Risk & Scenario Intelligence"
+- "Monte Carlo Simulation with 10,000 paths"
+- "GBM + GARCH + HMM"
+
+### New Copy Principles
+- Lead with downside, not capability
+- Plain English, no jargon
+- No marketing language
+- No predictions, no advice
+
+### Key Copy Changes
+
+| Location | Current | New |
+|----------|---------|-----|
+| Hero question | "Quantify Uncertainty Before You Trade" | "What's the worst-case loss if I do this trade?" |
+| Subtext | "Monte Carlo simulation with GBM..." | "Risk analysis before you deploy capital" |
+| CTA button | "Analyze Risk & Scenarios" | "Analyze downside risk" |
+| Direction input | "Bullish View / Bearish View" | "Buy / Sell" |
+| Results header | "Risk Snapshot" | (Remove - just show the number) |
+| Risk explanation | Multi-paragraph AI interpretation | 3-5 lines, plain English |
+
+### Phrases to DELETE
+- "AI-powered"
+- "Three-layer intelligence"
+- "Institutional-grade"
+- "Monte Carlo paths"
+- "GBM/GARCH/HMM"
+- "Neural Database"
+- "Regime detection"
+- "Scenario regimes"
+- "Layer 1/2/3"
+- Any technical terminology
+
+---
+
+## 5. Feature Deletions
+
+### Delete Immediately
+| Feature | Reason |
+|---------|--------|
+| Portfolio analysis | Delays single-decision accountability |
+| Tracked assets | Feature creep |
+| Charts and visualizations | Numbers first, not entertainment |
+| Advanced metrics accordion | Complexity before PMF |
+| Scenario Regime Cards | Visual noise |
+| Return Distribution Chart | Entertainment, not decision |
+| AI Risk Interpretation (long-form) | 3-5 lines max, no AI branding |
+| Usage indicator in workspace | Move to paywall only |
+| "Pro" badges everywhere | Feels sold-to before value |
+| Dashboard alerts | Alerts feel like signals |
+| Dashboard hero | Dashboards invite browsing |
+| Recent reports grid | Historical context, not action |
+| Methodology page | If it works, it explains itself |
+| About page | Marketing before PMF |
+| Demo page | The product IS the demo |
+| Pricing page | Inline paywall only |
+| Onboarding wizard | First analysis IS onboarding |
+
+### Freeze for 6 Months
+- API access
+- Global markets beyond US (for free tier)
+- Alerts & notifications
+- Custom scenarios
+- Education content
+- B2B features
+- Mobile app
+
+---
+
+## 6. Monetization Redesign
+
+### Current State
+- Prominent pricing page
+- Upgrade CTAs throughout
+- Feature comparison tables
+- "PRO" badges everywhere
+
+### New State
+- Inline paywall ONLY after value delivered
+- Triggers: Usage limit reached, stress scenario locked, non-US market
+
+### Paywall Copy
 ```text
-GET /admin-analytics?action=overview     -> Summary metrics
-GET /admin-analytics?action=traffic      -> Traffic sources breakdown
-GET /admin-analytics?action=signups      -> Recent signups with activity
-GET /admin-analytics?action=journey&userId=xxx -> User event timeline
+Free users can run 5 US market analyses per month.
+Upgrade to unlock stress scenarios and global markets.
+
+[ Upgrade ]
 ```
 
-**Security Check** (runs first on every request):
-- Extracts JWT from Authorization header
-- Verifies user email is `uservatsal@outlook.com`
-- Returns 403 if not admin
+No pricing table. No feature list. No comparison. Just the unlock.
 
-**Queries Used**:
+---
 
-Overview metrics:
-- Total users from `profiles`
-- Signups in last 24h/7d from `profiles.created_at`
-- Total sessions from `behavior_sessions`
-- Conversion rate: sessions with `user_id` / total sessions
+## 7. Decision Log (/decisions)
 
-Traffic sources:
-- Groups `behavior_sessions` by `utm_source` or extracted domain from `entry_referrer`
-- Returns top 10 sources with session counts
+Replaces current History page with behavior reinforcement focus.
 
-Recent signups:
-- Joins `profiles` with `behavior_sessions` and counts `analysis_history`
-- Shows last 20 signups with their source and activity
+### Purpose
+Make users respect their own caution.
 
-User journey:
-- Fetches `behavior_events` for sessions linked to the user
-- Orders by timestamp to show timeline
+### Content
+- List of past decisions (date, asset, worst-case loss shown)
+- Simple outcome tag: Avoided / Entered / Ignored risk
+- No charts, no PnL, no performance stats
 
-### Frontend Components
+### Copy
+"Your decision history" - not "Analysis History"
 
-**AdminAnalyticsPanel.tsx**:
-- Collapsible card with "Admin Analytics" header and shield icon
-- Uses Radix Collapsible for expand/collapse
-- Contains summary stat cards, chart, and table
-- Only rendered when `isAdmin` is true
+---
 
-**TrafficSourcesChart.tsx**:
-- Recharts PieChart with custom colors per source
-- Shows session counts and percentages
-- Responsive sizing
+## 8. Account Page (/account)
 
-**RecentSignupsTable.tsx**:
-- Displays masked email (first 3 chars + domain)
-- Shows signup date, traffic source, analysis count
-- "View" button opens UserJourneyModal
+### Current State
+- Profile section with avatar upload
+- Bio editing
+- Subscription management
+- Privacy/Legal tabs
 
-**UserJourneyModal.tsx**:
-- Dialog with vertical timeline of events
-- Shows page visits, clicks, scroll depth
-- Color-coded event types
+### New State
+Minimal. Only:
+- Email display
+- Usage counter
+- Upgrade/downgrade button
+- Delete account
 
-### Dashboard Integration
+No preferences. No themes. No AI settings. No profile customization.
 
-```typescript
-// In Dashboard.tsx
-const ADMIN_EMAIL = 'uservatsal@outlook.com';
-const [userEmail, setUserEmail] = useState<string | null>(null);
+---
 
-// Fetch email from auth session
-useEffect(() => {
-  supabase.auth.getUser().then(({ data }) => {
-    setUserEmail(data?.user?.email?.toLowerCase() || null);
-  });
-}, []);
+## 9. Legal Page (/legal)
 
-const isAdmin = userEmail === ADMIN_EMAIL.toLowerCase();
+Consolidates all trust/legal content:
+- Important Disclaimer (prominent)
+- Data usage summary
+- Model limitations
+- Privacy policy link
+- Terms of service link
 
-// In render:
-{isAdmin && <AdminAnalyticsPanel />}
+This is the ONLY place disclaimers exist. Remove from all other pages.
+
+---
+
+## 10. Navigation Overhaul
+
+### Current Header
+- Logo, Demo, Workspace, Methodology, Pricing, Language toggle, Home, Tracked, History, Account, Sign out
+
+### New Header
+For logged-in users:
+- Logo (links to /)
+- Decisions (link to /decisions)
+- Account (link to /account)
+- Sign out
+
+For logged-out users:
+- Logo
+- Sign in
+
+No other navigation. No footer.
+
+---
+
+## 11. Onboarding Redesign
+
+### Current Flow
+3-step wizard: Credentials -> Legal -> Dashboard
+
+### New Flow
+No onboarding wizard. The first analysis IS onboarding.
+
+When user first arrives:
+1. Show the decision page
+2. Pre-fill a common asset (e.g., AAPL, TSLA)
+3. Show example worst-case loss
+4. The "click" moment: "This outcome happens 1 out of 20 times. Most people never price that in."
+
+### The Psychological Moment
+After first analysis, show:
+```text
+"Think of a trade you were confident about - 
+one that later went against you."
+
+[pause]
+
+"This is what the risk looked like before you took it."
 ```
 
 ---
 
-## Data Privacy
+## 12. Security Considerations
 
-- User emails are **masked** in the table (e.g., `use***@outlook.com`)
-- Full email only visible when expanding user journey
-- All data stays within your backend - no external services
+### Retained from Current Implementation
+- Supabase Auth (email/password, OAuth)
+- Row Level Security on all tables
+- API rate limiting
+- Encrypted data at rest/in transit
+- Audit logs for all operations
+
+### Removed/Simplified
+- Complex user preferences (less data to protect)
+- Portfolio data (not storing multi-asset positions)
+- Tracked asset alerts (not sending notifications)
+
+### Added
+- Immutable decision logs (for user accountability)
+- Clear data retention policy in /legal
 
 ---
 
-## Visual Design
+## 13. SEO Changes
 
-- Uses existing glass-card styling from dashboard components
-- Dark theme compatible
-- Collapsible by default to not clutter the dashboard
-- Admin badge/icon to clearly mark the section
-- Consistent with OutputLens institutional design language
+### Current Titles
+- "OutputLens: Probabilistic Risk Intelligence | Monte Carlo Simulation"
+- "Analyse - Probabilistic Risk Analysis | OutputLens"
+- "AI-Powered Risk & Scenario Intelligence"
+
+### New Titles
+- "/" - "OutputLens - Know Your Downside Before You Trade"
+- "/decisions" - "Your Decision History | OutputLens"
+- "/account" - "Account | OutputLens"
+- "/legal" - "Legal & Disclaimers | OutputLens"
+
+### Meta Description
+"Before you trade, know the worst-case loss. OutputLens shows probability distributions, not predictions."
 
 ---
 
-## Testing Checklist
+## 14. Technical Implementation Approach
 
-After implementation:
-- [ ] Panel only visible when logged in as `uservatsal@outlook.com`
-- [ ] Other users (like `test@outputlens.com`) see normal dashboard without panel
-- [ ] Traffic sources chart displays real data
-- [ ] Recent signups table shows correct information
-- [ ] User journey modal opens and shows event timeline
-- [ ] Panel collapse/expand works smoothly
-- [ ] Date range filter (24h/7d/30d) updates metrics
+### Phase 1: Core Page Rebuild
+1. Create new minimal `/` page with decision-focused design
+2. Implement new color system in CSS variables
+3. Simplify TradeInputForm to 4 inputs only
+4. Create results component showing only worst-case loss
+5. Add stress toggle (single boolean)
+6. Implement 3-5 line plain English explanation
+
+### Phase 2: Navigation & Routing
+1. Update App.tsx routes to new 4-page structure
+2. Add redirects for deprecated pages
+3. Simplify Header to minimal navigation
+4. Remove Footer entirely
+
+### Phase 3: Feature Removal
+1. Delete Dashboard, Pricing, Methodology, About pages
+2. Remove all chart components from results
+3. Remove Portfolio mode
+4. Remove Tracked Assets functionality
+5. Remove Advanced Metrics
+
+### Phase 4: Design System
+1. Update tailwind.config.ts with new colors
+2. Update index.css with new base styles
+3. Remove all gradient backgrounds
+4. Implement calm, clinical aesthetic
+
+### Phase 5: Copy & Messaging
+1. Update all button text
+2. Update all labels and headings
+3. Remove all technical jargon
+4. Write new plain English risk explanations
+
+---
+
+## 15. PMF Kill Metrics (Non-Negotiable)
+
+After implementation, track these to validate PMF:
+
+| Metric | Kill Threshold | Target |
+|--------|----------------|--------|
+| Pre-trade usage | <15% run analysis 2+ times/month | >30% |
+| Stress toggle usage | <30% of analyses use stress mode | >40% |
+| Decision saves | <20% save decisions | >30% |
+| Paid user habit | <25% of paying users run 3+ analyses/month | >40% |
+
+### Language Test
+Listen for:
+- "This stopped me" - Good
+- "This scared me" - Good
+- "Cool charts" - Kill signal
+
+---
+
+## 16. Files to Modify
+
+### Core Pages (Create New)
+- `src/pages/Decision.tsx` - New single decision page (/)
+- `src/pages/Decisions.tsx` - New decision log page
+
+### Delete Entirely
+- `src/pages/Landing.tsx`
+- `src/pages/Dashboard.tsx`
+- `src/pages/Pricing.tsx`
+- `src/pages/Methodology.tsx`
+- `src/pages/About.tsx`
+- `src/pages/Portfolio.tsx`
+- `src/pages/TrackedAssets.tsx`
+- `src/pages/Demo.tsx`
+- `src/pages/Results.tsx` (merge into Decision page)
+- `src/pages/Workspace.tsx` (merge into Decision page)
+- `src/components/dashboard/*` (all)
+- `src/components/landing/*` (all)
+- `src/components/ReturnDistributionChart.tsx`
+- `src/components/ScenarioProbabilityChart.tsx`
+- `src/components/workspace/ScenarioRegimeCards.tsx`
+- `src/components/workspace/AdvancedMetrics.tsx`
+- `src/components/workspace/PnLSummary.tsx`
+- `src/components/workspace/TailRiskPanel.tsx`
+- `src/components/workspace/TrackAssetModal.tsx`
+- `src/components/PortfolioAnalyzer.tsx`
+
+### Simplify Heavily
+- `src/App.tsx` - New route structure
+- `src/components/layout/Header.tsx` - Minimal nav
+- `src/components/layout/Footer.tsx` - DELETE entirely
+- `src/components/TradeInputForm.tsx` - 4 inputs only
+- `src/index.css` - New color system
+- `tailwind.config.ts` - New design tokens
+
+### Keep (with modifications)
+- `src/pages/Auth.tsx`
+- `src/pages/Account.tsx` (simplify)
+- `src/pages/Terms.tsx` -> `/legal`
+- `src/pages/Privacy.tsx` -> merge into `/legal`
+- `src/pages/Onboarding.tsx` (simplify dramatically)
+
+---
+
+## Summary
+
+This redesign eliminates 80% of the current UI to focus on one thing: making people pause before committing capital.
+
+The product becomes a simple loop:
+1. User about to trade
+2. User enters trade details
+3. User sees scary number
+4. User pauses, resizes, or walks away
+
+That's PMF. Everything else is distraction.
