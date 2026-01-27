@@ -72,6 +72,11 @@ export function usePlan() {
 
   const createCheckoutSession = async (priceId: string) => {
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        throw new Error('You must sign up or log in to pay.');
+      }
+
       const { data, error: fnError } = await supabase.functions.invoke('create-checkout', {
         body: { priceId },
       });
