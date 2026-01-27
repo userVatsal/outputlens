@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Check, Sparkles, Loader2, Database, Globe2, Cpu, Brain } from 'lucide-react';
+import { Check, X, Sparkles, Loader2, Globe2, Cpu, Brain, Database, HelpCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Layout } from '@/components/layout/Layout';
 import { Badge } from '@/components/ui/badge';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { usePlan } from '@/hooks/usePlan';
 import { PLAN_CONFIG, SubscriptionPlan } from '@/lib/stripe';
 import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
 
 const plans: { key: SubscriptionPlan; badge?: string }[] = [
   { key: 'free' },
@@ -15,127 +17,176 @@ const plans: { key: SubscriptionPlan; badge?: string }[] = [
   { key: 'trader' },
 ];
 
-// YC-style three-layer architecture tier table
-const tierFeatures = [
-  { 
-    feature: 'Layer 1: Stochastic Models', 
-    free: 'Basic GBM', 
-    starter: 'GBM + GARCH', 
-    pro: 'Full Suite', 
-    trader: 'Full + API' 
+// Tier features organized by layer with visual styling
+const tierLayers = [
+  {
+    name: 'Layer 1: Stochastic Engine',
+    icon: Cpu,
+    color: 'bg-blue-500/10 border-blue-500/20',
+    features: [
+      { 
+        feature: 'Stochastic Models', 
+        tooltip: 'Mathematical simulation engines',
+        free: 'Basic GBM', 
+        starter: 'GBM + GARCH', 
+        pro: 'Full Suite', 
+        trader: 'Full + API' 
+      },
+      { 
+        feature: 'Monte Carlo Paths', 
+        tooltip: 'Number of simulation paths for accuracy',
+        free: '5,000', 
+        starter: '10,000', 
+        pro: '10,000', 
+        trader: '10,000' 
+      },
+      { 
+        feature: 'Regime Switching', 
+        tooltip: 'Bull/Bear/Stress market detection',
+        free: false, 
+        starter: true, 
+        pro: true, 
+        trader: true 
+      },
+      { 
+        feature: 'Jump Diffusion', 
+        tooltip: 'Model sudden price jumps',
+        free: false, 
+        starter: false, 
+        pro: true, 
+        trader: true 
+      },
+    ],
   },
-  { 
-    feature: 'Monte Carlo Paths', 
-    free: '5,000', 
-    starter: '10,000', 
-    pro: '10,000', 
-    trader: '10,000' 
+  {
+    name: 'Layer 2: Neural Intelligence',
+    icon: Database,
+    color: 'bg-green-500/10 border-green-500/20',
+    features: [
+      { 
+        feature: 'Neural Database', 
+        tooltip: 'Historical pattern similarity search',
+        free: 'Limited', 
+        starter: 'Full', 
+        pro: 'Full + Auto', 
+        trader: 'Full + Auto' 
+      },
+      { 
+        feature: 'Regime Detection (HMM)', 
+        tooltip: 'Hidden Markov Model for market states',
+        free: false, 
+        starter: true, 
+        pro: true, 
+        trader: true 
+      },
+    ],
   },
-  { 
-    feature: 'Regime Switching', 
-    free: '❌', 
-    starter: '✓', 
-    pro: '✓', 
-    trader: '✓' 
+  {
+    name: 'Layer 3: AI Interpretation',
+    icon: Brain,
+    color: 'bg-purple-500/10 border-purple-500/20',
+    features: [
+      { 
+        feature: 'AI Explanation', 
+        tooltip: 'LLM explains results (never predicts)',
+        free: 'Manual', 
+        starter: 'Auto', 
+        pro: 'Advanced', 
+        trader: 'Advanced' 
+      },
+      { 
+        feature: 'RAG Knowledge', 
+        tooltip: 'Retrieval-augmented risk context',
+        free: false, 
+        starter: true, 
+        pro: true, 
+        trader: true 
+      },
+    ],
   },
-  { 
-    feature: 'Jump Diffusion', 
-    free: '❌', 
-    starter: '❌', 
-    pro: '✓', 
-    trader: '✓' 
-  },
-  { 
-    feature: 'Layer 2: Neural Database', 
-    free: 'Limited', 
-    starter: 'Full', 
-    pro: 'Full + Auto', 
-    trader: 'Full + Auto' 
-  },
-  { 
-    feature: 'Regime Detection (HMM)', 
-    free: '❌', 
-    starter: '✓', 
-    pro: '✓', 
-    trader: '✓' 
-  },
-  { 
-    feature: 'Layer 3: AI Interpretation', 
-    free: 'Manual', 
-    starter: 'Auto', 
-    pro: 'Advanced', 
-    trader: 'Advanced' 
-  },
-  { 
-    feature: 'RAG Knowledge Access', 
-    free: '❌', 
-    starter: '✓', 
-    pro: '✓', 
-    trader: '✓' 
-  },
-  { 
-    feature: 'Markets', 
-    free: 'US Only', 
-    starter: 'Global', 
-    pro: 'Global', 
-    trader: 'Global' 
-  },
-  { 
-    feature: 'Portfolio Assets', 
-    free: '—', 
-    starter: '—', 
-    pro: '5', 
-    trader: '20' 
-  },
-  { 
-    feature: 'API Access', 
-    free: '—', 
-    starter: '—', 
-    pro: '—', 
-    trader: '100/mo' 
+  {
+    name: 'Access & Limits',
+    icon: Globe2,
+    color: 'bg-muted border-border',
+    features: [
+      { 
+        feature: 'Markets', 
+        tooltip: 'Geographic market coverage',
+        free: 'US Only', 
+        starter: 'Global', 
+        pro: 'Global', 
+        trader: 'Global' 
+      },
+      { 
+        feature: 'Portfolio Assets', 
+        tooltip: 'Max assets in portfolio analysis',
+        free: '—', 
+        starter: '—', 
+        pro: '5', 
+        trader: '20' 
+      },
+      { 
+        feature: 'API Access', 
+        tooltip: 'Programmatic API calls per month',
+        free: '—', 
+        starter: '—', 
+        pro: '—', 
+        trader: '100/mo' 
+      },
+    ],
   },
 ];
 
+// Streamlined FAQs (removed technical IP details)
 const faqs = [
   {
-    question: 'What is the three-layer intelligence architecture?',
-    answer: 'Layer 1 (Deterministic Math): GBM simulation, VaR/CVaR calculations—pure math that works without AI. Layer 2 (Statistical/ML): HMM regime detection, neural database for similarity search. Layer 3 (AI Interpretation): LLMs explain outputs—they NEVER predict prices or generate numbers.',
+    question: 'What do I get with the Free tier?',
+    answer: 'Free gives you 5 risk analyses per month on US stocks only, using basic Monte Carlo simulation with 5,000 paths. Perfect for learning probabilistic risk concepts.',
   },
   {
-    question: 'What stochastic models do you use?',
-    answer: 'We use Geometric Brownian Motion (GBM) as the primary engine, with GARCH-like stochastic volatility extensions, fat-tailed distribution modeling, and regime switching detection for Bull/Base/Bear/Stress market states.',
+    question: 'Why upgrade to Starter or Pro?',
+    answer: 'Paid plans unlock global markets (UK, EU, Crypto, Forex), 10,000 Monte Carlo paths for higher accuracy, regime detection for market state awareness, and AI-powered explanations of your risk profile.',
   },
   {
-    question: 'How does the neural database work?',
-    answer: 'The neural database stores embeddings of historical price paths, volatility regimes, and tail events. It retrieves historically similar patterns to contextualize your risk analysis. Critically, it does NOT predict markets—it provides historical context.',
-  },
-  {
-    question: 'Why don\'t you predict prices?',
-    answer: 'Prediction tools give single price targets. We show the entire probability distribution of possible outcomes. Markets are inherently unpredictable—our LLMs explain distributions and summarize risk, but never predict prices or give trading signals.',
-  },
-  {
-    question: 'How does regime detection work?',
-    answer: 'We use Hidden Markov Models (HMM) to detect latent market regimes: bull, neutral, bear, and stress. Layer 1 simulation parameters adapt based on detected regime, creating more realistic scenario distributions.',
-  },
-  {
-    question: "What's the difference between basic GBM and full stochastic suite?",
-    answer: "Basic GBM (Free): Standard Geometric Brownian Motion. Full Suite (Pro+): GBM + GARCH volatility clustering + regime switching + jump diffusion for more realistic tail risk modeling.",
+    question: 'Is this a trading signal service?',
+    answer: 'No. OutputLens shows probability distributions, not price predictions. We quantify uncertainty—we never tell you what to buy or sell. This is risk infrastructure, not trading advice.',
   },
   {
     question: 'Can I upgrade or downgrade anytime?',
-    answer: "Yes. All subscriptions can be changed at any time from your Account page. Changes take effect immediately with prorated billing.",
-  },
-  {
-    question: 'What makes this different from AI trading tools?',
-    answer: 'We are NOT a trading tool. We are risk infrastructure. Layer 1 computes probabilities. Layer 2 detects regimes. Layer 3 explains—never signals. Others show targets → we show distributions. Others predict → we quantify downside.',
+    answer: 'Yes. All subscriptions can be changed at any time from your Account page. Changes take effect immediately with prorated billing.',
   },
 ];
+
+// Render cell value with proper styling
+const renderCellValue = (value: string | boolean, isPro: boolean = false) => {
+  if (typeof value === 'boolean') {
+    return value ? (
+      <div className={cn(
+        'w-6 h-6 rounded-full flex items-center justify-center mx-auto',
+        isPro ? 'bg-primary/20' : 'bg-bullish/20'
+      )}>
+        <Check className={cn('h-4 w-4', isPro ? 'text-primary' : 'text-bullish')} />
+      </div>
+    ) : (
+      <div className="w-6 h-6 rounded-full bg-muted/50 flex items-center justify-center mx-auto">
+        <X className="h-4 w-4 text-muted-foreground/50" />
+      </div>
+    );
+  }
+  return (
+    <span className={cn(
+      'text-sm',
+      isPro ? 'text-primary font-medium' : 'text-muted-foreground'
+    )}>
+      {value}
+    </span>
+  );
+};
 
 export default function Pricing() {
   const { plan: currentPlan, createCheckoutSession, isLoading: planLoading } = usePlan();
   const [loadingPlan, setLoadingPlan] = useState<SubscriptionPlan | null>(null);
 
-  // SEO: Set page-specific document title
   useEffect(() => {
     document.title = 'Pricing - Free to Trader Plans | OutputLens';
   }, []);
@@ -171,23 +222,23 @@ export default function Pricing() {
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-foreground mb-4 font-brand">
-            Probabilistic Risk Intelligence
+            Risk Intelligence Plans
           </h1>
           <p className="text-lg text-muted-foreground max-w-xl mx-auto mb-4">
-            Free: US markets, 5 analyses/mo. Paid: Global markets + neural insights.
+            Free: US markets, 5 analyses/mo. Paid: Global markets + advanced features.
           </p>
-          <div className="flex items-center justify-center gap-3 flex-wrap text-sm text-muted-foreground">
+          <div className="flex items-center justify-center gap-4 flex-wrap text-sm text-muted-foreground">
             <span className="flex items-center gap-1">
               <Cpu className="h-4 w-4" />
-              GBM Engine
+              Monte Carlo Engine
             </span>
             <span className="flex items-center gap-1">
               <Database className="h-4 w-4" />
-              Neural Database
+              Pattern Database
             </span>
             <span className="flex items-center gap-1">
               <Brain className="h-4 w-4" />
-              AI Explanation (Never Predicts)
+              AI Insights
             </span>
           </div>
         </div>
@@ -203,9 +254,11 @@ export default function Pricing() {
             return (
               <div
                 key={key}
-                className={`glass-card p-6 relative flex flex-col ${
-                  isHighlighted ? 'border-2 border-primary ring-2 ring-primary/20' : ''
-                } ${isCurrentPlan ? 'bg-primary/5' : ''}`}
+                className={cn(
+                  'glass-card p-6 relative flex flex-col transition-all',
+                  isHighlighted && 'border-2 border-primary ring-2 ring-primary/20',
+                  isCurrentPlan && 'bg-bullish/5 border-bullish/30'
+                )}
               >
                 {badge && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2">
@@ -219,7 +272,7 @@ export default function Pricing() {
                 {isCurrentPlan && (
                   <div className="absolute -top-3 right-4">
                     <span className="inline-flex items-center gap-1 bg-bullish text-bullish-foreground text-xs font-medium px-2 py-1 rounded-full">
-                      Your Plan
+                      ✓ Your Plan
                     </span>
                   </div>
                 )}
@@ -237,13 +290,12 @@ export default function Pricing() {
                   <p className="text-sm text-muted-foreground mt-1">
                     {config.analysesLimit} analyses/month
                   </p>
-                  {key === 'free' && (
+                  {key === 'free' ? (
                     <Badge variant="outline" className="mt-2 text-xs">
                       <Globe2 className="h-3 w-3 mr-1" />
                       US Markets Only
                     </Badge>
-                  )}
-                  {key !== 'free' && (
+                  ) : (
                     <Badge variant="outline" className="mt-2 text-xs bg-primary/10 text-primary border-primary/20">
                       <Globe2 className="h-3 w-3 mr-1" />
                       Global Markets
@@ -293,35 +345,73 @@ export default function Pricing() {
           })}
         </div>
 
-        {/* Tier Comparison Table */}
-        <div className="max-w-4xl mx-auto mb-16">
+        {/* Enhanced Tier Comparison Table */}
+        <div className="max-w-5xl mx-auto mb-16">
           <h2 className="text-2xl font-bold text-foreground text-center mb-8 font-brand">
-            Tier Comparison
+            Feature Comparison
           </h2>
+          
           <div className="glass-card overflow-hidden">
-            <div className="grid grid-cols-5 p-4 bg-muted/50 border-b border-border font-semibold text-sm">
+            {/* Header */}
+            <div className="grid grid-cols-5 p-4 bg-muted/50 border-b border-border font-semibold text-sm sticky top-0">
               <span>Feature</span>
               <span className="text-center">Free</span>
               <span className="text-center">Starter</span>
               <span className="text-center text-primary">Pro</span>
               <span className="text-center">Trader</span>
             </div>
-            {tierFeatures.map((row) => (
-              <div key={row.feature} className="grid grid-cols-5 p-4 border-b border-border/50 text-sm">
-                <span className="text-foreground font-medium">{row.feature}</span>
-                <span className="text-center text-muted-foreground">{row.free}</span>
-                <span className="text-center text-muted-foreground">{row.starter}</span>
-                <span className="text-center text-primary">{row.pro}</span>
-                <span className="text-center text-muted-foreground">{row.trader}</span>
+            
+            {/* Layer Groups */}
+            {tierLayers.map((layer) => (
+              <div key={layer.name}>
+                {/* Layer Header */}
+                <div className={cn(
+                  'grid grid-cols-5 px-4 py-3 border-b border-border',
+                  layer.color
+                )}>
+                  <div className="col-span-5 flex items-center gap-2">
+                    <layer.icon className="h-4 w-4 text-foreground" />
+                    <span className="font-semibold text-sm text-foreground">{layer.name}</span>
+                  </div>
+                </div>
+                
+                {/* Layer Features */}
+                {layer.features.map((row, idx) => (
+                  <div 
+                    key={row.feature} 
+                    className={cn(
+                      'grid grid-cols-5 px-4 py-3 border-b border-border/50 text-sm items-center',
+                      idx % 2 === 0 && 'bg-muted/20'
+                    )}
+                  >
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-foreground">{row.feature}</span>
+                      {row.tooltip && (
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <HelpCircle className="h-3.5 w-3.5 text-muted-foreground" />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p className="max-w-xs">{row.tooltip}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      )}
+                    </div>
+                    <div className="text-center">{renderCellValue(row.free)}</div>
+                    <div className="text-center">{renderCellValue(row.starter)}</div>
+                    <div className="text-center">{renderCellValue(row.pro, true)}</div>
+                    <div className="text-center">{renderCellValue(row.trader)}</div>
+                  </div>
+                ))}
               </div>
             ))}
           </div>
         </div>
 
-        {/* FAQ Section */}
+        {/* Streamlined FAQ Section */}
         <div className="max-w-3xl mx-auto">
           <h2 className="text-2xl font-bold text-foreground text-center mb-8 font-brand">
-            Frequently Asked Questions
+            Common Questions
           </h2>
           <div className="grid gap-4 sm:grid-cols-2">
             {faqs.map((faq) => (
@@ -336,9 +426,7 @@ export default function Pricing() {
         {/* Disclaimer */}
         <div className="mt-16 text-center">
           <p className="text-xs text-muted-foreground max-w-xl mx-auto">
-            OutputLens provides probabilistic risk analysis using stochastic models—not predictions. 
-            The neural database retrieves historical patterns—it does NOT predict markets.
-            LLMs explain math—they never predict prices or give trading signals. Not financial advice.
+            OutputLens shows probability distributions, not predictions. Not financial advice.
           </p>
         </div>
       </div>
