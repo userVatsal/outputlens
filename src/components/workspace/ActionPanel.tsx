@@ -14,6 +14,17 @@ interface ActionPanelProps {
   isHistorical?: boolean;
 }
 
+// HTML escape function to prevent XSS attacks
+function escapeHtml(unsafe: string): string {
+  if (!unsafe) return '';
+  return unsafe
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
 // Generate professional PDF content for printing
 function generatePDFContent(analysis: EnhancedTradeAnalysis): string {
   const { input, riskMetrics, scenarios, simulation, marketData } = analysis;
@@ -29,7 +40,7 @@ function generatePDFContent(analysis: EnhancedTradeAnalysis): string {
   
   const scenarioRows = allScenarios.map(s => `
     <tr>
-      <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;">${s.name}</td>
+      <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;">${escapeHtml(s.name)}</td>
       <td style="padding: 8px; border-bottom: 1px solid #e5e7eb; text-align: right;">${(s.probability * 100).toFixed(1)}%</td>
       <td style="padding: 8px; border-bottom: 1px solid #e5e7eb; text-align: right; color: ${s.returnRangeMax >= 0 ? '#10b981' : '#ef4444'};">
         ${s.returnRangeMin.toFixed(1)}% to ${s.returnRangeMax >= 0 ? '+' : ''}${s.returnRangeMax.toFixed(1)}%
@@ -72,11 +83,11 @@ function generatePDFContent(analysis: EnhancedTradeAnalysis): string {
         <div class="grid">
           <div class="metric">
             <div class="metric-label">Asset</div>
-            <div class="metric-value">${input.asset}</div>
+            <div class="metric-value">${escapeHtml(input.asset)}</div>
           </div>
           <div class="metric">
             <div class="metric-label">Direction</div>
-            <div class="metric-value">${input.direction.toUpperCase()}</div>
+            <div class="metric-value">${escapeHtml(input.direction.toUpperCase())}</div>
           </div>
           <div class="metric">
             <div class="metric-label">Entry Price</div>
@@ -84,7 +95,7 @@ function generatePDFContent(analysis: EnhancedTradeAnalysis): string {
           </div>
           <div class="metric">
             <div class="metric-label">Time Horizon</div>
-            <div class="metric-value">${input.timeHorizon}</div>
+            <div class="metric-value">${escapeHtml(input.timeHorizon)}</div>
           </div>
         </div>
       </div>
@@ -97,7 +108,7 @@ function generatePDFContent(analysis: EnhancedTradeAnalysis): string {
             <div class="metric-value">
               ${riskMetrics.riskScore}/10
               <span class="risk-badge ${riskMetrics.riskScore <= 3 ? 'risk-low' : riskMetrics.riskScore <= 6 ? 'risk-medium' : 'risk-high'}" style="margin-left: 8px;">
-                ${riskMetrics.riskLabel}
+                ${escapeHtml(riskMetrics.riskLabel)}
               </span>
             </div>
           </div>
@@ -167,7 +178,7 @@ function generatePDFContent(analysis: EnhancedTradeAnalysis): string {
       ${input.assumptions ? `
       <div class="section">
         <div class="section-title">Trade Thesis</div>
-        <p style="color: #4b5563; font-style: italic;">"${input.assumptions}"</p>
+        <p style="color: #4b5563; font-style: italic;">"${escapeHtml(input.assumptions)}"</p>
       </div>
       ` : ''}
 
@@ -226,7 +237,7 @@ export function ActionPanel({ analysis, onNewAnalysis, isHistorical }: ActionPan
         <!DOCTYPE html>
         <html>
           <head>
-            <title>Risk Analysis - ${analysis.input.asset} | OutputLens</title>
+            <title>Risk Analysis - ${escapeHtml(analysis.input.asset)} | OutputLens</title>
           </head>
           <body>
             ${content}
