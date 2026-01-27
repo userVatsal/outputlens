@@ -1,4 +1,4 @@
-import { AlertTriangle, Target, Zap } from 'lucide-react';
+import { AlertTriangle, Target, Zap, Database } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 
@@ -19,14 +19,14 @@ const cards = [
     icon: Target,
     iconBg: 'bg-primary/10',
     iconColor: 'text-primary',
-    content: 'OutputLens quantifies your downside before you trade. See 10,000 possible outcomes, measure tail risk, and understand scenario regimes.',
+    content: 'OutputLens quantifies uncertainty before you trade. Probabilities, not predictions. See 10,000 possible outcomes, measure tail risk, understand scenario regimes.',
   },
   {
     step: 'How We Do It',
     icon: Zap,
     iconBg: 'bg-bullish/10',
     iconColor: 'text-bullish',
-    content: 'Monte Carlo simulation + live market volatility + AI interpretation. Institutional methodology, delivered in 2 seconds.',
+    content: 'Monte Carlo simulation + GBM + GARCH-like volatility + Neural database + LLM interpretation. Stochastic processes + Physics-inspired models + AI explanation layer. Institutional methodology, delivered in 2 seconds.',
   },
 ];
 
@@ -58,6 +58,14 @@ export function ProblemSolutionSection({ className }: ProblemSolutionSectionProp
               </CardContent>
             </Card>
           ))}
+        </div>
+        
+        {/* Neural DB grounding statement */}
+        <div className="mt-8 text-center">
+          <p className="text-xs text-muted-foreground max-w-2xl mx-auto">
+            <Database className="h-3 w-3 inline mr-1" />
+            The neural database does not predict markets. It retrieves historically similar volatility and regime patterns to contextualize risk.
+          </p>
         </div>
       </div>
     </section>

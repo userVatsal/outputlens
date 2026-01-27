@@ -30,36 +30,36 @@ const FEATURE_CONFIG: Record<GatableFeature, {
   icon: React.ElementType;
 }> = {
   sentiment: {
-    title: 'Market Sentiment Analysis',
-    description: 'AI-analyzed sentiment from 100+ news & social media sources.',
+    title: 'Neural Database Insights',
+    description: 'Full neural database + auto AI explanations. Retrieves historical patterns—never predicts.',
     minPlan: 'Starter',
     price: 12,
     icon: TrendingUp,
   },
   portfolio: {
     title: 'Portfolio Analysis',
-    description: 'Analyze your entire portfolio with correlations & risk metrics.',
+    description: 'Analyze correlated assets with stochastic modeling and regime detection.',
     minPlan: 'Pro',
     price: 29,
     icon: PieChart,
   },
   api: {
     title: 'API Access',
-    description: 'Integrate OutputLens with your trading tools via REST API.',
+    description: 'Integrate OutputLens with your trading systems via REST API.',
     minPlan: 'Trader',
     price: 79,
     icon: Code,
   },
   exports: {
     title: 'Export Reports',
-    description: 'Download your analysis as PDF or CSV for offline review.',
+    description: 'Download probabilistic analysis as PDF or CSV for offline review.',
     minPlan: 'Pro',
     price: 29,
     icon: FileDown,
   },
   alerts: {
-    title: 'Price & Risk Alerts',
-    description: 'Get notified when assets hit target prices or risk thresholds.',
+    title: 'Risk Alerts',
+    description: 'Get notified when assets breach VaR thresholds or regime shifts.',
     minPlan: 'Trader',
     price: 79,
     icon: Bell,

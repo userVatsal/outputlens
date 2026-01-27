@@ -6,7 +6,9 @@ import {
   TrendingUp, 
   Shield, 
   Sparkles,
-  Play
+  Play,
+  Database,
+  Globe2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -49,13 +51,25 @@ export function InteractivePreview({ className }: InteractivePreviewProps) {
             <BarChart3 className="h-5 w-5 text-primary" />
           </div>
           <div>
-            <p className="font-semibold text-foreground">Try It Live</p>
-            <p className="text-sm text-muted-foreground">Select an asset to preview</p>
+            <p className="font-semibold text-foreground">Probabilistic Preview</p>
+            <p className="text-sm text-muted-foreground">10,000 Monte Carlo paths (full analysis)</p>
           </div>
         </div>
         <Badge className="bg-bullish/10 text-bullish border-bullish/20">
           <Sparkles className="h-3 w-3 mr-1" />
           Interactive Demo
+        </Badge>
+      </div>
+
+      {/* Tier Indicator */}
+      <div className="flex items-center gap-2 mb-4 text-xs">
+        <Badge variant="outline" className="bg-muted/50">
+          <Globe2 className="h-3 w-3 mr-1" />
+          Free: US Only
+        </Badge>
+        <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">
+          <Globe2 className="h-3 w-3 mr-1" />
+          Paid: Global Markets
         </Badge>
       </div>
 
@@ -124,13 +138,19 @@ export function InteractivePreview({ className }: InteractivePreviewProps) {
             <Badge variant="outline" className="text-bearish">26% probability</Badge>
           </div>
         </div>
+        
+        {/* Grounding statement */}
+        <div className="flex items-center gap-2 mb-4 p-2 rounded bg-muted/50 text-xs text-muted-foreground">
+          <Database className="h-3 w-3" />
+          <span>Probabilities, not predictions. GBM simulation with regime switching.</span>
+        </div>
       </div>
 
       {/* CTA Buttons */}
       <div className="flex flex-col sm:flex-row gap-3">
         <Button asChild className="flex-1">
           <Link to="/auth?mode=signup">
-            Run Risk Analysis – Free
+            Quantify Your Risk – Free
             <ArrowRight className="ml-2 h-4 w-4" />
           </Link>
         </Button>

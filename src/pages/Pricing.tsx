@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Check, Sparkles, Loader2 } from 'lucide-react';
+import { Check, Sparkles, Loader2, Database, Globe2, Cpu, Brain } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Layout } from '@/components/layout/Layout';
+import { Badge } from '@/components/ui/badge';
 import { usePlan } from '@/hooks/usePlan';
 import { PLAN_CONFIG, SubscriptionPlan } from '@/lib/stripe';
 import { toast } from 'sonner';
@@ -14,38 +15,84 @@ const plans: { key: SubscriptionPlan; badge?: string }[] = [
   { key: 'trader' },
 ];
 
+// YC-style tier differentiation table
+const tierFeatures = [
+  { 
+    feature: 'Markets', 
+    free: 'US Only', 
+    starter: 'Global', 
+    pro: 'Global', 
+    trader: 'Global' 
+  },
+  { 
+    feature: 'Monte Carlo Paths', 
+    free: '5,000', 
+    starter: '10,000', 
+    pro: '10,000', 
+    trader: '10,000' 
+  },
+  { 
+    feature: 'Neural Database', 
+    free: 'Limited', 
+    starter: 'Full', 
+    pro: 'Full + Auto', 
+    trader: 'Full + Auto' 
+  },
+  { 
+    feature: 'AI Interpretation', 
+    free: 'Manual', 
+    starter: 'Auto', 
+    pro: 'Auto + Advanced', 
+    trader: 'Auto + Advanced' 
+  },
+  { 
+    feature: 'Stochastic Models', 
+    free: 'Basic GBM', 
+    starter: 'Full GBM + GARCH', 
+    pro: 'Full Suite', 
+    trader: 'Full Suite + API' 
+  },
+  { 
+    feature: 'Portfolio Assets', 
+    free: '—', 
+    starter: '—', 
+    pro: '5', 
+    trader: '20' 
+  },
+];
+
 const faqs = [
   {
-    question: 'How many Monte Carlo simulations do I get?',
-    answer: 'Free tier runs 5,000 Monte Carlo paths per analysis. Paid tiers (Starter, Pro, Trader) run the full 10,000 paths for more accurate probability distributions and better tail risk analysis.',
+    question: 'What stochastic models do you use?',
+    answer: 'We use Geometric Brownian Motion (GBM) as the primary engine, with GARCH-like stochastic volatility extensions, fat-tailed distribution modeling, and regime switching detection for Bull/Base/Bear market states.',
   },
   {
-    question: 'Is this financial advice?',
-    answer: 'No. OutputLens is a risk analysis platform that shows the probability distribution of possible outcomes using Monte Carlo simulation. It does not provide financial advice, trading signals, or predictions.',
+    question: 'How does the neural database work?',
+    answer: 'The neural database stores embeddings of historical price paths, volatility regimes, and tail events. It retrieves historically similar patterns to contextualize your risk analysis. Critically, it does NOT predict markets—it provides historical context.',
+  },
+  {
+    question: 'Why don\'t you predict prices?',
+    answer: 'Prediction tools give single price targets. We show the entire probability distribution of possible outcomes. Markets are inherently unpredictable—our LLMs explain distributions and summarize risk, but never predict prices or give trading signals.',
+  },
+  {
+    question: 'How many Monte Carlo simulations do I get?',
+    answer: 'Free tier runs 5,000 Monte Carlo paths per analysis (US markets only). Paid tiers run the full 10,000 paths with access to global markets for more accurate probability distributions.',
   },
   {
     question: "What's the difference between VaR and Expected Shortfall?",
-    answer: "VaR (Value at Risk) tells you the maximum expected loss at a given confidence level (e.g., 95%). Expected Shortfall goes further—it shows the average loss when things are worse than VaR.",
+    answer: "VaR (Value at Risk) tells you the maximum expected loss at a given confidence level (e.g., 95%). Expected Shortfall goes further—it shows the average loss when things are worse than VaR, capturing tail risk more comprehensively.",
   },
   {
     question: 'Can I upgrade or downgrade anytime?',
     answer: "Yes. All subscriptions can be changed at any time from your Account page. Changes take effect immediately with prorated billing.",
   },
   {
-    question: 'What markets are supported?',
-    answer: 'We support US (NYSE/NASDAQ), UK (LSE), and European (Euronext/DAX) markets, plus crypto and forex pairs with live data.',
-  },
-  {
-    question: 'What data is live vs delayed?',
-    answer: 'Free tier receives 15-minute delayed data. All paid tiers (Starter, Pro, Trader) receive real-time market data.',
-  },
-  {
-    question: 'How is my data used?',
-    answer: "We store your analysis history to show you past trades. We don't sell your data. See our Privacy Policy for full details.",
+    question: 'What makes this different from AI trading tools?',
+    answer: 'Others show targets → we show distributions. Others predict → we quantify downside. Others hide math → we explain it. LLMs explain risk, they never signal trades.',
   },
   {
     question: 'What portfolio features are included?',
-    answer: 'Pro includes portfolio analysis for up to 5 assets. Trader includes up to 20 assets with correlation risk insights.',
+    answer: 'Pro includes portfolio analysis for up to 5 assets with correlation risk. Trader includes up to 20 assets with full stochastic modeling and API access.',
   },
 ];
 
@@ -55,7 +102,7 @@ export default function Pricing() {
 
   // SEO: Set page-specific document title
   useEffect(() => {
-    document.title = 'Pricing Plans - AI Risk & Scenario Intelligence | OutputLens';
+    document.title = 'Pricing - Free to Trader Plans | OutputLens';
   }, []);
 
   const handleSubscribe = async (planKey: SubscriptionPlan) => {
@@ -87,20 +134,31 @@ export default function Pricing() {
     <Layout>
       <div className="section-container py-12">
         {/* Header */}
-        <div className="text-center mb-16">
-          <h1 className="text-4xl font-bold text-foreground mb-4">
-            Simple, Transparent Pricing
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-bold text-foreground mb-4 font-brand">
+            Probabilistic Risk Intelligence
           </h1>
           <p className="text-lg text-muted-foreground max-w-xl mx-auto mb-4">
-            Start free with 5 analyses/month. Upgrade for more analyses, live data, and advanced features.
+            Free: US markets, 5 analyses/mo. Paid: Global markets + neural insights.
           </p>
-          <p className="text-sm text-muted-foreground">
-            No hidden fees • Cancel anytime • Upgrade or downgrade instantly
-          </p>
+          <div className="flex items-center justify-center gap-3 flex-wrap text-sm text-muted-foreground">
+            <span className="flex items-center gap-1">
+              <Cpu className="h-4 w-4" />
+              GBM Engine
+            </span>
+            <span className="flex items-center gap-1">
+              <Database className="h-4 w-4" />
+              Neural Database
+            </span>
+            <span className="flex items-center gap-1">
+              <Brain className="h-4 w-4" />
+              AI Explanation (Never Predicts)
+            </span>
+          </div>
         </div>
 
         {/* Pricing Cards */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto mb-20">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto mb-16">
           {plans.map(({ key, badge }) => {
             const config = PLAN_CONFIG[key];
             const isCurrentPlan = key === currentPlan;
@@ -144,6 +202,18 @@ export default function Pricing() {
                   <p className="text-sm text-muted-foreground mt-1">
                     {config.analysesLimit} analyses/month
                   </p>
+                  {key === 'free' && (
+                    <Badge variant="outline" className="mt-2 text-xs">
+                      <Globe2 className="h-3 w-3 mr-1" />
+                      US Markets Only
+                    </Badge>
+                  )}
+                  {key !== 'free' && (
+                    <Badge variant="outline" className="mt-2 text-xs bg-primary/10 text-primary border-primary/20">
+                      <Globe2 className="h-3 w-3 mr-1" />
+                      Global Markets
+                    </Badge>
+                  )}
                 </div>
 
                 <ul className="space-y-3 mb-6 flex-1">
@@ -188,9 +258,34 @@ export default function Pricing() {
           })}
         </div>
 
+        {/* Tier Comparison Table */}
+        <div className="max-w-4xl mx-auto mb-16">
+          <h2 className="text-2xl font-bold text-foreground text-center mb-8 font-brand">
+            Tier Comparison
+          </h2>
+          <div className="glass-card overflow-hidden">
+            <div className="grid grid-cols-5 p-4 bg-muted/50 border-b border-border font-semibold text-sm">
+              <span>Feature</span>
+              <span className="text-center">Free</span>
+              <span className="text-center">Starter</span>
+              <span className="text-center text-primary">Pro</span>
+              <span className="text-center">Trader</span>
+            </div>
+            {tierFeatures.map((row) => (
+              <div key={row.feature} className="grid grid-cols-5 p-4 border-b border-border/50 text-sm">
+                <span className="text-foreground font-medium">{row.feature}</span>
+                <span className="text-center text-muted-foreground">{row.free}</span>
+                <span className="text-center text-muted-foreground">{row.starter}</span>
+                <span className="text-center text-primary">{row.pro}</span>
+                <span className="text-center text-muted-foreground">{row.trader}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* FAQ Section */}
         <div className="max-w-3xl mx-auto">
-          <h2 className="text-2xl font-bold text-foreground text-center mb-8">
+          <h2 className="text-2xl font-bold text-foreground text-center mb-8 font-brand">
             Frequently Asked Questions
           </h2>
           <div className="grid gap-4 sm:grid-cols-2">
@@ -206,8 +301,9 @@ export default function Pricing() {
         {/* Disclaimer */}
         <div className="mt-16 text-center">
           <p className="text-xs text-muted-foreground max-w-xl mx-auto">
-            OutputLens provides risk analysis and scenario modeling for informational purposes only. 
-            It does not provide financial advice or trading signals. Past scenarios do not guarantee future results.
+            OutputLens provides probabilistic risk analysis using stochastic models—not predictions. 
+            The neural database retrieves historical patterns—it does NOT predict markets.
+            LLMs explain math—they never predict prices or give trading signals. Not financial advice.
           </p>
         </div>
       </div>

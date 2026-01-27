@@ -51,7 +51,7 @@ export default function Demo() {
 
   // SEO: Set page-specific document title
   useEffect(() => {
-    document.title = 'Live Demo - AI Trade Scenario Analysis | OutputLens';
+    document.title = 'Live Demo - 10,000 Monte Carlo Simulations | OutputLens';
   }, []);
   
   // Show soft signup prompt after viewing results for a bit
@@ -360,8 +360,8 @@ export default function Demo() {
               <div className="space-y-2">
                 <p className="text-foreground font-medium">
                   {loadingPhase === 'fetching' && 'Fetching live market data...'}
-                  {loadingPhase === 'simulating' && 'Running Monte Carlo simulation...'}
-                  {loadingPhase === 'generating' && 'Generating AI insights...'}
+                  {loadingPhase === 'simulating' && 'Running GBM stochastic simulation...'}
+                  {loadingPhase === 'generating' && 'Querying neural database for regime similarity...'}
                 </p>
                 <p className="text-sm text-muted-foreground font-mono">
                   {loadingPhase === 'simulating' 
