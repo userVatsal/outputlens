@@ -1,5 +1,5 @@
 // Stripe product and price configuration for OutputLens tiers
-// Higher pricing tier for future AI cost buffer: $12 / $29 / $79
+// YC-style tier differentiation: Free (US only) vs Paid (Global)
 
 export type SubscriptionPlan = 'free' | 'starter' | 'pro' | 'trader';
 
@@ -12,6 +12,10 @@ export interface PlanConfig {
   portfolioAssetsLimit: number;
   apiCallsLimit: number;
   historyDays: number;
+  monteCarloPathsLimit: number;
+  globalMarkets: boolean;
+  neuralDatabase: 'limited' | 'full' | 'auto';
+  stochasticModels: 'basic' | 'full' | 'api';
   features: string[];
   highlighted?: boolean;
 }
@@ -26,12 +30,18 @@ export const PLAN_CONFIG: Record<SubscriptionPlan, PlanConfig> = {
     portfolioAssetsLimit: 0,
     apiCallsLimit: 0,
     historyDays: 7,
+    monteCarloPathsLimit: 5000,
+    globalMarkets: false,
+    neuralDatabase: 'limited',
+    stochasticModels: 'basic',
     features: [
       '5 analyses per month',
+      'US markets only',
       '5,000 Monte Carlo paths',
-      'Delayed market data (15min)',
-      '7-day history retention',
+      'Basic GBM stochastic model',
+      'Limited neural database',
       'Manual AI explanation trigger',
+      '7-day history retention',
     ],
   },
   starter: {
@@ -43,13 +53,18 @@ export const PLAN_CONFIG: Record<SubscriptionPlan, PlanConfig> = {
     portfolioAssetsLimit: 0,
     apiCallsLimit: 0,
     historyDays: 30,
+    monteCarloPathsLimit: 10000,
+    globalMarkets: true,
+    neuralDatabase: 'full',
+    stochasticModels: 'full',
     features: [
       '30 analyses per month',
+      'Global markets (UK, EU, Crypto, Forex)',
       '10,000 Monte Carlo paths',
-      'Live market data',
-      '30-day history retention',
+      'Full GBM + GARCH-like dynamics',
+      'Full neural database',
       'Auto AI explanations',
-      'Basic sentiment score',
+      '30-day history retention',
     ],
   },
   pro: {
@@ -61,15 +76,19 @@ export const PLAN_CONFIG: Record<SubscriptionPlan, PlanConfig> = {
     portfolioAssetsLimit: 5,
     apiCallsLimit: 0,
     historyDays: Infinity,
+    monteCarloPathsLimit: 10000,
+    globalMarkets: true,
+    neuralDatabase: 'auto',
+    stochasticModels: 'full',
     features: [
       '100 analyses per month',
+      'Global markets',
       '10,000 Monte Carlo paths',
-      'Priority live data',
-      'Unlimited history',
+      'Full stochastic suite',
+      'Neural database + auto insights',
       'Portfolio analysis (5 assets)',
-      'Full sentiment breakdown',
       'CSV/PDF exports',
-      'Email priority support',
+      'Unlimited history',
     ],
     highlighted: true,
   },
@@ -82,15 +101,19 @@ export const PLAN_CONFIG: Record<SubscriptionPlan, PlanConfig> = {
     portfolioAssetsLimit: 20,
     apiCallsLimit: 100,
     historyDays: Infinity,
+    monteCarloPathsLimit: 10000,
+    globalMarkets: true,
+    neuralDatabase: 'auto',
+    stochasticModels: 'api',
     features: [
       '500 analyses per month',
+      'Global markets + priority data',
       '10,000 Monte Carlo paths',
-      'Priority live data',
-      'Unlimited history',
+      'Full stochastic suite + API',
+      'Neural database + auto insights',
       'Portfolio analysis (20 assets)',
-      'Full sentiment + alerts',
-      'CSV/PDF exports + API (100/mo)',
-      'Priority email + chat support',
+      'CSV/PDF exports + REST API (100/mo)',
+      'Priority support',
     ],
   },
 };

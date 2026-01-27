@@ -43,7 +43,7 @@ export default function Workspace() {
 
   // SEO: Set page-specific document title
   useEffect(() => {
-    document.title = 'Risk Workspace - AI-Powered Scenario Analysis | OutputLens';
+    document.title = 'Risk Workspace - Probabilistic Analysis | OutputLens';
   }, []);
 
   useEffect(() => {
@@ -111,7 +111,7 @@ export default function Workspace() {
             <div>
               <h1 className="text-2xl font-bold text-foreground">Risk Workspace</h1>
               <p className="text-muted-foreground">
-                AI-powered scenario analysis with Monte Carlo simulation
+                Probabilistic analysis with stochastic simulation + neural database
               </p>
             </div>
             <div className="flex items-center gap-3">
@@ -184,8 +184,8 @@ export default function Workspace() {
 
               {/* Disclaimer with tier info */}
               <p className="text-center text-xs text-muted-foreground mt-6 max-w-sm mx-auto">
-                Free: 5,000 Monte Carlo paths | Paid: 10,000 paths. 
-                Probabilities derived from historical volatility. Not financial advice.
+                Free: US only, 5,000 paths | Paid: Global, 10,000 paths. 
+                Probabilities from GBM simulation. Neural DB retrieves, never predicts. Not financial advice.
               </p>
             </div>
 
@@ -194,9 +194,9 @@ export default function Workspace() {
               {tradeLoading && (
                 <div className="glass-card p-12 text-center">
                   <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto mb-4" />
-                  <p className="text-lg font-semibold text-foreground">Running Monte Carlo simulations...</p>
+                  <p className="text-lg font-semibold text-foreground">Running Geometric Brownian Motion simulation...</p>
                   <p className="text-sm text-muted-foreground mt-2">
-                    Calculating risk metrics and scenario probabilities
+                    Applying regime switching models • Querying neural database
                   </p>
                 </div>
               )}
