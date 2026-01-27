@@ -1,5 +1,6 @@
 export { AccountCard } from './AccountCard';
 export { AccountHeader } from './AccountHeader';
+export { AdminPanel } from './AdminPanel';
 export { AlertsPanel } from './AlertsPanel';
 export { TrackedAssetsGrid } from './TrackedAssetsGrid';
 export { RecentReports } from './RecentReports';

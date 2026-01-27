@@ -7,8 +7,10 @@ import { useProfile } from '@/hooks/useProfile';
 import { useUsage } from '@/hooks/useUsage';
 import { usePlan } from '@/hooks/usePlan';
 import { useTrackedAssets } from '@/hooks/useTrackedAssets';
+import { useAdminRole } from '@/hooks/useAdminRole';
 import {
   AccountHeader,
+  AdminPanel,
   DashboardHero,
   AlertsPanel,
   TrackedAssetsGrid,
@@ -31,6 +33,7 @@ export default function Dashboard() {
   const { usage, loading: usageLoading } = useUsage();
   const planData = usePlan();
   const { trackedAssets, alerts, isLoading: assetsLoading, dismissAlert, markAlertRead } = useTrackedAssets();
+  const { isAdmin, loading: adminLoading } = useAdminRole();
 
   // SEO
   useEffect(() => {
@@ -101,6 +104,9 @@ export default function Dashboard() {
         <div className="max-w-7xl mx-auto space-y-6">
           {/* Account Header - Top of Dashboard */}
           <AccountHeader profile={profile} plan={planData} />
+
+          {/* Admin Analytics Panel - Only visible for admins */}
+          {isAdmin && <AdminPanel />}
 
           {/* Onboarding Guide for new users */}
           {shouldShowOnboarding && (
