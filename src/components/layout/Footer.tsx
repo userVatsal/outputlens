@@ -78,7 +78,8 @@ export function Footer() {
               <BrandLogo size="md" />
             </Link>
             <p className="text-sm text-muted-foreground">
-              Probabilistic risk intelligence. We quantify uncertainty before capital is deployed. Truth over hype.
+              Three-layer risk intelligence. We quantify uncertainty before capital is deployed. 
+              Probabilities, not predictions. Truth over hype.
             </p>
           </div>
 
@@ -207,10 +208,11 @@ export function Footer() {
           </div>
         </div>
 
-        {/* Disclaimer */}
+        {/* Disclaimer - Three-layer architecture */}
         <div className="mt-8 pt-6 border-t border-border">
           <p className="text-xs text-muted-foreground">
-            <span className="font-semibold">Disclaimer:</span> OutputLens provides probabilistic risk analysis using stochastic models and Monte Carlo simulation. 
+            <span className="font-semibold">Disclaimer:</span> OutputLens provides probabilistic risk analysis using a three-layer intelligence architecture: 
+            (1) deterministic stochastic models for simulation, (2) machine learning for regime detection, (3) AI for interpretation only. 
             It shows probability distributions, not predictions. The neural database retrieves historical patterns—it does NOT predict markets.
             LLMs explain math—they never predict prices or give trading signals. Not financial advice.
           </p>

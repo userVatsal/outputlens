@@ -21,7 +21,11 @@ import {
   LineChart,
   PieChart,
   Activity,
-  Calendar
+  Calendar,
+  Cpu,
+  Brain,
+  XCircle,
+  CheckCircle2
 } from 'lucide-react';
 
 // X (Twitter) icon component
@@ -33,20 +37,53 @@ const XIcon = ({ className }: { className?: string }) => (
 
 const personas = [
   {
-    title: "Active Traders",
-    description: "Quantify positions with probability, not gut.",
+    title: "Active Traders (Retail → Semi-Pro)",
+    description: "Overconfidence, gut decisions, no tail awareness? We give you Monte Carlo distributions, VaR/CVaR, and probabilistic education.",
     icon: TrendingUp
   },
   {
-    title: "Quantitative Analysts", 
-    description: "Build intuition through scenario-based risk.",
+    title: "Quant / Technical Analysts", 
+    description: "Tools fragmented & opaque? GBM + regime switching + physics-inspired intuition. Build models, not guesses.",
     icon: BarChart3
   },
   {
-    title: "Hedge Funds & Asset Managers",
-    description: "Portfolio-level risk planning for B2B.",
+    title: "B2B / Funds / Fintechs",
+    description: "Risk tooling expensive, slow, legacy? Deterministic engine, explainable AI, API + licensing.",
     icon: Building2
   }
+];
+
+// Core principles (YC-style)
+const corePrinciples = [
+  { icon: Target, title: "Truth over hype", description: "We never predict. We quantify." },
+  { icon: Activity, title: "Probabilities, not predictions", description: "Distributions, not price targets." },
+  { icon: Cpu, title: "Deterministic math first, AI second", description: "Layer 1 works without AI." },
+  { icon: Shield, title: "Transparent methodology", description: "The math is public. Open source principles." },
+  { icon: Zap, title: "Clear free vs paid boundaries", description: "US only free. Global paid." },
+];
+
+// Non-goals (Critical for compliance)
+const nonGoals = [
+  "No trading execution",
+  "No price predictions",
+  "No hype indicators",
+  "No social trading",
+  "No black-box AI",
+];
+
+// What is OutputLens IP
+const ipOwned = [
+  "Scenario parameter engine",
+  "Regime → volatility mapping",
+  "Risk composition logic",
+  "RAG knowledge base",
+  "Compute-based pricing logic",
+];
+
+const ipNotOwned = [
+  "Raw Monte Carlo (public math)",
+  "VaR formula (public math)",
+  "GBM equation (public math)",
 ];
 
 const socialLinks = [
@@ -250,7 +287,7 @@ export default function About() {
         </div>
       </section>
 
-      {/* Mission Statement Section */}
+      {/* Mission Statement Section - YC-style */}
       <section className="py-16 md:py-20 bg-primary/5 border-y border-primary/10">
         <div className="section-container">
           <div className="max-w-4xl mx-auto text-center">
@@ -258,9 +295,88 @@ export default function About() {
               <Target className="w-5 h-5" />
               <span className="font-semibold">Our Mission</span>
             </div>
-            <blockquote className="text-2xl md:text-3xl font-brand font-semibold text-foreground leading-relaxed">
-              "OutputLens exists to democratize institutional-grade risk analysis. We believe every trader deserves to quantify their downside before they trade—not guess. Our mission is to close the gap between retail intuition and hedge fund precision."
+            <blockquote className="text-2xl md:text-3xl font-brand font-semibold text-foreground leading-relaxed mb-4">
+              "Build the world's most trustworthy, AI-powered probabilistic risk intelligence platform—giving traders and institutions the same mathematical tools used by hedge funds, without hype or black-box predictions."
             </blockquote>
+            <p className="text-lg text-muted-foreground">
+              We quantify uncertainty before capital is deployed. Truth over hype. Probabilities, not predictions.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Core Principles Section (NEW) */}
+      <section className="py-16 md:py-20">
+        <div className="section-container">
+          <div className="text-center mb-12">
+            <Badge variant="secondary" className="mb-4 px-4 py-2">
+              <Shield className="w-4 h-4 mr-2" />
+              Core Principles
+            </Badge>
+            <h2 className="text-3xl md:text-4xl font-brand font-bold text-foreground mb-4">
+              What We Believe
+            </h2>
+          </div>
+          <div className="max-w-4xl mx-auto grid md:grid-cols-5 gap-4">
+            {corePrinciples.map((principle, index) => (
+              <div key={index} className="text-center p-4 rounded-lg bg-card border border-border">
+                <div className="w-10 h-10 mx-auto mb-3 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <principle.icon className="w-5 h-5 text-primary" />
+                </div>
+                <h3 className="font-semibold text-foreground text-sm mb-1">{principle.title}</h3>
+                <p className="text-xs text-muted-foreground">{principle.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Non-Goals & IP Section (NEW) */}
+      <section className="py-16 md:py-20 bg-muted/30">
+        <div className="section-container">
+          <div className="max-w-4xl mx-auto grid md:grid-cols-2 gap-8">
+            {/* Non-Goals */}
+            <div className="glass-card p-6 border-l-4 border-l-bearish">
+              <h3 className="font-semibold text-foreground mb-4 flex items-center gap-2">
+                <XCircle className="h-5 w-5 text-bearish" />
+                What We Don't Do (Non-Goals)
+              </h3>
+              <ul className="space-y-2">
+                {nonGoals.map((item, i) => (
+                  <li key={i} className="flex items-center gap-3 text-sm text-muted-foreground">
+                    <div className="h-1.5 w-1.5 rounded-full bg-bearish" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* IP Boundary */}
+            <div className="glass-card p-6 border-l-4 border-l-bullish">
+              <h3 className="font-semibold text-foreground mb-4 flex items-center gap-2">
+                <CheckCircle2 className="h-5 w-5 text-bullish" />
+                What is OutputLens IP
+              </h3>
+              <ul className="space-y-2 mb-4">
+                {ipOwned.map((item, i) => (
+                  <li key={i} className="flex items-center gap-3 text-sm text-muted-foreground">
+                    <div className="h-1.5 w-1.5 rounded-full bg-bullish" />
+                    ✔ {item}
+                  </li>
+                ))}
+              </ul>
+              <p className="text-xs text-muted-foreground italic border-t pt-3 border-border">
+                Not IP: {ipNotOwned.join(' • ')}
+              </p>
+            </div>
+          </div>
+          
+          {/* IP Statement */}
+          <div className="max-w-2xl mx-auto mt-8 text-center">
+            <p className="text-sm text-muted-foreground bg-primary/5 border border-primary/20 rounded-lg p-4">
+              <Target className="h-4 w-4 inline mr-2 text-primary" />
+              <strong>The mathematics are public.</strong> Our IP is how we orchestrate, interpret, and operationalize them at scale.
+            </p>
           </div>
         </div>
       </section>

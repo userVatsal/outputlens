@@ -1,5 +1,5 @@
 // Stripe product and price configuration for OutputLens tiers
-// YC-style tier differentiation: Free (US only) vs Paid (Global)
+// YC-style three-layer intelligence architecture: Layer 1 (Math/Physics) → Layer 2 (ML) → Layer 3 (AI)
 
 export type SubscriptionPlan = 'free' | 'starter' | 'pro' | 'trader';
 
@@ -12,10 +12,24 @@ export interface PlanConfig {
   portfolioAssetsLimit: number;
   apiCallsLimit: number;
   historyDays: number;
+  
+  // Layer 1: Deterministic Math/Physics (CORE IP)
   monteCarloPathsLimit: number;
+  stochasticModels: 'basic_gbm' | 'gbm_garch' | 'full_suite' | 'api';
+  jumpDiffusion: boolean;
+  regimeSwitching: boolean;
+  
+  // Layer 2: Statistical & ML Adaptation
   globalMarkets: boolean;
+  marketsList: string[];
   neuralDatabase: 'limited' | 'full' | 'auto';
-  stochasticModels: 'basic' | 'full' | 'api';
+  regimeDetection: boolean;
+  volatilityAdaptation: boolean;
+  
+  // Layer 3: AI Interpretation (Strictly Controlled)
+  aiInterpretation: 'manual' | 'auto' | 'advanced';
+  ragAccess: boolean;
+  
   features: string[];
   highlighted?: boolean;
 }
@@ -30,16 +44,25 @@ export const PLAN_CONFIG: Record<SubscriptionPlan, PlanConfig> = {
     portfolioAssetsLimit: 0,
     apiCallsLimit: 0,
     historyDays: 7,
+    // Layer 1: Basic math
     monteCarloPathsLimit: 5000,
+    stochasticModels: 'basic_gbm',
+    jumpDiffusion: false,
+    regimeSwitching: false,
+    // Layer 2: Limited ML
     globalMarkets: false,
+    marketsList: ['US'],
     neuralDatabase: 'limited',
-    stochasticModels: 'basic',
+    regimeDetection: false,
+    volatilityAdaptation: false,
+    // Layer 3: Manual AI
+    aiInterpretation: 'manual',
+    ragAccess: false,
     features: [
+      'Layer 1: Basic GBM simulation',
       '5 analyses per month',
       'US markets only',
       '5,000 Monte Carlo paths',
-      'Basic GBM stochastic model',
-      'Limited neural database',
       'Manual AI explanation trigger',
       '7-day history retention',
     ],
@@ -53,18 +76,28 @@ export const PLAN_CONFIG: Record<SubscriptionPlan, PlanConfig> = {
     portfolioAssetsLimit: 0,
     apiCallsLimit: 0,
     historyDays: 30,
+    // Layer 1: Full stochastic suite
     monteCarloPathsLimit: 10000,
+    stochasticModels: 'gbm_garch',
+    jumpDiffusion: false,
+    regimeSwitching: true,
+    // Layer 2: Full ML features
     globalMarkets: true,
+    marketsList: ['US', 'UK', 'EU', 'Crypto', 'Forex'],
     neuralDatabase: 'full',
-    stochasticModels: 'full',
+    regimeDetection: true,
+    volatilityAdaptation: true,
+    // Layer 3: Auto AI
+    aiInterpretation: 'auto',
+    ragAccess: true,
     features: [
+      'Layers 1-3: Full intelligence stack',
       '30 analyses per month',
       'Global markets (UK, EU, Crypto, Forex)',
       '10,000 Monte Carlo paths',
-      'Full GBM + GARCH-like dynamics',
-      'Full neural database',
+      'GBM + GARCH + regime switching',
+      'Full neural database + RAG',
       'Auto AI explanations',
-      '30-day history retention',
     ],
   },
   pro: {
@@ -76,15 +109,24 @@ export const PLAN_CONFIG: Record<SubscriptionPlan, PlanConfig> = {
     portfolioAssetsLimit: 5,
     apiCallsLimit: 0,
     historyDays: Infinity,
+    // Layer 1: Full suite + jump diffusion
     monteCarloPathsLimit: 10000,
+    stochasticModels: 'full_suite',
+    jumpDiffusion: true,
+    regimeSwitching: true,
+    // Layer 2: Auto neural insights
     globalMarkets: true,
+    marketsList: ['US', 'UK', 'EU', 'Crypto', 'Forex'],
     neuralDatabase: 'auto',
-    stochasticModels: 'full',
+    regimeDetection: true,
+    volatilityAdaptation: true,
+    // Layer 3: Advanced AI
+    aiInterpretation: 'advanced',
+    ragAccess: true,
     features: [
+      'Layers 1-3: Advanced intelligence',
       '100 analyses per month',
-      'Global markets',
-      '10,000 Monte Carlo paths',
-      'Full stochastic suite',
+      'Full stochastic suite + jump diffusion',
       'Neural database + auto insights',
       'Portfolio analysis (5 assets)',
       'CSV/PDF exports',
@@ -101,18 +143,27 @@ export const PLAN_CONFIG: Record<SubscriptionPlan, PlanConfig> = {
     portfolioAssetsLimit: 20,
     apiCallsLimit: 100,
     historyDays: Infinity,
+    // Layer 1: Full suite + API
     monteCarloPathsLimit: 10000,
-    globalMarkets: true,
-    neuralDatabase: 'auto',
     stochasticModels: 'api',
+    jumpDiffusion: true,
+    regimeSwitching: true,
+    // Layer 2: Full access + API
+    globalMarkets: true,
+    marketsList: ['US', 'UK', 'EU', 'Crypto', 'Forex'],
+    neuralDatabase: 'auto',
+    regimeDetection: true,
+    volatilityAdaptation: true,
+    // Layer 3: Advanced + priority
+    aiInterpretation: 'advanced',
+    ragAccess: true,
     features: [
+      'Layers 1-3: Full + API access',
       '500 analyses per month',
-      'Global markets + priority data',
-      '10,000 Monte Carlo paths',
-      'Full stochastic suite + API',
-      'Neural database + auto insights',
+      'Full stochastic suite + REST API',
+      'Priority data & processing',
       'Portfolio analysis (20 assets)',
-      'CSV/PDF exports + REST API (100/mo)',
+      'CSV/PDF exports + API (100/mo)',
       'Priority support',
     ],
   },
@@ -130,19 +181,41 @@ export function getPlanFromProductId(productId: string): SubscriptionPlan {
   return PRODUCT_TO_PLAN[productId] || 'free';
 }
 
-// Helper to check if a plan has access to a feature
-export function planHasFeature(plan: SubscriptionPlan, feature: 'sentiment' | 'portfolio' | 'api' | 'exports' | 'alerts'): boolean {
+// Helper to check if a plan has access to a feature (three-layer architecture)
+export type GatableFeature = 
+  | 'sentiment' 
+  | 'portfolio' 
+  | 'api' 
+  | 'exports' 
+  | 'alerts'
+  | 'neural_database'
+  | 'regime_detection'
+  | 'global_markets'
+  | 'advanced_ai'
+  | 'jump_diffusion';
+
+export function planHasFeature(plan: SubscriptionPlan, feature: GatableFeature): boolean {
+  const config = PLAN_CONFIG[plan];
   switch (feature) {
     case 'sentiment':
-      return plan !== 'free';
+    case 'global_markets':
+      return config.globalMarkets;
     case 'portfolio':
-      return plan === 'pro' || plan === 'trader';
+      return config.portfolioAssetsLimit > 0;
     case 'api':
-      return plan === 'trader';
+      return config.apiCallsLimit > 0;
     case 'exports':
       return plan === 'pro' || plan === 'trader';
     case 'alerts':
       return plan === 'trader';
+    case 'neural_database':
+      return config.neuralDatabase !== 'limited';
+    case 'regime_detection':
+      return config.regimeDetection;
+    case 'advanced_ai':
+      return config.aiInterpretation === 'advanced';
+    case 'jump_diffusion':
+      return config.jumpDiffusion;
     default:
       return false;
   }

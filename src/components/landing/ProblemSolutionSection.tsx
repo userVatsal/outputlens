@@ -22,11 +22,11 @@ const cards = [
     content: 'OutputLens quantifies uncertainty before you trade. Probabilities, not predictions. See 10,000 possible outcomes, measure tail risk, understand scenario regimes.',
   },
   {
-    step: 'How We Do It',
+    step: 'Three-Layer Intelligence',
     icon: Zap,
     iconBg: 'bg-bullish/10',
     iconColor: 'text-bullish',
-    content: 'Monte Carlo simulation + GBM + GARCH-like volatility + Neural database + LLM interpretation. Stochastic processes + Physics-inspired models + AI explanation layer. Institutional methodology, delivered in 2 seconds.',
+    content: '(1) GBM + GARCH stochastic simulation, (2) HMM regime detection + neural database, (3) LLM interpretation with RAG. Deterministic math first. AI interprets, never predicts.',
   },
 ];
 
