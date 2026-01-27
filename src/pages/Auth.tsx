@@ -87,16 +87,25 @@ export default function Auth() {
     // Check if already logged in
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session) {
-        // Check if onboarding is completed
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('onboarding_completed')
-          .eq('user_id', session.user.id)
-          .single();
-        
-        if (profile?.onboarding_completed) {
-          navigate('/dashboard');
-        } else {
+        try {
+          // Check if onboarding is completed
+          const { data: profile, error } = await supabase
+            .from('profiles')
+            .select('onboarding_completed')
+            .eq('user_id', session.user.id)
+            .maybeSingle();
+          
+          console.log('[Auth] Session check - profile:', profile, 'error:', error);
+          
+          // If profile doesn't exist or onboarding not completed, go to onboarding
+          if (!profile || !profile.onboarding_completed) {
+            navigate('/onboarding');
+          } else {
+            navigate('/dashboard');
+          }
+        } catch (err) {
+          console.error('[Auth] Error checking profile:', err);
+          // Default to onboarding if there's an error
           navigate('/onboarding');
         }
       }
@@ -105,17 +114,33 @@ export default function Auth() {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log('[Auth] Auth state changed:', event, session?.user?.id);
+        
         if (session) {
-          // Check onboarding status
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('onboarding_completed')
-            .eq('user_id', session.user.id)
-            .single();
-          
-          if (profile?.onboarding_completed) {
-            navigate('/dashboard');
-          } else {
+        try {
+            // Small delay to allow profile trigger to complete for new signups
+            if (event === 'SIGNED_IN') {
+              await new Promise(resolve => setTimeout(resolve, 500));
+            }
+            
+            // Check onboarding status
+            const { data: profile, error } = await supabase
+              .from('profiles')
+              .select('onboarding_completed')
+              .eq('user_id', session.user.id)
+              .maybeSingle();
+            
+            console.log('[Auth] onAuthStateChange - profile:', profile, 'error:', error);
+            
+            // If profile doesn't exist or onboarding not completed, go to onboarding
+            if (!profile || !profile.onboarding_completed) {
+              navigate('/onboarding');
+            } else {
+              navigate('/dashboard');
+            }
+          } catch (err) {
+            console.error('[Auth] Error in auth state change:', err);
+            // Default to onboarding if there's an error
             navigate('/onboarding');
           }
         }
