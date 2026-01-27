@@ -1,256 +1,177 @@
 
 
-# Interactive Preview Enhancement + UX Improvements Plan
+# Fix Disclaimers, Header Demo Link, and Account Plan Display
 
-## Overview
+## Summary of Issues Found
 
-This plan addresses all user requests:
-1. **Make Interactive Preview more interactive** - allow users to choose asset, timing, investment amount
-2. **Remove Demo page** - redirect /demo to landing page since functionality is now embedded
-3. **Grant Trader subscription** - update profiles for test@outputlens.com and uservatsal@outlook.com
-4. **Improve Pricing page** - better tier comparison layout and UI/UX
-5. **Simplify pricing/about page** - remove detailed IP/methodology information that could be copied
-6. **Test all changes**
+After thorough investigation, I identified three distinct problems:
 
----
+### Issue 1: Disclaimers on Too Many Pages
+Disclaimers currently appear in 10+ locations across the app. Based on your preference, they should only remain on **Methodology + Terms** pages.
 
-## Phase 1: Enhanced Interactive Preview Component
+**Pages with disclaimers to remove:**
+- `Footer.tsx` - Lines 211-228 (global footer disclaimer)
+- `Results.tsx` - Lines 309-317 (Monte Carlo disclaimer)
+- `Workspace.tsx` - Lines 185-191 (Layer 1-3 disclaimer)
+- `Analyze.tsx` - Lines 157-161 (educational disclaimer)
+- `Portfolio.tsx` - Lines 222-231 (correlation disclaimer)
+- `PortfolioAnalyzer.tsx` - Lines 543-548 (educational disclaimer)
+- `Dashboard.tsx` - Lines 150-157 (informational disclaimer)
+- `Pricing.tsx` - Lines 426-431 (probability disclaimer)
+- `AIExplanation.tsx` - Lines 83-88 (probabilistic warning)
+- `RiskInterpretation.tsx` - Lines 157-164 (Monte Carlo disclaimer)
+- `ActionPanel.tsx` - Lines 174-179 (PDF export disclaimer)
 
-### Current State
-The `InteractivePreview` component only lets users:
-- Select from 4 preset symbols (AAPL, TSLA, MSFT, SPY)
-- View static demo results
+**Pages to KEEP disclaimers:**
+- `Methodology.tsx` - Already has appropriate disclaimers
+- `Terms.tsx` - Keep legal disclaimers
 
-### Enhanced Features
-
-**New Interactive Controls:**
-
-1. **Asset Input with Search**
-   - Free text input for symbol/company name
-   - Autocomplete from popular assets
-   - Show "Premium: Global Markets" badge for non-US assets
-   - Clear visual tier indicator (Free: US Only vs Paid: Global)
-
-2. **Investment Amount Slider/Input**
-   - Default $1,000 investment
-   - Range: $100 - $100,000
-   - Show position size in shares based on entry price
-   - Display P&L scenarios in dollar terms
-
-3. **Time Horizon Selector**
-   - Preset buttons: 1 Week, 1 Month, 3 Months
-   - Shows how holding period affects risk metrics
-   - Quick visual feedback on risk profile change
-
-4. **Direction Toggle**
-   - Long / Short toggle (visual switch)
-   - Updates scenarios accordingly
-
-5. **Live Calculation Display**
-   - Recalculates demo results on parameter change
-   - Smooth animations between states
-   - Shows win probability, expected return, VaR, risk score
-
-**New UI Layout:**
-```text
-┌─────────────────────────────────────────────────────────────┐
-│  [Search Asset: AAPL, Tesla, Bitcoin...]        [US/Global] │
-├─────────────────────────────────────────────────────────────┤
-│  Investment: [$1,000 ────────────○───────────── $100k]      │
-│  Direction:  [LONG] [SHORT]      Horizon: [1W] [1M] [3M]    │
-├─────────────────────────────────────────────────────────────┤
-│  Win: 62%    Return: +1.8%    VaR: -4.2%    Risk: 4/10      │
-├─────────────────────────────────────────────────────────────┤
-│  ▲ Bullish 24%  │  ─ Base 50%  │  ▼ Bearish 26%             │
-├─────────────────────────────────────────────────────────────┤
-│  [Analyze with Your Account – Free] →                       │
-└─────────────────────────────────────────────────────────────┘
+### Issue 2: Demo Link in Header Navigation
+The header navigation at `Header.tsx` line 18 still shows:
+```typescript
+{ href: '/demo', labelKey: 'demo' }
 ```
 
-**Demo Data Updates:**
-- Expand `DEMO_RESULTS` with more assets and parameter variations
-- Add popular crypto and international stocks for "locked" preview
-- Show blurred results for premium assets with upgrade CTA
+This should be changed to point to the landing page demo section:
+```typescript
+{ href: '/#demo', labelKey: 'demo' }
+```
+
+### Issue 3: Account Shows "Free" Despite Trader Access
+**Root Cause Identified:**
+
+The `usePlan` hook calls the `check-subscription` Edge Function, which queries Stripe for active subscriptions. Since test@outputlens.com and uservatsal@outlook.com were granted Trader access via a **database override** (not a Stripe subscription), the Edge Function finds no Stripe subscription and returns "free".
+
+Meanwhile, `useUsage` correctly reads `subscription_plan` from the `profiles` table and shows the 500-analysis limit.
+
+**The Fix:**
+
+Modify the `check-subscription` Edge Function to check the `profiles.subscription_plan` column FIRST before checking Stripe. If the database has a manual override (e.g., 'trader'), return that plan. Only fall back to Stripe check if no override exists.
 
 ---
 
-## Phase 2: Remove Demo Page + Update Routes
+## Implementation Details
 
-### Route Changes in `App.tsx`
+### Phase 1: Remove Disclaimers from Non-Essential Pages
+
+Remove disclaimer sections from these 11 files:
+
+| File | Lines to Remove | Description |
+|------|-----------------|-------------|
+| `src/components/layout/Footer.tsx` | 211-228 | Three-layer architecture + "Not financial advice" |
+| `src/pages/Results.tsx` | 309-317 | Monte Carlo disclaimer box |
+| `src/pages/Workspace.tsx` | 185-191 | Layer 1-3 architecture note |
+| `src/pages/Analyze.tsx` | 157-161 | Educational disclaimer |
+| `src/pages/Portfolio.tsx` | 222-231 | Correlation disclaimer |
+| `src/components/PortfolioAnalyzer.tsx` | 543-548 | Educational disclaimer |
+| `src/pages/Dashboard.tsx` | 150-157 | Risk analysis disclaimer |
+| `src/pages/Pricing.tsx` | 426-431 | Probability disclaimer |
+| `src/components/AIExplanation.tsx` | 83-88 | Probabilistic warning |
+| `src/components/workspace/RiskInterpretation.tsx` | 157-164 | Monte Carlo disclaimer |
+| `src/components/workspace/ActionPanel.tsx` | 174-179 | PDF disclaimer (in template) |
+
+### Phase 2: Update Header Demo Link
+
+Modify `src/components/layout/Header.tsx`:
+
+**Before (line 17-22):**
+```typescript
+const navLinks = [
+  { href: '/demo', labelKey: 'demo' },
+  { href: '/workspace', labelKey: 'workspace' },
+  { href: '/methodology', labelKey: 'methodology' },
+  { href: '/pricing', labelKey: 'pricing' },
+];
+```
+
+**After:**
+```typescript
+const navLinks = [
+  { href: '/#demo', labelKey: 'demo' },
+  { href: '/workspace', labelKey: 'workspace' },
+  { href: '/methodology', labelKey: 'methodology' },
+  { href: '/pricing', labelKey: 'pricing' },
+];
+```
+
+### Phase 3: Fix Plan Display for Database Overrides
+
+Modify `supabase/functions/check-subscription/index.ts` to respect database overrides:
+
+**New Logic Flow:**
+1. Authenticate user
+2. Query `profiles.subscription_plan` directly from database
+3. If database has a non-free, non-null plan AND no active Stripe subscription exists → return the database plan (this handles testing/demo accounts)
+4. If Stripe subscription exists → return Stripe-based plan (normal flow)
+5. If neither → return "free"
+
+**Code changes needed:**
+
+After line 82 (after user authentication), add a database check:
 
 ```typescript
-// Change Demo route to redirect to landing
-<Route path="/demo" element={<Navigate to="/#demo" replace />} />
+// Check for database override first (for testing/demo accounts)
+const { data: profileData } = await supabaseClient
+  .from("profiles")
+  .select("subscription_plan")
+  .eq("user_id", user.id)
+  .single();
+
+const dbPlan = profileData?.subscription_plan;
 ```
 
-### Landing Page Updates
+Then, after the Stripe check (around line 120), if no active Stripe subscription but database has a plan:
 
-1. Add `id="demo"` anchor to the Interactive Preview section
-2. Update all internal links that pointed to `/demo`:
-   - Hero section "See Live Demo" button
-   - Footer links
-   - Any other navigation references
-
-### Cleanup
-
-- Keep Demo.tsx file but make it redirect (or remove import if redirecting in route)
-- Update navigation items that reference /demo
-
----
-
-## Phase 3: Grant Trader Subscription Access
-
-### Database Update Required
-
-The users exist in the database:
-- `test@outputlens.com` - subscription_plan is NULL
-- `uservatsal@outlook.com` - subscription_plan is "free"
-
-**SQL to execute:**
-```sql
-UPDATE profiles 
-SET subscription_plan = 'trader',
-    plan_expires_at = '2099-12-31'::timestamp
-WHERE user_id IN (
-  SELECT id FROM auth.users 
-  WHERE email IN ('test@outputlens.com', 'uservatsal@outlook.com')
-);
+```typescript
+if (subscriptions.data.length === 0) {
+  // No Stripe subscription - check for database override
+  if (dbPlan && dbPlan !== 'free') {
+    logStep("Using database plan override", { plan: dbPlan });
+    return new Response(JSON.stringify({ 
+      subscribed: true,
+      plan: dbPlan,
+      subscription_end: null
+    }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: 200,
+    });
+  }
+  // Otherwise return free tier
+  ...
+}
 ```
 
-This grants permanent Trader tier access for testing purposes.
-
----
-
-## Phase 4: Improve Pricing Page
-
-### Current Issues
-- Tier comparison table is plain text
-- Not visually scannable
-- Missing visual hierarchy for layer groupings
-
-### Improvements
-
-1. **Visual Layer Groupings**
-   - Add subtle background colors for each layer section
-   - Layer 1 (Math): Light blue background
-   - Layer 2 (ML): Light green background
-   - Layer 3 (AI): Light purple background
-
-2. **Better Feature Indicators**
-   - Replace text checkmarks with styled badges
-   - Use color-coded icons: green check, red X, orange partial
-   - Add hover tooltips explaining each feature
-
-3. **Highlight Current Plan**
-   - More prominent "Your Plan" indicator
-   - Green border/glow on current plan column
-
-4. **Responsive Design**
-   - Horizontal scroll on mobile with sticky first column
-   - Collapsible layer sections on mobile
-
-5. **Streamlined FAQ**
-   - Reduce to 4-5 most important questions
-   - Remove overly technical questions that reveal IP
-
----
-
-## Phase 5: Simplify About Page (Hide IP Details)
-
-### Remove or Simplify These Sections
-
-1. **IP Boundary Section**
-   - Remove the entire "What is OutputLens IP" and "Not IP" lists
-   - These reveal too much about implementation details
-   - Keep only the mission statement
-
-2. **Core Principles Section**
-   - Keep principles but remove technical implementation details
-   - Focus on user benefits, not architecture
-
-3. **Methodology References**
-   - Remove explicit model names (GBM, GARCH, HMM, etc.)
-   - Keep general "institutional-grade analysis" language
-   - Link to methodology page for those who want details
-
-4. **Non-Goals Section**
-   - Keep the list but make it more user-focused
-   - Less technical, more benefit-oriented
-
-### Keep These Sections
-- Mission statement
-- Who We Serve (personas)
-- Educational glossary (trading terms)
-- Social links
-
-### New Simplified Structure
-```text
-1. Hero - Our Story
-2. Mission Statement
-3. Who We Serve (3 personas)
-4. Learn & Explore (Glossary)
-5. Social Links
-6. CTA
-```
-
----
-
-## Phase 6: Additional UI/UX Improvements
-
-### Global Improvements
-
-1. **Button Consistency**
-   - Ensure all primary CTAs use consistent styling
-   - "Quantify Your Risk" as primary action text
-
-2. **Mobile Responsiveness**
-   - Test all new interactive controls on mobile
-   - Ensure touch-friendly slider/input sizes
-
-3. **Loading States**
-   - Add skeleton loaders where appropriate
-   - Smooth transitions between states
-
-4. **Accessibility**
-   - Ensure keyboard navigation works on new controls
-   - Proper ARIA labels on interactive elements
+This ensures manually-granted Trader access displays correctly in the UI.
 
 ---
 
 ## Files to Modify
 
-### Modified Files
-1. `src/components/landing/InteractivePreview.tsx` - Complete rewrite with new interactive features
-2. `src/pages/Landing.tsx` - Add demo anchor, update CTAs
-3. `src/App.tsx` - Change /demo route to redirect
-4. `src/pages/Pricing.tsx` - Improve tier table layout
-5. `src/pages/About.tsx` - Simplify and remove IP details
-6. `src/components/layout/Footer.tsx` - Update /demo links
-
-### Database Migration
-- SQL query to update profiles for test users
+| File | Change Type |
+|------|-------------|
+| `src/components/layout/Header.tsx` | Update demo link to `/#demo` |
+| `src/components/layout/Footer.tsx` | Remove disclaimer section |
+| `src/pages/Results.tsx` | Remove disclaimer box |
+| `src/pages/Workspace.tsx` | Remove Layer 1-3 note |
+| `src/pages/Analyze.tsx` | Remove educational disclaimer |
+| `src/pages/Portfolio.tsx` | Remove correlation disclaimer |
+| `src/components/PortfolioAnalyzer.tsx` | Remove educational disclaimer |
+| `src/pages/Dashboard.tsx` | Remove informational disclaimer |
+| `src/pages/Pricing.tsx` | Remove probability disclaimer |
+| `src/components/AIExplanation.tsx` | Remove probabilistic warning |
+| `src/components/workspace/RiskInterpretation.tsx` | Remove Monte Carlo disclaimer |
+| `src/components/workspace/ActionPanel.tsx` | Remove PDF disclaimer from template |
+| `supabase/functions/check-subscription/index.ts` | Add database override check |
 
 ---
 
 ## Testing Checklist
 
 After implementation:
-- [ ] Interactive Preview responds to all input changes
-- [ ] Demo redirect works correctly
-- [ ] test@outputlens.com and uservatsal@outlook.com show as Trader tier
-- [ ] Pricing tier table is visually improved
-- [ ] About page no longer reveals detailed IP information
-- [ ] All CTAs navigate correctly
-- [ ] Mobile responsive on all new components
-
----
-
-## Expected Outcomes
-
-1. **Higher Engagement** - Interactive preview lets users experiment before signup
-2. **Cleaner Navigation** - No separate demo page, all on landing
-3. **Testing Enabled** - Both accounts have full Trader access
-4. **Better Conversion** - Improved pricing page clarity
-5. **IP Protected** - Removed detailed implementation information from public pages
-6. **Professional UX** - Consistent, polished interface throughout
+- [ ] Disclaimers only appear on Methodology and Terms pages
+- [ ] Header "Demo" link scrolls to landing page `/#demo` section
+- [ ] test@outputlens.com shows "Trader" plan in Account
+- [ ] uservatsal@outlook.com shows "Trader" plan in Account
+- [ ] Usage indicator shows correct 500-analysis limit
+- [ ] Stripe-based subscribers still work correctly
 
