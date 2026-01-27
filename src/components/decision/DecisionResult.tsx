@@ -29,8 +29,8 @@ export function DecisionResult({ analysis, onSave, onClose }: DecisionResultProp
   const worstCasePct = Math.abs(riskMetrics.valueAtRisk95);
   const worstCaseDollar = calculatePnL(input.entryPrice, -worstCasePct, shares);
   
-  // Probability of loss
-  const probLoss = 100 - riskMetrics.probabilityOfProfit;
+  // Probability of loss (probabilityOfProfit is decimal 0-1, convert to %)
+  const probLoss = (1 - riskMetrics.probabilityOfProfit) * 100;
   
   // Expected P&L (based on expected return)
   const expectedReturnPct = riskMetrics.expectedReturn;
