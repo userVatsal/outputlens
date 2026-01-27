@@ -172,7 +172,6 @@ function generatePDFContent(analysis: EnhancedTradeAnalysis): string {
       ` : ''}
 
       <div class="footer">
-        <p><strong>Disclaimer:</strong> This analysis uses Monte Carlo simulation with ${simulation.paths.toLocaleString()} paths. It does not predict actual outcomes and is not financial advice. Markets are inherently unpredictable. Always consult a qualified financial advisor before trading.</p>
         <p style="margin-top: 8px;">© ${new Date().getFullYear()} OutputLens. All rights reserved.</p>
       </div>
     </div>

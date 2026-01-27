@@ -423,12 +423,6 @@ export default function Pricing() {
           </div>
         </div>
 
-        {/* Disclaimer */}
-        <div className="mt-16 text-center">
-          <p className="text-xs text-muted-foreground max-w-xl mx-auto">
-            OutputLens shows probability distributions, not predictions. Not financial advice.
-          </p>
-        </div>
       </div>
     </Layout>
   );

@@ -154,11 +154,6 @@ export default function Analyze() {
             <TradeInputForm onSubmit={handleSubmitTrade} isLoading={tradeLoading} />
           </div>
 
-          {/* Disclaimer */}
-          <p className="text-center text-xs text-muted-foreground mt-8 max-w-sm mx-auto">
-            This tool uses Monte Carlo simulation with live market data when available. 
-            Educational purposes only. Not financial advice.
-          </p>
         </div>
       </div>
 

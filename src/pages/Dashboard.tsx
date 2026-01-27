@@ -147,14 +147,6 @@ export default function Dashboard() {
           {/* Why OutputLens Exists - Full Width */}
           <WhySection />
 
-          {/* Footer Disclaimer */}
-          <div className="pt-6 border-t border-border">
-            <p className="text-xs text-muted-foreground text-center max-w-3xl mx-auto">
-              OutputLens provides risk analysis and scenario modeling for informational purposes only. 
-              It does not provide financial advice, predictions, or trading signals. 
-              Past scenarios do not guarantee future results.
-            </p>
-          </div>
         </div>
       </div>
     </Layout>

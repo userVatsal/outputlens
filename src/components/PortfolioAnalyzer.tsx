@@ -540,11 +540,6 @@ function PortfolioResults({ result, onReset }: { result: BatchAnalysisResult; on
         </div>
       </div>
 
-      {/* Disclaimer */}
-      <p className="text-xs text-muted-foreground text-center">
-        Correlations are estimated from asset class relationships. 
-        This is educational analysis only—not financial advice.
-      </p>
     </div>
   );
 }

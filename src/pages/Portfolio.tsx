@@ -219,16 +219,6 @@ export default function Portfolio() {
             </div>
           </div>
 
-          {/* Disclaimer */}
-          <div className="text-center space-y-2">
-            <p className="text-xs text-muted-foreground max-w-lg mx-auto">
-              Portfolio correlations are estimated from asset class relationships. 
-              For production use, historical price data provides more accurate correlation matrices.
-            </p>
-            <p className="text-xs text-muted-foreground">
-              Educational purposes only. Not financial advice.
-            </p>
-          </div>
         </div>
       </div>
 

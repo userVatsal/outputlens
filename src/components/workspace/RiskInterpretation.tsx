@@ -154,14 +154,6 @@ export function RiskInterpretation({ analysis }: RiskInterpretationProps) {
         </>
       )}
 
-      {/* Disclaimer */}
-      <div className="mt-4 pt-3 border-t border-border/50">
-        <p className="text-xs text-muted-foreground">
-          Analysis based on Monte Carlo simulation with {analysis.simulation.paths.toLocaleString()} paths. 
-          Probabilities are derived from historical volatility and do not predict future outcomes. 
-          This is not financial advice.
-        </p>
-      </div>
     </div>
   );
 }

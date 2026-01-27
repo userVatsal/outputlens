@@ -182,12 +182,6 @@ export default function Workspace() {
                 <TradeInputForm onSubmit={handleSubmitTrade} isLoading={tradeLoading} />
               </div>
 
-              {/* Disclaimer with three-layer architecture */}
-              <p className="text-center text-xs text-muted-foreground mt-6 max-w-sm mx-auto">
-                Layer 1: GBM simulation (Free: 5,000 paths | Paid: 10,000). 
-                Layer 2: Neural DB retrieves, never predicts. 
-                Layer 3: AI interprets, never signals. Not financial advice.
-              </p>
             </div>
 
             {/* Right Column: Results */}

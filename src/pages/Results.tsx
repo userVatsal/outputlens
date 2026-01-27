@@ -306,15 +306,6 @@ const Results = () => {
             )}
           </div>
 
-          {/* Disclaimer */}
-          <div className="mt-8 p-4 rounded-lg bg-muted/30 border border-border/50">
-            <p className="text-xs text-muted-foreground text-center">
-              This analysis uses Monte Carlo simulation with {simulation.paths.toLocaleString()} paths 
-              and {marketData.dataQuality === 'live' ? 'live market data' : 'estimated volatility'}. 
-              It does not predict actual outcomes and is not financial advice. 
-              Markets are inherently unpredictable. Always consult a qualified financial advisor before trading.
-            </p>
-          </div>
         </div>
       </div>
     </Layout>
