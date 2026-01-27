@@ -2,7 +2,6 @@ import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Layout } from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { 
@@ -12,20 +11,12 @@ import {
   Instagram,
   Youtube,
   ArrowRight,
-  Clock,
   Rocket,
   BookOpen,
   Target,
   Zap,
   Shield,
-  LineChart,
-  PieChart,
   Activity,
-  Calendar,
-  Cpu,
-  Brain,
-  XCircle,
-  CheckCircle2
 } from 'lucide-react';
 
 // X (Twitter) icon component
@@ -37,53 +28,31 @@ const XIcon = ({ className }: { className?: string }) => (
 
 const personas = [
   {
-    title: "Active Traders (Retail → Semi-Pro)",
-    description: "Overconfidence, gut decisions, no tail awareness? We give you Monte Carlo distributions, VaR/CVaR, and probabilistic education.",
+    title: "Active Traders",
+    subtitle: "Retail → Semi-Pro",
+    description: "Get institutional-grade risk metrics before you trade. Know your win probability and worst-case scenarios.",
     icon: TrendingUp
   },
   {
-    title: "Quant / Technical Analysts", 
-    description: "Tools fragmented & opaque? GBM + regime switching + physics-inspired intuition. Build models, not guesses.",
+    title: "Quant Analysts", 
+    subtitle: "Data-Driven",
+    description: "Modular risk engine with reproducible simulations. Build on solid mathematical foundations.",
     icon: BarChart3
   },
   {
-    title: "B2B / Funds / Fintechs",
-    description: "Risk tooling expensive, slow, legacy? Deterministic engine, explainable AI, API + licensing.",
+    title: "Funds & Fintechs",
+    subtitle: "Enterprise",
+    description: "Risk infrastructure that scales. API access, deterministic outputs, transparent methodology.",
     icon: Building2
   }
 ];
 
-// Core principles (YC-style)
+// Core principles (user-focused, not technical)
 const corePrinciples = [
   { icon: Target, title: "Truth over hype", description: "We never predict. We quantify." },
-  { icon: Activity, title: "Probabilities, not predictions", description: "Distributions, not price targets." },
-  { icon: Cpu, title: "Deterministic math first, AI second", description: "Layer 1 works without AI." },
-  { icon: Shield, title: "Transparent methodology", description: "The math is public. Open source principles." },
-  { icon: Zap, title: "Clear free vs paid boundaries", description: "US only free. Global paid." },
-];
-
-// Non-goals (Critical for compliance)
-const nonGoals = [
-  "No trading execution",
-  "No price predictions",
-  "No hype indicators",
-  "No social trading",
-  "No black-box AI",
-];
-
-// What is OutputLens IP
-const ipOwned = [
-  "Scenario parameter engine",
-  "Regime → volatility mapping",
-  "Risk composition logic",
-  "RAG knowledge base",
-  "Compute-based pricing logic",
-];
-
-const ipNotOwned = [
-  "Raw Monte Carlo (public math)",
-  "VaR formula (public math)",
-  "GBM equation (public math)",
+  { icon: Activity, title: "Probabilities", description: "Distributions, not price targets." },
+  { icon: Shield, title: "Transparency", description: "Open methodology you can verify." },
+  { icon: Zap, title: "Accessible", description: "Institutional tools for everyone." },
 ];
 
 const socialLinks = [
@@ -93,193 +62,68 @@ const socialLinks = [
   { name: "YouTube", icon: Youtube, url: "https://youtube.com/@outputlens", handle: "@outputlens" }
 ];
 
-// Article 1: Trading Terms
-const outputLensTerms = [
+// Simplified glossary (educational value, no IP details)
+const glossaryTerms = [
   {
     term: "Win Probability",
-    definition: "The statistical likelihood that a trade will be profitable at the end of your specified time horizon, calculated through Monte Carlo simulation.",
-    whyItMatters: "Most traders rely on gut feeling. Win probability gives you a quantified edge before you enter a position.",
-    howWeHelp: "OutputLens runs 10,000+ simulations using historical volatility and current market conditions to calculate your exact win probability."
+    definition: "The statistical likelihood your trade will be profitable at your target timeframe.",
   },
   {
-    term: "VaR (Value at Risk) - 95%",
-    definition: "The maximum expected loss you could experience 95% of the time. In other words, there's only a 5% chance your loss will exceed this number.",
-    whyItMatters: "VaR helps you size positions appropriately and set stop-losses based on statistical reality, not arbitrary levels.",
-    howWeHelp: "We calculate 95% VaR for every analysis, showing you the realistic worst-case scenario for your trade."
+    term: "VaR (Value at Risk)",
+    definition: "The maximum expected loss at a given confidence level (e.g., 95% VaR = 5% chance of exceeding).",
   },
   {
-    term: "Expected Shortfall (CVaR)",
-    definition: "Also called Conditional VaR, this measures the average loss when things go really wrong—specifically, the average of the worst 5% of outcomes.",
-    whyItMatters: "VaR tells you the threshold; Expected Shortfall tells you how bad it gets when you cross it. This is crucial for tail risk management.",
-    howWeHelp: "OutputLens shows Expected Shortfall alongside VaR, giving you a complete picture of downside risk."
+    term: "Expected Shortfall",
+    definition: "Average loss when things go wrong—the mean of the worst outcomes beyond VaR.",
   },
   {
     term: "Monte Carlo Simulation",
-    definition: "A computational technique that runs thousands of random price path simulations based on historical volatility patterns to model possible future outcomes.",
-    whyItMatters: "Instead of predicting one outcome, Monte Carlo shows you the full distribution of possibilities, revealing risks you might not have considered.",
-    howWeHelp: "Every OutputLens analysis runs 10,000 Monte Carlo paths, generating realistic scenario distributions for your specific trade."
+    definition: "Running thousands of random price scenarios to understand the full range of possibilities.",
   },
   {
     term: "Tail Risk",
-    definition: "The probability and severity of extreme, rare events—the 'black swan' scenarios that fall in the tails of a probability distribution.",
-    whyItMatters: "Tail events, while rare, can wipe out months or years of gains. Understanding tail risk is essential for survival.",
-    howWeHelp: "Our Tail Risk Panel specifically highlights low-probability, high-impact scenarios with their potential magnitude."
+    definition: "Low-probability, high-impact events—the 'black swans' that can devastate portfolios.",
   },
   {
     term: "Sharpe Ratio",
-    definition: "A measure of risk-adjusted return, calculated as the excess return (above risk-free rate) divided by the standard deviation of returns.",
-    whyItMatters: "A high return means nothing if you took massive risk to achieve it. Sharpe Ratio tells you how efficiently you're being compensated for risk.",
-    howWeHelp: "OutputLens calculates expected Sharpe Ratio for your trades, helping you compare opportunities on a risk-adjusted basis."
+    definition: "Risk-adjusted return: how much return you get per unit of risk taken.",
   },
-  {
-    term: "Kurtosis",
-    definition: "A statistical measure of how 'fat' the tails of a distribution are. High kurtosis means more extreme outcomes than a normal distribution would predict.",
-    whyItMatters: "Financial markets have fat tails—extreme moves happen more often than traditional models suggest. Ignoring kurtosis leads to underestimating risk.",
-    howWeHelp: "We display kurtosis in our Advanced Metrics panel, alerting you when a distribution has dangerous fat tails."
-  },
-  {
-    term: "Skewness",
-    definition: "A measure of asymmetry in a probability distribution. Negative skewness means the left tail (losses) is longer; positive skewness means the right tail (gains) is longer.",
-    whyItMatters: "Skewness tells you if your risk/reward is truly symmetric or if you're exposed to more downside than upside.",
-    howWeHelp: "OutputLens calculates skewness for every simulation, revealing hidden asymmetry in your trade's risk profile."
-  }
-];
-
-const industryTerms = [
-  {
-    term: "Alpha",
-    definition: "The excess return of an investment relative to a benchmark index. Positive alpha means you're beating the market.",
-    whyItMatters: "Alpha is the 'edge'—what separates skilled traders from those who'd be better off buying an index fund."
-  },
-  {
-    term: "Beta",
-    definition: "A measure of an asset's volatility relative to the overall market. A beta of 1.5 means the asset moves 50% more than the market.",
-    whyItMatters: "Understanding beta helps you gauge how much market risk you're taking on with a position."
-  },
-  {
-    term: "Drawdown",
-    definition: "The peak-to-trough decline during a specific period. Maximum drawdown is the largest historical drop from a peak.",
-    whyItMatters: "Drawdowns test psychological resilience. Knowing potential drawdowns helps you size positions you can actually hold."
-  },
-  {
-    term: "Leverage",
-    definition: "Using borrowed capital to increase potential returns (and losses). 2x leverage means you control twice the position your capital would normally allow.",
-    whyItMatters: "Leverage amplifies everything—gains, losses, and the speed at which you can blow up an account."
-  },
-  {
-    term: "Position Sizing",
-    definition: "The process of determining how much capital to allocate to a single trade, typically based on risk parameters.",
-    whyItMatters: "Position sizing is often more important than entry timing. Proper sizing ensures no single trade can devastate your portfolio."
-  },
-  {
-    term: "Stop Loss",
-    definition: "A predetermined price level at which you'll exit a losing trade to limit downside.",
-    whyItMatters: "Stop losses enforce discipline and prevent emotional decision-making during drawdowns."
-  },
-  {
-    term: "Take Profit",
-    definition: "A predetermined price level at which you'll exit a winning trade to lock in gains.",
-    whyItMatters: "Without take profit levels, winning trades can turn into losers. It's essential for capturing gains systematically."
-  },
-  {
-    term: "Risk-Reward Ratio",
-    definition: "The ratio between your potential profit and potential loss on a trade. A 3:1 ratio means you're risking $1 to make $3.",
-    whyItMatters: "Even with a 50% win rate, a favorable risk-reward ratio can lead to profitable trading."
-  }
-];
-
-// Article 2: Trading Strategies
-const strategies = [
-  {
-    name: "Momentum Strategies",
-    description: "Riding trends by buying assets showing strong upward price movement and selling those trending downward.",
-    keyPrinciples: [
-      "Trend-following: 'The trend is your friend'",
-      "Breakout trading on volume confirmation",
-      "Relative strength comparison across assets"
-    ],
-    howOutputLensHelps: "Our Monte Carlo simulations incorporate momentum factors, and our scenario analysis shows probability of trend continuation vs. reversal.",
-    icon: TrendingUp
-  },
-  {
-    name: "Mean Reversion",
-    description: "Betting that overextended moves will revert to historical averages—buying dips and selling rallies.",
-    keyPrinciples: [
-      "Statistical extremes tend to normalize",
-      "Bollinger Bands and RSI for overbought/oversold signals",
-      "Pair trading to isolate relative value"
-    ],
-    howOutputLensHelps: "Our tail risk analysis identifies extreme scenarios, while VaR calculations help set appropriate entry points for mean reversion trades.",
-    icon: Activity
-  },
-  {
-    name: "Risk Parity",
-    description: "Allocating capital based on risk contribution rather than dollar amounts, ensuring each position contributes equally to portfolio volatility.",
-    keyPrinciples: [
-      "Balance volatility, not just capital",
-      "Diversification across uncorrelated assets",
-      "Dynamic rebalancing as volatilities change"
-    ],
-    howOutputLensHelps: "Portfolio-level analysis shows risk contribution from each holding, enabling true risk-parity allocation.",
-    icon: PieChart
-  },
-  {
-    name: "Quantitative/Systematic",
-    description: "Algorithm-driven strategies that remove emotion, using backtested rules and statistical models for all decisions.",
-    keyPrinciples: [
-      "Data-driven decision making",
-      "Backtesting on historical data",
-      "Consistent execution without emotional bias"
-    ],
-    howOutputLensHelps: "OutputLens provides the quantitative metrics (Sharpe, Kurtosis, VaR) that systematic traders need to validate their strategies.",
-    icon: LineChart
-  },
-  {
-    name: "Event-Driven",
-    description: "Trading around specific catalysts like earnings announcements, M&A, central bank meetings, or economic data releases.",
-    keyPrinciples: [
-      "Anticipate market reactions to scheduled events",
-      "Volatility expansion around catalysts",
-      "Risk management for binary outcomes"
-    ],
-    howOutputLensHelps: "Our scenario regime analysis models bullish, bearish, and base case outcomes—perfect for event-driven setups with binary risk.",
-    icon: Zap
-  }
 ];
 
 export default function About() {
   useEffect(() => {
-    document.title = 'About OutputLens - Mission, Learn & Explore | OutputLens';
+    document.title = 'About OutputLens - Our Mission | OutputLens';
   }, []);
 
   return (
     <Layout>
-      {/* Hero Section - Our Story & Mission */}
+      {/* Hero Section */}
       <section className="relative py-20 md:py-28 overflow-hidden">
         <div className="absolute inset-0 hero-gradient opacity-50" />
         <div className="section-container relative z-10">
           <div className="text-center max-w-4xl mx-auto">
             <Badge variant="secondary" className="mb-6 px-4 py-2">
               <Rocket className="w-4 h-4 mr-2" />
-              Our Story & Mission
+              Our Story
             </Badge>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-brand font-bold text-foreground mb-6">
               Why We Built{' '}
               <span className="text-primary">OutputLens</span>
             </h1>
             <p className="text-xl md:text-2xl text-muted-foreground mb-8 leading-relaxed max-w-3xl mx-auto">
-              Markets are irrational, and drawdowns are inevitable. We built OutputLens to give traders the same institutional-grade risk tools that hedge funds use — AI-powered, in-browser, and accessible to everyone.
+              Markets are irrational, and drawdowns are inevitable. We built OutputLens to give every trader 
+              access to institutional-grade risk quantification—transparent, accessible, and honest.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button asChild size="lg" className="text-lg px-8">
                 <Link to="/workspace">
-                  Explore Risk Scenarios
+                  Try Risk Analysis
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
               <Button asChild variant="outline" size="lg" className="text-lg px-8">
                 <Link to="/methodology">
-                  See How It Works
+                  Our Methodology
                 </Link>
               </Button>
             </div>
@@ -287,7 +131,7 @@ export default function About() {
         </div>
       </section>
 
-      {/* Mission Statement Section - YC-style */}
+      {/* Mission Statement */}
       <section className="py-16 md:py-20 bg-primary/5 border-y border-primary/10">
         <div className="section-container">
           <div className="max-w-4xl mx-auto text-center">
@@ -296,28 +140,26 @@ export default function About() {
               <span className="font-semibold">Our Mission</span>
             </div>
             <blockquote className="text-2xl md:text-3xl font-brand font-semibold text-foreground leading-relaxed mb-4">
-              "Build the world's most trustworthy, AI-powered probabilistic risk intelligence platform—giving traders and institutions the same mathematical tools used by hedge funds, without hype or black-box predictions."
+              "Build the most trustworthy probabilistic risk platform—giving traders the same 
+              quantitative tools used by institutions, without hype or black-box predictions."
             </blockquote>
             <p className="text-lg text-muted-foreground">
-              We quantify uncertainty before capital is deployed. Truth over hype. Probabilities, not predictions.
+              We quantify uncertainty before capital is deployed. Probabilities, not predictions.
             </p>
           </div>
         </div>
       </section>
 
-      {/* Core Principles Section (NEW) */}
+      {/* Core Principles */}
       <section className="py-16 md:py-20">
         <div className="section-container">
           <div className="text-center mb-12">
             <Badge variant="secondary" className="mb-4 px-4 py-2">
               <Shield className="w-4 h-4 mr-2" />
-              Core Principles
-            </Badge>
-            <h2 className="text-3xl md:text-4xl font-brand font-bold text-foreground mb-4">
               What We Believe
-            </h2>
+            </Badge>
           </div>
-          <div className="max-w-4xl mx-auto grid md:grid-cols-5 gap-4">
+          <div className="max-w-3xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4">
             {corePrinciples.map((principle, index) => (
               <div key={index} className="text-center p-4 rounded-lg bg-card border border-border">
                 <div className="w-10 h-10 mx-auto mb-3 rounded-lg bg-primary/10 flex items-center justify-center">
@@ -331,319 +173,104 @@ export default function About() {
         </div>
       </section>
 
-      {/* Non-Goals & IP Section (NEW) */}
+      {/* Who We Serve */}
       <section className="py-16 md:py-20 bg-muted/30">
         <div className="section-container">
-          <div className="max-w-4xl mx-auto grid md:grid-cols-2 gap-8">
-            {/* Non-Goals */}
-            <div className="glass-card p-6 border-l-4 border-l-bearish">
-              <h3 className="font-semibold text-foreground mb-4 flex items-center gap-2">
-                <XCircle className="h-5 w-5 text-bearish" />
-                What We Don't Do (Non-Goals)
-              </h3>
-              <ul className="space-y-2">
-                {nonGoals.map((item, i) => (
-                  <li key={i} className="flex items-center gap-3 text-sm text-muted-foreground">
-                    <div className="h-1.5 w-1.5 rounded-full bg-bearish" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* IP Boundary */}
-            <div className="glass-card p-6 border-l-4 border-l-bullish">
-              <h3 className="font-semibold text-foreground mb-4 flex items-center gap-2">
-                <CheckCircle2 className="h-5 w-5 text-bullish" />
-                What is OutputLens IP
-              </h3>
-              <ul className="space-y-2 mb-4">
-                {ipOwned.map((item, i) => (
-                  <li key={i} className="flex items-center gap-3 text-sm text-muted-foreground">
-                    <div className="h-1.5 w-1.5 rounded-full bg-bullish" />
-                    ✔ {item}
-                  </li>
-                ))}
-              </ul>
-              <p className="text-xs text-muted-foreground italic border-t pt-3 border-border">
-                Not IP: {ipNotOwned.join(' • ')}
-              </p>
-            </div>
-          </div>
-          
-          {/* IP Statement */}
-          <div className="max-w-2xl mx-auto mt-8 text-center">
-            <p className="text-sm text-muted-foreground bg-primary/5 border border-primary/20 rounded-lg p-4">
-              <Target className="h-4 w-4 inline mr-2 text-primary" />
-              <strong>The mathematics are public.</strong> Our IP is how we orchestrate, interpret, and operationalize them at scale.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* Who We Serve Section - Compact Bullets */}
-      <section className="py-16 md:py-24 bg-muted/30">
-        <div className="section-container">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-brand font-bold text-foreground mb-4">
+            <Badge variant="secondary" className="mb-4 px-4 py-2">
+              <TrendingUp className="w-4 h-4 mr-2" />
               Who We Serve
+            </Badge>
+            <h2 className="text-3xl font-brand font-bold text-foreground">
+              Built for Risk-Aware Traders
             </h2>
           </div>
-
-          <div className="max-w-4xl mx-auto">
-            {/* Compact Persona Bullets */}
-            <div className="grid md:grid-cols-3 gap-6 mb-12">
-              {personas.map((persona, index) => (
-                <div key={index} className="flex items-start gap-4 p-4 rounded-lg bg-card border border-border">
-                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                    <persona.icon className="w-5 h-5 text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-foreground mb-1">
-                      {persona.title}
-                    </h3>
-                    <p className="text-sm text-muted-foreground">
-                      {persona.description}
-                    </p>
-                  </div>
+          <div className="max-w-4xl mx-auto grid md:grid-cols-3 gap-6">
+            {personas.map((persona, idx) => (
+              <div key={idx} className="glass-card p-6">
+                <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
+                  <persona.icon className="w-6 h-6 text-primary" />
                 </div>
-              ))}
-            </div>
-
-            {/* Tagline */}
-            <div className="text-center">
-              <p className="text-xl md:text-2xl font-brand font-semibold text-foreground">
-                Most traders guess. Institutions quantify.{' '}
-                <span className="text-primary">We close that gap.</span>
-              </p>
-            </div>
+                <h3 className="font-semibold text-foreground text-lg mb-1">{persona.title}</h3>
+                <p className="text-sm text-primary mb-3">{persona.subtitle}</p>
+                <p className="text-sm text-muted-foreground">{persona.description}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Learn & Explore Section */}
-      <section id="learn" className="py-16 md:py-24">
+      {/* Learn & Explore - Glossary */}
+      <section className="py-16 md:py-20">
         <div className="section-container">
           <div className="text-center mb-12">
             <Badge variant="secondary" className="mb-4 px-4 py-2">
               <BookOpen className="w-4 h-4 mr-2" />
               Learn & Explore
             </Badge>
-            <h2 className="text-3xl md:text-4xl font-brand font-bold text-foreground mb-4">
-              Educational Resources
+            <h2 className="text-3xl font-brand font-bold text-foreground mb-4">
+              Risk Metrics Glossary
             </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Sharpen your risk management with in-depth guides on trading terminology and strategies.
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              Understanding these concepts will help you make better risk-aware decisions.
             </p>
           </div>
-
-          {/* Article 1: Trading Terms */}
-          <div id="trading-terms" className="max-w-5xl mx-auto mb-16">
-            <Card className="overflow-hidden">
-              <div className="bg-gradient-to-r from-primary/10 to-primary/5 p-6 md:p-8 border-b">
-                <div className="flex items-center gap-3 mb-4">
-                  <Badge variant="default">Glossary</Badge>
-                  <span className="text-sm text-muted-foreground flex items-center">
-                    <Clock className="w-4 h-4 mr-1" />
-                    10 min read
-                  </span>
-                </div>
-                <h3 className="text-2xl md:text-3xl font-brand font-bold text-foreground mb-2">
-                  Understanding Trading & Investment Terms
-                </h3>
-                <p className="text-muted-foreground">
-                  Master the essential terminology from OutputLens metrics to industry-standard concepts. Each term includes a clear definition, why it matters, and how OutputLens helps you apply it.
-                </p>
+          
+          <div className="max-w-4xl mx-auto grid md:grid-cols-2 gap-4">
+            {glossaryTerms.map((item) => (
+              <div key={item.term} className="glass-card p-5">
+                <h3 className="font-semibold text-foreground mb-2">{item.term}</h3>
+                <p className="text-sm text-muted-foreground">{item.definition}</p>
               </div>
-              
-              <CardContent className="p-6 md:p-8">
-                {/* OutputLens Terminology */}
-                <div className="mb-10">
-                  <h4 className="text-xl font-semibold text-foreground mb-6 flex items-center gap-2">
-                    <Shield className="w-5 h-5 text-primary" />
-                    OutputLens Terminology
-                  </h4>
-                  <div className="space-y-6">
-                    {outputLensTerms.map((item, index) => (
-                      <div key={index} className="p-4 rounded-lg bg-muted/50 border border-border">
-                        <h5 className="font-semibold text-foreground text-lg mb-2">{item.term}</h5>
-                        <p className="text-muted-foreground mb-3">{item.definition}</p>
-                        <div className="grid md:grid-cols-2 gap-3">
-                          <div className="p-3 rounded bg-amber-500/10 border border-amber-500/20">
-                            <span className="text-xs font-semibold text-amber-600 uppercase">Why It Matters</span>
-                            <p className="text-sm text-foreground mt-1">{item.whyItMatters}</p>
-                          </div>
-                          <div className="p-3 rounded bg-primary/10 border border-primary/20">
-                            <span className="text-xs font-semibold text-primary uppercase">How OutputLens Helps</span>
-                            <p className="text-sm text-foreground mt-1">{item.howWeHelp}</p>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <Separator className="my-8" />
-
-                {/* Industry Standard Terms */}
-                <div>
-                  <h4 className="text-xl font-semibold text-foreground mb-6 flex items-center gap-2">
-                    <BarChart3 className="w-5 h-5 text-primary" />
-                    Industry Standard Terms
-                  </h4>
-                  <div className="grid md:grid-cols-2 gap-4">
-                    {industryTerms.map((item, index) => (
-                      <div key={index} className="p-4 rounded-lg bg-muted/50 border border-border">
-                        <h5 className="font-semibold text-foreground mb-2">{item.term}</h5>
-                        <p className="text-sm text-muted-foreground mb-2">{item.definition}</p>
-                        <p className="text-xs text-primary">{item.whyItMatters}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Article 2: Trading Strategies */}
-          <div id="strategies-2026" className="max-w-5xl mx-auto mb-16">
-            <Card className="overflow-hidden">
-              <div className="bg-gradient-to-r from-green-500/10 to-green-500/5 p-6 md:p-8 border-b">
-                <div className="flex items-center gap-3 mb-4">
-                  <Badge className="bg-green-500/20 text-green-600 hover:bg-green-500/30">Strategy</Badge>
-                  <span className="text-sm text-muted-foreground flex items-center">
-                    <Clock className="w-4 h-4 mr-1" />
-                    12 min read
-                  </span>
-                </div>
-                <h3 className="text-2xl md:text-3xl font-brand font-bold text-foreground mb-2">
-                  Trading & Hedge Fund Strategies in 2026
-                </h3>
-                <p className="text-muted-foreground">
-                  Explore the major approaches used by professional traders and hedge funds—from momentum to mean reversion to quantitative systematic trading—and how OutputLens supports each strategy type.
-                </p>
-              </div>
-              
-              <CardContent className="p-6 md:p-8">
-                <div className="space-y-8">
-                  {strategies.map((strategy, index) => {
-                    const Icon = strategy.icon;
-                    return (
-                      <div key={index} className="p-6 rounded-lg bg-muted/50 border border-border">
-                        <div className="flex items-start gap-4 mb-4">
-                          <div className="p-3 rounded-lg bg-primary/10 flex-shrink-0">
-                            <Icon className="w-6 h-6 text-primary" />
-                          </div>
-                          <div>
-                            <h5 className="font-semibold text-foreground text-xl mb-2">{strategy.name}</h5>
-                            <p className="text-muted-foreground">{strategy.description}</p>
-                          </div>
-                        </div>
-                        
-                        <div className="grid md:grid-cols-2 gap-4 mt-4">
-                          <div className="p-4 rounded bg-background border border-border">
-                            <span className="text-xs font-semibold text-muted-foreground uppercase mb-2 block">Key Principles</span>
-                            <ul className="space-y-1">
-                              {strategy.keyPrinciples.map((principle, pIndex) => (
-                                <li key={pIndex} className="text-sm text-foreground flex items-start gap-2">
-                                  <span className="text-primary mt-1">•</span>
-                                  {principle}
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                          <div className="p-4 rounded bg-primary/5 border border-primary/20">
-                            <span className="text-xs font-semibold text-primary uppercase mb-2 block">How OutputLens Helps</span>
-                            <p className="text-sm text-foreground">{strategy.howOutputLensHelps}</p>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Monthly Insights - Coming Soon */}
-          <div id="monthly-insights" className="max-w-5xl mx-auto">
-            <Card className="overflow-hidden opacity-80">
-              <div className="bg-gradient-to-r from-muted to-muted/50 p-6 md:p-8 border-b">
-                <div className="flex items-center gap-3 mb-4">
-                  <Badge variant="secondary">Coming Soon</Badge>
-                  <span className="text-sm text-muted-foreground flex items-center">
-                    <Calendar className="w-4 h-4 mr-1" />
-                    February 2026
-                  </span>
-                </div>
-                <h3 className="text-2xl md:text-3xl font-brand font-bold text-foreground mb-2">
-                  Monthly Finance Insights
-                </h3>
-                <p className="text-muted-foreground">
-                  Stay tuned for our monthly analysis of market trends, emerging opportunities, and in-depth company or sector analysis. Each month we'll cover what's new in finance with data-driven insights.
-                </p>
-              </div>
-              <CardContent className="p-6 md:p-8">
-                <div className="text-center py-8">
-                  <Calendar className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-lg font-medium text-foreground mb-2">First Article Coming February 2026</p>
-                  <p className="text-muted-foreground">Topics will include market analysis, company deep-dives, and actionable insights for traders.</p>
-                </div>
-              </CardContent>
-            </Card>
+            ))}
           </div>
         </div>
       </section>
 
       {/* Social Links */}
-      <section className="py-12 bg-muted/30">
+      <section className="py-16 md:py-20 bg-muted/30">
         <div className="section-container">
-          <div className="text-center">
-            <h3 className="text-lg font-semibold text-foreground mb-6">
-              Follow Us
-            </h3>
-            <div className="flex flex-wrap justify-center gap-3">
-              {socialLinks.map((social, index) => (
-                <a
-                  key={index}
-                  href={social.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-card border border-border hover:bg-accent hover:text-accent-foreground transition-colors"
-                  aria-label={social.name}
-                >
-                  <social.icon className="w-4 h-4" />
-                  <span className="text-sm font-medium">{social.handle}</span>
-                </a>
-              ))}
-            </div>
+          <div className="text-center mb-8">
+            <h2 className="text-2xl font-brand font-bold text-foreground mb-2">
+              Connect With Us
+            </h2>
+            <p className="text-muted-foreground">Follow our journey and get updates</p>
+          </div>
+          <div className="flex flex-wrap justify-center gap-4 max-w-2xl mx-auto">
+            {socialLinks.map((social) => (
+              <a
+                key={social.name}
+                href={social.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-card border border-border hover:border-primary/30 transition-colors"
+              >
+                <social.icon className="w-4 h-4" />
+                <span className="text-sm font-medium">{social.handle}</span>
+              </a>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Final CTA Section */}
-      <section className="py-16 md:py-24">
+      <Separator />
+
+      {/* Final CTA */}
+      <section className="py-16 md:py-20">
         <div className="section-container">
-          <div className="text-center max-w-3xl mx-auto">
-            <h2 className="text-3xl md:text-4xl font-brand font-bold text-foreground mb-4">
-              Start Analyzing Risk Today
+          <div className="max-w-2xl mx-auto text-center">
+            <h2 className="text-3xl font-brand font-bold text-foreground mb-4">
+              Ready to Quantify Your Risk?
             </h2>
-            <p className="text-lg text-muted-foreground mb-8">
-              Join traders who quantify before they trade.
+            <p className="text-muted-foreground mb-8">
+              Join thousands of traders who understand their risk before they trade.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button asChild size="lg" className="text-lg px-8">
-                <Link to="/workspace">
-                  Try Free Analysis
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Link>
-              </Button>
-              <Button asChild variant="outline" size="lg" className="text-lg px-8">
-                <Link to="/pricing">
-                  View Pricing
-                </Link>
-              </Button>
-            </div>
+            <Button asChild size="lg" className="text-lg px-8">
+              <Link to="/auth?mode=signup">
+                Get Started Free
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Link>
+            </Button>
           </div>
         </div>
       </section>

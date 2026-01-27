@@ -179,10 +179,10 @@ export default function Landing() {
                 </Link>
               </Button>
               <Button size="lg" variant="outline" asChild className="px-8 py-6 text-lg">
-                <Link to="/demo">
+                <a href="#demo">
                   <Play className="mr-2 h-5 w-5" />
-                  See Live Demo
-                </Link>
+                  Try Interactive Demo
+                </a>
               </Button>
             </div>
 
@@ -355,10 +355,10 @@ export default function Landing() {
           {/* Shared CTA */}
           <div className="text-center mt-8">
             <Button variant="outline" asChild>
-              <Link to="/demo">
-                See How It Works
+              <a href="#demo">
+                Try Interactive Demo
                 <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
+              </a>
             </Button>
           </div>
         </div>
