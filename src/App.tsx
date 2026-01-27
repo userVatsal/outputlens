@@ -6,23 +6,17 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { TradeProvider } from "@/hooks/useTrade";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { TrackingProvider } from "@/components/tracking/TrackingProvider";
-import Landing from "./pages/Landing";
-import Auth from "./pages/Auth";
-import Dashboard from "./pages/Dashboard";
-import Workspace from "./pages/Workspace";
-import Results from "./pages/Results";
-import Portfolio from "./pages/Portfolio";
-import History from "./pages/History";
-import Methodology from "./pages/Methodology";
-import Pricing from "./pages/Pricing";
-import Privacy from "./pages/Privacy";
-import Terms from "./pages/Terms";
+
+// Core pages (4 only)
+import Decision from "./pages/Decision";
+import Decisions from "./pages/Decisions";
 import Account from "./pages/Account";
-import Demo from "./pages/Demo";
-import TrackedAssets from "./pages/TrackedAssets";
-import About from "./pages/About";
-import Onboarding from "./pages/Onboarding";
+import Legal from "./pages/Legal";
+import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
+
+// Keep onboarding for legal consent
+import Onboarding from "./pages/Onboarding";
 
 const queryClient = new QueryClient();
 
@@ -36,24 +30,33 @@ const App = () => (
               <Toaster />
               <Sonner />
               <Routes>
-                <Route path="/" element={<Landing />} />
-                <Route path="/auth" element={<Auth />} />
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/onboarding" element={<Onboarding />} />
-                <Route path="/workspace" element={<Workspace />} />
-                <Route path="/analyze" element={<Navigate to="/workspace" replace />} />
-                <Route path="/results" element={<Results />} />
-                <Route path="/portfolio" element={<Navigate to="/workspace?mode=portfolio" replace />} />
-                <Route path="/history" element={<History />} />
-                <Route path="/methodology" element={<Methodology />} />
-                <Route path="/pricing" element={<Pricing />} />
-                <Route path="/privacy" element={<Privacy />} />
-                <Route path="/terms" element={<Terms />} />
+                {/* Core 4 pages */}
+                <Route path="/" element={<Decision />} />
+                <Route path="/decisions" element={<Decisions />} />
                 <Route path="/account" element={<Account />} />
-                <Route path="/demo" element={<Navigate to="/#demo" replace />} />
-                <Route path="/tracked-assets" element={<TrackedAssets />} />
-                <Route path="/about" element={<About />} />
-                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                <Route path="/legal" element={<Legal />} />
+                
+                {/* Auth flow */}
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/onboarding" element={<Onboarding />} />
+                
+                {/* Redirects for deprecated routes */}
+                <Route path="/landing" element={<Navigate to="/" replace />} />
+                <Route path="/dashboard" element={<Navigate to="/" replace />} />
+                <Route path="/workspace" element={<Navigate to="/" replace />} />
+                <Route path="/analyze" element={<Navigate to="/" replace />} />
+                <Route path="/results" element={<Navigate to="/" replace />} />
+                <Route path="/pricing" element={<Navigate to="/account" replace />} />
+                <Route path="/methodology" element={<Navigate to="/legal" replace />} />
+                <Route path="/about" element={<Navigate to="/" replace />} />
+                <Route path="/portfolio" element={<Navigate to="/" replace />} />
+                <Route path="/tracked-assets" element={<Navigate to="/" replace />} />
+                <Route path="/demo" element={<Navigate to="/" replace />} />
+                <Route path="/history" element={<Navigate to="/decisions" replace />} />
+                <Route path="/privacy" element={<Navigate to="/legal" replace />} />
+                <Route path="/terms" element={<Navigate to="/legal" replace />} />
+                
+                {/* 404 */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </TrackingProvider>
