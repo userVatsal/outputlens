@@ -48,7 +48,6 @@ export function useAssetSearch(
   const [error, setError] = useState<string | null>(null);
   const [selectedAsset, setSelectedAsset] = useState<SelectedAsset | null>(null);
   const [isOpen, setIsOpen] = useState(false);
-  const skipNextSearchRef = useRef(false);
   
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -104,12 +103,6 @@ export function useAssetSearch(
       clearTimeout(debounceRef.current);
     }
 
-    // Skip search if we just selected an asset (prevent re-searching selected asset name)
-    if (skipNextSearchRef.current) {
-      skipNextSearchRef.current = false;
-      return;
-    }
-
     if (!query || query.length < minChars) {
       setResults([]);
       setIsOpen(false);
@@ -146,8 +139,6 @@ export function useAssetSearch(
       type: asset.type,
       exchange: asset.exchange,
     });
-    // Skip the next search since we're setting query to the selected asset name
-    skipNextSearchRef.current = true;
     setQuery(asset.name);
     setResults([]);
     setIsOpen(false);

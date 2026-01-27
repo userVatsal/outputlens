@@ -142,7 +142,6 @@ export type Database = {
           asset: string
           created_at: string
           data_sources: Json | null
-          decision_outcome: string | null
           direction: string
           entry_price: number
           id: string
@@ -159,7 +158,6 @@ export type Database = {
           asset: string
           created_at?: string
           data_sources?: Json | null
-          decision_outcome?: string | null
           direction: string
           entry_price: number
           id?: string
@@ -176,7 +174,6 @@ export type Database = {
           asset?: string
           created_at?: string
           data_sources?: Json | null
-          decision_outcome?: string | null
           direction?: string
           entry_price?: number
           id?: string

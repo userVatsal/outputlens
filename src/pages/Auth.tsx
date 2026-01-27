@@ -84,23 +84,40 @@ export default function Auth() {
   }, [mode]);
 
   useEffect(() => {
-    // Check if already logged in - redirect to main decision page
+    // Check if already logged in
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session) {
-        // PMF redesign: go straight to decision page, no onboarding wizard
-        navigate('/');
+        // Check if onboarding is completed
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('onboarding_completed')
+          .eq('user_id', session.user.id)
+          .single();
+        
+        if (profile?.onboarding_completed) {
+          navigate('/dashboard');
+        } else {
+          navigate('/onboarding');
+        }
       }
     });
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('[Auth] Auth state changed:', event, session?.user?.id);
-        
         if (session) {
-          // PMF redesign: go straight to decision page
-          // First analysis IS the onboarding
-          navigate('/');
+          // Check onboarding status
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('onboarding_completed')
+            .eq('user_id', session.user.id)
+            .single();
+          
+          if (profile?.onboarding_completed) {
+            navigate('/dashboard');
+          } else {
+            navigate('/onboarding');
+          }
         }
       }
     );
@@ -134,12 +151,9 @@ export default function Auth() {
 
     if (!validateForm()) return;
 
-    console.log('[Auth] Submit started', { mode });
-
     // Check security before submitting
     const endpoint = mode === 'signup' ? 'signup' : 'login';
     const analysis = await checkSecurity(endpoint);
-    console.log('[Auth] Security check complete', { endpoint, blocked: analysis.blocked, captchaRequired: analysis.captchaRequired });
 
     // If blocked, show error
     if (analysis.blocked) {
@@ -156,20 +170,9 @@ export default function Auth() {
 
     setLoading(true);
 
-    // If anything in the auth flow hangs, fail gracefully so the UI doesn't spin forever.
-    let didFinish = false;
-    const slowTimer = window.setTimeout(() => {
-      if (!didFinish) {
-        console.warn('[Auth] Login/signup taking too long, releasing UI');
-        setLoading(false);
-        setError('This is taking longer than expected. Please try again.');
-      }
-    }, 15000);
-
     try {
       if (mode === 'signup') {
         // Quick signup - only send email and password, profile will be completed later
-        console.log('[Auth] signUp start');
         const { error } = await supabase.auth.signUp({
           email,
           password,
@@ -181,8 +184,6 @@ export default function Auth() {
             },
           },
         });
-
-        console.log('[Auth] signUp completed', { hasError: !!error });
 
         if (error) {
           if (error.message.includes('already registered')) {
@@ -200,13 +201,10 @@ export default function Auth() {
           body: { email }
         }).catch(err => console.error('Welcome email failed:', err));
       } else {
-        console.log('[Auth] signIn start');
         const { error } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
-
-        console.log('[Auth] signIn completed', { hasError: !!error });
 
         if (error) {
           if (error.message.includes('Invalid login credentials')) {
@@ -222,8 +220,6 @@ export default function Auth() {
     } catch (err) {
       setError('An unexpected error occurred. Please try again.');
     } finally {
-      didFinish = true;
-      window.clearTimeout(slowTimer);
       setLoading(false);
     }
   };
@@ -440,7 +436,7 @@ export default function Auth() {
                 await supabase.auth.signInWithOAuth({
                   provider: 'google',
                   options: {
-                    redirectTo: `${window.location.origin}/`,
+                    redirectTo: `${window.location.origin}/dashboard`,
                   },
                 });
                 setLoading(false);

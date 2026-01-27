@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { Loader2, LogOut } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { BrandLogo } from '@/components/BrandLogo';
-import { PaywallModal } from '@/components/PaywallModal';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Loader2, User, CreditCard, Shield } from 'lucide-react';
+import { Layout } from '@/components/layout/Layout';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ProfileSection } from '@/components/account/ProfileSection';
+import { SubscriptionSection } from '@/components/account/SubscriptionSection';
+import { LegalSection } from '@/components/account/LegalSection';
 import { useProfile } from '@/hooks/useProfile';
 import { usePlan } from '@/hooks/usePlan';
 import { useUsage } from '@/hooks/useUsage';
@@ -12,170 +14,140 @@ import { toast } from 'sonner';
 
 export default function Account() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [loading, setLoading] = useState(true);
   const [portalLoading, setPortalLoading] = useState(false);
-  const [deleting, setDeleting] = useState(false);
   
-  const { profile, loading: profileLoading } = useProfile();
-  const { subscribed, planConfig, openCustomerPortal, isLoading: planLoading } = usePlan();
+  const { 
+    profile, 
+    loading: profileLoading, 
+    updateProfile, 
+    checkUsernameAvailable,
+    acceptConsent 
+  } = useProfile();
+  
+  const { 
+    subscribed, 
+    subscriptionEnd, 
+    isLoading: planLoading,
+    planConfig,
+    openCustomerPortal,
+    checkSubscription
+  } = usePlan();
+  
   const { usage, loading: usageLoading } = useUsage();
 
+  // SEO: Set page-specific document title
   useEffect(() => {
-    document.title = 'Account | OutputLens';
+    document.title = 'Account Settings | OutputLens';
   }, []);
 
   useEffect(() => {
+    // Check auth
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!session) {
         navigate('/auth');
       }
       setLoading(false);
     });
-  }, [navigate]);
+
+    // Handle success redirect
+    if (searchParams.get('success') === 'true') {
+      toast.success('Subscription activated! Welcome to your new plan.');
+      checkSubscription();
+    }
+  }, [navigate, searchParams, checkSubscription]);
 
   const handleManageSubscription = async () => {
     setPortalLoading(true);
     try {
       await openCustomerPortal();
-    } catch {
-      toast.error('Unable to open billing portal');
+    } catch (err) {
+      toast.error('Unable to open billing portal. Please try again.');
     } finally {
       setPortalLoading(false);
     }
   };
 
-  const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    navigate('/');
-  };
-
-  const handleDeleteAccount = async () => {
-    const confirmed = confirm('Are you sure you want to delete your account? This cannot be undone.');
-    if (!confirmed) return;
-
-    setDeleting(true);
-    try {
-      // Delete profile (cascade will handle related data)
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        await supabase.from('profiles').delete().eq('user_id', session.user.id);
-      }
-      await supabase.auth.signOut();
-      toast.success('Account deleted');
-      navigate('/');
-    } catch {
-      toast.error('Failed to delete account');
-    } finally {
-      setDeleting(false);
-    }
-  };
-
   if (loading || planLoading || profileLoading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-      </div>
+      <Layout>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </Layout>
     );
   }
 
-  const email = profile?.user_id ? '(loading...)' : 'Unknown';
-  const usageCount = usage?.analysisCount || 0;
-  const usageLimit = planConfig?.analysesLimit || 5;
+  if (!profile) {
+    return (
+      <Layout>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <p className="text-muted-foreground">Unable to load profile. Please try again.</p>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Minimal header */}
-      <header className="border-b border-border">
-        <div className="section-container py-4 flex items-center justify-between">
-          <Link to="/">
-            <BrandLogo size="md" />
-          </Link>
-          <Button variant="ghost" size="sm" onClick={handleSignOut}>
-            <LogOut className="h-4 w-4 mr-2" />
-            Sign out
-          </Button>
-        </div>
-      </header>
-
-      <main className="section-container py-8">
-        <h1 className="text-2xl font-semibold text-foreground mb-8">Account</h1>
-
-        <div className="space-y-6">
-          {/* Email */}
-          <div className="glass-card p-5">
-            <p className="text-sm text-muted-foreground mb-1">Email</p>
-            <p className="text-foreground font-medium">
-              {profile?.user_id || 'Not available'}
+    <Layout>
+      <div className="section-container py-8">
+        <div className="max-w-4xl mx-auto">
+          {/* Header */}
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-foreground mb-2">Account</h1>
+            <p className="text-muted-foreground">
+              Manage your profile, subscription, and privacy settings
             </p>
           </div>
 
-          {/* Usage */}
-          <div className="glass-card p-5">
-            <p className="text-sm text-muted-foreground mb-2">Usage this month</p>
-            <div className="flex items-center justify-between">
-              <p className="text-foreground font-medium">
-                {usageLoading ? '...' : `${usageCount} / ${usageLimit === Infinity ? '∞' : usageLimit}`} analyses
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {planConfig?.name || 'Free'} plan
-              </p>
-            </div>
-            {/* Simple progress bar */}
-            {usageLimit !== Infinity && (
-              <div className="mt-3 h-1.5 bg-muted rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-foreground rounded-full transition-all"
-                  style={{ width: `${Math.min((usageCount / usageLimit) * 100, 100)}%` }}
-                />
-              </div>
-            )}
-          </div>
+          {/* Tabbed Content */}
+          <Tabs defaultValue="profile" className="space-y-6">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="profile" className="flex items-center gap-2">
+                <User className="h-4 w-4" />
+                <span className="hidden sm:inline">Profile</span>
+              </TabsTrigger>
+              <TabsTrigger value="subscription" className="flex items-center gap-2">
+                <CreditCard className="h-4 w-4" />
+                <span className="hidden sm:inline">Subscription</span>
+              </TabsTrigger>
+              <TabsTrigger value="privacy" className="flex items-center gap-2">
+                <Shield className="h-4 w-4" />
+                <span className="hidden sm:inline">Privacy</span>
+              </TabsTrigger>
+            </TabsList>
 
-          {/* Subscription */}
-          <div className="glass-card p-5">
-            <p className="text-sm text-muted-foreground mb-3">Subscription</p>
-            {subscribed ? (
-              <div className="space-y-3">
-                <p className="text-foreground font-medium">{planConfig?.name} Plan</p>
-                <Button 
-                  variant="outline" 
-                  onClick={handleManageSubscription}
-                  disabled={portalLoading}
-                >
-                  {portalLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-                  Manage subscription
-                </Button>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                <p className="text-foreground">Free plan - 5 analyses per month</p>
-                <Button onClick={() => navigate('/account?upgrade=true')}>
-                  Upgrade
-                </Button>
-              </div>
-            )}
-          </div>
+            <TabsContent value="profile">
+              <ProfileSection
+                profile={profile}
+                onUpdate={updateProfile}
+                checkUsernameAvailable={checkUsernameAvailable}
+              />
+            </TabsContent>
 
-          {/* Delete account */}
-          <div className="glass-card p-5">
-            <p className="text-sm text-muted-foreground mb-3">Danger zone</p>
-            <Button 
-              variant="outline" 
-              onClick={handleDeleteAccount}
-              disabled={deleting}
-              className="text-destructive border-destructive/30 hover:bg-destructive/10"
-            >
-              {deleting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-              Delete account
-            </Button>
-          </div>
+            <TabsContent value="subscription">
+              <SubscriptionSection
+                profile={profile}
+                planConfig={planConfig}
+                usage={usage}
+                usageLoading={usageLoading}
+                subscriptionEnd={subscriptionEnd}
+                subscribed={subscribed}
+                onManageSubscription={handleManageSubscription}
+                portalLoading={portalLoading}
+              />
+            </TabsContent>
+
+            <TabsContent value="privacy">
+              <LegalSection
+                profile={profile}
+                onAcceptConsent={acceptConsent}
+              />
+            </TabsContent>
+          </Tabs>
         </div>
-
-        {/* Legal link */}
-        <p className="text-xs text-muted-foreground mt-8">
-          <Link to="/legal" className="hover:text-foreground">Privacy & Terms</Link>
-        </p>
-      </main>
-    </div>
+      </div>
+    </Layout>
   );
 }

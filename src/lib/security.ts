@@ -2,27 +2,6 @@
  * Security utilities and types for SentinelAI integration
  */
 
-const DEFAULT_TIMEOUT_MS = 8000;
-
-async function fetchWithTimeout(
-  input: RequestInfo | URL,
-  init: RequestInit,
-  timeoutMs: number = DEFAULT_TIMEOUT_MS
-) {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), timeoutMs);
-
-  try {
-    const mergedInit: RequestInit = {
-      ...init,
-      signal: controller.signal,
-    };
-    return await fetch(input, mergedInit);
-  } finally {
-    clearTimeout(timeout);
-  }
-}
-
 export interface ThreatAnalysis {
   threatScore: number;
   action: "allow" | "challenge" | "block";
@@ -61,7 +40,7 @@ export async function analyzeRequest(
   metadata?: Record<string, unknown>
 ): Promise<ThreatAnalysis> {
   try {
-    const response = await fetchWithTimeout(
+    const response = await fetch(
       `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/sentinel-ai`,
       {
         method: "POST",
@@ -99,7 +78,7 @@ export async function verifyCaptcha(
   userId?: string
 ): Promise<CaptchaVerification> {
   try {
-    const response = await fetchWithTimeout(
+    const response = await fetch(
       `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/sentinel-ai`,
       {
         method: "POST",
@@ -128,7 +107,7 @@ export async function verifyCaptcha(
  */
 export async function logSecurityEvent(event: SecurityEvent, userId?: string): Promise<void> {
   try {
-    await fetchWithTimeout(
+    await fetch(
       `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/sentinel-ai`,
       {
         method: "POST",
@@ -144,8 +123,7 @@ export async function logSecurityEvent(event: SecurityEvent, userId?: string): P
           metadata: event.metadata,
           userId,
         }),
-      },
-      4000
+      }
     );
   } catch (error) {
     console.error("[Security] Log event error:", error);
@@ -162,7 +140,7 @@ export async function getIpStatus(): Promise<{
   blockedUntil?: string;
 }> {
   try {
-    const response = await fetchWithTimeout(
+    const response = await fetch(
       `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/sentinel-ai`,
       {
         method: "POST",
@@ -171,8 +149,7 @@ export async function getIpStatus(): Promise<{
           "apikey": import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
         },
         body: JSON.stringify({ action: "ip-status" }),
-      },
-      4000
+      }
     );
 
     return await response.json();

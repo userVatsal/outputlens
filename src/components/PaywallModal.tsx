@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Sparkles, Check } from 'lucide-react';
+import { Sparkles, Check, TrendingUp, BarChart3, Brain, FileDown, Bell, Code } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -10,12 +10,18 @@ import {
 import { Button } from '@/components/ui/button';
 import { usePlan } from '@/hooks/usePlan';
 import { PLAN_CONFIG, SubscriptionPlan } from '@/lib/stripe';
-import { toast } from 'sonner';
 
 export type PaywallTrigger = 
   | 'usage_limit' 
-  | 'stress_scenario'
+  | 'portfolio' 
+  | 'sentiment' 
+  | 'exports' 
+  | 'alerts' 
+  | 'api' 
+  | 'neural_database'
+  | 'regime_detection'
   | 'global_markets'
+  | 'advanced_ai'
   | 'generic';
 
 interface PaywallModalProps {
@@ -24,8 +30,86 @@ interface PaywallModalProps {
   trigger?: PaywallTrigger;
 }
 
-export function PaywallModal({ open, onOpenChange, trigger = 'usage_limit' }: PaywallModalProps) {
+const TRIGGER_CONFIG: Record<PaywallTrigger, {
+  title: string;
+  description: string;
+  icon: React.ElementType;
+  highlightFeatures: string[];
+}> = {
+  usage_limit: {
+    title: "You've Hit Your Monthly Limit",
+    description: "You've used all 5 free analyses this month. Upgrade to continue analyzing trades.",
+    icon: TrendingUp,
+    highlightFeatures: ['Layer 1-3 access', '10,000 paths', 'Global markets'],
+  },
+  portfolio: {
+    title: "Portfolio Analysis is a Pro Feature",
+    description: "Analyze your entire portfolio with correlations, risk metrics, and optimization.",
+    icon: BarChart3,
+    highlightFeatures: ['Portfolio VaR', 'Correlation matrix', 'Position sizing'],
+  },
+  sentiment: {
+    title: "Market Sentiment is a Starter Feature",
+    description: "Get AI-analyzed sentiment from 100+ news and social media sources.",
+    icon: Brain,
+    highlightFeatures: ['News sentiment', 'Social signals', 'Trend analysis'],
+  },
+  exports: {
+    title: "Exports are a Pro Feature",
+    description: "Download professional PDF and CSV reports to share with your team.",
+    icon: FileDown,
+    highlightFeatures: ['PDF reports', 'CSV exports', 'Branded documents'],
+  },
+  alerts: {
+    title: "Price Alerts are a Trader Feature",
+    description: "Get notified when your assets hit target prices or risk thresholds.",
+    icon: Bell,
+    highlightFeatures: ['Price alerts', 'Risk alerts', 'Email notifications'],
+  },
+  api: {
+    title: "API Access is a Trader Feature",
+    description: "Integrate OutputLens with your trading tools via our REST API.",
+    icon: Code,
+    highlightFeatures: ['REST API', '100 calls/mo', 'Webhooks'],
+  },
+  neural_database: {
+    title: "Neural Database is a Starter Feature",
+    description: "Unlock full neural database for historical regime similarity search (Layer 2).",
+    icon: Brain,
+    highlightFeatures: ['Pattern retrieval', 'Regime similarity', 'Historical context'],
+  },
+  regime_detection: {
+    title: "Regime Detection is a Starter Feature",
+    description: "Enable Hidden Markov Model for automatic regime classification (Layer 2).",
+    icon: TrendingUp,
+    highlightFeatures: ['Bull/Bear detection', 'Stress regimes', 'Auto-adaptation'],
+  },
+  global_markets: {
+    title: "Global Markets is a Starter Feature",
+    description: "Access UK, EU, Crypto, and Forex markets with full stochastic modeling.",
+    icon: TrendingUp,
+    highlightFeatures: ['UK/EU markets', 'Crypto', 'Forex'],
+  },
+  advanced_ai: {
+    title: "Advanced AI is a Pro Feature",
+    description: "Get advanced AI interpretations with RAG knowledge access (Layer 3).",
+    icon: Brain,
+    highlightFeatures: ['RAG access', 'Advanced explanations', 'Priority processing'],
+  },
+  generic: {
+    title: "Upgrade Your Plan",
+    description: "Unlock Layers 1-3: Full stochastic models, neural database, and advanced AI.",
+    icon: Sparkles,
+    highlightFeatures: ['Three-layer access', 'Global markets', 'Neural database'],
+  },
+};
+
+const upgradePlans: SubscriptionPlan[] = ['starter', 'pro', 'trader'];
+
+export function PaywallModal({ open, onOpenChange, trigger = 'generic' }: PaywallModalProps) {
   const { plan: currentPlan, createCheckoutSession } = usePlan();
+  const config = TRIGGER_CONFIG[trigger];
+  const Icon = config.icon;
 
   const handleUpgrade = async (planKey: SubscriptionPlan) => {
     const planConfig = PLAN_CONFIG[planKey];
@@ -35,72 +119,109 @@ export function PaywallModal({ open, onOpenChange, trigger = 'usage_limit' }: Pa
       await createCheckoutSession(planConfig.priceId);
       onOpenChange(false);
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Unable to start checkout';
-      toast.error(message);
+      console.error('Checkout error:', err);
     }
   };
 
   // Filter to show only upgrade options
   const planOrder: SubscriptionPlan[] = ['free', 'starter', 'pro', 'trader'];
   const currentIndex = planOrder.indexOf(currentPlan);
-  const availableUpgrades = (['starter', 'pro'] as SubscriptionPlan[]).filter(
+  const availableUpgrades = upgradePlans.filter(
     (p) => planOrder.indexOf(p) > currentIndex
   );
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Sparkles className="h-5 w-5" />
-            {trigger === 'usage_limit' 
-              ? 'Monthly limit reached' 
-              : 'Upgrade to continue'}
+            <Icon className="h-5 w-5 text-primary" />
+            {config.title}
           </DialogTitle>
           <DialogDescription>
-            Free users can run 5 US market analyses per month.
-            Upgrade to unlock more analyses and global markets.
+            {config.description}
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-3 py-4">
+        {/* Highlighted features for this trigger */}
+        <div className="flex flex-wrap gap-2 py-2">
+          {config.highlightFeatures.map((feature) => (
+            <span 
+              key={feature}
+              className="text-xs px-2 py-1 bg-primary/10 text-primary rounded-full font-medium"
+            >
+              {feature}
+            </span>
+          ))}
+        </div>
+
+        <div className="space-y-4 py-2">
           {availableUpgrades.map((planKey) => {
             const planConfig = PLAN_CONFIG[planKey];
             return (
               <div
                 key={planKey}
-                className="p-4 rounded-lg border border-border"
+                className={`p-4 rounded-lg border ${
+                  planConfig.highlighted 
+                    ? 'border-primary bg-primary/5' 
+                    : 'border-border bg-muted/30'
+                }`}
               >
-                <div className="flex items-center justify-between mb-2">
-                  <span className="font-medium text-foreground">
-                    {planConfig.name}
-                  </span>
-                  <span className="text-lg font-semibold">
-                    ${planConfig.price}<span className="text-sm text-muted-foreground">/mo</span>
-                  </span>
+                <div className="flex items-center justify-between mb-3">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-semibold text-foreground">
+                        {planConfig.name}
+                      </span>
+                      {planConfig.highlighted && (
+                        <span className="text-xs bg-primary text-primary-foreground px-2 py-0.5 rounded-full">
+                          Recommended
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      {planConfig.analysesLimit} analyses/month
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-2xl font-bold text-foreground">
+                      ${planConfig.price}
+                    </span>
+                    <span className="text-muted-foreground">/mo</span>
+                  </div>
                 </div>
-                <p className="text-sm text-muted-foreground mb-3">
-                  {planConfig.analysesLimit === Infinity ? 'Unlimited' : planConfig.analysesLimit} analyses/month
-                </p>
+
+                <ul className="space-y-1 mb-3">
+                  {planConfig.features.slice(0, 4).map((feature) => (
+                    <li key={feature} className="flex items-center gap-2 text-sm">
+                      <Check className="h-3 w-3 text-bullish flex-shrink-0" />
+                      <span className="text-muted-foreground">{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+
                 <Button 
                   className="w-full" 
-                  variant={planKey === 'starter' ? 'default' : 'outline'}
+                  variant={planConfig.highlighted ? 'default' : 'outline'}
                   onClick={() => handleUpgrade(planKey)}
                 >
+                  <Sparkles className="h-4 w-4 mr-2" />
                   Get {planConfig.name}
                 </Button>
               </div>
             );
           })}
-        </div>
 
-        <Button
-          variant="ghost"
-          className="w-full text-muted-foreground"
-          onClick={() => onOpenChange(false)}
-        >
-          Maybe later
-        </Button>
+          <div className="text-center pt-2">
+            <Button
+              variant="ghost"
+              className="text-muted-foreground"
+              onClick={() => onOpenChange(false)}
+            >
+              Maybe later
+            </Button>
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
   );

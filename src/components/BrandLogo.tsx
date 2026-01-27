@@ -6,7 +6,11 @@ interface BrandLogoProps {
 }
 
 /**
- * Text-based OutputLens brand logo in deep navy
+ * Text-based OutputLens brand logo
+ * Recreates the exact typography from the logo:
+ * - "Output" in deep navy
+ * - "Lens" in royal blue
+ * - Clean, bold, modern sans-serif (Plus Jakarta Sans)
  */
 export function BrandLogo({ size = 'md', className }: BrandLogoProps) {
   const sizeClasses = {
@@ -19,7 +23,7 @@ export function BrandLogo({ size = 'md', className }: BrandLogoProps) {
   return (
     <span 
       className={cn(
-        'font-brand font-extrabold tracking-tight select-none text-logo-navy',
+        'font-brand font-extrabold tracking-tight select-none',
         sizeClasses[size],
         className
       )}
