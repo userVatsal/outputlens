@@ -1,113 +1,103 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* OutputLens Design System
-   Light professional theme with deep navy and royal blue accents
-   Matching the logo: Navy (#1B2B4B) + Royal Blue (#2847C8) */
+/* OutputLens PMF-First Design System
+   Clinical, calm, serious - designed to make users pause
+   Colors: Warm off-white, near-black, muted red for risk */
 
 @layer base {
   :root {
-    --background: 220 30% 98%;
-    --foreground: 222 47% 15%;
+    /* Clinical warm off-white - less fatiguing than pure white */
+    --background: 60 10% 97%;
+    --foreground: 220 39% 10%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222 47% 15%;
+    --card-foreground: 220 39% 10%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 15%;
+    --popover-foreground: 220 39% 10%;
 
-    /* Royal blue from logo "Lens" */
-    --primary: 230 70% 53%;
+    /* Deep slate for authority */
+    --primary: 210 22% 15%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 220 25% 95%;
-    --secondary-foreground: 222 47% 15%;
+    --secondary: 220 14% 96%;
+    --secondary-foreground: 220 39% 10%;
 
-    --muted: 220 25% 95%;
-    --muted-foreground: 220 15% 45%;
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 9% 46%;
 
-    --accent: 220 25% 95%;
-    --accent-foreground: 222 47% 15%;
+    --accent: 220 14% 96%;
+    --accent-foreground: 220 39% 10%;
 
-    --destructive: 0 84% 60%;
+    /* Muted red for risk/loss - danger signal, not panic */
+    --destructive: 0 60% 42%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 20% 90%;
-    --input: 220 20% 90%;
-    --ring: 230 70% 53%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 210 22% 15%;
 
-    --radius: 0.625rem;
+    --radius: 0.5rem;
 
-    /* Trading colors */
-    --bullish: 152 69% 40%;
+    /* Risk color - THE key color for loss numbers */
+    --risk: 0 60% 42%;
+    --risk-foreground: 0 0% 100%;
+
+    /* Minimal accent colors - used sparingly */
+    --bullish: 152 50% 38%;
     --bullish-foreground: 0 0% 100%;
-    --bearish: 4 84% 55%;
+    --bearish: 0 60% 42%;
     --bearish-foreground: 0 0% 100%;
-    --caution: 40 95% 50%;
+    --caution: 40 80% 45%;
     --caution-foreground: 0 0% 10%;
-    --neutral: 220 15% 50%;
+    --neutral: 220 10% 50%;
     --neutral-foreground: 0 0% 100%;
-
-    /* Brand colors - from logo */
-    --navy: 222 47% 20%;
-    --navy-deep: 222 50% 15%;
-    --brand-blue: 230 70% 53%;
-
-    /* Logo exact colors */
-    --logo-navy: 222 47% 20%;
-    --logo-blue: 225 83% 53%;
   }
 
   .dark {
-    --background: 222 47% 6%;
-    --foreground: 210 40% 98%;
+    --background: 220 25% 7%;
+    --foreground: 60 10% 95%;
 
-    --card: 222 47% 9%;
-    --card-foreground: 210 40% 98%;
+    --card: 220 25% 10%;
+    --card-foreground: 60 10% 95%;
 
-    --popover: 222 47% 9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 220 25% 10%;
+    --popover-foreground: 60 10% 95%;
 
-    --primary: 225 75% 60%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 60 10% 95%;
+    --primary-foreground: 220 25% 7%;
 
-    --secondary: 222 40% 15%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 220 20% 15%;
+    --secondary-foreground: 60 10% 95%;
 
-    --muted: 222 40% 15%;
-    --muted-foreground: 215 20% 65%;
+    --muted: 220 20% 15%;
+    --muted-foreground: 220 10% 60%;
 
-    --accent: 222 40% 15%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 220 20% 15%;
+    --accent-foreground: 60 10% 95%;
 
-    --destructive: 0 62% 50%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 55% 50%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 222 40% 18%;
-    --input: 222 40% 18%;
-    --ring: 225 75% 60%;
+    --border: 220 20% 18%;
+    --input: 220 20% 18%;
+    --ring: 60 10% 95%;
 
-    /* Trading colors - dark mode */
-    --bullish: 152 65% 45%;
+    --risk: 0 55% 50%;
+    --risk-foreground: 0 0% 100%;
+
+    --bullish: 152 45% 45%;
     --bullish-foreground: 0 0% 100%;
-    --bearish: 4 80% 58%;
+    --bearish: 0 55% 50%;
     --bearish-foreground: 0 0% 100%;
-    --caution: 40 92% 50%;
+    --caution: 40 75% 50%;
     --caution-foreground: 0 0% 10%;
-    --neutral: 220 13% 55%;
+    --neutral: 220 8% 55%;
     --neutral-foreground: 0 0% 100%;
-
-    /* Brand colors - dark mode */
-    --navy: 210 40% 98%;
-    --navy-deep: 215 20% 80%;
-    --brand-blue: 225 75% 65%;
-
-    /* Logo colors - dark mode */
-    --logo-navy: 210 40% 98%;
-    --logo-blue: 225 80% 70%;
   }
 }
 
@@ -125,67 +115,47 @@
     font-family: 'Inter', system-ui, sans-serif;
   }
 
-  /* Brand font - matches logo style */
-  .font-brand {
-    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-  }
-
   .font-mono {
     font-family: 'JetBrains Mono', monospace;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-weight: 600;
   }
 }
 
 @layer components {
+  /* Minimal card - no shadow, just border */
   .glass-card {
-    @apply bg-card border border-border rounded-xl shadow-sm;
+    @apply bg-card border border-border rounded-lg;
   }
 
+  /* Clean input styling */
   .trading-input {
-    @apply bg-background border-border focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200;
+    @apply bg-background border-border focus:border-foreground focus:ring-1 focus:ring-foreground/20 transition-colors duration-150;
   }
 
-  .scenario-row {
-    @apply border-b border-border/50 hover:bg-muted/50 transition-colors duration-150;
-  }
-
-  .risk-badge-low {
-    @apply bg-bullish/10 text-bullish border border-bullish/20;
-  }
-
-  .risk-badge-medium {
-    @apply bg-caution/10 text-caution border border-caution/20;
-  }
-
-  .risk-badge-high {
-    @apply bg-bearish/10 text-bearish border border-bearish/20;
-  }
-
-  .nav-link {
-    @apply text-muted-foreground hover:text-foreground transition-colors duration-200;
-  }
-
-  .nav-link-active {
-    @apply text-primary font-medium;
-  }
-
+  /* Section container */
   .section-container {
-    @apply max-w-6xl mx-auto px-4 sm:px-6 lg:px-8;
+    @apply max-w-2xl mx-auto px-4 sm:px-6;
   }
 
-  .hero-gradient {
-    @apply bg-gradient-to-br from-primary/5 via-background to-primary/10;
+  /* Risk number - the hero element */
+  .risk-number {
+    @apply text-4xl sm:text-5xl font-bold font-mono;
+    color: hsl(var(--risk));
   }
 
-  /* Brand text styling to match logo */
-  .brand-text {
-    @apply font-brand font-bold;
-    background: linear-gradient(135deg, hsl(var(--navy)) 0%, hsl(var(--navy)) 50%, hsl(var(--brand-blue)) 50%, hsl(var(--brand-blue)) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+  /* Subtle link */
+  .subtle-link {
+    @apply text-muted-foreground hover:text-foreground transition-colors duration-150;
+  }
+}
+
+/* Remove all animations for serious, clinical feel */
+@media (prefers-reduced-motion: no-preference) {
+  * {
+    transition-duration: 150ms !important;
   }
 }
