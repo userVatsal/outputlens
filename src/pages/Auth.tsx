@@ -84,30 +84,11 @@ export default function Auth() {
   }, [mode]);
 
   useEffect(() => {
-    // Check if already logged in
+    // Check if already logged in - redirect to main decision page
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session) {
-        try {
-          // Check if onboarding is completed
-          const { data: profile, error } = await supabase
-            .from('profiles')
-            .select('onboarding_completed')
-            .eq('user_id', session.user.id)
-            .maybeSingle();
-          
-          console.log('[Auth] Session check - profile:', profile, 'error:', error);
-          
-          // If profile doesn't exist or onboarding not completed, go to onboarding
-          if (!profile || !profile.onboarding_completed) {
-            navigate('/onboarding');
-          } else {
-            navigate('/dashboard');
-          }
-        } catch (err) {
-          console.error('[Auth] Error checking profile:', err);
-          // Default to onboarding if there's an error
-          navigate('/onboarding');
-        }
+        // PMF redesign: go straight to decision page, no onboarding wizard
+        navigate('/');
       }
     });
 
@@ -117,32 +98,9 @@ export default function Auth() {
         console.log('[Auth] Auth state changed:', event, session?.user?.id);
         
         if (session) {
-        try {
-            // Small delay to allow profile trigger to complete for new signups
-            if (event === 'SIGNED_IN') {
-              await new Promise(resolve => setTimeout(resolve, 500));
-            }
-            
-            // Check onboarding status
-            const { data: profile, error } = await supabase
-              .from('profiles')
-              .select('onboarding_completed')
-              .eq('user_id', session.user.id)
-              .maybeSingle();
-            
-            console.log('[Auth] onAuthStateChange - profile:', profile, 'error:', error);
-            
-            // If profile doesn't exist or onboarding not completed, go to onboarding
-            if (!profile || !profile.onboarding_completed) {
-              navigate('/onboarding');
-            } else {
-              navigate('/dashboard');
-            }
-          } catch (err) {
-            console.error('[Auth] Error in auth state change:', err);
-            // Default to onboarding if there's an error
-            navigate('/onboarding');
-          }
+          // PMF redesign: go straight to decision page
+          // First analysis IS the onboarding
+          navigate('/');
         }
       }
     );
