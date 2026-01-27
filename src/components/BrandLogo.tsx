@@ -1,5 +1,4 @@
 import { cn } from '@/lib/utils';
-import logoWordmark from '@/assets/logo-wordmark.png';
 
 interface BrandLogoProps {
   size?: 'sm' | 'md' | 'lg' | 'xl';
@@ -7,25 +6,25 @@ interface BrandLogoProps {
 }
 
 /**
- * OutputLens brand logo using the official wordmark
+ * Text-based OutputLens brand logo in deep navy
  */
 export function BrandLogo({ size = 'md', className }: BrandLogoProps) {
   const sizeClasses = {
-    sm: 'h-6',
-    md: 'h-8',
-    lg: 'h-10',
-    xl: 'h-12'
+    sm: 'text-lg',
+    md: 'text-xl md:text-2xl',
+    lg: 'text-2xl md:text-3xl',
+    xl: 'text-3xl md:text-4xl lg:text-5xl'
   };
 
   return (
-    <img 
-      src={logoWordmark}
-      alt="OutputLens"
+    <span 
       className={cn(
+        'font-brand font-extrabold tracking-tight select-none text-logo-navy',
         sizeClasses[size],
-        'w-auto',
         className
       )}
-    />
+    >
+      OutputLens
+    </span>
   );
 }
