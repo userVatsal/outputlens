@@ -111,7 +111,7 @@ export default function Workspace() {
             <div>
               <h1 className="text-2xl font-bold text-foreground">Risk Workspace</h1>
               <p className="text-muted-foreground">
-                Probabilistic analysis with stochastic simulation + neural database
+                Three-layer intelligence: Stochastic simulation → Regime detection → AI interpretation
               </p>
             </div>
             <div className="flex items-center gap-3">
@@ -182,10 +182,11 @@ export default function Workspace() {
                 <TradeInputForm onSubmit={handleSubmitTrade} isLoading={tradeLoading} />
               </div>
 
-              {/* Disclaimer with tier info */}
+              {/* Disclaimer with three-layer architecture */}
               <p className="text-center text-xs text-muted-foreground mt-6 max-w-sm mx-auto">
-                Free: US only, 5,000 paths | Paid: Global, 10,000 paths. 
-                Probabilities from GBM simulation. Neural DB retrieves, never predicts. Not financial advice.
+                Layer 1: GBM simulation (Free: 5,000 paths | Paid: 10,000). 
+                Layer 2: Neural DB retrieves, never predicts. 
+                Layer 3: AI interprets, never signals. Not financial advice.
               </p>
             </div>
 
@@ -194,9 +195,12 @@ export default function Workspace() {
               {tradeLoading && (
                 <div className="glass-card p-12 text-center">
                   <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto mb-4" />
-                  <p className="text-lg font-semibold text-foreground">Running Geometric Brownian Motion simulation...</p>
+                  <p className="text-lg font-semibold text-foreground">Layer 1: Running GBM stochastic simulation...</p>
                   <p className="text-sm text-muted-foreground mt-2">
-                    Applying regime switching models • Querying neural database
+                    Layer 2: Detecting regime via HMM • Querying neural database
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Layer 3: Preparing AI interpretation (explains, never predicts)
                   </p>
                 </div>
               )}

@@ -149,7 +149,7 @@ export default function Demo() {
                   </Badge>
                 </div>
                 <p className="text-muted-foreground text-sm">
-                  This demo shows a full 10,000-path analysis. Free tier runs 5,000 paths.
+                  This demo shows a full three-layer analysis. Layer 1: 10,000 GBM paths. Layer 2: Regime detection. Layer 3: AI explains, never predicts.
                 </p>
               </div>
             </div>
@@ -356,18 +356,18 @@ export default function Demo() {
                 <div className="absolute inset-0 rounded-full border-2 border-primary/30 animate-ping" />
               </div>
               
-              {/* Phase indicator */}
+              {/* Phase indicator - three-layer architecture */}
               <div className="space-y-2">
                 <p className="text-foreground font-medium">
-                  {loadingPhase === 'fetching' && 'Fetching live market data...'}
-                  {loadingPhase === 'simulating' && 'Running GBM stochastic simulation...'}
-                  {loadingPhase === 'generating' && 'Querying neural database for regime similarity...'}
+                  {loadingPhase === 'fetching' && 'Layer 1: Fetching live market data...'}
+                  {loadingPhase === 'simulating' && 'Layer 1: Running GBM stochastic simulation...'}
+                  {loadingPhase === 'generating' && 'Layer 2: Detecting regime • Querying neural database...'}
                 </p>
                 <p className="text-sm text-muted-foreground font-mono">
                   {loadingPhase === 'simulating' 
                     ? `Scenario ${Math.min(simulationCount, 10000).toLocaleString()} of 10,000`
                     : loadingPhase === 'generating'
-                    ? 'Analyzing 10,000 scenarios...'
+                    ? 'Layer 3: Preparing AI interpretation (explains, never predicts)...'
                     : 'Connecting to data providers...'}
                 </p>
               </div>

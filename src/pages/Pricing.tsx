@@ -15,14 +15,14 @@ const plans: { key: SubscriptionPlan; badge?: string }[] = [
   { key: 'trader' },
 ];
 
-// YC-style tier differentiation table
+// YC-style three-layer architecture tier table
 const tierFeatures = [
   { 
-    feature: 'Markets', 
-    free: 'US Only', 
-    starter: 'Global', 
-    pro: 'Global', 
-    trader: 'Global' 
+    feature: 'Layer 1: Stochastic Models', 
+    free: 'Basic GBM', 
+    starter: 'GBM + GARCH', 
+    pro: 'Full Suite', 
+    trader: 'Full + API' 
   },
   { 
     feature: 'Monte Carlo Paths', 
@@ -32,25 +32,53 @@ const tierFeatures = [
     trader: '10,000' 
   },
   { 
-    feature: 'Neural Database', 
+    feature: 'Regime Switching', 
+    free: '❌', 
+    starter: '✓', 
+    pro: '✓', 
+    trader: '✓' 
+  },
+  { 
+    feature: 'Jump Diffusion', 
+    free: '❌', 
+    starter: '❌', 
+    pro: '✓', 
+    trader: '✓' 
+  },
+  { 
+    feature: 'Layer 2: Neural Database', 
     free: 'Limited', 
     starter: 'Full', 
     pro: 'Full + Auto', 
     trader: 'Full + Auto' 
   },
   { 
-    feature: 'AI Interpretation', 
-    free: 'Manual', 
-    starter: 'Auto', 
-    pro: 'Auto + Advanced', 
-    trader: 'Auto + Advanced' 
+    feature: 'Regime Detection (HMM)', 
+    free: '❌', 
+    starter: '✓', 
+    pro: '✓', 
+    trader: '✓' 
   },
   { 
-    feature: 'Stochastic Models', 
-    free: 'Basic GBM', 
-    starter: 'Full GBM + GARCH', 
-    pro: 'Full Suite', 
-    trader: 'Full Suite + API' 
+    feature: 'Layer 3: AI Interpretation', 
+    free: 'Manual', 
+    starter: 'Auto', 
+    pro: 'Advanced', 
+    trader: 'Advanced' 
+  },
+  { 
+    feature: 'RAG Knowledge Access', 
+    free: '❌', 
+    starter: '✓', 
+    pro: '✓', 
+    trader: '✓' 
+  },
+  { 
+    feature: 'Markets', 
+    free: 'US Only', 
+    starter: 'Global', 
+    pro: 'Global', 
+    trader: 'Global' 
   },
   { 
     feature: 'Portfolio Assets', 
@@ -59,12 +87,23 @@ const tierFeatures = [
     pro: '5', 
     trader: '20' 
   },
+  { 
+    feature: 'API Access', 
+    free: '—', 
+    starter: '—', 
+    pro: '—', 
+    trader: '100/mo' 
+  },
 ];
 
 const faqs = [
   {
+    question: 'What is the three-layer intelligence architecture?',
+    answer: 'Layer 1 (Deterministic Math): GBM simulation, VaR/CVaR calculations—pure math that works without AI. Layer 2 (Statistical/ML): HMM regime detection, neural database for similarity search. Layer 3 (AI Interpretation): LLMs explain outputs—they NEVER predict prices or generate numbers.',
+  },
+  {
     question: 'What stochastic models do you use?',
-    answer: 'We use Geometric Brownian Motion (GBM) as the primary engine, with GARCH-like stochastic volatility extensions, fat-tailed distribution modeling, and regime switching detection for Bull/Base/Bear market states.',
+    answer: 'We use Geometric Brownian Motion (GBM) as the primary engine, with GARCH-like stochastic volatility extensions, fat-tailed distribution modeling, and regime switching detection for Bull/Base/Bear/Stress market states.',
   },
   {
     question: 'How does the neural database work?',
@@ -75,12 +114,12 @@ const faqs = [
     answer: 'Prediction tools give single price targets. We show the entire probability distribution of possible outcomes. Markets are inherently unpredictable—our LLMs explain distributions and summarize risk, but never predict prices or give trading signals.',
   },
   {
-    question: 'How many Monte Carlo simulations do I get?',
-    answer: 'Free tier runs 5,000 Monte Carlo paths per analysis (US markets only). Paid tiers run the full 10,000 paths with access to global markets for more accurate probability distributions.',
+    question: 'How does regime detection work?',
+    answer: 'We use Hidden Markov Models (HMM) to detect latent market regimes: bull, neutral, bear, and stress. Layer 1 simulation parameters adapt based on detected regime, creating more realistic scenario distributions.',
   },
   {
-    question: "What's the difference between VaR and Expected Shortfall?",
-    answer: "VaR (Value at Risk) tells you the maximum expected loss at a given confidence level (e.g., 95%). Expected Shortfall goes further—it shows the average loss when things are worse than VaR, capturing tail risk more comprehensively.",
+    question: "What's the difference between basic GBM and full stochastic suite?",
+    answer: "Basic GBM (Free): Standard Geometric Brownian Motion. Full Suite (Pro+): GBM + GARCH volatility clustering + regime switching + jump diffusion for more realistic tail risk modeling.",
   },
   {
     question: 'Can I upgrade or downgrade anytime?',
@@ -88,11 +127,7 @@ const faqs = [
   },
   {
     question: 'What makes this different from AI trading tools?',
-    answer: 'Others show targets → we show distributions. Others predict → we quantify downside. Others hide math → we explain it. LLMs explain risk, they never signal trades.',
-  },
-  {
-    question: 'What portfolio features are included?',
-    answer: 'Pro includes portfolio analysis for up to 5 assets with correlation risk. Trader includes up to 20 assets with full stochastic modeling and API access.',
+    answer: 'We are NOT a trading tool. We are risk infrastructure. Layer 1 computes probabilities. Layer 2 detects regimes. Layer 3 explains—never signals. Others show targets → we show distributions. Others predict → we quantify downside.',
   },
 ];
 

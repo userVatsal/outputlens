@@ -11,7 +11,18 @@ import { Button } from '@/components/ui/button';
 import { usePlan } from '@/hooks/usePlan';
 import { PLAN_CONFIG, SubscriptionPlan } from '@/lib/stripe';
 
-export type PaywallTrigger = 'usage_limit' | 'portfolio' | 'sentiment' | 'exports' | 'alerts' | 'api' | 'generic';
+export type PaywallTrigger = 
+  | 'usage_limit' 
+  | 'portfolio' 
+  | 'sentiment' 
+  | 'exports' 
+  | 'alerts' 
+  | 'api' 
+  | 'neural_database'
+  | 'regime_detection'
+  | 'global_markets'
+  | 'advanced_ai'
+  | 'generic';
 
 interface PaywallModalProps {
   open: boolean;
@@ -29,7 +40,7 @@ const TRIGGER_CONFIG: Record<PaywallTrigger, {
     title: "You've Hit Your Monthly Limit",
     description: "You've used all 5 free analyses this month. Upgrade to continue analyzing trades.",
     icon: TrendingUp,
-    highlightFeatures: ['More analyses', 'Live market data', 'Full Monte Carlo'],
+    highlightFeatures: ['Layer 1-3 access', '10,000 paths', 'Global markets'],
   },
   portfolio: {
     title: "Portfolio Analysis is a Pro Feature",
@@ -61,11 +72,35 @@ const TRIGGER_CONFIG: Record<PaywallTrigger, {
     icon: Code,
     highlightFeatures: ['REST API', '100 calls/mo', 'Webhooks'],
   },
+  neural_database: {
+    title: "Neural Database is a Starter Feature",
+    description: "Unlock full neural database for historical regime similarity search (Layer 2).",
+    icon: Brain,
+    highlightFeatures: ['Pattern retrieval', 'Regime similarity', 'Historical context'],
+  },
+  regime_detection: {
+    title: "Regime Detection is a Starter Feature",
+    description: "Enable Hidden Markov Model for automatic regime classification (Layer 2).",
+    icon: TrendingUp,
+    highlightFeatures: ['Bull/Bear detection', 'Stress regimes', 'Auto-adaptation'],
+  },
+  global_markets: {
+    title: "Global Markets is a Starter Feature",
+    description: "Access UK, EU, Crypto, and Forex markets with full stochastic modeling.",
+    icon: TrendingUp,
+    highlightFeatures: ['UK/EU markets', 'Crypto', 'Forex'],
+  },
+  advanced_ai: {
+    title: "Advanced AI is a Pro Feature",
+    description: "Get advanced AI interpretations with RAG knowledge access (Layer 3).",
+    icon: Brain,
+    highlightFeatures: ['RAG access', 'Advanced explanations', 'Priority processing'],
+  },
   generic: {
     title: "Upgrade Your Plan",
-    description: "Unlock more features and analyses with a paid subscription.",
+    description: "Unlock Layers 1-3: Full stochastic models, neural database, and advanced AI.",
     icon: Sparkles,
-    highlightFeatures: ['More analyses', 'Live data', 'Exports'],
+    highlightFeatures: ['Three-layer access', 'Global markets', 'Neural database'],
   },
 };
 
