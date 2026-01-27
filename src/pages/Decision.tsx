@@ -40,6 +40,13 @@ export default function Decision() {
   }, []);
 
   const handleSubmitTrade = async (input: Parameters<typeof submitTrade>[0]) => {
+    // If not logged in, redirect to auth
+    if (!user) {
+      toast.info('Sign in to analyze your trade');
+      navigate('/auth');
+      return;
+    }
+
     if (!canAnalyze) {
       setShowPaywall(true);
       return;
@@ -51,7 +58,6 @@ export default function Decision() {
 
   const handleSaveDecision = async () => {
     toast.success('Decision saved to your history');
-    // The analysis is already saved by useTrade hook
   };
 
   const handleClose = () => {
@@ -72,13 +78,11 @@ export default function Decision() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Minimal header */}
-      <header className="border-b border-border">
-        <div className="section-container py-4 flex items-center justify-between">
-          <Link to="/">
-            <BrandLogo size="md" />
-          </Link>
+    <div className="min-h-screen bg-background flex flex-col">
+      {/* Minimal header - no border */}
+      <header className="py-4">
+        <div className="section-container flex items-center justify-between">
+          <BrandLogo size="md" />
           
           {user ? (
             <div className="flex items-center gap-2">
@@ -99,37 +103,31 @@ export default function Decision() {
               </Button>
             </div>
           ) : (
-            <Button size="sm" asChild>
-              <Link to="/auth">Sign in</Link>
-            </Button>
+            <Link 
+              to="/auth" 
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Sign in
+            </Link>
           )}
         </div>
       </header>
 
-      {/* Main content */}
-      <main className="section-container py-8 sm:py-12">
-        {/* Anchor text */}
-        <p className="text-xs text-muted-foreground text-center mb-8">
-          Risk analysis before you deploy capital
+      {/* Main content - centered vertically */}
+      <main className="flex-1 flex flex-col justify-center section-container py-8">
+        {/* Hero headline */}
+        <h1 className="text-3xl sm:text-4xl font-semibold text-center text-foreground mb-3 max-w-lg mx-auto leading-tight">
+          Know your downside before you trade.
+        </h1>
+        
+        {/* Subhead */}
+        <p className="text-base text-muted-foreground text-center mb-10">
+          Enter your trade details to see the worst-case loss.
         </p>
 
-        {/* Hero question */}
-        <h1 className="text-2xl sm:text-3xl font-semibold text-center text-foreground mb-10 max-w-md mx-auto leading-tight">
-          What's the worst-case loss if I do this trade?
-        </h1>
-
-        {/* Content area */}
-        <div className="max-w-md mx-auto">
-          {!user ? (
-            <div className="glass-card p-8 text-center">
-              <p className="text-muted-foreground mb-4">
-                Sign in to analyze your trades
-              </p>
-              <Button asChild>
-                <Link to="/auth">Get started</Link>
-              </Button>
-            </div>
-          ) : tradeLoading ? (
+        {/* Decision interface */}
+        <div className="max-w-md mx-auto w-full">
+          {tradeLoading ? (
             <div className="glass-card p-8">
               <LoadingState />
             </div>
@@ -143,9 +141,6 @@ export default function Decision() {
             </div>
           ) : (
             <div className="glass-card p-6">
-              <p className="text-sm text-muted-foreground mb-6">
-                Describe the trade you're considering
-              </p>
               <DecisionInput 
                 onSubmit={handleSubmitTrade}
                 isLoading={tradeLoading}
@@ -155,10 +150,17 @@ export default function Decision() {
         </div>
       </main>
 
-      {/* Micro disclaimer */}
-      <footer className="section-container py-6">
+      {/* Footer */}
+      <footer className="py-6">
         <p className="text-xs text-muted-foreground/60 text-center">
-          Probabilistic analysis. Not financial advice. <Link to="/legal" className="hover:text-foreground">Legal</Link>
+          Probabilistic analysis. Not financial advice.{' '}
+          <Link to="/legal" className="hover:text-foreground transition-colors">Legal</Link>
+          {!user && (
+            <>
+              {' · '}
+              <Link to="/auth" className="hover:text-foreground transition-colors">Sign in</Link>
+            </>
+          )}
         </p>
       </footer>
 
