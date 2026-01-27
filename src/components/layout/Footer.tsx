@@ -89,7 +89,7 @@ export function Footer() {
             <ul className="space-y-2 text-sm">
               <li>
                 <Link to="/workspace" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Risk Workspace
+                  Analyse
                 </Link>
               </li>
               <li>

@@ -43,7 +43,7 @@ export default function Workspace() {
 
   // SEO: Set page-specific document title
   useEffect(() => {
-    document.title = 'Risk Workspace - Probabilistic Analysis | OutputLens';
+    document.title = 'Analyse - Probabilistic Risk Analysis | OutputLens';
   }, []);
 
   useEffect(() => {
@@ -109,7 +109,7 @@ export default function Workspace() {
           {/* Header */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
             <div>
-              <h1 className="text-2xl font-bold text-foreground">Risk Workspace</h1>
+              <h1 className="text-2xl font-bold text-foreground">Analyse</h1>
               <p className="text-muted-foreground">
                 Three-layer intelligence: Stochastic simulation → Regime detection → AI interpretation
               </p>
