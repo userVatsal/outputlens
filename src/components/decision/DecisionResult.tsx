@@ -32,6 +32,10 @@ export function DecisionResult({ analysis, onSave, onClose }: DecisionResultProp
   // Probability of loss
   const probLoss = 100 - riskMetrics.probabilityOfProfit;
   
+  // Expected P&L (based on expected return)
+  const expectedReturnPct = riskMetrics.expectedReturn;
+  const expectedPnL = calculatePnL(input.entryPrice, expectedReturnPct, shares);
+  
   // Expected drawdown (median negative outcome)
   const expectedDrawdownPct = Math.abs(riskMetrics.expectedShortfall);
   const expectedDrawdown = calculatePnL(input.entryPrice, -expectedDrawdownPct, shares);
@@ -102,14 +106,23 @@ export function DecisionResult({ analysis, onSave, onClose }: DecisionResultProp
       </div>
 
       {/* Supporting metrics */}
-      <div className="grid grid-cols-2 gap-4 text-sm">
-        <div className="text-center p-4 rounded-lg bg-muted/50">
-          <p className="text-muted-foreground mb-1">Probability of loss</p>
-          <p className="text-xl font-semibold font-mono">{probLoss.toFixed(0)}%</p>
+      <div className="grid grid-cols-3 gap-3 text-sm">
+        <div className="text-center p-3 rounded-lg bg-muted/50">
+          <p className="text-muted-foreground mb-1 text-xs">Probability of loss</p>
+          <p className="text-lg font-semibold font-mono">{probLoss.toFixed(0)}%</p>
         </div>
-        <div className="text-center p-4 rounded-lg bg-muted/50">
-          <p className="text-muted-foreground mb-1">Expected drawdown</p>
-          <p className="text-xl font-semibold font-mono">
+        <div className="text-center p-3 rounded-lg bg-muted/50">
+          <p className="text-muted-foreground mb-1 text-xs">Expected P&L</p>
+          <p className={cn(
+            "text-lg font-semibold font-mono",
+            expectedPnL.totalPnl >= 0 ? "text-bullish" : "text-bearish"
+          )}>
+            {formatCurrencyWithSign(expectedPnL.totalPnl, '$')}
+          </p>
+        </div>
+        <div className="text-center p-3 rounded-lg bg-muted/50">
+          <p className="text-muted-foreground mb-1 text-xs">Max drawdown</p>
+          <p className="text-lg font-semibold font-mono">
             {formatCurrencyWithSign(expectedDrawdown.totalPnl, '$')}
           </p>
         </div>
