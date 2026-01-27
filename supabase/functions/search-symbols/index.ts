@@ -71,14 +71,23 @@ serve(async (req) => {
         .slice(0, limit);
     } else {
       // Use Finnhub symbol search for stocks
-      const searchUrl = `https://finnhub.io/api/v1/search?q=${encodeURIComponent(query)}&token=${finnhubApiKey}`;
+      // Truncate very long queries to prevent API issues
+      const searchQuery = query.length > 30 ? query.substring(0, 30) : query;
+      const searchUrl = `https://finnhub.io/api/v1/search?q=${encodeURIComponent(searchQuery)}&token=${finnhubApiKey}`;
       
-      console.log(`[SEARCH] Searching Finnhub for: ${query}`);
+      console.log(`[SEARCH] Searching Finnhub for: ${searchQuery}`);
       
       const response = await fetch(searchUrl);
       
       if (!response.ok) {
         console.error(`[SEARCH] Finnhub error: ${response.status}`);
+        // Return empty results instead of throwing for 4xx errors
+        if (response.status >= 400 && response.status < 500) {
+          return new Response(
+            JSON.stringify({ results: [] }),
+            { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
         throw new Error(`Finnhub API error: ${response.status}`);
       }
 
