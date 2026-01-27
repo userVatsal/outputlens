@@ -9,6 +9,7 @@ import { usePlan } from '@/hooks/usePlan';
 import { PLAN_CONFIG, SubscriptionPlan } from '@/lib/stripe';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { supabase } from '@/integrations/supabase/client';
 
 const plans: { key: SubscriptionPlan; badge?: string }[] = [
   { key: 'free' },
@@ -194,6 +195,13 @@ export default function Pricing() {
   const handleSubscribe = async (planKey: SubscriptionPlan) => {
     const config = PLAN_CONFIG[planKey];
     if (!config.priceId) return;
+
+    // Check if user is logged in
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      toast.error('Please sign up or log in to subscribe to a plan.');
+      return;
+    }
 
     setLoadingPlan(planKey);
     try {
