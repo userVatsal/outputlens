@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, lazy, Suspense } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   Shield, 
@@ -24,10 +24,14 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Layout } from '@/components/layout/Layout';
-import { InteractivePreview } from '@/components/landing/InteractivePreview';
-import { DataProviderLogos } from '@/components/landing/DataProviderLogos';
-import { AISemanticSection } from '@/components/landing/AISemanticSection';
-import { ProblemSolutionSection } from '@/components/landing/ProblemSolutionSection';
+import { LazySection } from '@/components/landing/LazySection';
+import { Skeleton } from '@/components/ui/skeleton';
+
+// Lazy load below-the-fold components
+const InteractivePreview = lazy(() => import('@/components/landing/InteractivePreview').then(m => ({ default: m.InteractivePreview })));
+const DataProviderLogos = lazy(() => import('@/components/landing/DataProviderLogos').then(m => ({ default: m.DataProviderLogos })));
+const AISemanticSection = lazy(() => import('@/components/landing/AISemanticSection').then(m => ({ default: m.AISemanticSection })));
+const ProblemSolutionSection = lazy(() => import('@/components/landing/ProblemSolutionSection').then(m => ({ default: m.ProblemSolutionSection })));
 
 // 6 features with YC-grade technical terminology
 const features = [
@@ -257,18 +261,28 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Problem → Solution → How */}
-      <ProblemSolutionSection />
+      {/* Problem → Solution → How - Lazy loaded */}
+      <LazySection fallback={<div className="py-16"><Skeleton className="h-96 max-w-4xl mx-auto" /></div>}>
+        <Suspense fallback={<div className="py-16"><Skeleton className="h-96 max-w-4xl mx-auto" /></div>}>
+          <ProblemSolutionSection />
+        </Suspense>
+      </LazySection>
 
-      {/* Interactive Demo + Data Providers */}
-      <section className="py-16 bg-background">
-        <div className="section-container">
-          <div className="max-w-3xl mx-auto space-y-8">
-            <InteractivePreview />
-            <DataProviderLogos />
+      {/* Interactive Demo + Data Providers - Lazy loaded */}
+      <LazySection fallback={<div className="py-16"><Skeleton className="h-64 max-w-3xl mx-auto" /></div>}>
+        <section className="py-16 bg-background">
+          <div className="section-container">
+            <div className="max-w-3xl mx-auto space-y-8">
+              <Suspense fallback={<Skeleton className="h-48 w-full" />}>
+                <InteractivePreview />
+              </Suspense>
+              <Suspense fallback={<Skeleton className="h-16 w-full" />}>
+                <DataProviderLogos />
+              </Suspense>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      </LazySection>
 
       {/* Metrics Bar - YC terminology */}
       <section className="py-8 bg-card border-y border-border">
@@ -438,8 +452,12 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* AI-Optimized FAQ & Semantic Section */}
-      <AISemanticSection />
+      {/* AI-Optimized FAQ & Semantic Section - Lazy loaded */}
+      <LazySection fallback={<div className="py-16"><Skeleton className="h-96 max-w-4xl mx-auto" /></div>}>
+        <Suspense fallback={<div className="py-16"><Skeleton className="h-96 max-w-4xl mx-auto" /></div>}>
+          <AISemanticSection />
+        </Suspense>
+      </LazySection>
 
       {/* Final CTA Section - YC mission */}
       <section className="py-20 bg-gradient-to-br from-primary/10 via-background to-primary/5">
