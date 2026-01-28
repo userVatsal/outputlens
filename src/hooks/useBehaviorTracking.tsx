@@ -183,20 +183,23 @@ export function useBehaviorTracking() {
     trackEvent('click', elementData);
   }, [trackEvent]);
 
-  // Track scroll depth
+  // Track scroll depth - batched with requestAnimationFrame to avoid forced reflow
   const handleScroll = useCallback(() => {
-    const scrollTop = window.scrollY;
-    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-    const scrollPercent = docHeight > 0 ? Math.round((scrollTop / docHeight) * 100) : 0;
+    // Use RAF to batch layout reads and avoid forced reflow
+    requestAnimationFrame(() => {
+      const scrollTop = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const scrollPercent = docHeight > 0 ? Math.round((scrollTop / docHeight) * 100) : 0;
 
-    if (scrollPercent > maxScrollDepth.current) {
-      maxScrollDepth.current = scrollPercent;
+      if (scrollPercent > maxScrollDepth.current) {
+        maxScrollDepth.current = scrollPercent;
 
-      // Track at 25%, 50%, 75%, 100% milestones
-      if ([25, 50, 75, 100].includes(scrollPercent)) {
-        trackEvent('scroll', { scrollDepth: scrollPercent });
+        // Track at 25%, 50%, 75%, 100% milestones
+        if ([25, 50, 75, 100].includes(scrollPercent)) {
+          trackEvent('scroll', { scrollDepth: scrollPercent });
+        }
       }
-    }
+    });
   }, [trackEvent]);
 
   // Track cursor movement (throttled, batched)
@@ -319,9 +322,22 @@ export function useBehaviorTracking() {
     setShowExitSurvey(false);
   }, []);
 
-  // Initialize on mount
+  // Initialize on mount - deferred to avoid blocking initial render
   useEffect(() => {
-    initSession();
+    // Use requestIdleCallback for non-critical initialization
+    const scheduleInit = () => {
+      if ('requestIdleCallback' in window) {
+        (window as Window & { requestIdleCallback: (cb: () => void, opts?: { timeout: number }) => number }).requestIdleCallback(
+          () => initSession(),
+          { timeout: 3000 }
+        );
+      } else {
+        // Fallback: defer by 2 seconds
+        setTimeout(initSession, 2000);
+      }
+    };
+    
+    scheduleInit();
   }, [initSession]);
 
   // Track page views on route change
