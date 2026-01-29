@@ -1,239 +1,171 @@
 
 
-# Performance Optimization Plan for OutputLens
+# Landing Page Copy Redesign Plan
 
 ## Summary
 
-The Lighthouse audit reveals significant performance issues, especially on mobile (60% score) vs desktop (89%). The main bottlenecks are:
-
-1. **Render-blocking resources** (280-1,460ms savings)
-2. **Unused JavaScript** (~330 KiB savings)
-3. **Multiple page redirects** (230-780ms savings)
-4. **Font loading blocking render** (Google Fonts)
-5. **Cache lifetimes** (~510 KiB savings)
-6. **Forced reflow** (JavaScript querying layout during DOM changes)
+This plan updates the OutputLens landing page copy to adopt a more sales-focused, action-oriented messaging style while retaining the core technical differentiation. The new copy emphasizes "Stop Guessing, Start Winning" as the hero message and restructures sections around features, use cases, a sample asset dashboard, testimonials, and a strong CTA.
 
 ---
 
-## Root Causes Identified
+## Key Changes Overview
 
-### 1. Render-Blocking Google Fonts
-The `@import` statement in `src/index.css` blocks rendering:
-```css
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
-```
-This must complete before the page can render.
-
-### 2. No Code Splitting on Landing Page
-The entire app bundle loads on the landing page, including:
-- All 15+ page components
-- Heavy libraries (recharts, date-fns)
-- All dashboard/workspace components
-- Behavior tracking system
-
-### 3. Synchronous Supabase Initialization
-The `TrackingProvider` makes an API call immediately on page load, blocking First Contentful Paint.
-
-### 4. No Lazy Loading for Below-the-Fold Content
-The landing page loads all sections immediately, including:
-- `AISemanticSection` (FAQ accordion - heavy)
-- `InteractivePreview` (complex interactive demo)
-- `DataProviderLogos`
-- Full `Footer` with contact form
-
-### 5. Tailwind CDN Warning
-Console shows Tailwind CDN usage, which should not be in production.
+| Section | Current | New |
+|---------|---------|-----|
+| Hero Headline | "Quantify Uncertainty Before You Trade" | "Stop Guessing, Start Winning" |
+| Hero Subhead | Technical tier info | AI-powered risk management layer |
+| Trust Badges | Technical terms | Remove or simplify |
+| Features | 6 technical features | 3 simpler features (Data Aggregation, AI Scenario Analysis, Risk Probability) |
+| Use Cases | 3 ICPs (Traders, Quants, B2B) | Real-time Asset Risk Dashboard with sample tickers |
+| Social Proof | None | 3 Testimonials section |
+| Final CTA | Technical messaging | "Ready to Elevate Your Trading?" |
 
 ---
 
-## Implementation Plan
+## Files to Modify
 
-### Phase 1: Critical Rendering Path Fixes
+### 1. `src/pages/Landing.tsx`
+Main landing page - complete copy overhaul:
 
-#### 1.1 Optimize Font Loading
-Move Google Fonts from CSS `@import` to HTML `<link>` with `display=swap` and `preconnect`:
+**Hero Section Changes:**
+- Headline: "Stop Guessing, Start Winning"
+- Subhead: "OutputLens provides a comprehensive risk management layer, leveraging AI to analyze qualitative, quantitative, and scenario-based data for smarter asset purchasing decisions."
+- CTAs: "Request a Demo" + "Learn More"
+- Remove "Why Now?" box and technical tier info
 
-**File: `index.html`**
-```html
-<!-- Add to <head> -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" media="print" onload="this.media='all'">
+**Features Section Changes:**
+- New header: "A Smarter Way to Assess Risk"
+- Reduce to 3 features:
+  1. **Data Aggregation** - Aggregate qualitative and quantitative data from diverse sources to get a holistic view of asset risks
+  2. **AI Scenario Analysis** - Our Gen-AI tools analyze potential scenarios, incorporating internal and external factors to foresee market shifts
+  3. **Risk Probability Prediction** - Receive a clear risk probability score for any asset, visualized in an intuitive gauge
+
+**Use Cases → Asset Dashboard:**
+- Replace ICP cards with a sample "Asset Risk Dashboard" table
+- Show 4 sample assets (Tesla, Apple, Amazon, NVIDIA) with risk scores and risk levels (High/Medium/Low)
+- Make rows appear clickable with hover states
+
+**Add Testimonials Section:**
+- 3 testimonial cards with quotes, names, and roles
+- Professional styling with quotation marks
+
+**Final CTA:**
+- Headline: "Ready to Elevate Your Trading?"
+- Subhead: "Sign up to get early access, or contact us for a personalized demo for your team."
+- Single email CTA linking to signup
+
+---
+
+## Sections to Remove/Simplify
+
+1. **Three-Layer Architecture Visualization** - Remove (too technical for new messaging)
+2. **Problem-Solution Section** - Remove or merge into features
+3. **Metrics Bar** (10,000 paths, GBM, etc.) - Remove (too technical)
+4. **IP Transparency Section** - Remove (B2B focused, not relevant for new messaging)
+5. **Comparison Table** - Remove (competitive positioning can be more subtle)
+6. **FAQ/AISemanticSection** - Keep but simplify or move lower
+
+---
+
+## New Testimonials Data
+
+```typescript
+const testimonials = [
+  {
+    quote: "OutputLens has revolutionized my trading strategy. The risk probability predictions are incredibly accurate and have saved me from several potential losses. It's like having an AI co-pilot.",
+    name: "Sarah L.",
+    role: "Day Trader"
+  },
+  {
+    quote: "The depth of analysis, combining both quantitative and qualitative data, is unmatched. OutputLens provides the clarity we need to make high-stakes decisions with confidence.",
+    name: "Michael B.",
+    role: "Hedge Fund Manager"
+  },
+  {
+    quote: "I was skeptical at first, but the AI scenario analysis is a game-changer. It surfaces risks I would have never considered. An essential tool for any serious analyst.",
+    name: "Jessica T.",
+    role: "Financial Analyst"
+  }
+];
 ```
 
-**File: `src/index.css`**
-Remove the `@import` statement.
+---
 
-**Est. savings: 200-400ms FCP**
+## New Asset Dashboard Data
 
-#### 1.2 Defer Behavior Tracking Initialization
-Move the Supabase tracking session initialization to after the page has rendered:
+```typescript
+const sampleAssets = [
+  { name: 'Tesla, Inc.', ticker: 'TSLA', riskScore: 78, riskLevel: 'High' },
+  { name: 'Apple Inc.', ticker: 'AAPL', riskScore: 23, riskLevel: 'Low' },
+  { name: 'Amazon.com, Inc.', ticker: 'AMZN', riskScore: 45, riskLevel: 'Medium' },
+  { name: 'NVIDIA Corporation', ticker: 'NVDA', riskScore: 35, riskLevel: 'Medium' },
+];
+```
 
-**File: `src/hooks/useBehaviorTracking.tsx`**
-- Use `requestIdleCallback` or `setTimeout` to defer session creation
-- Avoid blocking the main thread during initial render
+---
+
+## Technical Details
+
+### New Landing Page Structure
 
 ```text
-Change: initSession() called in useEffect
-To: Delay initialization by 2-3 seconds after page load
+1. Hero Section
+   - Badge: "AI-Powered Risk Intelligence"
+   - H1: "Stop Guessing, Start Winning"
+   - Subhead: Comprehensive risk management layer...
+   - CTAs: "Request a Demo" | "Learn More"
+
+2. Features Section (Our Features)
+   - Header: "A Smarter Way to Assess Risk"
+   - 3 feature cards in grid
+
+3. Interactive Demo (existing - keep)
+   - Keep the InteractivePreview component
+
+4. Asset Risk Dashboard (new)
+   - Header: "Real-time Asset Risk Analysis"
+   - Subhead: "See our AI in action..."
+   - Table with sample assets
+
+5. Testimonials Section (new)
+   - Header: "Trusted by Professionals"
+   - 3 testimonial cards
+
+6. Final CTA Section
+   - Header: "Ready to Elevate Your Trading?"
+   - Email signup link + contact info
+
+7. FAQ Section (keep AISemanticSection)
 ```
 
-**Est. savings: 90-150ms document latency**
+### Component Structure
 
-### Phase 2: Route-Level Code Splitting
+The Landing page will be restructured but still use:
+- `Layout` wrapper
+- `InteractivePreview` (interactive demo)
+- `AISemanticSection` (FAQ - keep for SEO)
+- `LazySection` (performance optimization)
 
-#### 2.1 Implement Lazy Loading for All Routes
-Currently only `Results.tsx` uses lazy loading. Apply to all routes:
-
-**File: `src/App.tsx`**
-```tsx
-// Replace direct imports with lazy imports
-const Landing = lazy(() => import('./pages/Landing'));
-const Auth = lazy(() => import('./pages/Auth'));
-const Dashboard = lazy(() => import('./pages/Dashboard'));
-const Workspace = lazy(() => import('./pages/Workspace'));
-// ... etc for all page components
-
-// Wrap routes in Suspense with a minimal fallback
-<Suspense fallback={<PageSkeleton />}>
-  <Routes>...</Routes>
-</Suspense>
-```
-
-**Est. savings: 200-300 KiB initial bundle, 6+ sec FCP improvement on mobile**
-
-### Phase 3: Landing Page Optimization
-
-#### 3.1 Lazy Load Below-the-Fold Sections
-Split the landing page into above-the-fold (critical) and below-the-fold (deferred):
-
-**File: `src/pages/Landing.tsx`**
-```tsx
-// Lazy load non-critical sections
-const AISemanticSection = lazy(() => import('@/components/landing/AISemanticSection'));
-const InteractivePreview = lazy(() => import('@/components/landing/InteractivePreview'));
-
-// Use Intersection Observer to load when near viewport
-```
-
-**Critical (keep synchronous):**
-- Hero section
-- Trust badges
-- Metrics bar
-
-**Deferred (lazy load):**
-- Interactive demo
-- Features grid
-- Use cases
-- FAQ section
-- Comparison table
-
-#### 3.2 Reduce Footer Complexity
-The footer includes a contact form with validation that loads on every page:
-
-- Consider lazy-loading the contact form
-- Or simplify to a link to a dedicated contact page
-
-### Phase 4: Bundle Optimization
-
-#### 4.1 Tree-Shake Lucide Icons
-Currently importing individual icons, which is good. Verify no star imports:
-```tsx
-// Good: import { Shield, ArrowRight } from 'lucide-react'
-// Bad: import * as Icons from 'lucide-react'
-```
-
-#### 4.2 Lazy Load Recharts
-Recharts (~150 KiB) is imported but only used on specific pages. Ensure it is not in the landing page bundle:
-
-**File: `src/components/ReturnDistributionChart.tsx`**
-Already only used in Results page - verify no landing page imports.
-
-#### 4.3 Configure Vite Manual Chunks
-Optimize bundle splitting in Vite config:
-
-**File: `vite.config.ts`**
-```ts
-build: {
-  rollupOptions: {
-    output: {
-      manualChunks: {
-        'vendor-react': ['react', 'react-dom', 'react-router-dom'],
-        'vendor-supabase': ['@supabase/supabase-js'],
-        'vendor-ui': ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', ...],
-        'vendor-charts': ['recharts'],
-      }
-    }
-  }
-}
-```
-
-### Phase 5: Caching and Performance Headers
-
-#### 5.1 Configure Cache Headers
-This requires configuration in the deployment platform (Lovable/Netlify), but we can add hints:
-
-**File: `public/_headers` (if supported)**
-```
-/assets/*
-  Cache-Control: public, max-age=31536000, immutable
-```
-
-### Phase 6: Fix Forced Reflow
-
-The forced reflow is likely caused by:
-- The behavior tracking `handleMouseMove` and `handleScroll` accessing layout properties
-- The `InteractivePreview` slider component
-
-**File: `src/hooks/useBehaviorTracking.tsx`**
-- Batch layout reads
-- Use `requestAnimationFrame` for scroll/mouse handlers
+New inline components:
+- Asset dashboard table (simple, no new file needed)
+- Testimonials grid (simple, no new file needed)
 
 ---
 
-## Technical Implementation Details
+## Files Summary
 
-### Files to Modify
-
-| File | Change | Impact |
-|------|--------|--------|
-| `index.html` | Add font preconnect and async loading | High - fixes render blocking |
-| `src/index.css` | Remove `@import` for fonts | High - fixes render blocking |
-| `src/App.tsx` | Add lazy loading for all routes | High - reduces initial bundle |
-| `src/pages/Landing.tsx` | Lazy load below-fold sections | Medium - faster LCP |
-| `src/hooks/useBehaviorTracking.tsx` | Defer session init | Medium - faster document response |
-| `vite.config.ts` | Add manual chunk splitting | Medium - better caching |
-
-### Files to Create
-
-| File | Purpose |
-|------|---------|
-| `src/components/PageSkeleton.tsx` | Suspense fallback component |
+| File | Action |
+|------|--------|
+| `src/pages/Landing.tsx` | Major rewrite - new copy, structure, and sections |
+| `src/components/landing/ProblemSolutionSection.tsx` | Remove import/usage from Landing |
 
 ---
 
-## Expected Results
+## Considerations
 
-| Metric | Current (Mobile) | Target |
-|--------|------------------|--------|
-| Performance Score | 60% | 85%+ |
-| First Contentful Paint | 6.6s | < 2s |
-| Largest Contentful Paint | 7.0s | < 2.5s |
-| Speed Index | 6.6s | < 3s |
-| Total Blocking Time | High | Low |
-
-| Metric | Current (Desktop) | Target |
-|--------|-------------------|--------|
-| Performance Score | 89% | 95%+ |
-| Render-blocking resources | 280ms | < 50ms |
-
----
-
-## Implementation Order
-
-1. **Font loading optimization** - Quick win, major impact
-2. **Route-level code splitting** - Biggest bundle reduction
-3. **Defer behavior tracking** - Reduces document latency
-4. **Landing page section lazy loading** - Improves LCP
-5. **Vite chunk optimization** - Better long-term caching
+- **SEO**: The AISemanticSection (FAQ) remains for search engine optimization
+- **Interactive Demo**: Preserved as the key conversion element
+- **Testimonials**: Using placeholder names - can be updated with real testimonials later
+- **Risk Dashboard**: Static sample data to illustrate the product value proposition
+- **Mobile**: All sections will remain responsive with existing Tailwind utilities
 
