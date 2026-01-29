@@ -48,6 +48,8 @@
     --bearish-foreground: 0 0% 100%;
     --caution: 40 95% 50%;
     --caution-foreground: 0 0% 10%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 10%;
     --neutral: 220 15% 50%;
     --neutral-foreground: 0 0% 100%;
 
@@ -97,6 +99,8 @@
     --bearish-foreground: 0 0% 100%;
     --caution: 40 92% 50%;
     --caution-foreground: 0 0% 10%;
+    --warning: 38 92% 55%;
+    --warning-foreground: 0 0% 10%;
     --neutral: 220 13% 55%;
     --neutral-foreground: 0 0% 100%;
 
@@ -125,9 +129,14 @@
     font-family: 'Inter', system-ui, sans-serif;
   }
 
-  /* Brand font - matches logo style */
+  /* Display/headline font - Space Grotesk for contemporary, precise look */
+  .font-display {
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+  }
+
+  /* Brand font - matches display font for consistency */
   .font-brand {
-    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-family: 'Space Grotesk', system-ui, sans-serif;
   }
 
   .font-mono {
@@ -135,7 +144,8 @@
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    @apply tracking-tight;
   }
 }
 
