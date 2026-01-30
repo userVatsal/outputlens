@@ -10,3 +10,5 @@ export { AgeVerificationBanner } from './AgeVerificationBanner';
 export { OnboardingGuide } from './OnboardingGuide';
 export { DashboardHero } from './DashboardHero';
 export { WhySection } from './WhySection';
+export { WorkspacePreview } from './WorkspacePreview';
+export { QuickActions } from './QuickActions';

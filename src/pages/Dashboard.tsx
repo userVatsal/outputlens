@@ -16,10 +16,11 @@ import {
   TrackedAssetsGrid,
   RecentReports,
   LatestArticles,
-  WorkspaceCTA,
   AgeVerificationBanner,
   OnboardingGuide,
   WhySection,
+  WorkspacePreview,
+  QuickActions,
 } from '@/components/dashboard';
 
 export default function Dashboard() {
@@ -101,38 +102,61 @@ export default function Dashboard() {
   return (
     <Layout>
       <div className="section-container py-8">
-        <div className="max-w-7xl mx-auto space-y-6">
+        <div className="max-w-7xl mx-auto space-y-8">
           {/* Account Header - Top of Dashboard */}
-          <AccountHeader profile={profile} plan={planData} />
+          <div className="animate-fade-in">
+            <AccountHeader profile={profile} plan={planData} />
+          </div>
 
           {/* Admin Analytics Panel - Only visible for admins */}
-          {isAdmin && <AdminPanel />}
+          {isAdmin && (
+            <div className="animate-fade-in" style={{ animationDelay: '50ms' }}>
+              <AdminPanel />
+            </div>
+          )}
 
           {/* Onboarding Guide for new users */}
           {shouldShowOnboarding && (
-            <OnboardingGuide 
-              profileName={profile?.full_name}
-              onDismiss={() => setShowOnboarding(false)}
-            />
+            <div className="animate-fade-in" style={{ animationDelay: '100ms' }}>
+              <OnboardingGuide 
+                profileName={profile?.full_name}
+                onDismiss={() => setShowOnboarding(false)}
+              />
+            </div>
           )}
 
           {/* Age Verification Banner */}
           {needsAgeVerification && (
-            <AgeVerificationBanner onDismiss={() => setShowAgeVerification(false)} />
+            <div className="animate-fade-in">
+              <AgeVerificationBanner onDismiss={() => setShowAgeVerification(false)} />
+            </div>
           )}
 
-          {/* Hero Section - Full Width */}
-          <DashboardHero 
-            profile={profile} 
-            usage={usage} 
-            plan={planData} 
-          />
+          {/* Hero Section - Full Width with animation */}
+          <div className="animate-fade-in" style={{ animationDelay: '150ms' }}>
+            <DashboardHero 
+              profile={profile} 
+              usage={usage} 
+              plan={planData} 
+            />
+          </div>
 
-          {/* Workspace CTA - Full Width, Prominent */}
-          <WorkspaceCTA />
+          {/* Quick Actions - Fast navigation */}
+          <div className="animate-fade-in" style={{ animationDelay: '200ms' }}>
+            <h2 className="text-lg font-semibold font-display text-foreground mb-4">Quick Actions</h2>
+            <QuickActions />
+          </div>
+
+          {/* Workspace Preview - Full Width, Prominent with animation */}
+          <div className="animate-fade-in" style={{ animationDelay: '250ms' }}>
+            <WorkspacePreview />
+          </div>
 
           {/* 2-Column Grid: Alerts + Tracked Assets */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div 
+            className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-fade-in" 
+            style={{ animationDelay: '300ms' }}
+          >
             <AlertsPanel 
               alerts={alerts} 
               onDismiss={dismissAlert} 
@@ -145,13 +169,18 @@ export default function Dashboard() {
           </div>
 
           {/* 2-Column Grid: Reports + Latest Articles */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div 
+            className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-fade-in" 
+            style={{ animationDelay: '350ms' }}
+          >
             <RecentReports />
             <LatestArticles />
           </div>
 
           {/* Why OutputLens Exists - Full Width */}
-          <WhySection />
+          <div className="animate-fade-in" style={{ animationDelay: '400ms' }}>
+            <WhySection />
+          </div>
 
         </div>
       </div>
