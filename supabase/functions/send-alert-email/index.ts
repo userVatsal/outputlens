@@ -1,4 +1,5 @@
 import { Resend } from 'https://esm.sh/resend@2.0.0';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.1';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -58,10 +59,15 @@ Deno.serve(async (req) => {
       throw new Error('RESEND_API_KEY not configured');
     }
 
-    const resend = new Resend(resendApiKey);
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+    );
+
     const request: AlertEmailRequest = await req.json();
 
     const {
+      userId,
       email,
       name,
       symbol,
@@ -73,10 +79,61 @@ Deno.serve(async (req) => {
       message,
     } = request;
 
-    if (!email || !symbol) {
-      throw new Error('Email and symbol are required');
+    if (!email || !symbol || !userId) {
+      throw new Error('Email, symbol, and userId are required');
     }
 
+    // SECURITY: Verify the user exists and has email alerts enabled
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('user_id, contact_preferences')
+      .eq('user_id', userId)
+      .single();
+
+    if (profileError || !profile) {
+      console.warn(`[ALERT-EMAIL] User not found: ${userId}`);
+      return new Response(
+        JSON.stringify({ error: 'User not found' }),
+        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Check if user has email alerts enabled
+    const contactPrefs = profile.contact_preferences as { email?: boolean } | null;
+    if (contactPrefs && contactPrefs.email === false) {
+      console.log(`[ALERT-EMAIL] User ${userId} has disabled email alerts`);
+      return new Response(
+        JSON.stringify({ success: false, reason: 'Email alerts disabled' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Verify the user has a tracked asset for this symbol
+    const { data: trackedAsset, error: assetError } = await supabase
+      .from('tracked_assets')
+      .select('id, alert_on_risk_change')
+      .eq('user_id', userId)
+      .eq('symbol', symbol)
+      .single();
+
+    if (assetError || !trackedAsset) {
+      console.warn(`[ALERT-EMAIL] No tracked asset found for user ${userId}, symbol ${symbol}`);
+      return new Response(
+        JSON.stringify({ error: 'No tracked asset found' }),
+        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Check if alerts are enabled for this tracked asset
+    if (trackedAsset.alert_on_risk_change === false) {
+      console.log(`[ALERT-EMAIL] Alerts disabled for asset ${symbol} for user ${userId}`);
+      return new Response(
+        JSON.stringify({ success: false, reason: 'Asset alerts disabled' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const resend = new Resend(resendApiKey);
     const displayName = name || 'there';
     const appUrl = 'https://outputlens.lovable.app';
     const emoji = getAlertEmoji(alertType, severity);

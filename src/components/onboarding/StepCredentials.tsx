@@ -6,9 +6,16 @@ import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { z } from 'zod';
 
+// Stronger password requirements matching Auth.tsx
+const passwordSchema = z.string()
+  .min(8, 'Password must be at least 8 characters')
+  .regex(/[a-z]/, 'Password must contain a lowercase letter')
+  .regex(/[A-Z]/, 'Password must contain an uppercase letter')
+  .regex(/\d/, 'Password must contain a number');
+
 const credentialsSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
+  password: passwordSchema,
 });
 
 interface StepCredentialsProps {
@@ -125,7 +132,7 @@ export function StepCredentials({ onComplete }: StepCredentialsProps) {
           disabled={loading}
           required
         />
-        <p className="text-xs text-muted-foreground">At least 6 characters</p>
+        <p className="text-xs text-muted-foreground">At least 8 characters with uppercase, lowercase, and number</p>
       </div>
 
       <Button type="submit" className="w-full" disabled={loading}>
