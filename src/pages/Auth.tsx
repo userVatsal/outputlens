@@ -8,20 +8,28 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { supabase } from '@/integrations/supabase/client';
 import { z } from 'zod';
 import { differenceInYears } from 'date-fns';
+import { toast } from 'sonner';
 import logo from '@/assets/logo.png';
 import { LEGAL_VERSIONS } from '@/lib/legal';
 import { useSecurity } from '@/hooks/useSecurity';
 import { CaptchaGate } from '@/components/security/CaptchaGate';
 
+// Stronger password requirements: 8+ chars with uppercase, lowercase, and number
+const passwordSchema = z.string()
+  .min(8, 'Password must be at least 8 characters')
+  .regex(/[a-z]/, 'Password must contain a lowercase letter')
+  .regex(/[A-Z]/, 'Password must contain an uppercase letter')
+  .regex(/\d/, 'Password must contain a number');
+
 const signInSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
+  password: z.string().min(1, 'Password is required'),
 });
 
-// Quick signup schema - only email and password required
+// Quick signup schema - email and strong password
 const quickSignUpSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
+  password: passwordSchema,
 });
 
 // Full signup schema - for complete profile (deferred)
@@ -397,16 +405,14 @@ export default function Auth() {
                       return;
                     }
                     setLoading(true);
-                    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+                    // SECURITY: Always show the same message to prevent user enumeration
+                    await supabase.auth.resetPasswordForEmail(email, {
                       redirectTo: `${window.location.origin}/auth?reset=true`,
                     });
                     setLoading(false);
-                    if (error) {
-                      setError(error.message);
-                    } else {
-                      setError(null);
-                      alert('Password reset link sent! Check your email.');
-                    }
+                    setError(null);
+                    // Generic message that doesn't reveal if email exists
+                    toast.success('If an account exists with this email, you\'ll receive a password reset link.');
                   }}
                   className="text-sm text-muted-foreground hover:text-primary hover:underline"
                   disabled={loading}

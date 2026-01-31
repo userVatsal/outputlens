@@ -270,21 +270,22 @@ export function useBehaviorTracking() {
     });
   }, [trackEvent]);
 
-  // Close session on page unload
+  // Close session on page unload - using secure edge function instead of sendBeacon
   const handleUnload = useCallback(() => {
     if (!sessionRef.current) return;
 
     const totalTime = Math.round((Date.now() - sessionRef.current.startedAt.getTime()) / 1000);
 
-    // Use sendBeacon for reliable delivery on unload
+    // Use sendBeacon with our secure edge function that validates ownership
     const payload = JSON.stringify({
-      ended_at: new Date().toISOString(),
-      exit_page: window.location.pathname,
-      total_time_seconds: totalTime,
+      sessionId: sessionRef.current.id,
+      visitorId: sessionRef.current.visitorId,
+      exitPage: window.location.pathname,
+      totalTimeSeconds: totalTime,
     });
 
     navigator.sendBeacon(
-      `${import.meta.env.VITE_SUPABASE_URL}/rest/v1/behavior_sessions?id=eq.${sessionRef.current.id}`,
+      `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/close-session`,
       new Blob([payload], { type: 'application/json' })
     );
   }, []);

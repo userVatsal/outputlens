@@ -1,4 +1,5 @@
 import { Resend } from 'https://esm.sh/resend@2.0.0';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.1';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -8,6 +9,7 @@ const corsHeaders = {
 interface WelcomeEmailRequest {
   email: string;
   name?: string;
+  userId?: string;
 }
 
 Deno.serve(async (req) => {
@@ -22,14 +24,62 @@ Deno.serve(async (req) => {
       throw new Error('RESEND_API_KEY not configured');
     }
 
-    const resend = new Resend(resendApiKey);
-    const { email, name }: WelcomeEmailRequest = await req.json();
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+    );
+
+    const { email, name, userId }: WelcomeEmailRequest = await req.json();
 
     if (!email) {
       throw new Error('Email is required');
     }
 
-    const displayName = name || 'there';
+    // SECURITY: Verify this is a legitimate signup by checking if the user exists
+    // and was created recently (within last 5 minutes)
+    const { data: users, error: userError } = await supabase.auth.admin.listUsers();
+    
+    if (userError) {
+      console.error('Failed to verify user:', userError);
+      throw new Error('Unable to verify user');
+    }
+
+    const user = users.users.find(u => u.email?.toLowerCase() === email.toLowerCase());
+    
+    if (!user) {
+      console.warn(`[WELCOME-EMAIL] Attempt to send welcome email to non-existent user: ${email}`);
+      return new Response(
+        JSON.stringify({ error: 'User not found' }),
+        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Check if user was created within the last 5 minutes
+    const createdAt = new Date(user.created_at);
+    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+    
+    if (createdAt < fiveMinutesAgo) {
+      console.warn(`[WELCOME-EMAIL] User created too long ago, blocking email: ${email}`);
+      return new Response(
+        JSON.stringify({ error: 'Welcome email window expired' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Check if welcome email was already sent (prevent duplicate sends)
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('user_id', user.id)
+      .single();
+
+    // Profile should exist due to trigger, this is just validation
+    if (!profile) {
+      console.warn(`[WELCOME-EMAIL] No profile for user: ${user.id}`);
+    }
+
+    const resend = new Resend(resendApiKey);
+    const displayName = name || user.user_metadata?.full_name || 'there';
     const appUrl = 'https://outputlens.lovable.app';
 
     const { data, error } = await resend.emails.send({

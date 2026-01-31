@@ -1,10 +1,26 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+// Restricted CORS for sensitive endpoints
+const getAllowedOrigin = (requestOrigin: string | null): string => {
+  const allowedOrigins = [
+    "https://outputlens.com",
+    "https://outputlens.lovable.app",
+    "http://localhost:5173",
+    "http://localhost:8080"
+  ];
+  if (requestOrigin?.includes('.lovable.app')) {
+    return requestOrigin;
+  }
+  return allowedOrigins.includes(requestOrigin || '') 
+    ? requestOrigin! 
+    : allowedOrigins[0];
 };
+
+const getCorsHeaders = (req: Request) => ({
+  "Access-Control-Allow-Origin": getAllowedOrigin(req.headers.get("origin")),
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+});
 
 const MARKET_CONTEXT: Record<string, { name: string; centralBank: string; currency: string }> = {
   US: { name: 'United States', centralBank: 'Federal Reserve (Fed)', currency: 'USD' },
@@ -29,6 +45,8 @@ const PLAN_LIMITS: Record<string, number> = {
 };
 
 serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req);
+  
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -41,7 +59,7 @@ serve(async (req) => {
   );
 
   try {
-    const { analysis, tier = 'free' } = await req.json();
+    const { analysis } = await req.json();
     
     if (!analysis) {
       throw new Error("Analysis data is required");
@@ -52,8 +70,10 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    // Server-side usage verification (optional - user auth check)
+    // SECURITY: Always fetch tier server-side, never trust client
+    let userTier = 'free';
     const authHeader = req.headers.get("Authorization");
+    
     if (authHeader) {
       const token = authHeader.replace("Bearer ", "");
       const { data: userData } = await supabase.auth.getUser(token);
@@ -61,6 +81,16 @@ serve(async (req) => {
       if (userData?.user) {
         const userId = userData.user.id;
         const monthYear = new Date().toISOString().slice(0, 7);
+        
+        // Get user's plan from database (NOT from client request)
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("subscription_plan, subscription_tier")
+          .eq("user_id", userId)
+          .maybeSingle();
+        
+        // Use subscription_plan or subscription_tier, defaulting to free
+        userTier = profile?.subscription_plan || profile?.subscription_tier || 'free';
         
         // Check usage limit
         const { data: usageData } = await supabase
@@ -70,15 +100,7 @@ serve(async (req) => {
           .eq("month_year", monthYear)
           .maybeSingle();
         
-        // Get user's plan
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("subscription_plan")
-          .eq("user_id", userId)
-          .maybeSingle();
-        
-        const userPlan = profile?.subscription_plan || 'free';
-        const limit = PLAN_LIMITS[userPlan] || PLAN_LIMITS.free;
+        const limit = PLAN_LIMITS[userTier] || PLAN_LIMITS.free;
         const currentCount = usageData?.analysis_count || 0;
         
         if (currentCount >= limit) {
@@ -87,7 +109,7 @@ serve(async (req) => {
             JSON.stringify({ 
               error: "Monthly analysis limit reached",
               code: "LIMIT_EXCEEDED",
-              plan: userPlan,
+              plan: userTier,
               limit: limit,
               current: currentCount,
               upgrade_url: "/pricing"
@@ -101,9 +123,9 @@ serve(async (req) => {
     const { input, marketData, riskMetrics, scenarios, simulation, bestCase, worstCase, overallRisk } = analysis;
     const marketContext = MARKET_CONTEXT[input.market] || MARKET_CONTEXT.US;
     
-    // Select model based on tier
-    const model = MODEL_BY_TIER[tier] || MODEL_BY_TIER.free;
-    console.log(`[ANALYZE] Using model: ${model} for tier: ${tier}`);
+    // Select model based on server-validated tier
+    const model = MODEL_BY_TIER[userTier] || MODEL_BY_TIER.free;
+    console.log(`[ANALYZE] Using model: ${model} for tier: ${userTier}`);
 
     // Build structured scenario summary
     const formatScenarios = (categoryScenarios: any[], categoryName: string) => {
@@ -273,7 +295,7 @@ Focus on helping the trader quantify RISK EXPOSURE and understand the RANGE of p
         metric_type: 'ai_cost',
         metric_name: 'analyze_trade_call',
         metric_value: 1,
-        dimensions: { tier, model, asset: input.asset, latency_ms: latency }
+        dimensions: { tier: userTier, model, asset: input.asset, latency_ms: latency }
       });
 
     return new Response(

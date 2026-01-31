@@ -325,11 +325,12 @@ async function handleVerifyCaptcha(
   const HCAPTCHA_SECRET = Deno.env.get("HCAPTCHA_SECRET_KEY");
   
   if (!HCAPTCHA_SECRET) {
-    // If no hCaptcha configured, log and allow (development mode)
-    console.log("[SENTINEL] hCaptcha not configured, allowing request");
+    // SECURITY: In production, missing hCaptcha secret should BLOCK, not allow
+    // Log a critical error so admins know configuration is broken
+    console.error("[SENTINEL] CRITICAL: HCAPTCHA_SECRET_KEY not configured! Blocking request.");
     return new Response(
-      JSON.stringify({ success: true, score: 1.0, development: true }),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      JSON.stringify({ success: false, error: "Security verification unavailable. Please contact support." }),
+      { status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
 
