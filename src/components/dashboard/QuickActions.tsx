@@ -1,80 +1,52 @@
 import { Link } from 'react-router-dom';
-import { 
-  BarChart3, 
-  Briefcase, 
-  TrendingUp,
-  BookOpen,
-  ArrowRight 
-} from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
+import { BarChart3, Briefcase, TrendingUp, BookOpen, ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const actions = [
   {
-    title: 'Single Asset Analysis',
-    description: 'Run risk analysis on any stock, crypto, or ETF',
+    title: 'Single Asset',
+    description: 'Stocks, crypto, ETFs',
     icon: BarChart3,
     href: '/workspace',
-    color: 'text-primary',
-    bgColor: 'bg-primary/10',
   },
   {
     title: 'Portfolio Mode',
-    description: 'Analyze multi-asset portfolios with correlation',
+    description: 'Multi-asset correlation',
     icon: Briefcase,
     href: '/workspace?mode=portfolio',
-    color: 'text-purple-500',
-    bgColor: 'bg-purple-500/10',
   },
   {
     title: 'View History',
-    description: 'Review past analyses and track decisions',
+    description: 'Past analyses',
     icon: TrendingUp,
     href: '/history',
-    color: 'text-amber-500',
-    bgColor: 'bg-amber-500/10',
   },
   {
     title: 'Methodology',
-    description: 'Learn about our risk models and AI approach',
+    description: 'How it works',
     icon: BookOpen,
     href: '/methodology',
-    color: 'text-blue-500',
-    bgColor: 'bg-blue-500/10',
   },
 ];
 
 export function QuickActions() {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      {actions.map((action, index) => {
+    <div className="flex flex-wrap gap-2">
+      {actions.map((action) => {
         const Icon = action.icon;
         return (
-          <Link 
+          <Link
             key={action.title}
             to={action.href}
-            className="group"
+            className={cn(
+              'inline-flex items-center gap-2.5 px-4 py-2.5 rounded border border-border bg-card',
+              'text-sm font-medium text-foreground hover:border-primary/50 hover:bg-primary/5',
+              'transition-all duration-200 group'
+            )}
           >
-            <Card className={cn(
-              "h-full border-border hover:border-primary/40 transition-all duration-300",
-              "hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-1"
-            )}>
-              <CardContent className="p-4">
-                <div className={cn(
-                  "p-2.5 rounded-lg w-fit mb-3 transition-transform group-hover:scale-110",
-                  action.bgColor
-                )}>
-                  <Icon className={cn("h-5 w-5", action.color)} />
-                </div>
-                <h4 className="font-semibold text-foreground mb-1 flex items-center gap-2">
-                  {action.title}
-                  <ArrowRight className="h-3.5 w-3.5 opacity-0 -translate-x-2 transition-all group-hover:opacity-100 group-hover:translate-x-0" />
-                </h4>
-                <p className="text-xs text-muted-foreground">
-                  {action.description}
-                </p>
-              </CardContent>
-            </Card>
+            <Icon className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+            <span>{action.title}</span>
+            <ArrowRight className="h-3.5 w-3.5 text-muted-foreground/40 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
           </Link>
         );
       })}
