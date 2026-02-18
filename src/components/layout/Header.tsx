@@ -1,46 +1,39 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X, LogOut, User, Languages, History, Bookmark, Home } from 'lucide-react';
+import { Menu, X, LogOut, User, History, Bookmark, Home, Bell } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { supabase } from '@/integrations/supabase/client';
 import { User as SupabaseUser } from '@supabase/supabase-js';
-import { useLanguage } from '@/contexts/LanguageContext';
 import { BrandLogo } from '@/components/BrandLogo';
 import { RiskAlertBell } from '@/components/RiskAlertBell';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
 const navLinks = [
-  { href: '/#demo', labelKey: 'demo' },
-  { href: '/workspace', labelKey: 'workspace' },
-  { href: '/methodology', labelKey: 'methodology' },
-  { href: '/pricing', labelKey: 'pricing' },
+  { href: '/workspace', label: 'Workspace' },
+  { href: '/methodology', label: 'Methodology' },
+  { href: '/pricing', label: 'Pricing' },
+  { href: '/about', label: 'About' },
 ];
 
 export function Header() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { language, setLanguage, t } = useLanguage();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [user, setUser] = useState<SupabaseUser | null>(null);
 
   useEffect(() => {
-    // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        setUser(session?.user ?? null);
-      }
+      (event, session) => { setUser(session?.user ?? null); }
     );
-
-    // Check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
     });
-
     return () => subscription.unsubscribe();
   }, []);
 
@@ -49,193 +42,166 @@ export function Header() {
     navigate('/');
   };
 
+  const initials = user?.email?.slice(0, 2).toUpperCase() ?? 'U';
+
   return (
-    <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
+    <header className="sticky top-0 z-50 border-b border-white/10" style={{ backgroundColor: 'hsl(222, 47%, 14%)' }}>
       <div className="section-container">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center">
-            <BrandLogo size="md" />
+          <Link to="/" className="flex items-center flex-shrink-0">
+            <BrandLogo size="md" className="text-white [&_.text-logo-navy]:text-white [&_.text-logo-blue]:text-blue-400" />
           </Link>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-8">
+          {/* Desktop Nav — center */}
+          <nav className="hidden md:flex items-center gap-1">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
                 to={link.href}
-                className={`text-sm font-medium transition-colors ${
+                className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${
                   location.pathname === link.href
-                    ? 'text-primary'
-                    : 'text-muted-foreground hover:text-foreground'
+                    ? 'text-white bg-white/10'
+                    : 'text-white/60 hover:text-white hover:bg-white/8'
                 }`}
               >
-                {t(link.labelKey)}
+                {link.label}
               </Link>
             ))}
           </nav>
 
-          {/* Language Toggle & Auth Buttons */}
+          {/* Right: Auth */}
           <div className="hidden md:flex items-center gap-3">
-            {/* Language Toggle */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="flex items-center gap-2">
-                  <Languages className="h-4 w-4" />
-                  <span className="text-xs font-medium">{language === 'en-US' ? '🇺🇸 US' : '🇬🇧 UK'}</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="bg-background border z-50">
-                <DropdownMenuItem 
-                  onClick={() => setLanguage('en-US')}
-                  className={language === 'en-US' ? 'bg-muted' : ''}
-                >
-                  <span className="mr-2">🇺🇸</span> US English
-                </DropdownMenuItem>
-                <DropdownMenuItem 
-                  onClick={() => setLanguage('en-GB')}
-                  className={language === 'en-GB' ? 'bg-muted' : ''}
-                >
-                  <span className="mr-2">🇬🇧</span> UK English
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-
             {user ? (
               <>
                 <RiskAlertBell />
-                <Button variant="ghost" size="sm" asChild>
-                  <Link to="/dashboard" className="flex items-center gap-2">
-                    <Home className="h-4 w-4" />
-                    Home
-                  </Link>
-                </Button>
-                <Button variant="ghost" size="sm" asChild>
-                  <Link to="/tracked-assets" className="flex items-center gap-2">
-                    <Bookmark className="h-4 w-4" />
-                    Tracked
-                  </Link>
-                </Button>
-                <Button variant="ghost" size="sm" asChild>
-                  <Link to="/history" className="flex items-center gap-2">
-                    <History className="h-4 w-4" />
-                    History
-                  </Link>
-                </Button>
-                <Button variant="ghost" size="sm" asChild>
-                  <Link to="/account" className="flex items-center gap-2">
-                    <User className="h-4 w-4" />
-                    Account
-                  </Link>
-                </Button>
-                <Button variant="outline" size="sm" onClick={handleSignOut}>
-                  <LogOut className="h-4 w-4 mr-2" />
-                  {t('signOut')}
-                </Button>
+                <Link
+                  to="/dashboard"
+                  className="text-sm text-white/60 hover:text-white transition-colors px-3 py-1.5"
+                >
+                  Dashboard
+                </Link>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button className="flex items-center gap-2 rounded-full focus:outline-none focus:ring-2 focus:ring-white/20">
+                      <Avatar className="h-8 w-8 border border-white/20">
+                        <AvatarFallback className="text-xs font-semibold" style={{ backgroundColor: 'hsl(225, 83%, 53%)', color: 'white' }}>
+                          {initials}
+                        </AvatarFallback>
+                      </Avatar>
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48 bg-card border-border">
+                    <DropdownMenuItem asChild>
+                      <Link to="/dashboard" className="flex items-center gap-2">
+                        <Home className="h-4 w-4" /> Dashboard
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/tracked-assets" className="flex items-center gap-2">
+                        <Bookmark className="h-4 w-4" /> Tracked Assets
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/history" className="flex items-center gap-2">
+                        <History className="h-4 w-4" /> History
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/account" className="flex items-center gap-2">
+                        <User className="h-4 w-4" /> Account
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleSignOut} className="flex items-center gap-2 text-destructive focus:text-destructive">
+                      <LogOut className="h-4 w-4" /> Sign Out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </>
             ) : (
               <>
-                <Button variant="ghost" size="sm" asChild>
-                  <Link to="/auth">{t('signIn')}</Link>
-                </Button>
-                <Button size="sm" asChild>
-                  <Link to="/auth?mode=signup">{t('getStarted')}</Link>
-                </Button>
+                <Link
+                  to="/auth"
+                  className="text-sm font-medium text-white/70 hover:text-white transition-colors px-3 py-1.5"
+                >
+                  Sign In
+                </Link>
+                <Link
+                  to="/auth?mode=signup"
+                  className="inline-flex items-center px-4 py-2 rounded text-sm font-semibold text-white transition-all hover:opacity-90"
+                  style={{ backgroundColor: 'hsl(225, 83%, 53%)' }}
+                >
+                  Get Started
+                </Link>
               </>
             )}
           </div>
 
-          {/* Mobile Menu Button */}
+          {/* Mobile Toggle */}
           <button
-            className="md:hidden p-2"
+            className="md:hidden p-2 text-white/70 hover:text-white"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
-            {mobileMenuOpen ? (
-              <X className="h-6 w-6" />
-            ) : (
-              <Menu className="h-6 w-6" />
-            )}
+            {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
         </div>
 
-        {/* Mobile Navigation */}
+        {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden py-4 border-t border-border">
-            <nav className="flex flex-col gap-4">
+          <div className="md:hidden py-4 border-t border-white/10">
+            <nav className="flex flex-col gap-1 mb-4">
               {navLinks.map((link) => (
                 <Link
                   key={link.href}
                   to={link.href}
                   onClick={() => setMobileMenuOpen(false)}
-                  className={`text-sm font-medium transition-colors ${
+                  className={`px-3 py-2.5 rounded text-sm font-medium transition-colors ${
                     location.pathname === link.href
-                      ? 'text-primary'
-                      : 'text-muted-foreground hover:text-foreground'
+                      ? 'text-white bg-white/10'
+                      : 'text-white/60 hover:text-white hover:bg-white/8'
                   }`}
                 >
-                  {t(link.labelKey)}
+                  {link.label}
                 </Link>
               ))}
-              
-              {/* Language Toggle for Mobile */}
-              <div className="flex items-center gap-2 py-2">
-                <Languages className="h-4 w-4 text-muted-foreground" />
-                <button
-                  onClick={() => setLanguage(language === 'en-US' ? 'en-GB' : 'en-US')}
-                  className="text-sm font-medium text-muted-foreground hover:text-foreground"
-                >
-                  {language === 'en-US' ? '🇺🇸 US English' : '🇬🇧 UK English'}
-                </button>
-              </div>
-
-              <div className="flex flex-col gap-2 pt-4 border-t border-border">
-                {user ? (
-                  <>
-                    <Button variant="ghost" size="sm" asChild className="justify-start">
-                      <Link to="/dashboard" onClick={() => setMobileMenuOpen(false)}>
-                        <Home className="h-4 w-4 mr-2" />
-                        Home
-                      </Link>
-                    </Button>
-                    <Button variant="ghost" size="sm" asChild className="justify-start">
-                      <Link to="/tracked-assets" onClick={() => setMobileMenuOpen(false)}>
-                        <Bookmark className="h-4 w-4 mr-2" />
-                        Tracked Assets
-                      </Link>
-                    </Button>
-                    <Button variant="ghost" size="sm" asChild className="justify-start">
-                      <Link to="/history" onClick={() => setMobileMenuOpen(false)}>
-                        <History className="h-4 w-4 mr-2" />
-                        History
-                      </Link>
-                    </Button>
-                    <Button variant="ghost" size="sm" asChild className="justify-start">
-                      <Link to="/account" onClick={() => setMobileMenuOpen(false)}>
-                        <User className="h-4 w-4 mr-2" />
-                        Account
-                      </Link>
-                    </Button>
-                    <Button variant="outline" size="sm" onClick={handleSignOut}>
-                      <LogOut className="h-4 w-4 mr-2" />
-                      {t('signOut')}
-                    </Button>
-                  </>
-                ) : (
-                  <>
-                    <Button variant="ghost" size="sm" asChild>
-                      <Link to="/auth" onClick={() => setMobileMenuOpen(false)}>
-                        {t('signIn')}
-                      </Link>
-                    </Button>
-                    <Button size="sm" asChild>
-                      <Link to="/auth?mode=signup" onClick={() => setMobileMenuOpen(false)}>
-                        {t('getStarted')}
-                      </Link>
-                    </Button>
-                  </>
-                )}
-              </div>
             </nav>
+
+            <div className="flex flex-col gap-2 pt-4 border-t border-white/10">
+              {user ? (
+                <>
+                  <Link to="/dashboard" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white">
+                    <Home className="h-4 w-4" /> Dashboard
+                  </Link>
+                  <Link to="/tracked-assets" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white">
+                    <Bookmark className="h-4 w-4" /> Tracked Assets
+                  </Link>
+                  <Link to="/history" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white">
+                    <History className="h-4 w-4" /> History
+                  </Link>
+                  <Link to="/account" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white">
+                    <User className="h-4 w-4" /> Account
+                  </Link>
+                  <button onClick={handleSignOut} className="flex items-center gap-2 px-3 py-2 text-sm text-red-400 hover:text-red-300">
+                    <LogOut className="h-4 w-4" /> Sign Out
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link to="/auth" onClick={() => setMobileMenuOpen(false)} className="px-3 py-2 text-sm text-white/70 hover:text-white text-center">
+                    Sign In
+                  </Link>
+                  <Link
+                    to="/auth?mode=signup"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="px-4 py-2.5 rounded text-sm font-semibold text-white text-center"
+                    style={{ backgroundColor: 'hsl(225, 83%, 53%)' }}
+                  >
+                    Get Started Free
+                  </Link>
+                </>
+              )}
+            </div>
           </div>
         )}
       </div>

@@ -1,80 +1,116 @@
 import { useEffect, lazy, Suspense } from 'react';
 import { Link } from 'react-router-dom';
-import { 
-  ArrowRight, 
+import {
+  ArrowRight,
   Database,
   Brain,
   Gauge,
-  Quote,
   TrendingUp,
-  BarChart3,
+  TrendingDown,
   Shield,
-  Play,
-  Sparkles
+  CheckCircle,
+  BarChart3,
+  Activity,
+  ChevronRight,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
 import { Layout } from '@/components/layout/Layout';
 import { LazySection } from '@/components/landing/LazySection';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AnalysisFlowAnimation } from '@/components/landing/AnalysisFlowAnimation';
 import { LiveAssetDashboard } from '@/components/landing/LiveAssetDashboard';
+import { cn } from '@/lib/utils';
 
-// Lazy load below-the-fold components
 const InteractivePreview = lazy(() => import('@/components/landing/InteractivePreview').then(m => ({ default: m.InteractivePreview })));
 const AISemanticSection = lazy(() => import('@/components/landing/AISemanticSection').then(m => ({ default: m.AISemanticSection })));
 
-// 3 simplified features with streamlined icons
+const statsBar = [
+  { value: '<2s', label: 'Analysis time' },
+  { value: '10,000', label: 'Monte Carlo paths' },
+  { value: '95%', label: 'VaR confidence level' },
+  { value: 'Global', label: 'Market coverage' },
+];
+
+const painPoints = [
+  'You see a chart and a gut feeling. Not a probability.',
+  'You exit positions too early or hold through disasters.',
+  'You have no idea how bad the worst-case scenario actually is.',
+];
+
 const features = [
   {
     icon: Database,
     title: 'Data Aggregation',
-    description: 'Aggregate qualitative and quantitative data from diverse sources to get a holistic view of asset risks.',
-    gradient: 'from-primary/20 to-primary/5',
+    description: 'Real-time prices, volatility regimes, and qualitative signals — all synthesized before your analysis runs.',
+    visual: (
+      <div className="space-y-2">
+        {['Market Data', 'News Sentiment', 'Volatility 30D', 'Historical Patterns'].map((item, i) => (
+          <div key={item} className="flex items-center gap-3">
+            <div className="w-2 h-2 rounded-full bg-primary/60 flex-shrink-0" />
+            <div className="h-2 rounded-full bg-primary/20 flex-1" style={{ width: `${[85, 62, 78, 55][i]}%` }}>
+              <div className="h-full rounded-full bg-primary/50" style={{ width: '100%' }} />
+            </div>
+            <span className="text-xs text-white/50 font-mono w-8">{[85, 62, 78, 55][i]}%</span>
+          </div>
+        ))}
+      </div>
+    ),
   },
   {
     icon: Brain,
     title: 'AI Scenario Analysis',
-    description: 'Our Gen-AI tools analyze potential scenarios, incorporating internal and external factors to foresee market shifts.',
-    gradient: 'from-bullish/20 to-bullish/5',
+    description: 'Monte Carlo simulation builds 10,000 price paths. AI interprets them into scenarios you can actually act on.',
+    visual: (
+      <div className="space-y-2">
+        {[
+          { label: 'Bull case', pct: 28, color: 'bg-bullish' },
+          { label: 'Base case', pct: 42, color: 'bg-primary' },
+          { label: 'Bear case', pct: 30, color: 'bg-destructive' },
+        ].map(s => (
+          <div key={s.label} className="flex items-center gap-3">
+            <span className="text-xs text-white/50 w-20 flex-shrink-0">{s.label}</span>
+            <div className="h-5 rounded flex-1 bg-white/5 overflow-hidden">
+              <div className={cn('h-full rounded flex items-center justify-end pr-2', s.color)} style={{ width: `${s.pct}%` }}>
+                <span className="text-xs font-mono text-white font-semibold">{s.pct}%</span>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    ),
   },
   {
     icon: Gauge,
-    title: 'Risk Probability Prediction',
-    description: 'Receive a clear risk probability score for any asset, visualized in an intuitive gauge, to guide your investment decisions.',
-    gradient: 'from-warning/20 to-warning/5',
+    title: 'Risk Probability Score',
+    description: 'A single, clear number. Win probability. Maximum drawdown. Expected shortfall. No jargon.',
+    visual: (
+      <div className="grid grid-cols-3 gap-3">
+        {[
+          { label: 'Win Prob', value: '67%', color: 'text-bullish' },
+          { label: '95% VaR', value: '-12.4%', color: 'text-destructive' },
+          { label: 'Risk Score', value: '6/10', color: 'text-caution' },
+        ].map(m => (
+          <div key={m.label} className="bg-white/5 rounded p-3 text-center">
+            <p className={cn('text-lg font-bold font-mono', m.color)}>{m.value}</p>
+            <p className="text-xs text-white/40 mt-0.5">{m.label}</p>
+          </div>
+        ))}
+      </div>
+    ),
   },
 ];
 
-// Testimonials data
 const testimonials = [
   {
-    quote: "OutputLens has revolutionized my trading strategy. The risk probability predictions are incredibly accurate and have saved me from several potential losses. It's like having an AI co-pilot.",
+    quote: "The risk probability predictions are incredibly accurate. It's like having an institutional risk desk available 24/7.",
     name: "Sarah L.",
     role: "Day Trader",
-    avatar: "S"
   },
   {
-    quote: "The depth of analysis, combining both quantitative and qualitative data, is unmatched. OutputLens provides the clarity we need to make high-stakes decisions with confidence.",
+    quote: "The depth of analysis, combining both quantitative and qualitative data, is unmatched. An essential tool.",
     name: "Michael B.",
-    role: "Hedge Fund Manager",
-    avatar: "M"
+    role: "Portfolio Manager",
   },
-  {
-    quote: "I was skeptical at first, but the AI scenario analysis is a game-changer. It surfaces risks I would have never considered. An essential tool for any serious analyst.",
-    name: "Jessica T.",
-    role: "Financial Analyst",
-    avatar: "J"
-  }
-];
-
-// Stats for social proof
-const stats = [
-  { value: '10,000+', label: 'Monte Carlo Simulations', sublabel: 'Per analysis' },
-  { value: '<2s', label: 'Analysis Speed', sublabel: 'Real-time results' },
-  { value: '95%', label: 'VaR Accuracy', sublabel: 'Confidence level' },
-  { value: '24/7', label: 'Market Coverage', sublabel: 'Global access' },
 ];
 
 export default function Landing() {
@@ -84,192 +120,241 @@ export default function Landing() {
 
   return (
     <Layout>
-      {/* Hero Section */}
-      <section className="hero-gradient py-20 lg:py-28 overflow-hidden relative">
-        {/* Animated background elements */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute -top-40 -right-40 w-96 h-96 bg-primary/5 rounded-full blur-3xl animate-pulse" />
-          <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-primary/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-to-r from-primary/3 to-bullish/3 rounded-full blur-3xl" />
-        </div>
-        
-        <div className="section-container relative">
-          <div className="max-w-4xl mx-auto text-center space-y-8">
-            {/* Badge with animation */}
-            <div className="animate-fade-in opacity-0" style={{ animationDelay: '0ms', animationFillMode: 'forwards' }}>
-              <Badge variant="secondary" className="px-4 py-1.5 text-sm font-medium shadow-sm">
-                <Sparkles className="h-3.5 w-3.5 mr-1.5 text-primary" />
+      {/* ─── HERO — dark navy, 2-column ─── */}
+      <section className="hero-gradient py-20 lg:py-28 overflow-hidden">
+        <div className="section-container">
+          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+            {/* Left: copy */}
+            <div className="space-y-8">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold border"
+                style={{ borderColor: 'rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.7)', backgroundColor: 'rgba(255,255,255,0.06)' }}>
+                <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse-dot" />
                 AI-Powered Risk Intelligence
-              </Badge>
-            </div>
+              </div>
 
-            {/* Headline with staggered animation */}
-            <h1 
-              className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-foreground leading-tight animate-fade-in opacity-0"
-              style={{ animationDelay: '100ms', animationFillMode: 'forwards' }}
-            >
-              Stop Guessing,{' '}
-              <span className="text-primary relative inline-block">
-                Start Winning
-                <svg className="absolute -bottom-2 left-0 w-full h-3 text-primary/30" viewBox="0 0 200 12" preserveAspectRatio="none">
-                  <path d="M0,8 Q50,0 100,8 T200,8" fill="none" stroke="currentColor" strokeWidth="3" className="animate-[dash_2s_ease-in-out_forwards]" />
-                </svg>
-              </span>
-            </h1>
-            
-            {/* Subhead */}
-            <p 
-              className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed animate-fade-in opacity-0"
-              style={{ animationDelay: '200ms', animationFillMode: 'forwards' }}
-            >
-              OutputLens provides a comprehensive risk management layer, leveraging AI to analyze 
-              qualitative, quantitative, and scenario-based data for smarter asset purchasing decisions.
-            </p>
+              <h1 className="text-4xl md:text-5xl lg:text-[3.25rem] font-bold text-white leading-[1.1] tracking-tight font-display">
+                Know Your Risk Before You{' '}
+                <span className="text-blue-400">Risk Your Money</span>
+              </h1>
 
-            {/* CTA Buttons */}
-            <div 
-              className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4 animate-fade-in opacity-0"
-              style={{ animationDelay: '300ms', animationFillMode: 'forwards' }}
-            >
-              <Button 
-                size="lg" 
-                asChild 
-                className="px-8 py-6 text-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] group"
-              >
-                <Link to="/auth?mode=signup">
-                  Request a Demo
-                  <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+              <p className="text-lg text-white/60 max-w-lg leading-relaxed">
+                OutputLens quantifies your downside before you enter a position. Monte Carlo simulation, AI scenario analysis, and real-time market data — in under 2 seconds.
+              </p>
+
+              <div className="flex flex-col sm:flex-row items-start gap-3">
+                <Link
+                  to="/auth?mode=signup"
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded font-semibold text-white text-sm transition-all hover:opacity-90 group"
+                  style={{ backgroundColor: 'hsl(225, 83%, 53%)' }}
+                >
+                  Start Free Analysis
+                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
                 </Link>
-              </Button>
-              <Button 
-                size="lg" 
-                variant="outline" 
-                asChild 
-                className="px-8 py-6 text-lg hover:bg-muted/50 transition-all duration-300 group"
-              >
-                <a href="#how-it-works">
-                  <Play className="mr-2 h-5 w-5 transition-transform group-hover:scale-110" />
+                <a
+                  href="#how-it-works"
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded font-medium text-sm text-white/70 hover:text-white border border-white/20 hover:border-white/40 transition-all"
+                >
                   See How It Works
                 </a>
-              </Button>
+              </div>
+
+              <div className="flex items-center gap-5 text-sm text-white/40">
+                <span className="flex items-center gap-1.5"><CheckCircle className="h-4 w-4 text-green-400" /> No credit card</span>
+                <span className="flex items-center gap-1.5"><CheckCircle className="h-4 w-4 text-green-400" /> 5 free analyses</span>
+                <span className="flex items-center gap-1.5"><Shield className="h-4 w-4 text-blue-400" /> Bank-grade security</span>
+              </div>
             </div>
 
-            {/* Trust indicators */}
-            <div 
-              className="flex items-center justify-center gap-8 pt-8 text-sm text-muted-foreground animate-fade-in opacity-0"
-              style={{ animationDelay: '400ms', animationFillMode: 'forwards' }}
-            >
-              <div className="flex items-center gap-2">
-                <Shield className="h-4 w-4 text-bullish" />
-                <span>Bank-grade security</span>
+            {/* Right: terminal widget */}
+            <div className="terminal-window shadow-2xl">
+              <div className="terminal-header">
+                <div className="terminal-dot" style={{ backgroundColor: '#FF5F57' }} />
+                <div className="terminal-dot" style={{ backgroundColor: '#FEBC2E' }} />
+                <div className="terminal-dot" style={{ backgroundColor: '#28C840' }} />
+                <span className="text-xs ml-3" style={{ color: 'rgba(255,255,255,0.35)', fontFamily: 'JetBrains Mono, monospace' }}>outputlens — risk-analysis</span>
               </div>
-              <div className="hidden sm:flex items-center gap-2">
-                <BarChart3 className="h-4 w-4 text-primary" />
-                <span>Real-time analysis</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <TrendingUp className="h-4 w-4 text-warning" />
-                <span>No predictions, just data</span>
+              <div className="p-5 space-y-1" style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.8rem' }}>
+                <div style={{ color: 'rgba(255,255,255,0.4)' }}>$ analyze TSLA --horizon 30d --direction long</div>
+                <div style={{ color: 'rgba(255,255,255,0.3)' }}>→ Fetching market data... done</div>
+                <div style={{ color: 'rgba(255,255,255,0.3)' }}>→ Running 10,000 Monte Carlo paths...</div>
+                <div style={{ color: 'rgba(255,255,255,0.3)' }}>→ Detecting regime: VOLATILE</div>
+                <div style={{ color: 'rgba(255,255,255,0.3)' }}>→ Calculating CVaR at 95%... done</div>
+                <div className="text-green-400 font-semibold mt-1">✓ Analysis complete in 1.8s</div>
+                <div className="mt-4 pt-4 border-t border-white/10 grid grid-cols-2 gap-3">
+                  {[
+                    { label: 'Win Probability', value: '67%', color: '#4ade80' },
+                    { label: '95% VaR', value: '-12.4%', color: '#f87171' },
+                    { label: 'Expected Return', value: '+8.7%', color: '#4ade80' },
+                    { label: 'Tail Risk (CVaR)', value: '-18.2%', color: '#f87171' },
+                    { label: 'Sharpe Ratio', value: '1.42', color: 'rgba(255,255,255,0.7)' },
+                    { label: 'Risk Score', value: '6 / 10', color: '#facc15' },
+                  ].map(m => (
+                    <div key={m.label}>
+                      <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.7rem' }}>{m.label}</p>
+                      <p style={{ color: m.color, fontWeight: 700, fontSize: '0.9rem' }}>{m.value}</p>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-3 pt-3 border-t border-white/10 space-y-1">
+                  <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.7rem' }}>SCENARIO DISTRIBUTION</p>
+                  {[
+                    { s: 'Bull case (+18.4%)', pct: 28, color: '#4ade80' },
+                    { s: 'Base case (+5.2%)', pct: 42, color: '#60a5fa' },
+                    { s: 'Bear case (-14.7%)', pct: 30, color: '#f87171' },
+                  ].map(sc => (
+                    <div key={sc.s} className="flex items-center gap-2">
+                      <div className="h-1.5 rounded-full flex-shrink-0" style={{ width: `${sc.pct * 1.5}px`, backgroundColor: sc.color, opacity: 0.7 }} />
+                      <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.7rem' }}>{sc.s} — {sc.pct}%</span>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Stats Bar */}
-      <section className="py-8 bg-card border-y border-border">
+      {/* ─── STATS BAR — white strip ─── */}
+      <section className="py-6 bg-card border-b border-border">
         <div className="section-container">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {stats.map((stat, index) => (
-              <div 
-                key={stat.label} 
-                className="text-center animate-fade-in opacity-0"
-                style={{ animationDelay: `${index * 100}ms`, animationFillMode: 'forwards' }}
-              >
-                <p className="text-3xl md:text-4xl font-bold text-primary font-mono">
-                  {stat.value}
-                </p>
-                <p className="text-sm font-medium text-foreground">{stat.label}</p>
-                <p className="text-xs text-muted-foreground">{stat.sublabel}</p>
+          <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-border">
+            {statsBar.map((stat) => (
+              <div key={stat.label} className="px-6 py-2 text-center">
+                <p className="text-xl font-bold font-display text-foreground">{stat.value}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">{stat.label}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Features Section */}
-      <section id="features" className="py-24 bg-background">
+      {/* ─── THE PROBLEM — editorial 2-column ─── */}
+      <section className="py-24 bg-background">
         <div className="section-container">
-          <div className="text-center mb-16">
-            <Badge variant="outline" className="mb-4">Our Features</Badge>
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              A Smarter Way to Assess Risk
-            </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
-              OutputLens combines powerful data analysis with cutting-edge AI to give you an unparalleled edge in the market.
-            </p>
-          </div>
-          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            {features.map((feature, index) => (
-              <Card
-                key={feature.title}
-                className="border-border/50 hover:border-primary/40 transition-all duration-500 group hover:shadow-xl animate-fade-in opacity-0 overflow-hidden relative"
-                style={{ animationDelay: `${index * 150}ms`, animationFillMode: 'forwards' }}
-              >
-                {/* Gradient background on hover */}
-                <div className={`absolute inset-0 bg-gradient-to-br ${feature.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
-                
-                <CardContent className="p-8 relative">
-                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 text-primary mb-6 group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-500 group-hover:scale-110 group-hover:rotate-3">
-                    <feature.icon className="h-8 w-8" />
+          <div className="grid md:grid-cols-2 gap-12 lg:gap-20 items-start max-w-5xl">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-6">The Problem</p>
+              <h2 className="text-3xl md:text-4xl font-bold font-display text-foreground leading-tight">
+                Most traders enter positions without knowing their actual downside.
+              </h2>
+            </div>
+            <div className="space-y-6 pt-2 md:pt-10">
+              {painPoints.map((p, i) => (
+                <div key={i} className="flex items-start gap-4">
+                  <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"
+                    style={{ backgroundColor: 'hsl(var(--destructive) / 0.12)' }}>
+                    <span className="text-destructive text-xs font-bold">{i + 1}</span>
                   </div>
-                  <h3 className="text-xl font-semibold text-foreground mb-3">
-                    {feature.title}
-                  </h3>
-                  <p className="text-muted-foreground leading-relaxed">
-                    {feature.description}
-                  </p>
-                </CardContent>
-              </Card>
-            ))}
+                  <p className="text-foreground leading-relaxed">{p}</p>
+                </div>
+              ))}
+              <div className="pt-4">
+                <Link
+                  to="/auth?mode=signup"
+                  className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline"
+                >
+                  See how OutputLens fixes this <ChevronRight className="h-4 w-4" />
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* How It Works - Analysis Flow Animation */}
-      <section id="how-it-works" className="py-24 bg-muted/30">
+      {/* ─── HOW IT WORKS — terminal animation ─── */}
+      <section id="how-it-works" className="py-24" style={{ backgroundColor: 'hsl(220, 16%, 97%)' }}>
         <div className="section-container">
-          <div className="text-center mb-12">
-            <Badge variant="outline" className="mb-4">How It Works</Badge>
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              From Data to Decisions in Seconds
+          <div className="mb-12">
+            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">How It Works</p>
+            <h2 className="text-3xl md:text-4xl font-bold font-display text-foreground">
+              From data to decision<br />in under 2 seconds.
             </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
-              Watch how OutputLens transforms raw market data into actionable risk insights.
-            </p>
           </div>
-          
-          <div className="max-w-4xl mx-auto">
+          <div className="max-w-4xl">
             <AnalysisFlowAnimation />
           </div>
         </div>
       </section>
 
-      {/* Interactive Demo - Lazy loaded */}
+      {/* ─── FEATURES — alternating 2-column layout ─── */}
+      <section id="features" className="py-24 bg-background">
+        <div className="section-container">
+          <div className="mb-14 max-w-xl">
+            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">What We Analyse</p>
+            <h2 className="text-3xl md:text-4xl font-bold font-display text-foreground">
+              Three layers of risk intelligence.
+            </h2>
+          </div>
+
+          <div className="space-y-0">
+            {features.map((feature, i) => {
+              const Icon = feature.icon;
+              const isEven = i % 2 === 0;
+              return (
+                <div
+                  key={feature.title}
+                  className={cn(
+                    'grid md:grid-cols-2 gap-0 border-t border-border',
+                    i === features.length - 1 && 'border-b'
+                  )}
+                >
+                  {/* Text panel */}
+                  <div className={cn('p-10 lg:p-14 flex flex-col justify-center', !isEven && 'md:order-2')}>
+                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mb-5">
+                      <Icon className="h-5 w-5 text-primary" />
+                    </div>
+                    <h3 className="text-xl font-bold font-display text-foreground mb-3">{feature.title}</h3>
+                    <p className="text-muted-foreground leading-relaxed">{feature.description}</p>
+                  </div>
+                  {/* Visual panel */}
+                  <div
+                    className={cn(
+                      'p-10 lg:p-14 flex items-center justify-center',
+                      !isEven && 'md:order-1',
+                      'border-t md:border-t-0',
+                      isEven ? 'md:border-l border-border' : 'md:border-r border-border'
+                    )}
+                    style={{ backgroundColor: 'hsl(222, 47%, 13%)' }}
+                  >
+                    <div className="w-full max-w-xs">{feature.visual}</div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ─── LIVE ASSET DASHBOARD ─── */}
+      <section className="py-24" style={{ backgroundColor: 'hsl(220, 16%, 97%)' }}>
+        <div className="section-container">
+          <div className="mb-12">
+            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">Live Data</p>
+            <h2 className="text-3xl font-bold font-display text-foreground mb-2">
+              Real-time risk assessment.
+            </h2>
+            <p className="text-muted-foreground">
+              Powered by live market data. Refreshed every 60 seconds.
+            </p>
+          </div>
+          <div className="max-w-4xl">
+            <LiveAssetDashboard />
+          </div>
+        </div>
+      </section>
+
+      {/* ─── INTERACTIVE DEMO ─── */}
       <LazySection fallback={<div className="py-16"><Skeleton className="h-64 max-w-3xl mx-auto" /></div>}>
         <section id="demo" className="py-24 bg-background">
           <div className="section-container">
-            <div className="text-center mb-12">
-              <Badge variant="outline" className="mb-4">Try It Now</Badge>
-              <h2 className="text-3xl font-bold text-foreground mb-4">
-                Experience the Power
+            <div className="mb-12">
+              <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">Try It Now</p>
+              <h2 className="text-3xl font-bold font-display text-foreground mb-2">
+                Run a real analysis. No signup required.
               </h2>
-              <p className="text-muted-foreground max-w-2xl mx-auto">
-                Test our risk analysis engine with real market data. No signup required.
-              </p>
             </div>
-            <div className="max-w-3xl mx-auto">
-              <Suspense fallback={<Skeleton className="h-96 w-full rounded-xl" />}>
+            <div className="max-w-3xl">
+              <Suspense fallback={<Skeleton className="h-96 w-full rounded-lg" />}>
                 <InteractivePreview />
               </Suspense>
             </div>
@@ -277,120 +362,56 @@ export default function Landing() {
         </section>
       </LazySection>
 
-      {/* Live Asset Dashboard Section */}
-      <section className="py-24 bg-muted/30">
+      {/* ─── TESTIMONIALS — editorial strip ─── */}
+      <section className="py-24" style={{ backgroundColor: 'hsl(220, 16%, 97%)' }}>
         <div className="section-container">
-          <div className="text-center mb-12">
-            <Badge variant="outline" className="mb-4">Real-Time Data</Badge>
-            <h2 className="text-3xl font-bold text-foreground mb-4">
-              Live Asset Risk Analysis
-            </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
-              See our AI in action with real-time market data and risk assessments.
-            </p>
-          </div>
-          
-          <div className="max-w-4xl mx-auto">
-            <LiveAssetDashboard />
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials Section */}
-      <section className="py-24 bg-background">
-        <div className="section-container">
-          <div className="text-center mb-16">
-            <Badge variant="outline" className="mb-4">Testimonials</Badge>
-            <h2 className="text-3xl font-bold text-foreground mb-4">
-              Trusted by Professionals
-            </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
-              Hear what our users have to say about their experience with OutputLens.
-            </p>
-          </div>
-          
-          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            {testimonials.map((testimonial, index) => (
-              <Card 
-                key={index} 
-                className="border-border/50 hover:border-primary/30 transition-all duration-500 hover:shadow-xl animate-fade-in opacity-0 group"
-                style={{ animationDelay: `${index * 150}ms`, animationFillMode: 'forwards' }}
-              >
-                <CardContent className="p-8">
-                  <Quote className="h-10 w-10 text-primary/20 mb-6 group-hover:text-primary/40 transition-colors duration-300" />
-                  <p className="text-foreground mb-8 leading-relaxed">
-                    "{testimonial.quote}"
-                  </p>
-                  <div className="flex items-center gap-4 pt-4 border-t border-border">
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center shadow-lg">
-                      <span className="text-primary-foreground font-semibold text-lg">
-                        {testimonial.avatar}
-                      </span>
-                    </div>
-                    <div>
-                      <p className="font-semibold text-foreground">{testimonial.name}</p>
-                      <p className="text-sm text-muted-foreground">{testimonial.role}</p>
-                    </div>
+          <div className="grid md:grid-cols-2 gap-8 max-w-4xl">
+            {testimonials.map((t) => (
+              <div key={t.name} className="bg-card border border-border rounded-lg p-8">
+                <p className="text-foreground leading-relaxed mb-6 text-[1.05rem]">"{t.quote}"</p>
+                <div className="flex items-center gap-3 pt-4 border-t border-border">
+                  <div
+                    className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold text-white flex-shrink-0"
+                    style={{ backgroundColor: 'hsl(225, 83%, 53%)' }}
+                  >
+                    {t.name[0]}
                   </div>
-                </CardContent>
-              </Card>
+                  <div>
+                    <p className="font-semibold text-foreground text-sm">{t.name}</p>
+                    <p className="text-xs text-muted-foreground">{t.role}</p>
+                  </div>
+                </div>
+              </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* FAQ Section - Lazy loaded */}
+      {/* ─── FAQ ─── */}
       <LazySection fallback={<div className="py-16"><Skeleton className="h-96 max-w-4xl mx-auto" /></div>}>
         <Suspense fallback={<div className="py-16"><Skeleton className="h-96 max-w-4xl mx-auto" /></div>}>
           <AISemanticSection />
         </Suspense>
       </LazySection>
 
-      {/* Final CTA Section */}
-      <section className="py-24 bg-gradient-to-br from-primary/10 via-background to-primary/5 relative overflow-hidden">
-        {/* Animated background */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-0 right-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl animate-pulse" />
-          <div className="absolute bottom-0 left-1/4 w-96 h-96 bg-bullish/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1.5s' }} />
-        </div>
-        
-        <div className="section-container relative">
-          <div className="glass-card p-10 md:p-16 text-center max-w-3xl mx-auto border-primary/20 shadow-2xl">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 text-primary mb-6 animate-bounce" style={{ animationDuration: '2s' }}>
-              <TrendingUp className="h-8 w-8" />
-            </div>
-            
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6">
-              Ready to Elevate Your Trading?
-            </h2>
-            <p className="text-lg text-muted-foreground mb-10 max-w-xl mx-auto leading-relaxed">
-              Sign up to get early access, or contact us for a personalized demo for your team. 
-              We're here to answer any questions you have.
-            </p>
-            
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Button 
-                size="lg" 
-                asChild 
-                className="px-8 py-6 text-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] group"
-              >
-                <Link to="/auth?mode=signup">
-                  Sign Up for Early Access
-                  <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
-                </Link>
-              </Button>
-              <Button 
-                size="lg" 
-                variant="outline" 
-                asChild 
-                className="px-8 py-6 text-lg hover:bg-muted/50 transition-all duration-300"
-              >
-                <a href="mailto:contact@outputlens.com">
-                  Contact Us
-                </a>
-              </Button>
-            </div>
-          </div>
+      {/* ─── FINAL CTA — dark navy bookend ─── */}
+      <section className="py-24 hero-gradient">
+        <div className="section-container text-center">
+          <h2 className="text-3xl md:text-4xl font-bold font-display text-white mb-4">
+            Ready to trade with clarity?
+          </h2>
+          <p className="text-white/60 text-lg mb-8 max-w-xl mx-auto">
+            Stop guessing. Start quantifying. Your first 5 analyses are free.
+          </p>
+          <Link
+            to="/auth?mode=signup"
+            className="inline-flex items-center gap-2 px-8 py-4 rounded font-semibold text-white text-base transition-all hover:opacity-90 group"
+            style={{ backgroundColor: 'hsl(225, 83%, 53%)' }}
+          >
+            Start Free Analysis
+            <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-0.5" />
+          </Link>
+          <p className="text-white/30 text-sm mt-4">No credit card required · Cancel anytime</p>
         </div>
       </section>
     </Layout>
