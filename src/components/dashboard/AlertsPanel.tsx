@@ -1,7 +1,5 @@
 import { AlertTriangle, Info, X, ChevronRight, Bell } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { RiskAlert } from '@/hooks/useTrackedAssets';
 import { cn } from '@/lib/utils';
 import { formatDistanceToNow } from 'date-fns';
@@ -16,86 +14,68 @@ interface AlertsPanelProps {
 function getSeverityStyles(severity: 'info' | 'warning' | 'critical') {
   switch (severity) {
     case 'critical':
-      return {
-        bg: 'bg-destructive/10',
-        border: 'border-destructive/30',
-        icon: 'text-destructive',
-        badge: 'bg-destructive text-destructive-foreground',
-      };
+      return { bar: 'bg-destructive', icon: 'text-destructive', badge: 'text-destructive bg-destructive/10' };
     case 'warning':
-      return {
-        bg: 'bg-amber-500/10',
-        border: 'border-amber-500/30',
-        icon: 'text-amber-500',
-        badge: 'bg-amber-500 text-white',
-      };
+      return { bar: 'bg-caution', icon: 'text-caution', badge: 'text-caution bg-caution/10' };
     default:
-      return {
-        bg: 'bg-blue-500/10',
-        border: 'border-blue-500/30',
-        icon: 'text-blue-500',
-        badge: 'bg-blue-500 text-white',
-      };
+      return { bar: 'bg-primary', icon: 'text-primary', badge: 'text-primary bg-primary/10' };
   }
 }
 
-function AlertItem({ 
-  alert, 
-  onDismiss, 
-  onMarkRead 
-}: { 
-  alert: RiskAlert; 
+function AlertRow({
+  alert,
+  onDismiss,
+  onMarkRead,
+}: {
+  alert: RiskAlert;
   onDismiss: (id: string) => void;
   onMarkRead: (id: string) => void;
 }) {
   const styles = getSeverityStyles(alert.severity);
   const isUnread = !alert.read_at;
-  
+
   return (
-    <div 
+    <div
       className={cn(
-        "relative flex items-start gap-3 p-3 rounded-lg border transition-colors",
-        styles.bg,
-        styles.border,
-        isUnread && "ring-1 ring-primary/20"
+        'flex items-start gap-3 px-4 py-3 border-b border-border/50 last:border-0 cursor-pointer hover:bg-muted/20 transition-colors duration-100',
+        isUnread && 'bg-primary/3'
       )}
       onClick={() => isUnread && onMarkRead(alert.id)}
     >
-      {alert.severity === 'critical' ? (
-        <AlertTriangle className={cn("h-5 w-5 mt-0.5 flex-shrink-0", styles.icon)} />
-      ) : (
-        <Info className={cn("h-5 w-5 mt-0.5 flex-shrink-0", styles.icon)} />
-      )}
-      
+      {/* Severity bar */}
+      <div className={cn('w-0.5 self-stretch rounded-full flex-shrink-0 mt-0.5', styles.bar)} />
+
+      {/* Icon */}
+      {alert.severity === 'critical'
+        ? <AlertTriangle className={cn('h-4 w-4 flex-shrink-0 mt-0.5', styles.icon)} />
+        : <Info className={cn('h-4 w-4 flex-shrink-0 mt-0.5', styles.icon)} />
+      }
+
+      {/* Content */}
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 mb-1">
-          <Badge className={cn("text-[10px] px-1.5 py-0", styles.badge)}>
-            {alert.severity.toUpperCase()}
-          </Badge>
-          {isUnread && (
-            <span className="h-2 w-2 rounded-full bg-primary animate-pulse" />
-          )}
-          <span className="text-xs text-muted-foreground ml-auto">
+        <div className="flex items-center gap-2 mb-0.5">
+          <span className={cn('text-[10px] font-mono font-bold px-1.5 py-0.5 rounded uppercase tracking-wider', styles.badge)}>
+            {alert.severity}
+          </span>
+          {isUnread && <span className="h-1.5 w-1.5 rounded-full bg-primary" />}
+          <span className="text-[11px] text-muted-foreground ml-auto font-mono">
             {formatDistanceToNow(new Date(alert.created_at), { addSuffix: true })}
           </span>
         </div>
-        <p className="text-sm text-foreground">{alert.message}</p>
+        <p className="text-sm text-foreground leading-snug">{alert.message}</p>
         {alert.delta !== null && (
-          <p className="text-xs text-muted-foreground mt-1">
-            Change: {alert.delta > 0 ? '+' : ''}{alert.delta.toFixed(1)} pts
+          <p className="text-xs font-mono text-muted-foreground mt-0.5">
+            Δ {alert.delta > 0 ? '+' : ''}{alert.delta.toFixed(1)} pts
           </p>
         )}
       </div>
-      
+
+      {/* Dismiss */}
       <button
-        onClick={(e) => {
-          e.stopPropagation();
-          onDismiss(alert.id);
-        }}
-        className="p-1 rounded-md hover:bg-background/50 transition-colors"
-        title="Dismiss"
+        onClick={(e) => { e.stopPropagation(); onDismiss(alert.id); }}
+        className="p-1 rounded hover:bg-muted/50 transition-colors flex-shrink-0"
       >
-        <X className="h-4 w-4 text-muted-foreground" />
+        <X className="h-3.5 w-3.5 text-muted-foreground" />
       </button>
     </div>
   );
@@ -104,49 +84,59 @@ function AlertItem({
 export function AlertsPanel({ alerts, onDismiss, onMarkRead }: AlertsPanelProps) {
   const displayAlerts = alerts.slice(0, 5);
   const hasMore = alerts.length > 5;
-  
+  const unreadCount = alerts.filter(a => !a.read_at).length;
+
   return (
-    <Card>
-      <CardHeader className="pb-3">
-        <CardTitle className="text-base flex items-center gap-2">
-          <Bell className="h-4 w-4 text-primary" />
-          Risk Alerts
-          {alerts.length > 0 && (
-            <Badge variant="secondary" className="ml-auto">
-              {alerts.length}
-            </Badge>
-          )}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        {alerts.length === 0 ? (
-          <div className="text-center py-6 text-muted-foreground">
-            <Bell className="h-8 w-8 mx-auto mb-2 opacity-50" />
-            <p className="text-sm font-medium">No active alerts</p>
-            <p className="text-xs">Stay ahead of market surprises. You'll be notified when risk metrics change significantly.</p>
-          </div>
-        ) : (
-          <div className="space-y-2">
+    <div className="rounded-lg overflow-hidden border border-border bg-card">
+      {/* Dark header */}
+      <div
+        className="flex items-center justify-between px-4 py-3 border-b border-border"
+        style={{ backgroundColor: 'hsl(var(--brand-navy))' }}
+      >
+        <div className="flex items-center gap-2">
+          <Bell className="h-4 w-4 text-white/60" />
+          <span className="text-sm font-mono font-semibold text-white tracking-wider uppercase">Risk Alerts</span>
+        </div>
+        {alerts.length > 0 && (
+          <span className="text-xs font-mono text-white/50">
+            {unreadCount > 0 ? `${unreadCount} unread` : `${alerts.length} total`}
+          </span>
+        )}
+      </div>
+
+      {/* Body */}
+      {alerts.length === 0 ? (
+        <div className="text-center py-10 px-4">
+          <Bell className="h-8 w-8 mx-auto mb-3 text-muted-foreground/30" />
+          <p className="text-sm font-medium text-muted-foreground">No active alerts</p>
+          <p className="text-xs text-muted-foreground/60 mt-1">
+            You'll be notified when risk metrics change significantly.
+          </p>
+        </div>
+      ) : (
+        <>
+          <div className="divide-y divide-border/0">
             {displayAlerts.map((alert) => (
-              <AlertItem
+              <AlertRow
                 key={alert.id}
                 alert={alert}
                 onDismiss={onDismiss}
                 onMarkRead={onMarkRead}
               />
             ))}
-            
-            {hasMore && (
-              <Button variant="ghost" size="sm" className="w-full mt-2" asChild>
+          </div>
+          {hasMore && (
+            <div className="px-4 py-2 border-t border-border bg-muted/20">
+              <Button variant="ghost" size="sm" className="w-full text-xs" asChild>
                 <Link to="/tracked-assets">
-                  View All Alerts
-                  <ChevronRight className="h-4 w-4 ml-1" />
+                  View all {alerts.length} alerts
+                  <ChevronRight className="h-3.5 w-3.5 ml-1" />
                 </Link>
               </Button>
-            )}
-          </div>
-        )}
-      </CardContent>
-    </Card>
+            </div>
+          )}
+        </>
+      )}
+    </div>
   );
 }

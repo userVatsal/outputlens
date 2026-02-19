@@ -1,16 +1,16 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { History, Loader2, BarChart3, FolderOpen } from 'lucide-react';
+import { History, Loader2, BarChart3, FolderOpen, Terminal } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
 import { TradeInputForm } from '@/components/TradeInputForm';
 import { UsageIndicator } from '@/components/UsageIndicator';
 import { PaywallModal } from '@/components/PaywallModal';
 import { ReturnDistributionChart } from '@/components/ReturnDistributionChart';
-import { 
-  RiskSnapshot, 
-  TailRiskPanel, 
-  ScenarioRegimeCards, 
-  RiskInterpretation, 
+import {
+  RiskSnapshot,
+  TailRiskPanel,
+  ScenarioRegimeCards,
+  RiskInterpretation,
   ActionPanel,
   AdvancedMetrics,
   PnLSummary
@@ -26,8 +26,90 @@ import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { MARKETS } from '@/types/trade';
 import { cn } from '@/lib/utils';
+import { useRef } from 'react';
 
 type WorkspaceMode = 'single' | 'portfolio';
+
+// Terminal loading animation component
+function TerminalLoader({ asset }: { asset?: string }) {
+  const [lines, setLines] = useState<string[]>([]);
+  const [progress, setProgress] = useState(0);
+
+  const allLines = [
+    `> Fetching ${asset || 'asset'} live price data...`,
+    `> Building volatility surface...`,
+    `> Detecting market regime via HMM...`,
+    `> Running 10,000 Monte Carlo paths...`,
+    `> Calculating VaR and CVaR at 95% confidence...`,
+    `> Scoring tail risk scenarios...`,
+    `> Preparing AI interpretation...`,
+    `✓ Analysis complete.`,
+  ];
+
+  useEffect(() => {
+    setLines([]);
+    setProgress(0);
+    let i = 0;
+    const interval = setInterval(() => {
+      if (i < allLines.length) {
+        setLines(prev => [...prev, allLines[i]]);
+        setProgress(Math.round(((i + 1) / allLines.length) * 100));
+        i++;
+      } else {
+        clearInterval(interval);
+      }
+    }, 380);
+    return () => clearInterval(interval);
+  }, [asset]);
+
+  return (
+    <div className="rounded-lg overflow-hidden border border-border" style={{ backgroundColor: 'hsl(var(--brand-navy))' }}>
+      {/* Terminal chrome */}
+      <div className="flex items-center gap-2 px-4 py-3 border-b border-white/10">
+        <span className="w-3 h-3 rounded-full bg-red-400/70" />
+        <span className="w-3 h-3 rounded-full bg-yellow-400/70" />
+        <span className="w-3 h-3 rounded-full bg-green-400/70" />
+        <span className="ml-3 text-white/40 text-xs font-mono">outputlens-risk-engine</span>
+        <div className="ml-auto flex items-center gap-1.5">
+          <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+          <span className="text-[10px] font-mono text-white/40">RUNNING</span>
+        </div>
+      </div>
+
+      {/* Terminal output */}
+      <div className="p-5 font-mono text-sm space-y-1.5 min-h-[220px]">
+        {lines.map((line, i) => (
+          <div
+            key={i}
+            className={cn(
+              'transition-all duration-300',
+              line.startsWith('✓') ? 'text-green-400' : 'text-white/70'
+            )}
+          >
+            {line}
+          </div>
+        ))}
+        {lines.length < allLines.length && (
+          <span className="inline-block w-2 h-4 bg-white/70 animate-pulse ml-0.5" />
+        )}
+      </div>
+
+      {/* Progress bar */}
+      <div className="px-5 pb-4">
+        <div className="flex items-center justify-between mb-1">
+          <span className="text-[10px] font-mono text-white/30 uppercase tracking-widest">Progress</span>
+          <span className="text-[10px] font-mono text-white/50">{progress}%</span>
+        </div>
+        <div className="h-1 bg-white/10 rounded-full overflow-hidden">
+          <div
+            className="h-full bg-primary rounded-full transition-all duration-300"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function Workspace() {
   const navigate = useNavigate();
@@ -40,29 +122,22 @@ export default function Workspace() {
   const [loading, setLoading] = useState(true);
   const [showPaywall, setShowPaywall] = useState(false);
   const [mode, setMode] = useState<WorkspaceMode>('single');
+  const [currentAsset, setCurrentAsset] = useState<string>('');
 
-  // SEO: Set page-specific document title
   useEffect(() => {
     document.title = 'Risk Workspace - Probabilistic Analysis | OutputLens';
   }, []);
 
   useEffect(() => {
-    // Check auth state
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        setUser(session?.user ?? null);
-        if (!session) {
-          navigate('/auth');
-        }
-        setLoading(false);
-      }
-    );
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user ?? null);
+      if (!session) navigate('/auth');
+      setLoading(false);
+    });
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
-      if (!session) {
-        navigate('/auth');
-      }
+      if (!session) navigate('/auth');
       setLoading(false);
     });
 
@@ -70,19 +145,13 @@ export default function Workspace() {
   }, [navigate]);
 
   const handleSubmitTrade = async (input: Parameters<typeof submitTrade>[0]) => {
-    if (!canAnalyze) {
-      setShowPaywall(true);
-      return;
-    }
-
-    // Increment usage before submitting
+    if (!canAnalyze) { setShowPaywall(true); return; }
+    setCurrentAsset(input.asset || '');
     await incrementUsage();
     await submitTrade(input);
   };
 
-  const handleNewAnalysis = () => {
-    clearAnalysis();
-  };
+  const handleNewAnalysis = () => clearAnalysis();
 
   if (loading) {
     return (
@@ -95,178 +164,166 @@ export default function Workspace() {
   }
 
   const currencySymbol = analysis ? MARKETS[analysis.input.market].currencySymbol : '$';
-  
-  // Calculate shares for position display
-  const shares = analysis 
+  const shares = analysis
     ? (analysis.input.positionType === 'dollars' && analysis.input.positionSize
-        ? investmentToShares(analysis.input.positionSize, analysis.input.entryPrice)
-        : (analysis.input.positionSize || 1))
+      ? investmentToShares(analysis.input.positionSize, analysis.input.entryPrice)
+      : (analysis.input.positionSize || 1))
     : 1;
+
   return (
     <Layout>
-      <div className="section-container py-8">
+      <div className="section-container py-6">
         <div className="max-w-6xl mx-auto">
-          {/* Header */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
-            <div>
-              <h1 className="text-2xl font-bold text-foreground">Risk Workspace</h1>
-              <p className="text-muted-foreground">
-                Three-layer intelligence: Stochastic simulation → Regime detection → AI interpretation
-              </p>
-            </div>
+
+          {/* Page header bar */}
+          <div
+            className="flex items-center justify-between px-5 py-3 rounded-lg mb-6 border border-white/10"
+            style={{ backgroundColor: 'hsl(var(--brand-navy))' }}
+          >
             <div className="flex items-center gap-3">
-              {/* Mode Toggle */}
-              <div className="flex items-center rounded-lg border border-border bg-muted/30 p-1">
+              <Terminal className="h-4 w-4 text-white/60" />
+              <span className="font-mono text-sm font-bold text-white tracking-wider uppercase">Risk Workspace</span>
+              <div className="flex items-center gap-1.5 ml-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+                <span className="text-[10px] font-mono text-white/40 uppercase tracking-widest">Live</span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              {/* Mode toggle */}
+              <div className="flex items-center rounded border border-white/10 bg-white/5 p-0.5">
                 <button
                   onClick={() => setMode('single')}
                   className={cn(
-                    "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-all",
-                    mode === 'single' 
-                      ? "bg-background text-foreground shadow-sm" 
-                      : "text-muted-foreground hover:text-foreground"
+                    'flex items-center gap-1.5 px-3 py-1 rounded text-xs font-medium transition-all font-mono',
+                    mode === 'single' ? 'bg-white/10 text-white' : 'text-white/40 hover:text-white/70'
                   )}
                 >
-                  <BarChart3 className="h-4 w-4" />
-                  Single Asset
+                  <BarChart3 className="h-3.5 w-3.5" />
+                  Single
                 </button>
                 <button
                   onClick={() => {
-                    if (!canAccessPortfolio) {
-                      setShowPaywall(true);
-                      return;
-                    }
+                    if (!canAccessPortfolio) { setShowPaywall(true); return; }
                     setMode('portfolio');
                   }}
                   className={cn(
-                    "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-all",
-                    mode === 'portfolio' 
-                      ? "bg-background text-foreground shadow-sm" 
-                      : "text-muted-foreground hover:text-foreground"
+                    'flex items-center gap-1.5 px-3 py-1 rounded text-xs font-medium transition-all font-mono',
+                    mode === 'portfolio' ? 'bg-white/10 text-white' : 'text-white/40 hover:text-white/70'
                   )}
                 >
-                  <FolderOpen className="h-4 w-4" />
+                  <FolderOpen className="h-3.5 w-3.5" />
                   Portfolio
                   {!canAccessPortfolio && (
-                    <span className="text-[8px] px-1 py-0.5 bg-primary text-primary-foreground rounded ml-1">
-                      PRO
-                    </span>
+                    <span className="text-[8px] px-1 py-0.5 bg-primary text-primary-foreground rounded font-bold">PRO</span>
                   )}
                 </button>
               </div>
-              
-              <Button variant="outline" size="sm" asChild>
+
+              <Button
+                variant="ghost"
+                size="sm"
+                asChild
+                className="text-white/60 hover:text-white hover:bg-white/10 h-7 text-xs"
+              >
                 <Link to="/history">
-                  <History className="h-4 w-4 mr-2" />
+                  <History className="h-3.5 w-3.5 mr-1.5" />
                   History
                 </Link>
               </Button>
             </div>
           </div>
 
-          {/* Main Content Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            {/* Left Column: Input Form */}
-            <div className={cn(
-              "lg:col-span-5",
-              analysis && "lg:sticky lg:top-8 lg:self-start"
-            )}>
-              {/* Usage Indicator */}
+          {/* Main layout */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            {/* Left: Input panel */}
+            <div className={cn('lg:col-span-5', analysis && 'lg:sticky lg:top-6 lg:self-start')}>
+              {/* Usage bar */}
               {!usageLoading && usage && (
-                <div className="mb-6">
+                <div className="mb-4">
                   <UsageIndicator usage={usage} />
                 </div>
               )}
 
-              {/* Form Card */}
-              <div className="glass-card p-6">
-                <TradeInputForm onSubmit={handleSubmitTrade} isLoading={tradeLoading} />
+              {/* Input form */}
+              <div className="rounded-lg border border-border overflow-hidden">
+                <div
+                  className="px-4 py-2.5 border-b border-white/10"
+                  style={{ backgroundColor: 'hsl(var(--brand-navy))' }}
+                >
+                  <span className="text-[10px] font-mono font-bold text-white/50 uppercase tracking-widest">
+                    Position Parameters
+                  </span>
+                </div>
+                <div className="p-5 bg-card">
+                  <TradeInputForm onSubmit={handleSubmitTrade} isLoading={tradeLoading} />
+                </div>
               </div>
-
             </div>
 
-            {/* Right Column: Results */}
+            {/* Right: Results */}
             <div className="lg:col-span-7">
-              {tradeLoading && (
-                <div className="glass-card p-12 text-center">
-                  <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto mb-4" />
-                  <p className="text-lg font-semibold text-foreground">Layer 1: Running GBM stochastic simulation...</p>
-                  <p className="text-sm text-muted-foreground mt-2">
-                    Layer 2: Detecting regime via HMM • Querying neural database
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Layer 3: Preparing AI interpretation (explains, never predicts)
-                  </p>
-                </div>
-              )}
+              {/* Loading state */}
+              {tradeLoading && <TerminalLoader asset={currentAsset} />}
 
+              {/* Empty state */}
               {!analysis && !tradeLoading && (
-                <div className="glass-card p-12 text-center border-2 border-dashed border-border">
-                  <BarChart3 className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-lg font-semibold text-foreground">Enter a trade to analyze</p>
-                  <p className="text-sm text-muted-foreground mt-2">
-                    Get probabilistic scenarios, risk metrics, and AI-powered interpretation
-                  </p>
+                <div
+                  className="rounded-lg overflow-hidden border border-border min-h-[300px] flex flex-col"
+                  style={{ backgroundColor: 'hsl(var(--brand-navy))' }}
+                >
+                  <div className="flex items-center gap-2 px-4 py-3 border-b border-white/10">
+                    <span className="w-3 h-3 rounded-full bg-white/20" />
+                    <span className="w-3 h-3 rounded-full bg-white/20" />
+                    <span className="w-3 h-3 rounded-full bg-white/20" />
+                    <span className="ml-3 text-white/40 text-xs font-mono">outputlens-risk-engine</span>
+                  </div>
+                  <div className="flex-1 flex flex-col justify-center px-8 py-12">
+                    <div className="font-mono text-white/40 text-sm space-y-1">
+                      <div>&gt; Waiting for input...</div>
+                      <div className="flex items-center gap-0.5">
+                        <span>&gt; </span>
+                        <span className="inline-block w-2 h-4 bg-white/40 animate-pulse ml-0.5" />
+                      </div>
+                    </div>
+                    <p className="text-white/20 text-xs font-mono mt-6">
+                      Enter position parameters on the left to run probabilistic risk analysis.
+                    </p>
+                  </div>
                 </div>
               )}
 
+              {/* Results */}
               {analysis && !tradeLoading && (
-                <div className="space-y-6">
-                  {/* Historical View Badge */}
+                <div className="space-y-4">
                   {isHistorical && (
-                    <div className="bg-muted/50 border border-border rounded-lg px-4 py-2 text-sm text-muted-foreground">
+                    <div className="bg-muted/50 border border-border rounded px-4 py-2 text-xs text-muted-foreground font-mono">
                       📜 Viewing historical analysis from {new Date(analysis.analyzedAt).toLocaleDateString()}
                     </div>
                   )}
-
-                  {/* Risk Snapshot - Above the fold */}
                   <RiskSnapshot analysis={analysis} currencySymbol={currencySymbol} />
-
-                  {/* P&L Summary - Position economics */}
-                  <PnLSummary 
-                    analysis={analysis} 
-                    shares={shares} 
-                    currencySymbol={currencySymbol} 
-                  />
-
-                  {/* Tail Risk Panel - First-class, emphasized */}
-                  <TailRiskPanel 
+                  <PnLSummary analysis={analysis} shares={shares} currencySymbol={currencySymbol} />
+                  <TailRiskPanel
                     scenarios={analysis.scenarios}
                     expectedShortfall={analysis.riskMetrics.expectedShortfall}
                     kurtosis={analysis.simulation.kurtosis}
                     currencySymbol={currencySymbol}
                     entryPrice={analysis.input.entryPrice}
                   />
-
-                  {/* Scenario Regime Cards */}
-                  <ScenarioRegimeCards 
+                  <ScenarioRegimeCards
                     scenarios={analysis.scenarios}
                     currencySymbol={currencySymbol}
                     entryPrice={analysis.input.entryPrice}
                     shares={shares}
                   />
-
-                  {/* Distribution Chart */}
-                  <ReturnDistributionChart 
-                    riskMetrics={analysis.riskMetrics}
-                    simulation={analysis.simulation}
-                  />
-
-                  {/* Advanced Metrics - Collapsed by default */}
-                  <AdvancedMetrics 
+                  <ReturnDistributionChart riskMetrics={analysis.riskMetrics} simulation={analysis.simulation} />
+                  <AdvancedMetrics
                     metrics={analysis.riskMetrics}
                     kurtosis={analysis.simulation.kurtosis}
                     skewness={analysis.simulation.skewness}
                   />
-
-                  {/* AI Risk Interpretation */}
                   <RiskInterpretation analysis={analysis} />
-
-                  {/* Action Panel */}
-                  <ActionPanel 
-                    analysis={analysis}
-                    onNewAnalysis={handleNewAnalysis}
-                    isHistorical={isHistorical}
-                  />
+                  <ActionPanel analysis={analysis} onNewAnalysis={handleNewAnalysis} isHistorical={isHistorical} />
                 </div>
               )}
             </div>
@@ -274,7 +331,6 @@ export default function Workspace() {
         </div>
       </div>
 
-      {/* Paywall Modal */}
       <PaywallModal open={showPaywall} onOpenChange={setShowPaywall} />
     </Layout>
   );
