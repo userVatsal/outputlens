@@ -1,248 +1,244 @@
 
-# Full Website Redesign: OutputLens
+# Post-Login Redesign: Bloomberg Terminal, Better
 
-## The Problem
+## What's Wrong Right Now
 
-The current site looks AI-generated because of these specific issues:
-- **Washed-out hero**: Text is barely visible, fades into background, buttons are missing/hidden
-- **Every section uses the same pattern**: Badge → h2 → paragraph → grid of identical cards
-- **No visual weight hierarchy**: Everything has the same importance, nothing demands attention
-- **Generic animations**: Blob pulse effects everywhere, "animate-fade-in opacity-0" on everything
-- **No personality**: The design could be for any SaaS — no financial credibility markers
-- **Header is cramped on mobile**: Just a hamburger icon
-- **Landing stats bar looks cheap**: Large mono numbers with no context
-- **Cards everywhere**: Every section is just rounded cards with icons, no variety in layout
-- **The "How It Works" flow animation is technically functional but visually dull**
-- **Footer is sparse**: Barely anything there
-- **Auth page**: Just a plain form with no brand presence
+Every authenticated page suffers from the same core problem: they look like admin panels from a generic SaaS starter template. Specifically:
 
----
+- **Dashboard**: The `AccountHeader` and `DashboardHero` are two separate strips doing the same job. Cards everywhere. The `WorkspacePreview` is generic. `AlertsPanel` uses the default shadcn `Card` wrapper.
+- **Workspace**: A white form card on the left, a white results card on the right. No sense of a "terminal" or "instrument." The loading state is just a spinner and plain text. The results section is a loose stack of individual cards with no cohesion.
+- **Auth**: A basic centered form with a white header. No brand presence.
+- **History**: An okay table list but with no visual hierarchy — every row looks identical.
+- **Account**: Generic tabs with generic form fields.
+- **TrackedAssets**: Card grid with shadcn `Card` components. Looks like any todo app.
 
-## Design Direction
+## Design Principles for Post-Login
 
-**Real-world reference**: Think Bloomberg Terminal meets Stripe's landing page. Not Wall Street cold, not startup-cute. **Professional, confident, opinionated.**
-
-### Core Principles for the Redesign
-
-1. **Contrast over subtlety** — Dark navy header/hero against white content below. Strong visual breaks between sections, not gentle fades into each other.
-2. **Typography-led** — Let big, bold type do the heavy lifting rather than decorative gradients.
-3. **Asymmetric layouts** — Mix full-width sections, left-aligned sections, and 2-column splits. Not every section is a centered grid.
-4. **Data as design** — Real-looking terminal/dashboard widgets embedded directly in the layout, not as afterthoughts.
-5. **Decisive color** — Navy (#1B2B4B) as the primary story color, royal blue (#2563EB) for action, red for risk/loss indicators. No random purples and ambers everywhere.
+1. **Dark sidebar or dark top-bar for app chrome** — authenticated app feels different from the marketing site
+2. **Data density without clutter** — Bloomberg-style: show more in less space, but every element earns its place
+3. **Monospace for numbers** — all financial figures use `font-mono`
+4. **Terminal-inspired inputs** — dark backgrounds, border-focus, scan-line feel
+5. **Color as signal only** — green = profit/bullish, red = loss/bearish, blue = action, amber = warning. Never decorative.
+6. **No generic shadcn Cards** — replace with custom panels that use `border-l-4` accents, dark headers, and tight padding
 
 ---
 
-## Files to Edit
+## Files to Change
 
 | File | Change |
 |------|--------|
-| `src/index.css` | Tighten design tokens, add new animation keyframes |
-| `src/components/layout/Header.tsx` | Dark navy sticky header, cleaner nav, better mobile |
-| `src/components/layout/Footer.tsx` | Richer footer with more content, dark background |
-| `src/pages/Landing.tsx` | Complete rewrite — new sections, new layouts |
-| `src/components/landing/AnalysisFlowAnimation.tsx` | Terminal-style animation instead of floating cards |
-| `src/components/landing/LiveAssetDashboard.tsx` | Bloomberg-style table, tighter design |
-| `src/pages/Dashboard.tsx` | Cleaner post-login layout |
-| `src/components/dashboard/DashboardHero.tsx` | Replace with a focused, no-fluff welcome strip |
-| `src/components/dashboard/WorkspacePreview.tsx` | More premium pipeline visualization |
-| `src/components/dashboard/QuickActions.tsx` | Horizontal action bar instead of card grid |
-| `src/components/dashboard/AccountHeader.tsx` | Slimmer, more executive feel |
-| `src/pages/Pricing.tsx` | Cleaner pricing layout, stronger visual hierarchy |
-| `src/pages/About.tsx` | Story-led layout with better typography |
-| `src/pages/Auth.tsx` | Split-screen with brand panel on left |
+| `src/pages/Auth.tsx` | Full split-screen layout |
+| `src/pages/Dashboard.tsx` | New layout: merge AccountHeader+Hero into one strip, redesign all panels |
+| `src/pages/Workspace.tsx` | Terminal-style input panel, dramatic loading state, results overhaul |
+| `src/pages/History.tsx` | Bloomberg-style data table with row hover |
+| `src/pages/Account.tsx` | Clean settings layout, left sidebar tabs |
+| `src/pages/TrackedAssets.tsx` | Data table instead of card grid |
+| `src/components/dashboard/DashboardHero.tsx` | Merge into slim command strip |
+| `src/components/dashboard/AccountHeader.tsx` | Eliminate — merge into DashboardHero |
+| `src/components/dashboard/AlertsPanel.tsx` | Redesign as dark-header panel |
+| `src/components/dashboard/WorkspacePreview.tsx` | Redesign as pipeline diagram |
+| `src/components/dashboard/QuickActions.tsx` | Already good — minor polish |
+| `src/components/workspace/RiskSnapshot.tsx` | Terminal-style metric blocks |
+| `src/components/workspace/TailRiskPanel.tsx` | Dark header panel, table-style risk rows |
+| `src/components/workspace/ScenarioRegimeCards.tsx` | Horizontal bar chart style, not cards |
+| `src/components/workspace/PnLSummary.tsx` | Ledger-style layout |
+| `src/components/workspace/ActionPanel.tsx` | Compact toolbar, not icon buttons |
 
 ---
 
-## Section-by-Section Plan
+## Page-by-Page Design
 
-### 1. Global Design Tokens (`index.css`)
+### 1. Auth Page — Split Screen
 
-- Change background from `220 30% 98%` (pale blue-white) to `0 0% 99%` (pure near-white) — reduces the "washed out" feeling
-- Tighten border radius from `0.625rem` to `0.5rem` — more precision, less bubbly
-- Add new keyframes: `fade-up` (replaces generic `fade-in`), `counter-up` (for stats), `terminal-blink` (cursor)
-- Remove the generic `animate-pulse` blobs from CSS — they look cheap
+**Left panel (40% width, dark navy `#1B2B4B`):**
+- OutputLens logo top-left
+- Large centered quote: *"Know your risk before you risk your money."*
+- Three bullet value props with checkmarks: "10,000 Monte Carlo paths", "Live market data", "AI scenario interpretation"
+- Bottom: small footer with Privacy and Terms links
 
-### 2. Header (`Header.tsx`)
+**Right panel (60% width, near-white background):**
+- "Welcome back" or "Create account" heading, left-aligned
+- Clean form with dark-border inputs
+- Google OAuth button styled distinctly
+- Mode toggle (Sign In / Sign Up) as tabs, not a link
+- No header — the split-screen IS the brand presence
 
-**Current**: White sticky header with muted text nav links, language picker, lots of ghost buttons
+### 2. Dashboard — Command Centre Layout
 
-**New design**:
-- Dark navy background (`bg-[#1B2B4B]`) — immediately signals "financial tool" not "generic SaaS"
-- Logo left, nav center, auth CTA right
-- Nav links in white/70 opacity, hover white — cleaner
-- Single "Get Started" button in royal blue, outlined "Sign In" in white
-- When logged in: compact icon row (alerts bell, profile avatar dropdown) — no text labels eating space
-- Mobile: full-width drawer menu that slides in from left with brand color background
+Eliminate the separate `AccountHeader` + `DashboardHero` strips — merge into ONE thin command bar:
 
-### 3. Landing Page — Full Restructure (`Landing.tsx`)
+```
+[ JS Avatar ] Good morning, Alex  [ Pro badge ]  [ 3/5 analyses used ██░░░ ]  [ Run Analysis → ]
+```
 
-**New Section Order:**
+This is the entire top area — one row, no marketing copy.
 
-**A. Hero — Dark Navy full-screen**
-- Navy background (#1B2B4B) on the entire hero section — no more pale gradient
-- White headline: "Know Your Risk Before You Risk Your Money"
-- Subhead in white/70: one specific, honest sentence about what the product does
-- Two CTAs: "Start Free Analysis" (royal blue filled) + "See How It Works" (white outlined)
-- Right side: A static "terminal window" showing a mini risk output (VaR, win probability, scenarios) with monospace font — looks like a real product, not a placeholder
-- This is a 2-column layout on desktop, stacked on mobile
+Below it, a 3-column stat strip (no cards):
+```
+| 12 Reports | 4 Tracked Assets | 2 Active Alerts |
+  (linked)     (linked)           (linked)
+```
 
-**B. Trusted By / Stats Bar**
-- Pure white background
-- 4 metrics in a horizontal bar: clean, simple, no giant mono numbers
-- E.g., "< 2s analysis time" | "10,000 Monte Carlo paths" | "95% VaR confidence" | "Global market coverage"
-- Small and confident, not flashy
+Then a 2-column layout:
+- **Left (7/12)**: WorkspacePreview redesigned as a dark terminal panel showing the analysis pipeline with animated steps
+- **Right (5/12)**: AlertsPanel redesigned with a dark header and compact alert rows (not shadcn Cards)
 
-**C. The Problem (2-column, text-heavy)**
-- Left: Bold statement — "Most traders enter positions without knowing their actual downside."
-- Right: 3 bullet points of specific pain points (not generic — e.g. "You see a chart and a gut feeling. Not a probability.")
-- Clean, editorial. No icons, no cards. Just type.
+Below: full-width grid of Tracked Assets as a data table (not cards), then Recent Reports + Latest Articles side by side.
 
-**D. How OutputLens Works (left-aligned, with animated terminal)**
-- Section title left-aligned (not centered — breaks the pattern)
-- Replace the current card-based flow with a terminal-style window
-- The terminal shows a mock "analysis running" sequence: command input → data fetch → simulation lines → output table
-- This runs on a timer and loops — much more convincing than glowing cards
+Remove `WhySection` — user is already a customer, this is marketing copy in the wrong place.
 
-**E. Live Asset Dashboard (keep, refine)**
-- Keep `LiveAssetDashboard` but style it more like a Bloomberg terminal widget
-- Dark header, clean rows, tighter spacing
-- Add a "Powered by live data" caption
+### 3. Workspace — The Terminal
 
-**F. Social Proof — New Format**
-- Instead of 3 floating quote cards: use a horizontal scrolling ticker of quotes
-- Or a cleaner 2-up layout with named professionals and a specific quote
-- Remove the gradient avatar circles — use real initials with flat colored backgrounds
+**Layout**: Keep the 5/7 column split but completely change the styling.
 
-**G. Feature Details (Asymmetric 2-column)**
-- Not a 3-card grid — use an alternating left/right layout
-- Feature 1: Data Aggregation — text left, mock data visualization right
-- Feature 2: AI Scenario Analysis — mock scenario table left, text right
-- Feature 3: Risk Probability — text left, gauge/meter right
+**Left column — Input Panel:**
+- Dark navy header band: "RISK WORKSPACE" in caps, monospace, with a green pulsing "LIVE" dot
+- Step indicators become a horizontal stepper with connected dots
+- Inputs styled with dark backgrounds (`bg-[#1B2B4B]/5`), thick focus borders in primary blue
+- "Run Analysis" button spans full width, deep navy → blue gradient
+- Usage indicator becomes a thin progress bar at the top of the panel, not a separate card
 
-**H. Final CTA — Dark navy, full-width**
-- Same dark navy as hero for visual bookending
-- "Ready to trade with clarity?" in large white type
-- Single CTA button — no menu of options
-
-### 4. `AnalysisFlowAnimation.tsx` — Terminal Style
-
-Replace the three glowing card approach with a **terminal window UI**:
-- Dark background panel styled like a macOS/Linux terminal
-- Green cursor blinking
-- Text lines appear one by one (typewriter effect):
+**Right column — Results:**
+- Empty state: replace the dashed border card with a full-height terminal window showing a blinking cursor and: `> Waiting for input...`
+- Loading state: animated terminal with typewriter text:
   ```
-  > Fetching TSLA market data...
+  > Fetching TSLA live price... ✓
+  > Building volatility surface... ✓
   > Running 10,000 Monte Carlo paths...
-  > Detecting market regime: VOLATILE
-  > Calculating CVaR at 95%...
-  ✓ Analysis complete in 1.8s
+  > [████████░░] 82%
   ```
-- Then the terminal reveals a mini results table
-- This feels like a real product being used
 
-### 5. Header Changes for Dashboard Pages
+**Results — Each Section Redesigned:**
 
-When logged in, the dark header changes slightly:
-- Show the user's plan badge
-- Show remaining analyses count
-- Avatar dropdown for account/signout
+**RiskSnapshot**: 4 metric blocks in a dark header panel. No rounded bubbles — instead, a horizontal strip:
+```
+RISK SCORE      WIN PROB        TAIL RISK       EXPECTED P&L
+  7.2 / 10       54.3%           3.1%            +$284
+  HIGH          POSITIVE        ELEVATED        BULLISH
+```
 
-### 6. Dashboard (`Dashboard.tsx`)
+**PnLSummary**: Ledger-style table with alternating row shading:
+```
+POSITION SUMMARY                             100 shares × $182.50
+─────────────────────────────────────────────────────
+Expected Return    +$284.00        +1.56%      @ $185.35
+Best Upside        +$1,240.00      +6.8%       @ $194.90
+Worst Downside     -$640.00        -3.5%       @ $176.12
+─────────────────────────────────────────────────────
+VaR 95%            -$492.00        -2.7%       5% of paths
+Expected Shortfall -$720.00        -3.9%       worst 5% avg
+```
 
-**Problem**: The dashboard hero is almost identical to the landing page — "Stop Guessing, Start Winning" repeated everywhere
+**TailRiskPanel**: Dark amber-header panel with a horizontal probability bar across the top showing the 3.1% with a visual indicator on a scale.
 
-**New dashboard layout**:
-- Remove `DashboardHero` entirely — replace with a slim welcome bar
-  - Left: "Good morning, [Name]" + their plan badge + usage remaining
-  - Right: Quick link to workspace
-  - No animated blobs, no repeated marketing copy
-- `WorkspacePreview` stays but the visual design improves (see below)
-- `QuickActions` becomes a horizontal tab bar, not cards
-- Keep `AlertsPanel`, `TrackedAssetsGrid`, `RecentReports`, `LatestArticles`
+**ScenarioRegimeCards**: Replace the 3-column card grid with a single panel containing 3 rows — one per regime — each showing a horizontal bar proportional to probability, colored green/blue/red. Much more information dense.
 
-### 7. `WorkspacePreview.tsx` — Premium Pipeline
+**RiskInterpretation**: Dark panel with "AI ANALYSIS" header and a clean monospace rendering of bullet points. Each bullet gets a left-border accent line in primary blue.
 
-The 4-step pipeline visualization stays but gets a visual overhaul:
-- Change from light card rows to a sleek **progress rail** design
-- Steps connected by a vertical line (like a railway timeline)
-- Each step node has a number circle + icon + description
-- When a step is active: the circle fills with primary blue, a spinner shows
-- When complete: circle shows a checkmark, line below it turns blue
-- Sample results panel becomes a proper mini-dashboard with bars
+**ActionPanel**: Compact horizontal toolbar with text buttons + icons (not icon-only stacked cards):
+```
+[ New Analysis ]  [ Track Asset ]  [ Monitor Risk ]  [ Add to Portfolio ]  [ ↓ Export PDF ]  [ ↓ CSV ]
+```
 
-### 8. `QuickActions.tsx` — Action Bar
+### 4. History Page — Data Table
 
-Replace the 4-card grid with a **horizontal pill/tab bar**:
-- 4 actions shown as styled pills with icon + label
-- On hover: background fills with brand color
-- Much more compact, takes less vertical space
-- Doesn't feel like a generic feature grid
+Replace the list of button items with a proper data table:
 
-### 9. `DashboardHero.tsx` — Welcome Strip
+```
+DATE         ASSET    DIRECTION   MARKET    ENTRY     HORIZON    
+─────────────────────────────────────────────────────────────────
+2 Jan 2026   TSLA     LONG ↑     US        $182.50   7 days    →
+1 Jan 2026   AAPL     LONG ↑     US        $195.20   3 days    →
+31 Dec 2025  BTC      SHORT ↓    Crypto    $96,400   1 day     →
+```
 
-Replace with a single-row welcome strip:
-- Thin bar, full width
-- "Good morning, [Name]" left, usage chip (e.g. "3 of 5 analyses used") center, "Run Analysis →" button right
-- No marketing copy on the dashboard — user is already a customer
+- Sticky table header with dark navy background
+- Row hover highlights the entire row in `bg-primary/5`
+- Direction badge inline (small green/red pill)
+- Chevron on the right to indicate clickable
+- Search/filter bar at the top
+- Empty state is a dark terminal panel: `> No analysis history found.`
 
-### 10. Pricing Page (`Pricing.tsx`)
+### 5. Account Page — Settings Layout
 
-- Remove the 4-column pricing card grid — replace with a **3-column layout** (hide Free or collapse it)
-- Make the "Pro" card visually dominant with a darker background
-- Remove the complex tier comparison table — replace with feature toggles by plan
-- Keep the FAQ but style it as an accordion
+Replace the generic tabs at the top with a **left sidebar navigation** on desktop (stacks to tabs on mobile):
 
-### 11. Auth Page (`Auth.tsx`)
+```
+┌─────────────┬───────────────────────────────────┐
+│  Profile    │                                   │
+│  ─────────  │   Profile Settings                │
+│  Billing    │                                   │
+│  Privacy    │   [Avatar]  Display Name          │
+│             │             Username              │
+│             │             Email (read-only)     │
+│             │                                   │
+│             │   [ Save Changes ]                │
+└─────────────┴───────────────────────────────────┘
+```
 
-**Current**: Generic centered form
+Profile tab: clean 2-column form layout with floating labels
+Billing tab: current plan card + usage bar + upgrade/manage button
+Privacy tab: consent checkboxes with version info
 
-**New**: Split-screen layout
-- Left panel: Dark navy, brand logo top-left, big quote/value prop centered, social links bottom
-- Right panel: White, clean form
-- This pattern (used by Linear, Vercel, Railway) signals product quality immediately
+### 6. TrackedAssets Page — Data Table
 
-### 12. About Page (`About.tsx`)
+Replace the card grid with a proper monitoring table:
 
-- Lead with a single big statement in a dark section (like an editorial pull quote)
-- Replace generic principle cards with a clean numbered list
-- Use a timeline for "The Story" section
-- Keep the glossary — it adds credibility
+```
+SYMBOL    MARKET    DIRECTION   ENTRY     RISK@TRACK   CURRENT RISK   DELTA      STATUS    ACTIONS
+────────────────────────────────────────────────────────────────────────────────────────────────────
+TSLA      US        LONG ↑      $182.50   6.2 / 10     7.1 / 10       +0.9 ▲    ACTIVE    Analyze | ⏸ | ✕
+AAPL      US        LONG ↑      $195.20   4.1 / 10     4.0 / 10        -0.1 ▼   ACTIVE    Analyze | ⏸ | ✕
+BTC       Crypto    SHORT ↓     $96,400   8.5 / 10     8.5 / 10        0.0 —    PAUSED    Analyze | ▶ | ✕
+```
 
-### 13. Footer (`Footer.tsx`)
-
-- Dark navy background (consistent with header)
-- More generous spacing and content
-- Add tagline under logo
-- Add separator between footer columns
-- Show social links as icons
+- Risk delta shows colored up/down arrows
+- Threshold breached rows get a left `border-l-4 border-destructive`
+- Status as a small colored dot (green = active, gray = paused)
+- Actions inline at the end of each row
 
 ---
 
-## Animation Philosophy (replacing current approach)
+## WorkspacePreview (Dashboard) — Pipeline Diagram
 
-| Current (remove) | New (add) |
-|-----------------|-----------|
-| `animate-pulse` blob decorations | Single purposeful animation per section |
-| `opacity-0 animate-fade-in` on everything | Scroll-triggered fade-up on section entry |
-| `animationDelay` stagger on every card | Stagger only on intentional sequences |
-| Bounce on CTA icon | Remove — looks cheap |
-| Gradient blurs everywhere | Solid color sections instead |
+The current animation is functional but looks generic. New design:
 
-New animations to implement:
-- `fade-up`: elements enter from 20px below, opacity 0 → 1, 400ms ease-out
-- `terminal-type`: typewriter for the new flow animation
-- `count-up`: for the stats bar numbers
-- `pulse-dot`: small green dot for "live" indicator (keep this, it works)
+A dark terminal window (full width, `bg-[#0f172a]`) with:
+- Top bar: three dots + title "OutputLens Risk Engine"
+- Left: vertical numbered pipeline steps (connected by a line)
+- Right: Live mock results panel that populates after the animation completes
+
+Steps:
+```
+01 → Asset Selection         TSLA / US Markets / LONG
+02 → Live Data Fetch         Price: $182.50 | Vol: 28.4%
+03 → Monte Carlo Simulation  10,000 paths | Regime: VOLATILE
+04 → AI Analysis             Risk: 7.2/10 | Win: 54.3%
+```
+
+When step 4 completes, a mini results preview slides in on the right:
+- Risk badge (7.2/10, red)
+- Win probability bar (54.3%)
+- 3 scenario chips (Base/Upside/Tail)
+
+---
+
+## Animation Changes
+
+- Remove all `animate-pulse` decorative blobs from authenticated pages
+- Keep the green `pulse-dot` on the LIVE indicator
+- Terminal loading animation uses `setTimeout` chains (no new deps)
+- Metric numbers use a CSS counter animation when they first appear
+- Row hover transitions use `transition-colors duration-100` — fast, not slow
 
 ---
 
 ## Technical Notes
 
-- No new npm packages needed — all achievable with existing Tailwind + CSS
-- The split-screen auth layout uses CSS Grid, no new dependencies
-- The terminal animation uses `useEffect` with `setTimeout` chains — same pattern as existing
-- All existing hooks (`useProfile`, `usePlan`, `useUsage`, etc.) stay unchanged
-- All existing routes and page logic stay unchanged — this is purely visual
-- The `LiveAssetDashboard` data fetching stays unchanged
-- Mobile responsiveness: all new layouts stack to single-column on `< md`
-- The dark header requires checking text contrast on all nav links
+- All existing hooks (`useTrade`, `useUsage`, `useProfile`, etc.) stay unchanged
+- The `TradeInputForm` internal logic stays unchanged — only the wrapper/styling changes
+- No new npm packages needed
+- The `TrackedAssets` table uses plain HTML `<table>` with Tailwind, not a table library
+- Auth split-screen uses CSS Grid (`grid-cols-2` collapses to single column on mobile)
+- The Account sidebar uses flex layout — collapses to shadcn Tabs on `< md`
+- All RLS and security logic is untouched
