@@ -124,6 +124,13 @@ export default function Workspace() {
   const [mode, setMode] = useState<WorkspaceMode>('single');
   const [currentAsset, setCurrentAsset] = useState<string>('');
 
+  // Pre-fill params from URL (for landing page "Run Analysis" flow)
+  const urlAsset = searchParams.get('asset') ?? undefined;
+  const urlMarket = searchParams.get('market') ?? undefined;
+  const urlDirection = searchParams.get('direction') ?? undefined;
+  const urlAmount = searchParams.get('amount') ?? undefined;
+  const urlHorizon = searchParams.get('horizon') ?? undefined;
+
   useEffect(() => {
     document.title = 'Risk Workspace - Probabilistic Analysis | OutputLens';
   }, []);
@@ -131,20 +138,23 @@ export default function Workspace() {
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setUser(session?.user ?? null);
-      if (!session) navigate('/auth');
       setLoading(false);
     });
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
-      if (!session) navigate('/auth');
       setLoading(false);
     });
 
     return () => subscription.unsubscribe();
-  }, [navigate]);
+  }, []);
 
   const handleSubmitTrade = async (input: Parameters<typeof submitTrade>[0]) => {
+    // Gate on auth — redirect to login if not signed in
+    if (!user) {
+      navigate('/auth?redirect=/workspace');
+      return;
+    }
     if (!canAnalyze) { setShowPaywall(true); return; }
     setCurrentAsset(input.asset || '');
     await incrementUsage();
@@ -256,7 +266,20 @@ export default function Workspace() {
                   </span>
                 </div>
                 <div className="p-5 bg-card">
-                  <TradeInputForm onSubmit={handleSubmitTrade} isLoading={tradeLoading} />
+                  {!user && (
+                    <div className="mb-4 flex items-center gap-2 rounded border border-primary/20 bg-primary/5 px-3 py-2 text-xs text-muted-foreground">
+                      <span>👋</span>
+                      <span>Fill in your position below and click <strong className="text-foreground">Analyze Risk</strong> — you'll be asked to sign in to run the full analysis.</span>
+                    </div>
+                  )}
+                  <TradeInputForm
+                    onSubmit={handleSubmitTrade}
+                    isLoading={tradeLoading}
+                    initialAsset={urlAsset}
+                    initialMarket={urlMarket as 'US' | 'UK' | 'EU' | undefined}
+                    initialDirection={urlDirection as 'long' | 'short' | undefined}
+                    initialAmount={urlAmount ? Number(urlAmount) : undefined}
+                  />
                 </div>
               </div>
             </div>
