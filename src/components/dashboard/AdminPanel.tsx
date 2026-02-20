@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   Users, 
   TrendingUp, 
@@ -9,7 +10,8 @@ import {
   Clock,
   ArrowUpRight,
   ArrowDownRight,
-  RefreshCw
+  RefreshCw,
+  ExternalLink
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -38,6 +40,7 @@ interface AnalyticsData {
 }
 
 export function AdminPanel() {
+  const navigate = useNavigate();
   const [data, setData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -151,14 +154,25 @@ export function AdminPanel() {
               Admin Only
             </Badge>
           </CardTitle>
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={handleRefresh}
-            disabled={refreshing}
-          >
-            <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="default" 
+              size="sm" 
+              onClick={() => navigate('/ceo-dashboard')}
+              className="text-xs gap-1.5"
+            >
+              <ExternalLink className="h-3.5 w-3.5" />
+              CEO Dashboard
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={handleRefresh}
+              disabled={refreshing}
+            >
+              <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+            </Button>
+          </div>
         </div>
       </CardHeader>
       <CardContent className="space-y-6">

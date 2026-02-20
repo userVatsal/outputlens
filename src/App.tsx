@@ -26,6 +26,7 @@ const TrackedAssets = lazy(() => import("./pages/TrackedAssets"));
 const About = lazy(() => import("./pages/About"));
 const Onboarding = lazy(() => import("./pages/Onboarding"));
 const NotFound = lazy(() => import("./pages/NotFound"));
+const CEODashboard = lazy(() => import("./pages/CEODashboard"));
 
 const queryClient = new QueryClient();
 
@@ -57,6 +58,7 @@ const App = () => (
                   <Route path="/demo" element={<Navigate to="/#demo" replace />} />
                   <Route path="/tracked-assets" element={<TrackedAssets />} />
                   <Route path="/about" element={<About />} />
+                  <Route path="/ceo-dashboard" element={<CEODashboard />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>
