@@ -1,244 +1,175 @@
 
-# Post-Login Redesign: Bloomberg Terminal, Better
+# Two-Part Fix: Live Asset Dashboard + No-Signup Analysis on Landing
 
-## What's Wrong Right Now
+## What's Being Fixed
 
-Every authenticated page suffers from the same core problem: they look like admin panels from a generic SaaS starter template. Specifically:
+### Problem 1: LiveAssetDashboard — Stale data + infinite re-fetch bug
+The `fetchAllAssetData` callback in `LiveAssetDashboard.tsx` has a **critical stale closure bug**: it lists `assets` as a dependency, which causes a new callback every time assets update, which triggers the `setInterval` to reset, which calls fetch again — an infinite loop. The network logs confirm this: all 4 assets fetch simultaneously every ~60 seconds fine on first load, but the auto-refresh at `23:33:07` shows "Failed to fetch" because the component is fighting itself.
 
-- **Dashboard**: The `AccountHeader` and `DashboardHero` are two separate strips doing the same job. Cards everywhere. The `WorkspacePreview` is generic. `AlertsPanel` uses the default shadcn `Card` wrapper.
-- **Workspace**: A white form card on the left, a white results card on the right. No sense of a "terminal" or "instrument." The loading state is just a spinner and plain text. The results section is a loose stack of individual cards with no cohesion.
-- **Auth**: A basic centered form with a white header. No brand presence.
-- **History**: An okay table list but with no visual hierarchy — every row looks identical.
-- **Account**: Generic tabs with generic form fields.
-- **TrackedAssets**: Card grid with shadcn `Card` components. Looks like any todo app.
+**Fix**: Remove `assets` from the `useCallback` dependency and instead use `initialAssets` as a constant reference (the asset list never changes, only the `liveData` attached to each). This breaks the dependency cycle.
 
-## Design Principles for Post-Login
+Additionally, the static `riskScore` values (78, 23, 45, 35) never update from live data. We should compute a real risk level from the live `changePercent` — e.g., assets with >2% daily swing = High, 1–2% = Medium, <1% = Low. This makes the Risk column actually reflect live reality.
 
-1. **Dark sidebar or dark top-bar for app chrome** — authenticated app feels different from the marketing site
-2. **Data density without clutter** — Bloomberg-style: show more in less space, but every element earns its place
-3. **Monospace for numbers** — all financial figures use `font-mono`
-4. **Terminal-inspired inputs** — dark backgrounds, border-focus, scan-line feel
-5. **Color as signal only** — green = profit/bullish, red = loss/bearish, blue = action, amber = warning. Never decorative.
-6. **No generic shadcn Cards** — replace with custom panels that use `border-l-4` accents, dark headers, and tight padding
+### Problem 2: InteractivePreview — Hardcoded fake prices, no real analysis
+The `InteractivePreview` component uses completely **hardcoded static prices** from a `DEMO_ASSETS` object (AAPL at $185.50, etc.) and fake math to generate "results." The CTA at the bottom still forces people to `/auth?mode=signup` before doing anything real. This is exactly what the user wants to fix — let people run a real analysis without signing up.
+
+**Fix**: Convert `InteractivePreview` into a proper **unauthenticated analysis launcher**:
+- Keep the asset picker (AAPL, TSLA, etc.) but fetch **real live prices** from `fetch-market-data` edge function using the existing `useMarketData` hook
+- Connect the "Run Analysis" button to the **actual workspace** at `/workspace?asset=AAPL&market=US&direction=long` — the Workspace page already supports unauthenticated use (it only prompts for auth at analysis submission time)
+- Show the live current price next to each asset
+- Keep the investment slider and direction/horizon controls — they feed directly into workspace URL params
+- Remove the fake calculated metrics (winProb etc.) — instead show real current prices and a CTA: "Run Full Analysis" that pre-fills the workspace
+
+This is a much stronger conversion pattern: the user sees real current prices, sets their parameters, clicks one button, and lands directly in the workspace with the form pre-filled. They only hit the auth wall when they actually hit "Submit" — which is a much more motivated moment.
 
 ---
 
-## Files to Change
+## Detailed Implementation
+
+### File 1: `src/components/landing/LiveAssetDashboard.tsx`
+
+**Fix the stale closure bug:**
+```
+// BEFORE — assets in deps causes infinite loop:
+const fetchAllAssetData = useCallback(async () => {
+  const updatedAssets = await Promise.all(
+    assets.map(async (asset) => { ... })   // 'assets' is stale
+  );
+  setAssets(updatedAssets);
+}, [assets, fetchMarketData]);  // <-- 'assets' here causes loop
+
+// AFTER — use initialAssets (static ref, never changes):
+const fetchAllAssetData = useCallback(async () => {
+  setIsRefreshing(true);
+  const updatedAssets = await Promise.all(
+    initialAssets.map(async (asset) => { ... })  // stable reference
+  );
+  setAssets(updatedAssets);
+  setLastUpdate(new Date());
+  setIsRefreshing(false);
+}, [fetchMarketData]);  // only fetchMarketData as dep
+```
+
+**Compute live risk level from real data:**
+```typescript
+// After fetching live data, compute risk level from changePercent
+function computeRiskLevel(changePercent: number | undefined): 'High' | 'Medium' | 'Low' {
+  const abs = Math.abs(changePercent ?? 0);
+  if (abs >= 2.5) return 'High';
+  if (abs >= 1.0) return 'Medium';
+  return 'Low';
+}
+// Apply when setting liveData
+return {
+  ...asset,
+  liveData: data,
+  riskLevel: computeRiskLevel(data?.changePercent),
+  riskScore: Math.min(95, Math.round(Math.abs(data?.changePercent ?? 0) * 15 + 20)),
+};
+```
+
+**Redesign the table rows to be Bloomberg-style** (matching the post-login aesthetic):
+- Dark navy header instead of `bg-muted/30`
+- `font-mono` for all prices and changes
+- Clicking any row navigates to `/workspace?asset=TSLA&market=US` (pre-fills the workspace)
+- Footer CTA changes from "Sign up to analyze" → "Run Analysis" that goes directly to `/workspace`
+
+**Add 5 more assets** to make it more impressive:
+- Current: TSLA, AAPL, AMZN, NVDA
+- Add: MSFT, META, GOOGL, SPY, BTC (via CoinGecko)
+- Total: 9 rows — a proper Bloomberg-style watchlist
+
+### File 2: `src/components/landing/InteractivePreview.tsx`
+
+**Complete rethink** — from a fake calculator to a real analysis launcher:
+
+**New layout** (keeps existing structure but replaces fake math):
+1. Asset selector (same pill buttons) — now shows live price next to each
+2. Investment slider (keep as-is)
+3. Direction toggle (keep as-is)  
+4. Time horizon selector (keep as-is)
+5. **Remove**: fake winProb / expectedReturn / VaR / scenario bars (all fake)
+6. **Add**: Live price display — "Current price: $262.45 (−1.4%)" with color
+7. **Big CTA**: "Run Analysis in Workspace →" that goes to `/workspace?asset=AAPL&direction=long&amount=1000&horizon=1W`
+
+The Workspace page (`src/pages/Workspace.tsx`) already reads URL params to pre-fill the form. The user lands there, sees the pre-filled form, hits "Run Analysis" — THEN gets prompted to sign in. This is the correct funnel.
+
+**Live price fetching in InteractivePreview:**
+```typescript
+// Add useMarketData hook
+const { fetchMarketData } = useMarketData();
+const [livePrice, setLivePrice] = useState<number | null>(null);
+const [livePriceChange, setLivePriceChange] = useState<number | null>(null);
+
+// Fetch when symbol changes
+useEffect(() => {
+  fetchMarketData(selectedSymbol, 'US').then(data => {
+    if (data) {
+      setLivePrice(data.price);
+      setLivePriceChange(data.changePercent ?? null);
+    }
+  });
+}, [selectedSymbol]);
+```
+
+**Navigation to workspace:**
+```typescript
+const handleRunAnalysis = () => {
+  const params = new URLSearchParams({
+    asset: selectedSymbol,
+    market: 'US',
+    direction,
+    amount: String(amount),
+    horizon,
+  });
+  navigate(`/workspace?${params.toString()}`);
+};
+```
+
+### File 3: `src/pages/Workspace.tsx` — Verify URL param reading
+
+Check that the Workspace already reads these URL params. If it does, nothing extra needed. If not, add a `useEffect` that reads `URLSearchParams` on mount and pre-fills the trade form.
+
+### Visual Changes to LiveAssetDashboard
+
+Matching the new Bloomberg aesthetic from the post-login redesign:
+- Dark navy (`bg-[#1B2B4B]`) header bar instead of `bg-muted/30`
+- White text in header
+- "LIVE" badge with green pulse dot in header
+- Each row: monospace price + change, color-coded (green/red)
+- Row click → workspace with asset pre-filled
+- "Analyze →" button appears on row hover (rightmost column)
+- Footer: "Click any asset to run a full risk analysis. No signup required."
+
+---
+
+## Files to Edit
 
 | File | Change |
 |------|--------|
-| `src/pages/Auth.tsx` | Full split-screen layout |
-| `src/pages/Dashboard.tsx` | New layout: merge AccountHeader+Hero into one strip, redesign all panels |
-| `src/pages/Workspace.tsx` | Terminal-style input panel, dramatic loading state, results overhaul |
-| `src/pages/History.tsx` | Bloomberg-style data table with row hover |
-| `src/pages/Account.tsx` | Clean settings layout, left sidebar tabs |
-| `src/pages/TrackedAssets.tsx` | Data table instead of card grid |
-| `src/components/dashboard/DashboardHero.tsx` | Merge into slim command strip |
-| `src/components/dashboard/AccountHeader.tsx` | Eliminate — merge into DashboardHero |
-| `src/components/dashboard/AlertsPanel.tsx` | Redesign as dark-header panel |
-| `src/components/dashboard/WorkspacePreview.tsx` | Redesign as pipeline diagram |
-| `src/components/dashboard/QuickActions.tsx` | Already good — minor polish |
-| `src/components/workspace/RiskSnapshot.tsx` | Terminal-style metric blocks |
-| `src/components/workspace/TailRiskPanel.tsx` | Dark header panel, table-style risk rows |
-| `src/components/workspace/ScenarioRegimeCards.tsx` | Horizontal bar chart style, not cards |
-| `src/components/workspace/PnLSummary.tsx` | Ledger-style layout |
-| `src/components/workspace/ActionPanel.tsx` | Compact toolbar, not icon buttons |
+| `src/components/landing/LiveAssetDashboard.tsx` | Fix stale closure bug, add 5 more assets, live risk scoring, Bloomberg styling, click-to-analyze |
+| `src/components/landing/InteractivePreview.tsx` | Fetch live prices, remove fake math, add "Run in Workspace" CTA that pre-fills params |
+| `src/pages/Workspace.tsx` | Verify/add URL param reading to pre-fill TradeInputForm on mount |
 
 ---
 
-## Page-by-Page Design
+## What Does NOT Change
 
-### 1. Auth Page — Split Screen
-
-**Left panel (40% width, dark navy `#1B2B4B`):**
-- OutputLens logo top-left
-- Large centered quote: *"Know your risk before you risk your money."*
-- Three bullet value props with checkmarks: "10,000 Monte Carlo paths", "Live market data", "AI scenario interpretation"
-- Bottom: small footer with Privacy and Terms links
-
-**Right panel (60% width, near-white background):**
-- "Welcome back" or "Create account" heading, left-aligned
-- Clean form with dark-border inputs
-- Google OAuth button styled distinctly
-- Mode toggle (Sign In / Sign Up) as tabs, not a link
-- No header — the split-screen IS the brand presence
-
-### 2. Dashboard — Command Centre Layout
-
-Eliminate the separate `AccountHeader` + `DashboardHero` strips — merge into ONE thin command bar:
-
-```
-[ JS Avatar ] Good morning, Alex  [ Pro badge ]  [ 3/5 analyses used ██░░░ ]  [ Run Analysis → ]
-```
-
-This is the entire top area — one row, no marketing copy.
-
-Below it, a 3-column stat strip (no cards):
-```
-| 12 Reports | 4 Tracked Assets | 2 Active Alerts |
-  (linked)     (linked)           (linked)
-```
-
-Then a 2-column layout:
-- **Left (7/12)**: WorkspacePreview redesigned as a dark terminal panel showing the analysis pipeline with animated steps
-- **Right (5/12)**: AlertsPanel redesigned with a dark header and compact alert rows (not shadcn Cards)
-
-Below: full-width grid of Tracked Assets as a data table (not cards), then Recent Reports + Latest Articles side by side.
-
-Remove `WhySection` — user is already a customer, this is marketing copy in the wrong place.
-
-### 3. Workspace — The Terminal
-
-**Layout**: Keep the 5/7 column split but completely change the styling.
-
-**Left column — Input Panel:**
-- Dark navy header band: "RISK WORKSPACE" in caps, monospace, with a green pulsing "LIVE" dot
-- Step indicators become a horizontal stepper with connected dots
-- Inputs styled with dark backgrounds (`bg-[#1B2B4B]/5`), thick focus borders in primary blue
-- "Run Analysis" button spans full width, deep navy → blue gradient
-- Usage indicator becomes a thin progress bar at the top of the panel, not a separate card
-
-**Right column — Results:**
-- Empty state: replace the dashed border card with a full-height terminal window showing a blinking cursor and: `> Waiting for input...`
-- Loading state: animated terminal with typewriter text:
-  ```
-  > Fetching TSLA live price... ✓
-  > Building volatility surface... ✓
-  > Running 10,000 Monte Carlo paths...
-  > [████████░░] 82%
-  ```
-
-**Results — Each Section Redesigned:**
-
-**RiskSnapshot**: 4 metric blocks in a dark header panel. No rounded bubbles — instead, a horizontal strip:
-```
-RISK SCORE      WIN PROB        TAIL RISK       EXPECTED P&L
-  7.2 / 10       54.3%           3.1%            +$284
-  HIGH          POSITIVE        ELEVATED        BULLISH
-```
-
-**PnLSummary**: Ledger-style table with alternating row shading:
-```
-POSITION SUMMARY                             100 shares × $182.50
-─────────────────────────────────────────────────────
-Expected Return    +$284.00        +1.56%      @ $185.35
-Best Upside        +$1,240.00      +6.8%       @ $194.90
-Worst Downside     -$640.00        -3.5%       @ $176.12
-─────────────────────────────────────────────────────
-VaR 95%            -$492.00        -2.7%       5% of paths
-Expected Shortfall -$720.00        -3.9%       worst 5% avg
-```
-
-**TailRiskPanel**: Dark amber-header panel with a horizontal probability bar across the top showing the 3.1% with a visual indicator on a scale.
-
-**ScenarioRegimeCards**: Replace the 3-column card grid with a single panel containing 3 rows — one per regime — each showing a horizontal bar proportional to probability, colored green/blue/red. Much more information dense.
-
-**RiskInterpretation**: Dark panel with "AI ANALYSIS" header and a clean monospace rendering of bullet points. Each bullet gets a left-border accent line in primary blue.
-
-**ActionPanel**: Compact horizontal toolbar with text buttons + icons (not icon-only stacked cards):
-```
-[ New Analysis ]  [ Track Asset ]  [ Monitor Risk ]  [ Add to Portfolio ]  [ ↓ Export PDF ]  [ ↓ CSV ]
-```
-
-### 4. History Page — Data Table
-
-Replace the list of button items with a proper data table:
-
-```
-DATE         ASSET    DIRECTION   MARKET    ENTRY     HORIZON    
-─────────────────────────────────────────────────────────────────
-2 Jan 2026   TSLA     LONG ↑     US        $182.50   7 days    →
-1 Jan 2026   AAPL     LONG ↑     US        $195.20   3 days    →
-31 Dec 2025  BTC      SHORT ↓    Crypto    $96,400   1 day     →
-```
-
-- Sticky table header with dark navy background
-- Row hover highlights the entire row in `bg-primary/5`
-- Direction badge inline (small green/red pill)
-- Chevron on the right to indicate clickable
-- Search/filter bar at the top
-- Empty state is a dark terminal panel: `> No analysis history found.`
-
-### 5. Account Page — Settings Layout
-
-Replace the generic tabs at the top with a **left sidebar navigation** on desktop (stacks to tabs on mobile):
-
-```
-┌─────────────┬───────────────────────────────────┐
-│  Profile    │                                   │
-│  ─────────  │   Profile Settings                │
-│  Billing    │                                   │
-│  Privacy    │   [Avatar]  Display Name          │
-│             │             Username              │
-│             │             Email (read-only)     │
-│             │                                   │
-│             │   [ Save Changes ]                │
-└─────────────┴───────────────────────────────────┘
-```
-
-Profile tab: clean 2-column form layout with floating labels
-Billing tab: current plan card + usage bar + upgrade/manage button
-Privacy tab: consent checkboxes with version info
-
-### 6. TrackedAssets Page — Data Table
-
-Replace the card grid with a proper monitoring table:
-
-```
-SYMBOL    MARKET    DIRECTION   ENTRY     RISK@TRACK   CURRENT RISK   DELTA      STATUS    ACTIONS
-────────────────────────────────────────────────────────────────────────────────────────────────────
-TSLA      US        LONG ↑      $182.50   6.2 / 10     7.1 / 10       +0.9 ▲    ACTIVE    Analyze | ⏸ | ✕
-AAPL      US        LONG ↑      $195.20   4.1 / 10     4.0 / 10        -0.1 ▼   ACTIVE    Analyze | ⏸ | ✕
-BTC       Crypto    SHORT ↓     $96,400   8.5 / 10     8.5 / 10        0.0 —    PAUSED    Analyze | ▶ | ✕
-```
-
-- Risk delta shows colored up/down arrows
-- Threshold breached rows get a left `border-l-4 border-destructive`
-- Status as a small colored dot (green = active, gray = paused)
-- Actions inline at the end of each row
+- All edge functions and security logic — untouched
+- `useMarketData` hook — works correctly already, just used in more places  
+- `fetch-market-data` edge function — already live and working (confirmed by network logs)
+- Auth flow — users who aren't signed in get prompted when they click "Run" in Workspace
+- All other landing page sections
 
 ---
 
-## WorkspacePreview (Dashboard) — Pipeline Diagram
+## Technical Notes on the Stale Closure Fix
 
-The current animation is functional but looks generic. New design:
-
-A dark terminal window (full width, `bg-[#0f172a]`) with:
-- Top bar: three dots + title "OutputLens Risk Engine"
-- Left: vertical numbered pipeline steps (connected by a line)
-- Right: Live mock results panel that populates after the animation completes
-
-Steps:
+The current code is:
+```typescript
+useEffect(() => {
+  const interval = setInterval(fetchAllAssetData, 60000);
+  return () => clearInterval(interval);
+}, [fetchAllAssetData]);  // fetchAllAssetData changes when assets changes
 ```
-01 → Asset Selection         TSLA / US Markets / LONG
-02 → Live Data Fetch         Price: $182.50 | Vol: 28.4%
-03 → Monte Carlo Simulation  10,000 paths | Regime: VOLATILE
-04 → AI Analysis             Risk: 7.2/10 | Win: 54.3%
-```
-
-When step 4 completes, a mini results preview slides in on the right:
-- Risk badge (7.2/10, red)
-- Win probability bar (54.3%)
-- 3 scenario chips (Base/Upside/Tail)
-
----
-
-## Animation Changes
-
-- Remove all `animate-pulse` decorative blobs from authenticated pages
-- Keep the green `pulse-dot` on the LIVE indicator
-- Terminal loading animation uses `setTimeout` chains (no new deps)
-- Metric numbers use a CSS counter animation when they first appear
-- Row hover transitions use `transition-colors duration-100` — fast, not slow
-
----
-
-## Technical Notes
-
-- All existing hooks (`useTrade`, `useUsage`, `useProfile`, etc.) stay unchanged
-- The `TradeInputForm` internal logic stays unchanged — only the wrapper/styling changes
-- No new npm packages needed
-- The `TrackedAssets` table uses plain HTML `<table>` with Tailwind, not a table library
-- Auth split-screen uses CSS Grid (`grid-cols-2` collapses to single column on mobile)
-- The Account sidebar uses flex layout — collapses to shadcn Tabs on `< md`
-- All RLS and security logic is untouched
+Since `fetchAllAssetData` depends on `assets`, and `assets` updates after every fetch, this creates a dependency chain: fetch → update assets → new callback → clear interval → set new interval → repeat. By removing `assets` from `fetchAllAssetData`'s deps and using `initialAssets` directly, the callback becomes stable and the auto-refresh works correctly.
