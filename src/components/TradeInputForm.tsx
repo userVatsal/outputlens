@@ -18,6 +18,10 @@ import { SelectedAsset } from '@/hooks/useAssetSearch';
 interface TradeInputFormProps {
   onSubmit: (input: EnhancedTradeInput) => void;
   isLoading?: boolean;
+  initialAsset?: string;
+  initialMarket?: 'US' | 'UK' | 'EU';
+  initialDirection?: 'long' | 'short';
+  initialAmount?: number;
 }
 
 function StepIndicator({ step, current, completed }: { step: number; current: number; completed: boolean }) {
@@ -58,21 +62,23 @@ function getDefaultExitTime(market: Market, entryDate: Date): Date {
   return setMinutes(setHours(exit, hours), minutes);
 }
 
-export function TradeInputForm({ onSubmit, isLoading = false }: TradeInputFormProps) {
-  const [market, setMarket] = useState<Market>('US');
-  const [selectedAsset, setSelectedAsset] = useState<SelectedAsset | null>(null);
-  const [direction, setDirection] = useState<TradeDirection | null>(null);
+export function TradeInputForm({ onSubmit, isLoading = false, initialAsset, initialMarket, initialDirection, initialAmount }: TradeInputFormProps) {
+  const [market, setMarket] = useState<Market>(initialMarket ?? 'US');
+  const [selectedAsset, setSelectedAsset] = useState<SelectedAsset | null>(
+    initialAsset ? { symbol: initialAsset, name: initialAsset, type: 'stock', exchange: 'US' } : null
+  );
+  const [direction, setDirection] = useState<TradeDirection | null>(initialDirection ?? null);
   const [entryPrice, setEntryPrice] = useState('');
   const [priceAutoFilled, setPriceAutoFilled] = useState(false);
   const [showPriceOverride, setShowPriceOverride] = useState(false);
-  const [entryDateTime, setEntryDateTime] = useState<Date>(() => getDefaultEntryTime('US'));
-  const [exitDateTime, setExitDateTime] = useState<Date>(() => getDefaultExitTime('US', getDefaultEntryTime('US')));
+  const [entryDateTime, setEntryDateTime] = useState<Date>(() => getDefaultEntryTime(initialMarket ?? 'US'));
+  const [exitDateTime, setExitDateTime] = useState<Date>(() => getDefaultExitTime(initialMarket ?? 'US', getDefaultEntryTime(initialMarket ?? 'US')));
   const [confidence, setConfidence] = useState(5);
   const [assumptions, setAssumptions] = useState('');
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [showMarketDetails, setShowMarketDetails] = useState(false);
-  const [positionSize, setPositionSize] = useState('100');
-  const [positionType, setPositionType] = useState<'shares' | 'dollars'>('shares');
+  const [positionSize, setPositionSize] = useState(initialAmount ? String(initialAmount) : '100');
+  const [positionType, setPositionType] = useState<'shares' | 'dollars'>(initialAmount ? 'dollars' : 'shares');
 
   const selectedMarket = MARKETS[market];
 
