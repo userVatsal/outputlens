@@ -5,8 +5,8 @@
 @tailwind utilities;
 
 /* OutputLens Design System
-   Bloomberg Terminal meets Stripe — clinical, authoritative, precise.
-   Navy (#1B2B4B) + Royal Blue (#2563EB) */
+   Bloomberg Terminal meets Sarvam — warm gradients, liquid glass, 3D motion.
+   Navy (#1B2B4B) + Royal Blue (#2563EB) + Warm amber accents */
 
 @layer base {
   :root {
@@ -19,7 +19,6 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
 
-    /* Royal blue — decisive action color */
     --primary: 225 83% 53%;
     --primary-foreground: 0 0% 100%;
 
@@ -39,7 +38,7 @@
     --input: 220 16% 91%;
     --ring: 225 83% 53%;
 
-    --radius: 0.5rem;
+    --radius: 0.625rem;
 
     /* Trading colors */
     --bullish: 152 65% 36%;
@@ -60,6 +59,12 @@
 
     --logo-navy: 222 47% 20%;
     --logo-blue: 225 83% 53%;
+
+    /* Warm gradient tokens (Sarvam-inspired) */
+    --warm-amber: 30 95% 55%;
+    --warm-peach: 20 90% 70%;
+    --warm-lavender: 260 60% 75%;
+    --cool-periwinkle: 230 70% 78%;
   }
 
   .dark {
@@ -107,6 +112,11 @@
     --brand-blue: 225 75% 67%;
     --logo-navy: 210 40% 97%;
     --logo-blue: 225 80% 72%;
+
+    --warm-amber: 30 90% 60%;
+    --warm-peach: 20 85% 75%;
+    --warm-lavender: 260 55% 70%;
+    --cool-periwinkle: 230 65% 72%;
   }
 }
 
@@ -121,36 +131,100 @@
 
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: 'DM Sans', 'Inter', system-ui, sans-serif;
   }
 
   .font-display {
-    font-family: 'Space Grotesk', system-ui, sans-serif;
+    font-family: 'Playfair Display', 'Space Grotesk', serif;
   }
 
   .font-brand {
-    font-family: 'Space Grotesk', system-ui, sans-serif;
+    font-family: 'DM Sans', 'Space Grotesk', system-ui, sans-serif;
   }
 
   .font-mono {
     font-family: 'JetBrains Mono', monospace;
   }
 
-  h1, h2, h3, h4, h5, h6 {
-    font-family: 'Space Grotesk', system-ui, sans-serif;
+  h1, h2, h3 {
+    font-family: 'Playfair Display', 'Space Grotesk', serif;
     @apply tracking-tight;
+  }
+
+  h4, h5, h6 {
+    font-family: 'DM Sans', 'Space Grotesk', system-ui, sans-serif;
+    @apply tracking-tight font-semibold;
   }
 }
 
 @layer components {
-  /* Dark navy panel — used for header, hero, footer, CTA */
+  /* ── Dark navy panel ── */
   .navy-panel {
     background-color: hsl(222, 47%, 14%);
     color: hsl(210, 40%, 97%);
   }
 
+  /* ── Liquid glass card ── */
   .glass-card {
-    @apply bg-card border border-border rounded-lg shadow-sm;
+    @apply rounded-2xl border;
+    background: rgba(255, 255, 255, 0.6);
+    border-color: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    box-shadow:
+      0 4px 30px rgba(0, 0, 0, 0.06),
+      inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  }
+
+  .dark .glass-card {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.08);
+    box-shadow:
+      0 4px 30px rgba(0, 0, 0, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  }
+
+  /* ── Glass card (dark variant for hero sections) ── */
+  .glass-card-dark {
+    @apply rounded-2xl border;
+    background: rgba(30, 41, 59, 0.5);
+    border-color: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(24px) saturate(200%);
+    -webkit-backdrop-filter: blur(24px) saturate(200%);
+    box-shadow:
+      0 8px 40px rgba(0, 0, 0, 0.15),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  }
+
+  /* ── Warm gradient hero (Sarvam-inspired) ── */
+  .hero-gradient {
+    background: linear-gradient(
+      160deg,
+      hsl(222, 47%, 14%) 0%,
+      hsl(222, 47%, 16%) 30%,
+      hsl(240, 30%, 25%) 60%,
+      hsl(260, 35%, 22%) 80%,
+      hsl(222, 47%, 14%) 100%
+    );
+  }
+
+  .hero-gradient-warm {
+    background: linear-gradient(
+      180deg,
+      hsl(35, 85%, 55%) 0%,
+      hsl(25, 80%, 65%) 25%,
+      hsl(280, 40%, 70%) 55%,
+      hsl(230, 55%, 78%) 80%,
+      hsl(220, 16%, 96%) 100%
+    );
+  }
+
+  /* ── Frosted glass header ── */
+  .glass-header {
+    background: rgba(27, 43, 75, 0.75);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   }
 
   .trading-input {
@@ -185,10 +259,6 @@
     @apply max-w-6xl mx-auto px-4 sm:px-6 lg:px-8;
   }
 
-  .hero-gradient {
-    background-color: hsl(222, 47%, 14%);
-  }
-
   .brand-text {
     @apply font-brand font-bold;
     background: linear-gradient(135deg, hsl(var(--navy)) 0%, hsl(var(--navy)) 50%, hsl(var(--brand-blue)) 50%, hsl(var(--brand-blue)) 100%);
@@ -197,11 +267,11 @@
     background-clip: text;
   }
 
-  /* Terminal window styles */
+  /* ── Terminal window styles ── */
   .terminal-window {
     background: hsl(222, 47%, 8%);
     border: 1px solid hsl(222, 38%, 20%);
-    border-radius: 0.5rem;
+    border-radius: 1rem;
     font-family: 'JetBrains Mono', monospace;
   }
 
@@ -212,11 +282,108 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    border-radius: 1rem 1rem 0 0;
   }
 
   .terminal-dot {
     width: 12px;
     height: 12px;
     border-radius: 50%;
+  }
+
+  /* ── 3D Floating orb ── */
+  .orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.5;
+    pointer-events: none;
+    will-change: transform;
+  }
+
+  .orb-amber {
+    background: radial-gradient(circle, hsl(var(--warm-amber)) 0%, transparent 70%);
+  }
+
+  .orb-lavender {
+    background: radial-gradient(circle, hsl(var(--warm-lavender)) 0%, transparent 70%);
+  }
+
+  .orb-blue {
+    background: radial-gradient(circle, hsl(var(--cool-periwinkle)) 0%, transparent 70%);
+  }
+
+  .orb-peach {
+    background: radial-gradient(circle, hsl(var(--warm-peach)) 0%, transparent 70%);
+  }
+}
+
+/* ── 3D Float animation ── */
+@keyframes float-3d {
+  0%, 100% {
+    transform: translateY(0) translateX(0) scale(1) rotate3d(1, 1, 0, 0deg);
+  }
+  25% {
+    transform: translateY(-20px) translateX(10px) scale(1.02) rotate3d(1, 0, 0, 5deg);
+  }
+  50% {
+    transform: translateY(-8px) translateX(-5px) scale(0.98) rotate3d(0, 1, 0, -3deg);
+  }
+  75% {
+    transform: translateY(-25px) translateX(8px) scale(1.01) rotate3d(1, 1, 0, 4deg);
+  }
+}
+
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0) translateX(0); }
+  33% { transform: translateY(-30px) translateX(15px); }
+  66% { transform: translateY(-15px) translateX(-10px); }
+}
+
+@keyframes float-reverse {
+  0%, 100% { transform: translateY(0) translateX(0); }
+  33% { transform: translateY(20px) translateX(-15px); }
+  66% { transform: translateY(10px) translateX(10px); }
+}
+
+@keyframes morph {
+  0%, 100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+  25% { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; }
+  50% { border-radius: 50% 60% 30% 60% / 30% 50% 70% 50%; }
+  75% { border-radius: 40% 60% 50% 40% / 60% 30% 60% 40%; }
+}
+
+@keyframes globe-rotate {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@layer utilities {
+  .animate-float-3d {
+    animation: float-3d 8s ease-in-out infinite;
+  }
+
+  .animate-float-slow {
+    animation: float-slow 12s ease-in-out infinite;
+  }
+
+  .animate-float-reverse {
+    animation: float-reverse 10s ease-in-out infinite;
+  }
+
+  .animate-morph {
+    animation: morph 15s ease-in-out infinite;
+  }
+
+  .animate-globe {
+    animation: globe-rotate 60s linear infinite;
+  }
+
+  .perspective-1000 {
+    perspective: 1000px;
+  }
+
+  .preserve-3d {
+    transform-style: preserve-3d;
   }
 }
