@@ -14,7 +14,7 @@ export function Footer() {
         <div className="orb orb-blue w-[400px] h-[400px] -bottom-40 -right-40 opacity-10" />
         <div className="orb orb-lavender w-[300px] h-[300px] -bottom-20 left-20 opacity-8" />
       </div>
-      <div className="section-container py-14">
+      <div className="section-container py-14 relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
           {/* Brand */}
           <div className="space-y-4 lg:col-span-1">

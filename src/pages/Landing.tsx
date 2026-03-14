@@ -5,20 +5,18 @@ import {
   Database,
   Brain,
   Gauge,
-  TrendingUp,
-  TrendingDown,
-  Shield,
   CheckCircle,
-  BarChart3,
-  Activity,
+  Shield,
   ChevronRight,
+  Sparkles,
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { Layout } from '@/components/layout/Layout';
 import { LazySection } from '@/components/landing/LazySection';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AnalysisFlowAnimation } from '@/components/landing/AnalysisFlowAnimation';
 import { LiveAssetDashboard } from '@/components/landing/LiveAssetDashboard';
+import { FloatingOrbs } from '@/components/landing/FloatingOrbs';
+import { GlobeGraphic } from '@/components/landing/GlobeGraphic';
 import { cn } from '@/lib/utils';
 
 const InteractivePreview = lazy(() => import('@/components/landing/InteractivePreview').then(m => ({ default: m.InteractivePreview })));
@@ -120,91 +118,83 @@ export default function Landing() {
 
   return (
     <Layout>
-      {/* ─── HERO — dark navy, 2-column ─── */}
-      <section className="hero-gradient py-20 lg:py-28 overflow-hidden">
-        <div className="section-container">
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-            {/* Left: copy */}
-            <div className="space-y-8">
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold border"
-                style={{ borderColor: 'rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.7)', backgroundColor: 'rgba(255,255,255,0.06)' }}>
-                <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse-dot" />
-                AI-Powered Risk Intelligence
-              </div>
+      {/* ─── HERO — Sarvam-inspired warm gradient with floating orbs ─── */}
+      <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden hero-gradient-warm">
+        <FloatingOrbs variant="warm" />
 
-              <h1 className="text-4xl md:text-5xl lg:text-[3.25rem] font-bold text-white leading-[1.1] tracking-tight font-display">
-                Know Your Risk Before You{' '}
-                <span className="text-blue-400">Risk Your Money</span>
-              </h1>
+        {/* Globe wireframe background */}
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <GlobeGraphic className="w-[600px] h-[600px] md:w-[800px] md:h-[800px] text-foreground" />
+        </div>
 
-              <p className="text-lg text-white/60 max-w-lg leading-relaxed">
-                OutputLens quantifies your downside before you enter a position. Monte Carlo simulation, AI scenario analysis, and real-time market data — in under 2 seconds.
-              </p>
-
-              <div className="flex flex-col sm:flex-row items-start gap-3">
-                <Link
-                  to="/auth?mode=signup"
-                  className="inline-flex items-center gap-2 px-6 py-3 rounded font-semibold text-white text-sm transition-all hover:opacity-90 group"
-                  style={{ backgroundColor: 'hsl(225, 83%, 53%)' }}
-                >
-                  Start Free Analysis
-                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-                </Link>
-                <a
-                  href="#how-it-works"
-                  className="inline-flex items-center gap-2 px-6 py-3 rounded font-medium text-sm text-white/70 hover:text-white border border-white/20 hover:border-white/40 transition-all"
-                >
-                  See How It Works
-                </a>
-              </div>
-
-              <div className="flex items-center gap-5 text-sm text-white/40">
-                <span className="flex items-center gap-1.5"><CheckCircle className="h-4 w-4 text-green-400" /> No credit card</span>
-                <span className="flex items-center gap-1.5"><CheckCircle className="h-4 w-4 text-green-400" /> 5 free analyses</span>
-                <span className="flex items-center gap-1.5"><Shield className="h-4 w-4 text-blue-400" /> Bank-grade security</span>
-              </div>
+        <div className="relative z-10 section-container py-24 lg:py-32">
+          <div className="max-w-3xl mx-auto text-center space-y-8">
+            {/* Tag pill */}
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold glass-card">
+              <Sparkles className="h-4 w-4 text-primary" />
+              <span className="text-foreground">AI-Powered Risk Intelligence</span>
             </div>
 
-            {/* Right: terminal widget */}
-            <div className="terminal-window shadow-2xl">
+            {/* Hero headline */}
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold leading-[1.05] tracking-tight text-foreground">
+              Know Your Risk
+              <br />
+              <span className="text-primary">Before You Trade</span>
+            </h1>
+
+            {/* Subhead */}
+            <p className="text-lg md:text-xl text-foreground/60 max-w-xl mx-auto leading-relaxed">
+              Monte Carlo simulation, AI scenario analysis, and real-time market data — probabilities, not predictions.
+            </p>
+
+            {/* CTA */}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
+              <Link
+                to="/auth?mode=signup"
+                className="inline-flex items-center gap-2 px-8 py-4 rounded-full font-semibold text-primary-foreground text-base bg-foreground hover:opacity-90 transition-all group shadow-lg"
+              >
+                Experience OutputLens
+                <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-0.5" />
+              </Link>
+              <a
+                href="#how-it-works"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-full font-medium text-sm text-foreground/70 hover:text-foreground glass-card transition-all"
+              >
+                See How It Works
+              </a>
+            </div>
+
+            {/* Trust badges */}
+            <div className="flex items-center justify-center gap-5 text-sm text-foreground/40 pt-2">
+              <span className="flex items-center gap-1.5"><CheckCircle className="h-4 w-4 text-bullish" /> No credit card</span>
+              <span className="flex items-center gap-1.5"><CheckCircle className="h-4 w-4 text-bullish" /> 5 free analyses</span>
+              <span className="flex items-center gap-1.5"><Shield className="h-4 w-4 text-primary" /> Secure</span>
+            </div>
+          </div>
+
+          {/* Glass card terminal preview */}
+          <div className="mt-16 max-w-2xl mx-auto perspective-1000">
+            <div className="glass-card-dark rounded-2xl overflow-hidden shadow-2xl animate-fade-in preserve-3d" style={{ transform: 'rotateX(2deg)' }}>
               <div className="terminal-header">
                 <div className="terminal-dot" style={{ backgroundColor: '#FF5F57' }} />
                 <div className="terminal-dot" style={{ backgroundColor: '#FEBC2E' }} />
                 <div className="terminal-dot" style={{ backgroundColor: '#28C840' }} />
-                <span className="text-xs ml-3" style={{ color: 'rgba(255,255,255,0.35)', fontFamily: 'JetBrains Mono, monospace' }}>outputlens — risk-analysis</span>
+                <span className="text-xs ml-3 text-white/35 font-mono">outputlens — risk engine</span>
               </div>
-              <div className="p-5 space-y-1" style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.8rem' }}>
-                <div style={{ color: 'rgba(255,255,255,0.4)' }}>$ analyze TSLA --horizon 30d --direction long</div>
-                <div style={{ color: 'rgba(255,255,255,0.3)' }}>→ Fetching market data... done</div>
-                <div style={{ color: 'rgba(255,255,255,0.3)' }}>→ Running 10,000 Monte Carlo paths...</div>
-                <div style={{ color: 'rgba(255,255,255,0.3)' }}>→ Detecting regime: VOLATILE</div>
-                <div style={{ color: 'rgba(255,255,255,0.3)' }}>→ Calculating CVaR at 95%... done</div>
+              <div className="p-5 space-y-1 font-mono text-[0.8rem]">
+                <div className="text-white/40">$ analyze TSLA --horizon 30d --direction long</div>
+                <div className="text-white/30">→ Running 10,000 Monte Carlo paths...</div>
+                <div className="text-white/30">→ Detecting regime: VOLATILE</div>
                 <div className="text-green-400 font-semibold mt-1">✓ Analysis complete in 1.8s</div>
-                <div className="mt-4 pt-4 border-t border-white/10 grid grid-cols-2 gap-3">
+                <div className="mt-4 pt-4 border-t border-white/10 grid grid-cols-3 gap-3">
                   {[
                     { label: 'Win Probability', value: '67%', color: '#4ade80' },
                     { label: '95% VaR', value: '-12.4%', color: '#f87171' },
-                    { label: 'Expected Return', value: '+8.7%', color: '#4ade80' },
-                    { label: 'Tail Risk (CVaR)', value: '-18.2%', color: '#f87171' },
-                    { label: 'Sharpe Ratio', value: '1.42', color: 'rgba(255,255,255,0.7)' },
-                    { label: 'Risk Score', value: '6 / 10', color: '#facc15' },
+                    { label: 'Risk Score', value: '6/10', color: '#facc15' },
                   ].map(m => (
-                    <div key={m.label}>
-                      <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.7rem' }}>{m.label}</p>
-                      <p style={{ color: m.color, fontWeight: 700, fontSize: '0.9rem' }}>{m.value}</p>
-                    </div>
-                  ))}
-                </div>
-                <div className="mt-3 pt-3 border-t border-white/10 space-y-1">
-                  <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.7rem' }}>SCENARIO DISTRIBUTION</p>
-                  {[
-                    { s: 'Bull case (+18.4%)', pct: 28, color: '#4ade80' },
-                    { s: 'Base case (+5.2%)', pct: 42, color: '#60a5fa' },
-                    { s: 'Bear case (-14.7%)', pct: 30, color: '#f87171' },
-                  ].map(sc => (
-                    <div key={sc.s} className="flex items-center gap-2">
-                      <div className="h-1.5 rounded-full flex-shrink-0" style={{ width: `${sc.pct * 1.5}px`, backgroundColor: sc.color, opacity: 0.7 }} />
-                      <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.7rem' }}>{sc.s} — {sc.pct}%</span>
+                    <div key={m.label} className="text-center">
+                      <p className="text-white/35 text-[0.68rem]">{m.label}</p>
+                      <p className="font-bold text-base" style={{ color: m.color }}>{m.value}</p>
                     </div>
                   ))}
                 </div>
@@ -214,8 +204,8 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ─── STATS BAR — white strip ─── */}
-      <section className="py-6 bg-card border-b border-border">
+      {/* ─── STATS BAR — glass strip ─── */}
+      <section className="py-6 bg-card/80 backdrop-blur border-b border-border">
         <div className="section-container">
           <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-border">
             {statsBar.map((stat) => (
@@ -229,8 +219,9 @@ export default function Landing() {
       </section>
 
       {/* ─── THE PROBLEM — editorial 2-column ─── */}
-      <section className="py-24 bg-background">
-        <div className="section-container">
+      <section className="relative py-24 bg-background overflow-hidden">
+        <FloatingOrbs variant="cool" />
+        <div className="relative z-10 section-container">
           <div className="grid md:grid-cols-2 gap-12 lg:gap-20 items-start max-w-5xl">
             <div>
               <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-6">The Problem</p>
@@ -240,9 +231,8 @@ export default function Landing() {
             </div>
             <div className="space-y-6 pt-2 md:pt-10">
               {painPoints.map((p, i) => (
-                <div key={i} className="flex items-start gap-4">
-                  <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"
-                    style={{ backgroundColor: 'hsl(var(--destructive) / 0.12)' }}>
+                <div key={i} className="flex items-start gap-4 glass-card p-5">
+                  <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 bg-destructive/12">
                     <span className="text-destructive text-xs font-bold">{i + 1}</span>
                   </div>
                   <p className="text-foreground leading-relaxed">{p}</p>
@@ -261,13 +251,14 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ─── HOW IT WORKS — terminal animation ─── */}
-      <section id="how-it-works" className="py-24" style={{ backgroundColor: 'hsl(220, 16%, 97%)' }}>
-        <div className="section-container">
+      {/* ─── HOW IT WORKS — terminal animation with glass bg ─── */}
+      <section id="how-it-works" className="relative py-24 bg-muted/50 overflow-hidden">
+        <div className="section-container relative z-10">
           <div className="mb-12">
             <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">How It Works</p>
             <h2 className="text-3xl md:text-4xl font-bold font-display text-foreground">
-              From data to decision<br />in under 2 seconds.
+              From data to decision
+              <br />in under 2 seconds.
             </h2>
           </div>
           <div className="max-w-4xl">
@@ -276,9 +267,10 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ─── FEATURES — alternating 2-column layout ─── */}
-      <section id="features" className="py-24 bg-background">
-        <div className="section-container">
+      {/* ─── FEATURES — glass cards with 3D hover ─── */}
+      <section id="features" className="relative py-24 bg-background overflow-hidden">
+        <FloatingOrbs variant="cool" />
+        <div className="section-container relative z-10">
           <div className="mb-14 max-w-xl">
             <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">What We Analyse</p>
             <h2 className="text-3xl md:text-4xl font-bold font-display text-foreground">
@@ -298,15 +290,13 @@ export default function Landing() {
                     i === features.length - 1 && 'border-b'
                   )}
                 >
-                  {/* Text panel */}
                   <div className={cn('p-10 lg:p-14 flex flex-col justify-center', !isEven && 'md:order-2')}>
                     <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mb-5">
                       <Icon className="h-5 w-5 text-primary" />
                     </div>
-                    <h3 className="text-xl font-bold font-display text-foreground mb-3">{feature.title}</h3>
+                    <h3 className="text-xl font-bold text-foreground mb-3">{feature.title}</h3>
                     <p className="text-muted-foreground leading-relaxed">{feature.description}</p>
                   </div>
-                  {/* Visual panel */}
                   <div
                     className={cn(
                       'p-10 lg:p-14 flex items-center justify-center',
@@ -326,7 +316,7 @@ export default function Landing() {
       </section>
 
       {/* ─── LIVE ASSET DASHBOARD ─── */}
-      <section className="py-24" style={{ backgroundColor: 'hsl(220, 16%, 97%)' }}>
+      <section className="py-24 bg-muted/50">
         <div className="section-container">
           <div className="mb-12">
             <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">Live Data</p>
@@ -345,8 +335,9 @@ export default function Landing() {
 
       {/* ─── INTERACTIVE DEMO ─── */}
       <LazySection fallback={<div className="py-16"><Skeleton className="h-64 max-w-3xl mx-auto" /></div>}>
-        <section id="demo" className="py-24 bg-background">
-          <div className="section-container">
+        <section id="demo" className="relative py-24 bg-background overflow-hidden">
+          <FloatingOrbs variant="cool" />
+          <div className="section-container relative z-10">
             <div className="mb-12">
               <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">Try It Now</p>
               <h2 className="text-3xl font-bold font-display text-foreground mb-2">
@@ -362,17 +353,16 @@ export default function Landing() {
         </section>
       </LazySection>
 
-      {/* ─── TESTIMONIALS — editorial strip ─── */}
-      <section className="py-24" style={{ backgroundColor: 'hsl(220, 16%, 97%)' }}>
+      {/* ─── TESTIMONIALS — glass cards ─── */}
+      <section className="py-24 bg-muted/50">
         <div className="section-container">
           <div className="grid md:grid-cols-2 gap-8 max-w-4xl">
             {testimonials.map((t) => (
-              <div key={t.name} className="bg-card border border-border rounded-lg p-8">
+              <div key={t.name} className="glass-card p-8">
                 <p className="text-foreground leading-relaxed mb-6 text-[1.05rem]">"{t.quote}"</p>
                 <div className="flex items-center gap-3 pt-4 border-t border-border">
                   <div
-                    className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold text-white flex-shrink-0"
-                    style={{ backgroundColor: 'hsl(225, 83%, 53%)' }}
+                    className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold text-primary-foreground flex-shrink-0 bg-primary"
                   >
                     {t.name[0]}
                   </div>
@@ -394,24 +384,29 @@ export default function Landing() {
         </Suspense>
       </LazySection>
 
-      {/* ─── FINAL CTA — dark navy bookend ─── */}
-      <section className="py-24 hero-gradient">
-        <div className="section-container text-center">
-          <h2 className="text-3xl md:text-4xl font-bold font-display text-white mb-4">
-            Ready to trade with clarity?
-          </h2>
-          <p className="text-white/60 text-lg mb-8 max-w-xl mx-auto">
-            Stop guessing. Start quantifying. Your first 5 analyses are free.
-          </p>
-          <Link
-            to="/auth?mode=signup"
-            className="inline-flex items-center gap-2 px-8 py-4 rounded font-semibold text-white text-base transition-all hover:opacity-90 group"
-            style={{ backgroundColor: 'hsl(225, 83%, 53%)' }}
-          >
-            Start Free Analysis
-            <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-0.5" />
-          </Link>
-          <p className="text-white/30 text-sm mt-4">No credit card required · Cancel anytime</p>
+      {/* ─── FINAL CTA — warm gradient bookend with glass card ─── */}
+      <section className="relative py-24 overflow-hidden hero-gradient-warm">
+        <FloatingOrbs variant="warm" />
+        <div className="relative z-10 section-container">
+          <div className="glass-card-dark max-w-2xl mx-auto p-12 md:p-16 text-center rounded-3xl">
+            <GlobeGraphic className="absolute inset-0 w-full h-full text-white pointer-events-none" />
+            <div className="relative z-10">
+              <h2 className="text-3xl md:text-4xl font-bold font-display text-white mb-4">
+                Ready to trade with clarity?
+              </h2>
+              <p className="text-white/60 text-lg mb-8 max-w-xl mx-auto">
+                Stop guessing. Start quantifying. Your first 5 analyses are free.
+              </p>
+              <Link
+                to="/auth?mode=signup"
+                className="inline-flex items-center gap-2 px-8 py-4 rounded-full font-semibold text-foreground text-base bg-white hover:bg-white/90 transition-all group shadow-lg"
+              >
+                Get Started Now
+                <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-0.5" />
+              </Link>
+              <p className="text-white/30 text-sm mt-4">No credit card required · Cancel anytime</p>
+            </div>
+          </div>
         </div>
       </section>
     </Layout>
