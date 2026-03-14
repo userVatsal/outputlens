@@ -135,25 +135,21 @@
   }
 
   .font-display {
-    font-family: 'Playfair Display', 'Space Grotesk', serif;
+    font-family: 'Space Grotesk', system-ui, sans-serif;
   }
 
   .font-brand {
-    font-family: 'DM Sans', 'Space Grotesk', system-ui, sans-serif;
+    font-family: 'DM Sans', system-ui, sans-serif;
   }
 
   .font-mono {
     font-family: 'JetBrains Mono', monospace;
   }
 
-  h1, h2, h3 {
-    font-family: 'Playfair Display', 'Space Grotesk', serif;
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'DM Sans', system-ui, sans-serif;
     @apply tracking-tight;
-  }
-
-  h4, h5, h6 {
-    font-family: 'DM Sans', 'Space Grotesk', system-ui, sans-serif;
-    @apply tracking-tight font-semibold;
+    font-weight: 700;
   }
 }
 
