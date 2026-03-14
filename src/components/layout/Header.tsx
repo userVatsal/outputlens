@@ -45,7 +45,7 @@ export function Header() {
   const initials = user?.email?.slice(0, 2).toUpperCase() ?? 'U';
 
   return (
-    <header className="sticky top-0 z-50 border-b border-white/10" style={{ backgroundColor: 'hsl(222, 47%, 14%)' }}>
+    <header className="sticky top-0 z-50 glass-header">
       <div className="section-container">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
