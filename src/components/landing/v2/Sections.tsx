@@ -310,7 +310,7 @@ export function Pricing() {
 export function FooterV2() {
   const cols: Array<{ title: string; links: Array<{ label: string; to: string }> }> = [
     { title: 'Product', links: [{ label: 'Features', to: '#features' }, { label: 'Pricing', to: '#pricing' }, { label: 'Changelog', to: '/about' }, { label: 'Status', to: '/about' }] },
-    { title: 'Company', links: [{ label: 'About', to: '/about' }, { label: 'Blog', to: '/about' }, { label: 'Careers', to: '/about' }, { label: 'Contact', to: '/about' }] },
+    { title: 'Company', links: [{ label: 'About', to: '/about' }, { label: 'Blog', to: '/blog' }, { label: 'Careers', to: '/about' }, { label: 'Contact', to: '/about' }] },
     { title: 'Legal',   links: [{ label: 'Privacy', to: '/privacy' }, { label: 'Terms', to: '/terms' }, { label: 'Security', to: '/privacy' }, { label: 'Data Processing', to: '/privacy' }] },
   ];
   return (
