@@ -36,7 +36,8 @@ export function PositionsTable({ assets }: Props) {
         </div>
       ) : (
         <div className="divide-y divide-border">
-          <div className="grid grid-cols-12 px-4 py-2 text-[10px] font-mono uppercase tracking-widest text-muted-foreground bg-muted/30">
+          {/* Desktop header */}
+          <div className="hidden md:grid grid-cols-12 px-4 py-2 text-[10px] font-mono uppercase tracking-widest text-muted-foreground bg-muted/30">
             <div className="col-span-3">Asset</div>
             <div className="col-span-2 text-right">Entry</div>
             <div className="col-span-2 text-right">VaR 95%</div>
@@ -47,31 +48,68 @@ export function PositionsTable({ assets }: Props) {
             const delta = a.risk_delta ?? 0;
             const var95 = a.current_var95 ?? a.var95_at_track ?? 0;
             const tail = a.current_tail_risk ?? a.tail_risk_at_track ?? 0;
+            const tailPct = Math.min(100, Math.max(0, tail * 100 * 2)); // 0-100 risk bar
+            const tailColor = tailPct < 30 ? 'hsl(var(--bullish))' : tailPct < 60 ? 'hsl(var(--caution))' : 'hsl(var(--bearish))';
             return (
               <Link
                 key={a.id}
                 to={`/workspace?asset=${a.symbol}`}
-                className="grid grid-cols-12 px-4 py-3 text-sm hover:bg-muted/50 transition-colors items-center"
+                className="block hover:bg-muted/40 transition-colors"
               >
-                <div className="col-span-3">
-                  <div className="font-mono font-semibold text-foreground">{a.symbol}</div>
-                  <div className="text-[10px] text-muted-foreground uppercase">{a.direction}</div>
+                {/* Desktop row */}
+                <div className="hidden md:grid grid-cols-12 px-4 py-3 text-sm items-center">
+                  <div className="col-span-3">
+                    <div className="font-mono font-semibold text-foreground">{a.symbol}</div>
+                    <div className="text-[10px] text-muted-foreground uppercase">{a.direction}</div>
+                  </div>
+                  <div className="col-span-2 text-right font-mono text-foreground tabular-nums">
+                    ${a.entry_price.toFixed(2)}
+                  </div>
+                  <div className="col-span-2 text-right font-mono text-foreground tabular-nums">
+                    {(var95 * 100).toFixed(1)}%
+                  </div>
+                  <div className="col-span-2 text-right font-mono text-bearish tabular-nums flex items-center justify-end gap-2">
+                    <div className="hidden lg:block h-1 w-12 rounded-full bg-border overflow-hidden">
+                      <div className="h-full rounded-full" style={{ width: `${tailPct}%`, background: tailColor }} />
+                    </div>
+                    {(tail * 100).toFixed(1)}%
+                  </div>
+                  <div className={cn(
+                    'col-span-3 text-right font-mono tabular-nums flex items-center justify-end gap-1',
+                    delta > 0.02 ? 'text-bearish' : delta < -0.02 ? 'text-bullish' : 'text-muted-foreground'
+                  )}>
+                    {delta > 0.02 ? <TrendingUp className="h-3 w-3" /> : delta < -0.02 ? <TrendingDown className="h-3 w-3" /> : null}
+                    {delta > 0 ? '+' : ''}{(delta * 100).toFixed(1)}%
+                  </div>
                 </div>
-                <div className="col-span-2 text-right font-mono text-foreground tabular-nums">
-                  ${a.entry_price.toFixed(2)}
-                </div>
-                <div className="col-span-2 text-right font-mono text-foreground tabular-nums">
-                  {(var95 * 100).toFixed(1)}%
-                </div>
-                <div className="col-span-2 text-right font-mono text-bearish tabular-nums">
-                  {(tail * 100).toFixed(1)}%
-                </div>
-                <div className={cn(
-                  'col-span-3 text-right font-mono tabular-nums flex items-center justify-end gap-1',
-                  delta > 0.02 ? 'text-bearish' : delta < -0.02 ? 'text-bullish' : 'text-muted-foreground'
-                )}>
-                  {delta > 0.02 ? <TrendingUp className="h-3 w-3" /> : delta < -0.02 ? <TrendingDown className="h-3 w-3" /> : null}
-                  {delta > 0 ? '+' : ''}{(delta * 100).toFixed(1)}%
+                {/* Mobile card */}
+                <div className="md:hidden p-4 space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="font-mono font-semibold text-foreground text-base">{a.symbol}</div>
+                      <div className="text-[10px] text-muted-foreground uppercase">{a.direction} · Entry ${a.entry_price.toFixed(2)}</div>
+                    </div>
+                    <div className={cn(
+                      'font-mono text-xs tabular-nums flex items-center gap-1',
+                      delta > 0.02 ? 'text-bearish' : delta < -0.02 ? 'text-bullish' : 'text-muted-foreground'
+                    )}>
+                      {delta > 0.02 ? <TrendingUp className="h-3 w-3" /> : delta < -0.02 ? <TrendingDown className="h-3 w-3" /> : null}
+                      Δ {delta > 0 ? '+' : ''}{(delta * 100).toFixed(1)}%
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4 text-xs">
+                    <div>
+                      <span className="text-muted-foreground uppercase text-[10px]">VaR </span>
+                      <span className="font-mono text-foreground tabular-nums">{(var95 * 100).toFixed(1)}%</span>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground uppercase text-[10px]">Tail </span>
+                      <span className="font-mono text-bearish tabular-nums">{(tail * 100).toFixed(1)}%</span>
+                    </div>
+                  </div>
+                  <div className="h-1 w-full rounded-full bg-border overflow-hidden">
+                    <div className="h-full rounded-full" style={{ width: `${tailPct}%`, background: tailColor }} />
+                  </div>
                 </div>
               </Link>
             );

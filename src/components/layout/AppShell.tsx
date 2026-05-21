@@ -5,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { AppSidebar } from './AppSidebar';
 import { AppTopBar } from './AppTopBar';
 import { AIFeedPanel } from './AIFeedPanel';
+import { MobileNav } from './MobileNav';
 
 interface AppShellProps {
   children: ReactNode;
@@ -58,16 +59,18 @@ export function AppShell({ children, requireAuth = true }: AppShellProps) {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <AppSidebar collapsed={sidebarCollapsed} onToggle={() => setSidebarCollapsed(c => !c)} />
-      <AppTopBar sidebarWidth={sidebarWidth} />
-      <AIFeedPanel collapsed={feedCollapsed} onToggle={() => setFeedCollapsed(c => !c)} />
+      {/* Desktop chrome */}
+      <div className="hidden md:contents">
+        <AppSidebar collapsed={sidebarCollapsed} onToggle={() => setSidebarCollapsed(c => !c)} />
+        <AppTopBar sidebarWidth={sidebarWidth} />
+        <AIFeedPanel collapsed={feedCollapsed} onToggle={() => setFeedCollapsed(c => !c)} />
+      </div>
+      {/* Mobile chrome */}
+      <MobileNav />
 
       <main
-        className="min-h-screen pt-14 transition-[padding] duration-200"
-        style={{
-          paddingLeft: sidebarWidth,
-          paddingRight: feedWidth,
-        }}
+        className="min-h-screen pt-14 pb-[76px] md:pb-0 transition-[padding] duration-200 md:pl-[var(--ol-sb)] md:pr-[var(--ol-fp)]"
+        style={{ ['--ol-sb' as any]: `${sidebarWidth}px`, ['--ol-fp' as any]: `${feedWidth}px` }}
       >
         <div className="max-w-[1440px] mx-auto px-4 md:px-6 lg:px-8 py-6">
           {children}

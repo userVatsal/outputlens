@@ -21,6 +21,8 @@ import { ExecutiveStrip } from '@/components/dashboard/ExecutiveStrip';
 import { KpiGrid } from '@/components/dashboard/KpiGrid';
 import { PositionsTable } from '@/components/dashboard/PositionsTable';
 import { RecentSimulationCard } from '@/components/dashboard/RecentSimulationCard';
+import { GreetingBar } from '@/components/dashboard/GreetingBar';
+import { PortfolioDistributionCard } from '@/components/dashboard/PortfolioDistributionCard';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -101,11 +103,19 @@ export default function Dashboard() {
 
   return (
     <AppShell>
-      <div className="section-container py-8">
-        <div className="max-w-7xl mx-auto space-y-6">
+      <div className="max-w-[1280px] mx-auto">
+        <div className="space-y-4">
 
-          {/* Zone 1: Executive greeting strip */}
+          {/* Greeting */}
           <div className="animate-fade-in">
+            <GreetingBar
+              name={profile?.display_name || profile?.full_name}
+              attentionCount={trackedAssets.filter(a => (a.risk_delta ?? 0) > 0.05).length}
+            />
+          </div>
+
+          {/* Plan / usage strip */}
+          <div className="animate-fade-in" style={{ animationDelay: '50ms' }}>
             <ExecutiveStrip
               profile={profile}
               used={usage?.analysisCount ?? 0}
@@ -129,16 +139,18 @@ export default function Dashboard() {
             </div>
           )}
 
-          {/* Zone 2: KPI grid */}
+          {/* KPI cards row */}
           <div className="animate-fade-in" style={{ animationDelay: '100ms' }}>
             <KpiGrid assets={trackedAssets} streak={streak} />
           </div>
 
-          {/* Zone 3: Recent simulation + Alerts (2-col) */}
-          <div
-            className="grid grid-cols-1 lg:grid-cols-3 gap-4 animate-fade-in"
-            style={{ animationDelay: '150ms' }}
-          >
+          {/* Portfolio distribution chart */}
+          <div className="animate-fade-in" style={{ animationDelay: '130ms' }}>
+            <PortfolioDistributionCard />
+          </div>
+
+          {/* Recent simulation + Alerts */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 animate-fade-in" style={{ animationDelay: '160ms' }}>
             <div className="lg:col-span-2">
               <RecentSimulationCard />
             </div>
