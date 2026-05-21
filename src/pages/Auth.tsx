@@ -69,6 +69,11 @@ export default function Auth() {
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session) {
+        if (sessionStorage.getItem('ol_just_signed_up') === '1') {
+          sessionStorage.removeItem('ol_just_signed_up');
+          navigate('/welcome');
+          return;
+        }
         const { data: profile } = await supabase
           .from('profiles')
           .select('onboarding_completed')
@@ -82,6 +87,11 @@ export default function Auth() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if (session) {
+          if (sessionStorage.getItem('ol_just_signed_up') === '1') {
+            sessionStorage.removeItem('ol_just_signed_up');
+            navigate('/welcome');
+            return;
+          }
           const { data: profile } = await supabase
             .from('profiles')
             .select('onboarding_completed')
@@ -130,6 +140,7 @@ export default function Auth() {
     setLoading(true);
     try {
       if (mode === 'signup') {
+        sessionStorage.setItem('ol_just_signed_up', '1');
         const { error } = await supabase.auth.signUp({
           email,
           password,
@@ -139,6 +150,7 @@ export default function Auth() {
           },
         });
         if (error) {
+          sessionStorage.removeItem('ol_just_signed_up');
           setError(error.message.includes('already registered')
             ? 'This email is already registered. Please sign in instead.'
             : error.message);
