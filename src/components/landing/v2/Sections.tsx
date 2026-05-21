@@ -231,13 +231,13 @@ export function SocialProof() {
 }
 
 /* ───────────── PRICING ───────────── */
-const PLANS = (annual: boolean) => [
-  { name: 'Analyst', price: annual ? '£190' : '£24',  period: annual ? '/year' : '/month', desc: 'For individual analysts and active traders.',
-    features: ['100 simulations/month', 'Single-asset analysis', 'Email alerts', 'Standard models'], highlight: false, cta: 'Start free' },
-  { name: 'Desk',    price: annual ? '£790' : '£99',  period: annual ? '/year' : '/month', desc: 'For desks and small teams running portfolios.',
-    features: ['Unlimited simulations', 'Portfolio mode + correlation', 'AI commentary', 'GARCH, Heston, regime', 'Priority support'], highlight: true, cta: 'Start free' },
-  { name: 'Institutional', price: annual ? 'Custom' : 'Custom', period: '', desc: 'For funds, prop desks and enterprise risk.',
-    features: ['SSO + audit log', 'Dedicated infrastructure', 'Custom models & data', 'SLA & onboarding', 'Compliance reporting'], highlight: false, cta: 'Contact sales' },
+const PLANS = (_annual: boolean) => [
+  { name: 'Starter', price: '$12', period: '/month', desc: 'For individual analysts getting started with probabilistic risk.',
+    features: ['30 analyses/month', 'Global markets (UK, EU, Crypto, Forex)', '10,000 Monte Carlo paths', 'GBM + GARCH + regime switching', 'Auto AI explanations'], highlight: false, cta: 'Start free' },
+  { name: 'Pro',     price: '$29', period: '/month', desc: 'For active traders running portfolios.',
+    features: ['100 analyses/month', 'Full stochastic suite + jump diffusion', 'Portfolio analysis (5 assets)', 'Neural database + auto insights', 'CSV/PDF exports', 'Unlimited history'], highlight: true, cta: 'Start free' },
+  { name: 'Trader',  price: '$79', period: '/month', desc: 'For desks running multi-asset portfolios.',
+    features: ['500 analyses/month', 'Portfolio analysis (20 assets)', '100 API calls/month', 'Priority support', 'All advanced models'], highlight: false, cta: 'Start free' },
 ];
 export function Pricing() {
   const [annual, setAnnual] = useState(true);
@@ -310,7 +310,7 @@ export function Pricing() {
 export function FooterV2() {
   const cols: Array<{ title: string; links: Array<{ label: string; to: string }> }> = [
     { title: 'Product', links: [{ label: 'Features', to: '#features' }, { label: 'Pricing', to: '#pricing' }, { label: 'Changelog', to: '/about' }, { label: 'Status', to: '/about' }] },
-    { title: 'Company', links: [{ label: 'About', to: '/about' }, { label: 'Blog', to: '/about' }, { label: 'Careers', to: '/about' }, { label: 'Contact', to: '/about' }] },
+    { title: 'Company', links: [{ label: 'About', to: '/about' }, { label: 'Blog', to: '/blog' }, { label: 'Careers', to: '/about' }, { label: 'Contact', to: '/about' }] },
     { title: 'Legal',   links: [{ label: 'Privacy', to: '/privacy' }, { label: 'Terms', to: '/terms' }, { label: 'Security', to: '/privacy' }, { label: 'Data Processing', to: '/privacy' }] },
   ];
   return (

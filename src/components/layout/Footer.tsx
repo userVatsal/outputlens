@@ -28,6 +28,7 @@ export function Footer() {
                 { href: '/workspace',   label: 'Workspace'   },
                 { href: '/methodology', label: 'Methodology' },
                 { href: '/pricing',     label: 'Pricing'     },
+                { href: '/blog',        label: 'Blog'        },
                 { href: '/about',       label: 'About'       },
               ].map(l => (
                 <li key={l.href}>
