@@ -13,6 +13,8 @@ interface Props {
 export function ExecutiveStrip({ profile, usage, plan }: Props) {
   const { streak } = useStreak();
   const market = useMarketStatus();
+  const isOpen = market.state === 'open';
+  const statusLabel = market.state.toUpperCase();
   const first = (profile?.full_name || 'Analyst').split(' ')[0];
   const hour = new Date().getHours();
   const greet = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
@@ -35,8 +37,8 @@ export function ExecutiveStrip({ profile, usage, plan }: Props) {
         </div>
         <div className="flex items-center gap-4 text-xs text-muted-foreground font-mono">
           <span className="flex items-center gap-1.5">
-            <span className={`w-1.5 h-1.5 rounded-full ${market.isOpen ? 'bg-bullish animate-pulse' : 'bg-muted-foreground/50'}`} />
-            NYSE {market.status}
+            <span className={`w-1.5 h-1.5 rounded-full ${isOpen ? 'bg-bullish animate-pulse' : 'bg-muted-foreground/50'}`} />
+            NYSE {statusLabel}
           </span>
           {streak > 0 && (
             <span className="flex items-center gap-1 text-foreground">
