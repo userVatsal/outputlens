@@ -31,6 +31,7 @@ const Welcome = lazy(() => import("./pages/Welcome"));
 const Regime = lazy(() => import("./pages/Regime"));
 const Alerts = lazy(() => import("./pages/Alerts"));
 const Scenarios = lazy(() => import("./pages/Scenarios"));
+const VarCalculator = lazy(() => import("./pages/VarCalculator"));
 
 const queryClient = new QueryClient();
 
