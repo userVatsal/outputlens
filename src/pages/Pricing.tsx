@@ -1,18 +1,26 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Check, X, Sparkles, Loader2, ChevronDown } from 'lucide-react';
+import { Check, Sparkles, Loader2, ChevronDown, Shield, Clock, RefreshCw, CreditCard, Headphones } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
 import { usePlan } from '@/hooks/usePlan';
 import { PLAN_CONFIG, SubscriptionPlan } from '@/lib/stripe';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
-import { useState as useLocalState } from 'react';
 
+// Anchor high → low. Trader sits first so every cheaper plan feels reasonable by comparison.
 const plans: { key: SubscriptionPlan; badge?: string }[] = [
-  { key: 'free' },
-  { key: 'starter' },
+  { key: 'trader', badge: 'Institutional-grade' },
   { key: 'pro', badge: 'Most Popular' },
-  { key: 'trader' },
+  { key: 'starter' },
+  { key: 'free' },
+];
+
+const objections = [
+  { icon: Shield,    label: '14-day refund — no questions' },
+  { icon: RefreshCw, label: 'Cancel anytime, one click' },
+  { icon: CreditCard,label: 'No card required for Free' },
+  { icon: Clock,     label: 'Setup in under 30 seconds' },
+  { icon: Headphones,label: 'Human support, not chatbots' },
 ];
 
 const faqs = [
@@ -46,9 +54,13 @@ export default function Pricing() {
       {/* Header */}
       <section className="hero-gradient py-20">
         <div className="section-container text-center">
-          <h1 className="text-4xl md:text-5xl font-bold font-display text-white mb-4">Risk Intelligence Plans</h1>
-          <p className="text-white/60 text-lg max-w-xl mx-auto">
-            Free to start. Upgrade when you need global markets and advanced simulation.
+          <h1 className="text-4xl md:text-5xl font-bold font-display text-foreground mb-4 tracking-tight">
+            Quantify risk for less than a coffee a day.
+          </h1>
+          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+            Bloomberg Terminal: <span className="font-mono text-foreground">$24,000/yr</span>.
+            OutputLens Trader: <span className="font-mono text-foreground">$79/mo</span>.
+            Same probabilistic depth. None of the bloat.
           </p>
         </div>
       </section>
