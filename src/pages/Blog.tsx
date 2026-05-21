@@ -131,7 +131,7 @@ export default function Blog() {
           ) : (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {filtered.map((a, idx) => {
-                const Icon = (Icons as Record<string, React.ComponentType<{ className?: string }>>)[a.icon] || Icons.FileText;
+                const Icon = ((Icons as unknown as Record<string, React.ComponentType<{ className?: string }>>)[a.icon]) || Icons.FileText;
                 return (
                   <Link
                     key={a.slug}
