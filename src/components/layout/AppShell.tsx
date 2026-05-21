@@ -69,11 +69,8 @@ export function AppShell({ children, requireAuth = true }: AppShellProps) {
       <MobileNav />
 
       <main
-        className="min-h-screen pt-14 pb-[76px] md:pb-0 transition-[padding] duration-200"
-        style={{
-          paddingLeft: typeof window !== 'undefined' && window.innerWidth >= 768 ? sidebarWidth : 0,
-          paddingRight: typeof window !== 'undefined' && window.innerWidth >= 768 ? feedWidth : 0,
-        }}
+        className="min-h-screen pt-14 pb-[76px] md:pb-0 transition-[padding] duration-200 md:pl-[var(--ol-sb)] md:pr-[var(--ol-fp)]"
+        style={{ ['--ol-sb' as any]: `${sidebarWidth}px`, ['--ol-fp' as any]: `${feedWidth}px` }}
       >
         <div className="max-w-[1440px] mx-auto px-4 md:px-6 lg:px-8 py-6">
           {children}
