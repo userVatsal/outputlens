@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { History, Loader2, BarChart3, FolderOpen, Terminal } from 'lucide-react';
-import { Layout } from '@/components/layout/Layout';
+import { AppShell } from '@/components/layout/AppShell';
 import { TradeInputForm } from '@/components/TradeInputForm';
 import { UsageIndicator } from '@/components/UsageIndicator';
 import { PaywallModal } from '@/components/PaywallModal';
@@ -165,11 +165,11 @@ export default function Workspace() {
 
   if (loading) {
     return (
-      <Layout>
+      <AppShell>
         <div className="flex items-center justify-center min-h-[60vh]">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
-      </Layout>
+      </AppShell>
     );
   }
 
@@ -181,7 +181,7 @@ export default function Workspace() {
     : 1;
 
   return (
-    <Layout>
+    <AppShell>
       <div className="section-container py-6">
         <div className="max-w-6xl mx-auto">
 
@@ -355,6 +355,6 @@ export default function Workspace() {
       </div>
 
       <PaywallModal open={showPaywall} onOpenChange={setShowPaywall} />
-    </Layout>
+    </AppShell>
   );
 }
