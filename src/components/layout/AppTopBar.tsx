@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Search, Bell, ChevronRight, LogOut, Settings, User } from 'lucide-react';
+import { Search, Bell, ChevronRight, LogOut, Settings, User, Sparkles } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAlertsCount } from '@/hooks/useAlertsCount';
 import { useMarketStatus, formatCountdown } from '@/hooks/useMarketStatus';
@@ -185,6 +185,3 @@ export function AppTopBar({ sidebarWidth }: Props) {
     </header>
   );
 }
-
-// Sparkles icon import (declared late to keep header readable)
-import { Sparkles } from 'lucide-react';
