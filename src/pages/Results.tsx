@@ -16,7 +16,9 @@ import {
   ScenarioRegimeCards,
   AdvancedMetrics,
   RiskInterpretation,
-  ActionPanel
+  ActionPanel,
+  MonteCarloFanChart,
+  ScenarioProbabilityDonut
 } from '@/components/workspace';
 import { investmentToShares } from '@/lib/positionCalculations';
 
@@ -203,12 +205,22 @@ const Results = () => {
             />
           </div>
 
+          {/* Monte Carlo fan chart — hero visual */}
+          <div className="animate-fade-in" style={{ animationDelay: '0.18s' }}>
+            <MonteCarloFanChart analysis={analysis} currencySymbol={currencySymbol} />
+          </div>
+
           <div className="animate-fade-in" style={{ animationDelay: '0.2s' }}>
             <PnLSummary 
               analysis={analysis}
               shares={shares}
               currencySymbol={currencySymbol}
             />
+          </div>
+
+          {/* Scenario probability donut */}
+          <div className="animate-fade-in" style={{ animationDelay: '0.22s' }}>
+            <ScenarioProbabilityDonut analysis={analysis} />
           </div>
 
           <div className="animate-fade-in" style={{ animationDelay: '0.25s' }}>
