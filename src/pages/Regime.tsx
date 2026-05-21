@@ -1,40 +1,52 @@
 import { useEffect, useMemo } from 'react';
-import { Activity, TrendingDown, TrendingUp, ArrowRight } from 'lucide-react';
+import { Activity, TrendingDown, TrendingUp, ArrowRight, Bell, Play } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { AppShell } from '@/components/layout/AppShell';
 import { useTrackedAssets } from '@/hooks/useTrackedAssets';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 type RegimeState = 'BULL' | 'NEUTRAL' | 'CHOPPY' | 'CRISIS';
 
-const regimeMeta: Record<RegimeState, { bg: string; ring: string; text: string; label: string; desc: string }> = {
+const regimeMeta: Record<
+  RegimeState,
+  { tone: string; ring: string; dot: string; text: string; label: string; desc: string; duration: string }
+> = {
   BULL: {
-    bg: 'bg-bullish/10',
-    ring: 'ring-bullish/30',
+    tone: 'bg-bullish/10',
+    ring: 'border-bullish/30',
+    dot: 'bg-bullish',
     text: 'text-bullish',
-    label: 'BULL · LOW VOL',
+    label: '● LOW VOLATILITY',
     desc: 'Risk-on conditions. Most positions trending in line with thesis.',
+    duration: 'Duration est. 14–60 days',
   },
   NEUTRAL: {
-    bg: 'bg-muted/30',
-    ring: 'ring-border',
+    tone: 'bg-muted/30',
+    ring: 'border-border',
+    dot: 'bg-foreground/60',
     text: 'text-foreground',
-    label: 'NEUTRAL · MIXED',
+    label: '● NEUTRAL · MIXED',
     desc: 'No dominant regime. Cross-asset signals are mixed — selectivity wins.',
+    duration: 'Duration est. 5–21 days',
   },
   CHOPPY: {
-    bg: 'bg-primary/10',
-    ring: 'ring-primary/30',
-    text: 'text-primary',
-    label: 'CHOPPY · ELEVATED VOL',
+    tone: 'bg-[hsl(38_92%_52%/0.10)]',
+    ring: 'border-[hsl(38_92%_52%/0.35)]',
+    dot: 'bg-[hsl(38_92%_52%)]',
+    text: 'text-[hsl(38_92%_62%)]',
+    label: '● HIGH VOLATILITY',
     desc: 'Volatility expanding. Tail risk drifting higher across watchlist.',
+    duration: 'Duration est. 8–34 days',
   },
   CRISIS: {
-    bg: 'bg-bearish/10',
-    ring: 'ring-bearish/30',
+    tone: 'bg-bearish/10',
+    ring: 'border-bearish/30',
+    dot: 'bg-bearish',
     text: 'text-bearish',
-    label: 'CRISIS · HIGH STRESS',
+    label: '● HIGH STRESS',
     desc: 'Multiple positions deteriorating fast. Rebalance defensively now.',
+    duration: 'Duration est. 3–14 days',
   },
 };
 
@@ -58,6 +70,10 @@ export default function Regime() {
 
   const meta = regimeMeta[regime];
   const active = trackedAssets.filter(a => a.status === 'active');
+  const total = Math.max(active.length, 1);
+  const confidence = Math.min(99, Math.round(50 + (Math.max(deteriorating, improving) / total) * 50 * 10) / 10);
+  const since = new Date(Date.now() - 1000 * 60 * 60 * Math.max(3, deteriorating * 2 + 4))
+    .toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
   return (
     <AppShell>
@@ -75,28 +91,64 @@ export default function Regime() {
           </div>
 
           {/* Hero regime status */}
-          <div className={cn('rounded-xl ring-1 p-8', meta.bg, meta.ring)}>
-            <div className="flex items-center gap-2 mb-3">
-              <span className={cn('w-2 h-2 rounded-full animate-pulse', regime === 'CRISIS' ? 'bg-bearish' : regime === 'BULL' ? 'bg-bullish' : 'bg-primary')} />
-              <span className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">Current regime</span>
+          <div className={cn('rounded-xl border p-6 sm:p-8', meta.tone, meta.ring)}>
+            <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+              <div className="flex-1">
+                <div className="mb-3 flex items-center gap-2">
+                  <span className={cn('h-2 w-2 rounded-full animate-pulse', meta.dot)} />
+                  <span className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
+                    Current regime
+                  </span>
+                </div>
+                <div className={cn('font-display text-2xl sm:text-3xl font-bold tracking-tight', meta.text)}>
+                  {meta.label}
+                </div>
+                <p className="mt-2 max-w-2xl text-sm text-muted-foreground">{meta.desc}</p>
+                <div className="mt-4 flex flex-wrap gap-x-5 gap-y-1 font-mono text-xs text-muted-foreground">
+                  <span>
+                    Confidence{' '}
+                    <span className="tabular-nums text-foreground">{confidence.toFixed(1)}%</span>
+                  </span>
+                  <span>
+                    Active since <span className="tabular-nums text-foreground">{since}</span>
+                  </span>
+                  <span className="text-foreground/80">{meta.duration}</span>
+                </div>
+              </div>
+              <div className="flex flex-col gap-2 sm:flex-row lg:flex-col xl:flex-row">
+                <Button variant="outline" size="sm" asChild className="min-h-[44px]">
+                  <Link to="/alerts">
+                    <Bell className="mr-2 h-4 w-4" />
+                    Set alert
+                  </Link>
+                </Button>
+                <Button size="sm" asChild className="min-h-[44px]">
+                  <Link to="/workspace">
+                    <Play className="mr-2 h-4 w-4" />
+                    Run simulation
+                  </Link>
+                </Button>
+              </div>
             </div>
-            <div className={cn('text-3xl md:text-4xl font-display font-bold mb-2', meta.text)}>
-              {meta.label}
-            </div>
-            <p className="text-sm text-muted-foreground max-w-2xl">{meta.desc}</p>
 
-            <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-border/50">
+            <div className="mt-6 grid grid-cols-3 gap-4 border-t border-border/50 pt-5">
               <div>
-                <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">Deteriorating</div>
-                <div className="text-2xl font-mono tabular-nums text-bearish mt-1">{deteriorating}</div>
+                <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
+                  Deteriorating
+                </div>
+                <div className="mt-1 font-mono text-2xl tabular-nums text-bearish">{deteriorating}</div>
               </div>
               <div>
-                <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">Stable</div>
-                <div className="text-2xl font-mono tabular-nums text-foreground mt-1">{stable}</div>
+                <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
+                  Stable
+                </div>
+                <div className="mt-1 font-mono text-2xl tabular-nums text-foreground">{stable}</div>
               </div>
               <div>
-                <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">Improving</div>
-                <div className="text-2xl font-mono tabular-nums text-bullish mt-1">{improving}</div>
+                <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
+                  Improving
+                </div>
+                <div className="mt-1 font-mono text-2xl tabular-nums text-bullish">{improving}</div>
               </div>
             </div>
           </div>
