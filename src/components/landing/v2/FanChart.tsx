@@ -37,14 +37,34 @@ export function FanChart({ height = 380 }: { height?: number }) {
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart data={data} margin={{ top: 8, right: 8, bottom: 8, left: 8 }}>
           <YAxis hide domain={['dataMin - 4', 'dataMax + 4']} />
-          {/* P5-P95 outer band */}
-          <Area type="monotone" dataKey="p95" stroke="none" fill="hsl(189 100% 50% / 0.05)" isAnimationActive animationDuration={800} />
-          <Area type="monotone" dataKey="p5"  stroke="none" fill="hsl(var(--background))" isAnimationActive animationDuration={800} />
+          {/* P5-P95 outer band (ranged area) */}
+          <Area
+            type="monotone"
+            dataKey={(d: any) => [d.p5, d.p95]}
+            stroke="none"
+            fill="hsl(189 100% 50% / 0.06)"
+            isAnimationActive
+            animationDuration={900}
+          />
           {/* P25-P75 inner band */}
-          <Area type="monotone" dataKey="p75" stroke="none" fill="hsl(189 100% 50% / 0.10)" isAnimationActive animationDuration={900} />
-          <Area type="monotone" dataKey="p25" stroke="none" fill="hsl(var(--background))" isAnimationActive animationDuration={900} />
+          <Area
+            type="monotone"
+            dataKey={(d: any) => [d.p25, d.p75]}
+            stroke="none"
+            fill="hsl(189 100% 50% / 0.12)"
+            isAnimationActive
+            animationDuration={1000}
+          />
           {/* P50 median */}
-          <Line type="monotone" dataKey="p50" stroke="hsl(189 100% 50%)" strokeWidth={2} dot={false} isAnimationActive animationDuration={1100} />
+          <Line
+            type="monotone"
+            dataKey="p50"
+            stroke="hsl(189 100% 50%)"
+            strokeWidth={2}
+            dot={false}
+            isAnimationActive
+            animationDuration={1200}
+          />
         </AreaChart>
       </ResponsiveContainer>
     </div>
