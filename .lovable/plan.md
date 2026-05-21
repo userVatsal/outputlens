@@ -1,175 +1,71 @@
+# OutputLens Psychology-Driven Redesign
 
-# Two-Part Fix: Live Asset Dashboard + No-Signup Analysis on Landing
-
-## What's Being Fixed
-
-### Problem 1: LiveAssetDashboard — Stale data + infinite re-fetch bug
-The `fetchAllAssetData` callback in `LiveAssetDashboard.tsx` has a **critical stale closure bug**: it lists `assets` as a dependency, which causes a new callback every time assets update, which triggers the `setInterval` to reset, which calls fetch again — an infinite loop. The network logs confirm this: all 4 assets fetch simultaneously every ~60 seconds fine on first load, but the auto-refresh at `23:33:07` shows "Failed to fetch" because the component is fighting itself.
-
-**Fix**: Remove `assets` from the `useCallback` dependency and instead use `initialAssets` as a constant reference (the asset list never changes, only the `liveData` attached to each). This breaks the dependency cycle.
-
-Additionally, the static `riskScore` values (78, 23, 45, 35) never update from live data. We should compute a real risk level from the live `changePercent` — e.g., assets with >2% daily swing = High, 1–2% = Medium, <1% = Low. This makes the Risk column actually reflect live reality.
-
-### Problem 2: InteractivePreview — Hardcoded fake prices, no real analysis
-The `InteractivePreview` component uses completely **hardcoded static prices** from a `DEMO_ASSETS` object (AAPL at $185.50, etc.) and fake math to generate "results." The CTA at the bottom still forces people to `/auth?mode=signup` before doing anything real. This is exactly what the user wants to fix — let people run a real analysis without signing up.
-
-**Fix**: Convert `InteractivePreview` into a proper **unauthenticated analysis launcher**:
-- Keep the asset picker (AAPL, TSLA, etc.) but fetch **real live prices** from `fetch-market-data` edge function using the existing `useMarketData` hook
-- Connect the "Run Analysis" button to the **actual workspace** at `/workspace?asset=AAPL&market=US&direction=long` — the Workspace page already supports unauthenticated use (it only prompts for auth at analysis submission time)
-- Show the live current price next to each asset
-- Keep the investment slider and direction/horizon controls — they feed directly into workspace URL params
-- Remove the fake calculated metrics (winProb etc.) — instead show real current prices and a CTA: "Run Full Analysis" that pre-fills the workspace
-
-This is a much stronger conversion pattern: the user sees real current prices, sets their parameters, clicks one button, and lands directly in the workspace with the form pre-filled. They only hit the auth wall when they actually hit "Submit" — which is a much more motivated moment.
+A full visual + behavioural rebuild applying loss aversion, social proof, anchoring, reciprocity, and peak-end across the design system, landing, signup, pricing, and dashboard.
 
 ---
 
-## Detailed Implementation
+## Phase 1 — Design system foundation
+Rewrite `src/index.css` + `tailwind.config.ts` + `index.html` fonts.
 
-### File 1: `src/components/landing/LiveAssetDashboard.tsx`
+- **Palette** (dark-first, semantic tokens in HSL):
+  - bg `#0A0C10`, surface `#0F1117`, elevated `#161B24`
+  - primary cyan `#00D4FF` (CTAs/active only)
+  - violet `#7B61FF` (AI/model badges), green `#00C896` (upside), amber `#F5A623` (warn), red `#E84545` (loss/tail)
+  - text `#F0F4FF` / `#8B96A8`
+- **Fonts**: Sora 700/800 (display), DM Sans 400/500/600 (UI), JetBrains Mono tabular-nums (data)
+- **Type scale utilities**: `.text-display`, `.text-data-lg`, `.text-data-sm`, `.text-label` (11px +1px tracking uppercase)
+- **Components**: `.btn-primary` (cyan + glow-pulse on idle), `.surface`, `.surface-elevated`, `.kpi-number`, `.live-dot` (pulsing cyan), `.glow-ring`
+- **Motion**: keyframes for `glow-pulse`, `count-up`, `path-draw`, `reveal-blur`, `stagger-up`. Replace warm orb gradient with restrained grid-bg.
 
-**Fix the stale closure bug:**
-```
-// BEFORE — assets in deps causes infinite loop:
-const fetchAllAssetData = useCallback(async () => {
-  const updatedAssets = await Promise.all(
-    assets.map(async (asset) => { ... })   // 'assets' is stale
-  );
-  setAssets(updatedAssets);
-}, [assets, fetchMarketData]);  // <-- 'assets' here causes loop
+## Phase 2 — Landing page (`src/pages/Landing.tsx` + components)
+Rebuild around reciprocity-first flow.
 
-// AFTER — use initialAssets (static ref, never changes):
-const fetchAllAssetData = useCallback(async () => {
-  setIsRefreshing(true);
-  const updatedAssets = await Promise.all(
-    initialAssets.map(async (asset) => { ... })  // stable reference
-  );
-  setAssets(updatedAssets);
-  setLastUpdate(new Date());
-  setIsRefreshing(false);
-}, [fetchMarketData]);  // only fetchMarketData as dep
-```
+- Hero (staggered 0/100/200/400/600/800/1200ms):
+  - Eyebrow label "AI-POWERED RISK INTELLIGENCE"
+  - H1: "The market is a distribution. Your model should be too." (Sora 800, -2px)
+  - Sub: distribution-not-forecast paragraph
+  - **Ticker input + "Run Free Simulation →"** (no signup; runs 100 paths locally via existing engine)
+  - Microcopy: "2,400+ analysts already running simulations"
+- Live Monte Carlo fan chart in hero — paths draw left→right (existing `ReturnDistributionChart` adapted, 200 paths, 2ms stagger, percentile band fill, median line last)
+- Stats bar (count-up on scroll): 10,000 / 2,400+ / 94.7% / <0.3s
+- Loss-aversion section: tail scenarios shown FIRST with red accents
+- Authority strip: "Black-Scholes-Merton · GBM · GARCH · HMM · Heston" + "How we calculate ↗"
+- Testimonials with role + firm type structure
+- `LiveActivityToast` component (bottom-left, 45–90s randomised, real-looking names, role, time)
+- Single primary CTA throughout: "Analyse a Position Free"
 
-**Compute live risk level from real data:**
-```typescript
-// After fetching live data, compute risk level from changePercent
-function computeRiskLevel(changePercent: number | undefined): 'High' | 'Medium' | 'Low' {
-  const abs = Math.abs(changePercent ?? 0);
-  if (abs >= 2.5) return 'High';
-  if (abs >= 1.0) return 'Medium';
-  return 'Low';
-}
-// Apply when setting liveData
-return {
-  ...asset,
-  liveData: data,
-  riskLevel: computeRiskLevel(data?.changePercent),
-  riskScore: Math.min(95, Math.round(Math.abs(data?.changePercent ?? 0) * 15 + 20)),
-};
-```
+## Phase 3 — Partial-reveal → signup flow
+- After hero ticker run: show fan chart with blurred P25/P75 tails + overlay card "Your full distribution is ready" listing locked features → CTA "Unlock Full Analysis — Free"
+- `src/pages/Auth.tsx` rebuilt as 2-step:
+  - Step 1: email only, progress `●●○`, "No card required..."
+  - Step 2: role dropdown (PM/Risk/Quant/Trader/Other) + password, CTA "Complete Setup & See My Results →"
+- New `src/pages/Welcome.tsx` (peak-end confirmation): full-screen dark, cyan glow, counter 0→10,000 in 2.2s, then "Distribution complete. You now see [TICKER] as a probability distribution, not a consensus estimate." → auto-redirect dashboard 3s
 
-**Redesign the table rows to be Bloomberg-style** (matching the post-login aesthetic):
-- Dark navy header instead of `bg-muted/30`
-- `font-mono` for all prices and changes
-- Clicking any row navigates to `/workspace?asset=TSLA&market=US` (pre-fills the workspace)
-- Footer CTA changes from "Sign up to analyze" → "Run Analysis" that goes directly to `/workspace`
+## Phase 4 — Pricing (`src/pages/Pricing.tsx`)
+- Order: **Institutional → Desk → Analyst** (anchor high)
+- Annual toggle DEFAULT with "Save 30%" badge, monthly shows "Only £X/day"
+- Bloomberg comparison line: "Bloomberg Terminal: £24,000/yr. OutputLens Institutional: £X/yr."
+- Objection-killer strip below plans (5 bullets incl. refund guarantee)
+- CTAs: "Talk to Us", "Start Quantifying Risk", "Analyse Free for 14 Days"
 
-**Add 5 more assets** to make it more impressive:
-- Current: TSLA, AAPL, AMZN, NVDA
-- Add: MSFT, META, GOOGL, SPY, BTC (via CoinGecko)
-- Total: 9 rows — a proper Bloomberg-style watchlist
+## Phase 5 — Dashboard empty state (`src/pages/Dashboard.tsx`)
+- First-run: hide sidebar, center single input "What position do you want to quantify?", suggested tickers chips, CTA "Run 10,000 Simulations →", microcopy "Your first simulation is free. Always."
+- Populated state: streak badge "N-day analysis streak 🔥", "New signal detected" badge, "Run New Simulation" primary
+- KPI cards use JetBrains Mono tabular-nums; red worst-case loss remains hero metric
 
-### File 2: `src/components/landing/InteractivePreview.tsx`
-
-**Complete rethink** — from a fake calculator to a real analysis launcher:
-
-**New layout** (keeps existing structure but replaces fake math):
-1. Asset selector (same pill buttons) — now shows live price next to each
-2. Investment slider (keep as-is)
-3. Direction toggle (keep as-is)  
-4. Time horizon selector (keep as-is)
-5. **Remove**: fake winProb / expectedReturn / VaR / scenario bars (all fake)
-6. **Add**: Live price display — "Current price: $262.45 (−1.4%)" with color
-7. **Big CTA**: "Run Analysis in Workspace →" that goes to `/workspace?asset=AAPL&direction=long&amount=1000&horizon=1W`
-
-The Workspace page (`src/pages/Workspace.tsx`) already reads URL params to pre-fill the form. The user lands there, sees the pre-filled form, hits "Run Analysis" — THEN gets prompted to sign in. This is the correct funnel.
-
-**Live price fetching in InteractivePreview:**
-```typescript
-// Add useMarketData hook
-const { fetchMarketData } = useMarketData();
-const [livePrice, setLivePrice] = useState<number | null>(null);
-const [livePriceChange, setLivePriceChange] = useState<number | null>(null);
-
-// Fetch when symbol changes
-useEffect(() => {
-  fetchMarketData(selectedSymbol, 'US').then(data => {
-    if (data) {
-      setLivePrice(data.price);
-      setLivePriceChange(data.changePercent ?? null);
-    }
-  });
-}, [selectedSymbol]);
-```
-
-**Navigation to workspace:**
-```typescript
-const handleRunAnalysis = () => {
-  const params = new URLSearchParams({
-    asset: selectedSymbol,
-    market: 'US',
-    direction,
-    amount: String(amount),
-    horizon,
-  });
-  navigate(`/workspace?${params.toString()}`);
-};
-```
-
-### File 3: `src/pages/Workspace.tsx` — Verify URL param reading
-
-Check that the Workspace already reads these URL params. If it does, nothing extra needed. If not, add a `useEffect` that reads `URLSearchParams` on mount and pre-fills the trade form.
-
-### Visual Changes to LiveAssetDashboard
-
-Matching the new Bloomberg aesthetic from the post-login redesign:
-- Dark navy (`bg-[#1B2B4B]`) header bar instead of `bg-muted/30`
-- White text in header
-- "LIVE" badge with green pulse dot in header
-- Each row: monospace price + change, color-coded (green/red)
-- Row click → workspace with asset pre-filled
-- "Analyze →" button appears on row hover (rightmost column)
-- Footer: "Click any asset to run a full risk analysis. No signup required."
+## Phase 6 — Cross-cutting copy + components
+- Replace all generic CTAs ("Get Started", "Learn More", "Sign Up", "Try Free") with the approved list
+- `<DataFreshness />` "Updated HH:MM UTC" on every live data block
+- `<MethodologyLink />` "How we calculate this ↗" near every stat
+- Header/Footer restyled to dark system; remove warm gradient + FloatingOrbs + GlobeGraphic (keep files, unused)
 
 ---
 
-## Files to Edit
-
-| File | Change |
-|------|--------|
-| `src/components/landing/LiveAssetDashboard.tsx` | Fix stale closure bug, add 5 more assets, live risk scoring, Bloomberg styling, click-to-analyze |
-| `src/components/landing/InteractivePreview.tsx` | Fetch live prices, remove fake math, add "Run in Workspace" CTA that pre-fills params |
-| `src/pages/Workspace.tsx` | Verify/add URL param reading to pre-fill TradeInputForm on mount |
-
----
-
-## What Does NOT Change
-
-- All edge functions and security logic — untouched
-- `useMarketData` hook — works correctly already, just used in more places  
-- `fetch-market-data` edge function — already live and working (confirmed by network logs)
-- Auth flow — users who aren't signed in get prompted when they click "Run" in Workspace
-- All other landing page sections
-
----
-
-## Technical Notes on the Stale Closure Fix
-
-The current code is:
-```typescript
-useEffect(() => {
-  const interval = setInterval(fetchAllAssetData, 60000);
-  return () => clearInterval(interval);
-}, [fetchAllAssetData]);  // fetchAllAssetData changes when assets changes
-```
-Since `fetchAllAssetData` depends on `assets`, and `assets` updates after every fetch, this creates a dependency chain: fetch → update assets → new callback → clear interval → set new interval → repeat. By removing `assets` from `fetchAllAssetData`'s deps and using `initialAssets` directly, the callback becomes stable and the auto-refresh works correctly.
+## Technical notes
+- All colour via HSL semantic tokens in `index.css`; no raw hex in components
+- Free hero simulation: reuse `src/lib/engine/stochastic/gbm.ts` client-side with mocked drift/vol so no API/auth needed
+- `LiveActivityToast`: static name pool + randomised time strings; mounted once in `Layout`
+- Count-up + path-draw use IntersectionObserver + requestAnimationFrame (no new deps)
+- Email sequence + streak emails: out of scope this pass (frontend only)
+- Files touched (new): `LiveActivityToast.tsx`, `MonteCarloHero.tsx`, `StatsBar.tsx`, `BlurredRevealOverlay.tsx`, `Welcome.tsx`, `MethodologyLink.tsx`, `DataFreshness.tsx`
+- Files rewritten: `index.css`, `tailwind.config.ts`, `index.html`, `Landing.tsx`, `Auth.tsx`, `Pricing.tsx`, `Dashboard.tsx`, `Header.tsx`, `Footer.tsx`
