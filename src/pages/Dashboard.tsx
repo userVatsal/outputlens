@@ -168,6 +168,7 @@ export default function Dashboard() {
 
         </div>
       </div>
+      <AgentDrawer />
     </AppShell>
   );
 }
