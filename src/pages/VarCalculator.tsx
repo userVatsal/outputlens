@@ -21,7 +21,7 @@ function Pills<T extends string | number>({
         <button
           key={String(opt)}
           type="button"
-          onClick={() => onChange(opt)}
+          onClick={() => onChange(opt as T)}
           className={cn(
             'min-h-[44px] px-4 rounded-md border text-sm font-mono uppercase tracking-wide transition-colors',
             value === opt
