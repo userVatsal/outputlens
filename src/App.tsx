@@ -27,6 +27,7 @@ const About = lazy(() => import("./pages/About"));
 const Onboarding = lazy(() => import("./pages/Onboarding"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const CEODashboard = lazy(() => import("./pages/CEODashboard"));
+const Welcome = lazy(() => import("./pages/Welcome"));
 
 const queryClient = new QueryClient();
 
@@ -45,6 +46,7 @@ const App = () => (
                   <Route path="/auth" element={<Auth />} />
                   <Route path="/dashboard" element={<Dashboard />} />
                   <Route path="/onboarding" element={<Onboarding />} />
+                  <Route path="/welcome" element={<Welcome />} />
                   <Route path="/workspace" element={<Workspace />} />
                   <Route path="/analyze" element={<Navigate to="/workspace" replace />} />
                   <Route path="/results" element={<Results />} />
