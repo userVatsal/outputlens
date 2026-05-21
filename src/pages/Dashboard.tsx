@@ -8,20 +8,18 @@ import { useUsage } from '@/hooks/useUsage';
 import { usePlan } from '@/hooks/usePlan';
 import { useTrackedAssets } from '@/hooks/useTrackedAssets';
 import { useAdminRole } from '@/hooks/useAdminRole';
+import { useStreak } from '@/hooks/useStreak';
 import {
-  AccountHeader,
   AdminPanel,
-  DashboardHero,
   AlertsPanel,
-  TrackedAssetsGrid,
   RecentReports,
-  LatestArticles,
   AgeVerificationBanner,
   OnboardingGuide,
-  WhySection,
-  WorkspacePreview,
-  QuickActions,
 } from '@/components/dashboard';
+import { ExecutiveStrip } from '@/components/dashboard/ExecutiveStrip';
+import { KpiGrid } from '@/components/dashboard/KpiGrid';
+import { PositionsTable } from '@/components/dashboard/PositionsTable';
+import { RecentSimulationCard } from '@/components/dashboard/RecentSimulationCard';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -35,6 +33,7 @@ export default function Dashboard() {
   const planData = usePlan();
   const { trackedAssets, alerts, isLoading: assetsLoading, dismissAlert, markAlertRead } = useTrackedAssets();
   const { isAdmin, loading: adminLoading } = useAdminRole();
+  const { streak } = useStreak();
 
   // SEO
   useEffect(() => {
@@ -102,85 +101,70 @@ export default function Dashboard() {
   return (
     <AppShell>
       <div className="section-container py-8">
-        <div className="max-w-7xl mx-auto space-y-8">
-          {/* Account Header - Top of Dashboard */}
+        <div className="max-w-7xl mx-auto space-y-6">
+
+          {/* Zone 1: Executive greeting strip */}
           <div className="animate-fade-in">
-            <AccountHeader profile={profile} plan={planData} />
+            <ExecutiveStrip
+              profile={profile}
+              used={usage?.analysisCount ?? 0}
+              limit={usage?.limit ?? 0}
+              planLabel={planData.plan}
+            />
           </div>
 
-          {/* Admin Analytics Panel - Only visible for admins */}
-          {isAdmin && (
-            <div className="animate-fade-in" style={{ animationDelay: '50ms' }}>
-              <AdminPanel />
-            </div>
-          )}
-
-          {/* Onboarding Guide for new users */}
-          {shouldShowOnboarding && (
-            <div className="animate-fade-in" style={{ animationDelay: '100ms' }}>
-              <OnboardingGuide 
-                profileName={profile?.full_name}
-                onDismiss={() => setShowOnboarding(false)}
-              />
-            </div>
-          )}
-
-          {/* Age Verification Banner */}
           {needsAgeVerification && (
             <div className="animate-fade-in">
               <AgeVerificationBanner onDismiss={() => setShowAgeVerification(false)} />
             </div>
           )}
 
-          {/* Hero Section - Full Width with animation */}
-          <div className="animate-fade-in" style={{ animationDelay: '150ms' }}>
-            <DashboardHero 
-              profile={profile} 
-              usage={usage} 
-              plan={planData} 
-            />
+          {shouldShowOnboarding && (
+            <div className="animate-fade-in" style={{ animationDelay: '50ms' }}>
+              <OnboardingGuide
+                profileName={profile?.full_name}
+                onDismiss={() => setShowOnboarding(false)}
+              />
+            </div>
+          )}
+
+          {/* Zone 2: KPI grid */}
+          <div className="animate-fade-in" style={{ animationDelay: '100ms' }}>
+            <KpiGrid assets={trackedAssets} streak={streak} />
           </div>
 
-          {/* Quick Actions - Fast navigation */}
+          {/* Zone 3: Recent simulation + Alerts (2-col) */}
+          <div
+            className="grid grid-cols-1 lg:grid-cols-3 gap-4 animate-fade-in"
+            style={{ animationDelay: '150ms' }}
+          >
+            <div className="lg:col-span-2">
+              <RecentSimulationCard />
+            </div>
+            <div>
+              <AlertsPanel
+                alerts={alerts}
+                onDismiss={dismissAlert}
+                onMarkRead={markAlertRead}
+              />
+            </div>
+          </div>
+
+          {/* Zone 4: Positions table */}
           <div className="animate-fade-in" style={{ animationDelay: '200ms' }}>
-            <h2 className="text-lg font-semibold font-display text-foreground mb-4">Quick Actions</h2>
-            <QuickActions />
+            <PositionsTable assets={trackedAssets} />
           </div>
 
-          {/* Workspace Preview - Full Width, Prominent with animation */}
+          {/* Zone 5: Recent reports */}
           <div className="animate-fade-in" style={{ animationDelay: '250ms' }}>
-            <WorkspacePreview />
-          </div>
-
-          {/* 2-Column Grid: Alerts + Tracked Assets */}
-          <div 
-            className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-fade-in" 
-            style={{ animationDelay: '300ms' }}
-          >
-            <AlertsPanel 
-              alerts={alerts} 
-              onDismiss={dismissAlert} 
-              onMarkRead={markAlertRead} 
-            />
-            <TrackedAssetsGrid 
-              assets={trackedAssets} 
-              isLoading={assetsLoading} 
-            />
-          </div>
-
-          {/* 2-Column Grid: Reports + Latest Articles */}
-          <div 
-            className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-fade-in" 
-            style={{ animationDelay: '350ms' }}
-          >
             <RecentReports />
-            <LatestArticles />
           </div>
 
-          {/* Why OutputLens Exists - Full Width */}
-          <div className="animate-fade-in" style={{ animationDelay: '400ms' }}>
-            <WhySection />
-          </div>
+          {isAdmin && (
+            <div className="animate-fade-in" style={{ animationDelay: '300ms' }}>
+              <AdminPanel />
+            </div>
+          )}
 
         </div>
       </div>

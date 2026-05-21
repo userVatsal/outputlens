@@ -6,11 +6,12 @@ import { Button } from '@/components/ui/button';
 
 interface Props {
   profile: { full_name?: string | null } | null;
-  usage: { used: number; limit: number } | null;
-  plan: { tier: string };
+  used: number;
+  limit: number;
+  planLabel: string;
 }
 
-export function ExecutiveStrip({ profile, usage, plan }: Props) {
+export function ExecutiveStrip({ profile, used, limit, planLabel }: Props) {
   const { streak } = useStreak();
   const market = useMarketStatus();
   const isOpen = market.state === 'open';
@@ -19,8 +20,6 @@ export function ExecutiveStrip({ profile, usage, plan }: Props) {
   const hour = new Date().getHours();
   const greet = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
 
-  const used = usage?.used ?? 0;
-  const limit = usage?.limit ?? 0;
   const pct = limit > 0 ? Math.min(100, (used / limit) * 100) : 0;
   const nearLimit = pct >= 80;
 
@@ -32,7 +31,7 @@ export function ExecutiveStrip({ profile, usage, plan }: Props) {
             {greet}, {first}
           </h1>
           <span className="text-[10px] font-mono uppercase tracking-widest px-2 py-0.5 rounded bg-primary/10 text-primary border border-primary/20">
-            {plan.tier}
+            {planLabel}
           </span>
         </div>
         <div className="flex items-center gap-4 text-xs text-muted-foreground font-mono">
