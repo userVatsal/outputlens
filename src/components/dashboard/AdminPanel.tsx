@@ -19,6 +19,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/integrations/supabase/client';
 import { format, subDays } from 'date-fns';
+import { McpCostCard } from './McpCostCard';
 
 interface AnalyticsData {
   totalUsers: number;
@@ -204,6 +205,10 @@ export function AdminPanel() {
             value={data.totalTrackedAssets}
             subLabel={`${data.totalPortfolios} portfolios`}
           />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <McpCostCard />
         </div>
 
         {/* Two Column Layout */}
