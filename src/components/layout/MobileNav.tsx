@@ -20,12 +20,13 @@ const MORE = [
   { to: '/account', label: 'Account', icon: User },
 ];
 
-const TABS = [
+type Tab = { to: string; label: string; icon: React.ComponentType<{ className?: string }>; alerts?: boolean };
+const TABS: Tab[] = [
   { to: '/dashboard', label: 'Home', icon: LayoutGrid },
   { to: '/workspace', label: 'Simulate', icon: Sparkles },
   { to: '/portfolio', label: 'Portfolio', icon: Briefcase },
   { to: '/alerts', label: 'Alerts', icon: Bell, alerts: true },
-] as const;
+];
 
 export function MobileNav() {
   const [open, setOpen] = useState(false);
