@@ -135,6 +135,16 @@ export default function Pricing() {
 
         {/* FAQ accordion */}
         <div className="max-w-2xl mx-auto">
+          {/* Objection-killer strip — addresses risk-aversion right before FAQ */}
+          <div className="mb-12 grid grid-cols-2 md:grid-cols-5 gap-3">
+            {objections.map(({ icon: Icon, label }) => (
+              <div key={label} className="flex flex-col items-center text-center gap-2 p-4 rounded-lg border border-border bg-card/40">
+                <Icon className="h-4 w-4 text-primary" />
+                <span className="text-xs text-muted-foreground leading-snug">{label}</span>
+              </div>
+            ))}
+          </div>
+
           <h2 className="text-2xl font-bold font-display text-foreground text-center mb-8">Common Questions</h2>
           <div className="divide-y divide-border border border-border rounded-lg overflow-hidden">
             {faqs.map((faq, i) => (
