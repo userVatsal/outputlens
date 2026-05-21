@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ReturnDistributionChart } from '@/components/ReturnDistributionChart';
 import { FeatureGate } from '@/components/FeatureGate';
-import { Layout } from '@/components/layout/Layout';
+import { AppShell } from '@/components/layout/AppShell';
 import { useTrade } from '@/hooks/useTrade';
 import { MARKETS } from '@/types/trade';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -64,7 +64,7 @@ const Results = () => {
 
   if (isLoading) {
     return (
-      <Layout hideFooter>
+      <AppShell hideFooter>
         <div className="section-container py-6">
           <div className="max-w-5xl mx-auto">
             <div className="flex items-center justify-center py-20">
@@ -75,7 +75,7 @@ const Results = () => {
             </div>
           </div>
         </div>
-      </Layout>
+      </AppShell>
     );
   }
 
@@ -105,7 +105,7 @@ const Results = () => {
   };
 
   return (
-    <Layout hideFooter>
+    <AppShell hideFooter>
       <div className="section-container py-6">
         <div className="max-w-5xl mx-auto">
           {/* Header */}
@@ -308,7 +308,7 @@ const Results = () => {
 
         </div>
       </div>
-    </Layout>
+    </AppShell>
   );
 };
 

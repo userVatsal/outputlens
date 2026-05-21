@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Calendar, TrendingUp, TrendingDown, Loader2, BarChart3, ChevronRight, Eye } from 'lucide-react';
-import { Layout } from '@/components/layout/Layout';
+import { AppShell } from '@/components/layout/AppShell';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { MARKETS, Market, TradeDirection } from '@/types/trade';
@@ -55,7 +55,7 @@ export default function History() {
   };
 
   return (
-    <Layout>
+    <AppShell>
       <div className="section-container py-8">
         <div className="max-w-3xl mx-auto">
           {/* Header */}
@@ -149,6 +149,6 @@ export default function History() {
           )}
         </div>
       </div>
-    </Layout>
+    </AppShell>
   );
 }

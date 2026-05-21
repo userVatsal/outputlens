@@ -15,7 +15,7 @@ import {
   ArrowDownRight,
   Minus,
 } from 'lucide-react';
-import { Layout } from '@/components/layout/Layout';
+import { AppShell } from '@/components/layout/AppShell';
 import { Button } from '@/components/ui/button';
 import {
   AlertDialog,
@@ -84,16 +84,16 @@ export default function TrackedAssets() {
 
   if (!user) {
     return (
-      <Layout>
+      <AppShell>
         <div className="flex items-center justify-center min-h-[60vh]">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
-      </Layout>
+      </AppShell>
     );
   }
 
   return (
-    <Layout>
+    <AppShell>
       <div className="section-container py-8">
         <div className="max-w-7xl mx-auto">
           {/* Page Header */}
@@ -294,6 +294,6 @@ export default function TrackedAssets() {
           )}
         </div>
       </div>
-    </Layout>
+    </AppShell>
   );
 }
