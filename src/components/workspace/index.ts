@@ -8,3 +8,5 @@ export { AdvancedMetrics } from './AdvancedMetrics';
 export { PnLSummary } from './PnLSummary';
 export { TrackAssetModal } from './TrackAssetModal';
 export { AddToPortfolioModal } from './AddToPortfolioModal';
+export { MonteCarloFanChart } from './MonteCarloFanChart';
+export { ScenarioProbabilityDonut } from './ScenarioProbabilityDonut';

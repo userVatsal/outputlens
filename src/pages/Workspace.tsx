@@ -13,7 +13,9 @@ import {
   RiskInterpretation,
   ActionPanel,
   AdvancedMetrics,
-  PnLSummary
+  PnLSummary,
+  MonteCarloFanChart,
+  ScenarioProbabilityDonut
 } from '@/components/workspace';
 import { investmentToShares } from '@/lib/positionCalculations';
 import { supabase } from '@/integrations/supabase/client';
@@ -321,7 +323,9 @@ export default function Workspace() {
                     </div>
                   )}
                   <RiskSnapshot analysis={analysis} currencySymbol={currencySymbol} />
+                  <MonteCarloFanChart analysis={analysis} currencySymbol={currencySymbol} />
                   <PnLSummary analysis={analysis} shares={shares} currencySymbol={currencySymbol} />
+                  <ScenarioProbabilityDonut analysis={analysis} />
                   <TailRiskPanel
                     scenarios={analysis.scenarios}
                     expectedShortfall={analysis.riskMetrics.expectedShortfall}

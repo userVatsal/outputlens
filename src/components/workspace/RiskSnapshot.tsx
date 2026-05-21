@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { TrackAssetModal } from '@/components/workspace/TrackAssetModal';
 import { useTrackedAssets } from '@/hooks/useTrackedAssets';
+import { useCountUp } from '@/hooks/useCountUp';
 
 interface RiskSnapshotProps {
   analysis: EnhancedTradeAnalysis;
@@ -33,9 +34,10 @@ interface MetricBlockProps {
   sub: string;
   color: 'bullish' | 'bearish' | 'caution' | 'neutral';
   icon: React.ReactNode;
+  delay?: number;
 }
 
-function MetricBlock({ label, value, sub, color, icon }: MetricBlockProps) {
+function MetricBlock({ label, value, sub, color, icon, delay = 0 }: MetricBlockProps) {
   const colorMap = {
     bullish: 'text-bullish border-bullish/30 bg-bullish/5',
     bearish: 'text-destructive border-destructive/30 bg-destructive/5',
@@ -50,12 +52,18 @@ function MetricBlock({ label, value, sub, color, icon }: MetricBlockProps) {
   };
 
   return (
-    <div className={cn('rounded-lg border px-4 py-3', colorMap[color])}>
+    <div
+      className={cn(
+        'rounded-lg border px-4 py-3 animate-fade-in transition-transform hover:-translate-y-0.5 hover:shadow-lg',
+        colorMap[color]
+      )}
+      style={{ animationDelay: `${delay}ms`, animationFillMode: 'backwards' }}
+    >
       <div className="flex items-center gap-1.5 mb-2">
         <span className={cn('h-4 w-4', textColor[color])}>{icon}</span>
         <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest">{label}</span>
       </div>
-      <div className={cn('text-2xl font-bold font-mono', textColor[color])}>{value}</div>
+      <div className={cn('text-2xl font-bold font-mono tabular-nums', textColor[color])}>{value}</div>
       <div className={cn('text-xs font-semibold mt-0.5', textColor[color])}>{sub}</div>
     </div>
   );
@@ -83,6 +91,13 @@ export function RiskSnapshot({ analysis, currencySymbol, previousRiskScore, prev
   const isMediumRisk = riskMetrics.riskScore > 3;
   const isWinner = riskMetrics.probabilityOfProfit >= 50;
   const isElevatedTail = tailRiskProbability > 2;
+
+  // Animated counters
+  const aRisk = useCountUp(riskMetrics.riskScore);
+  const aWin  = useCountUp(riskMetrics.probabilityOfProfit);
+  const aTail = useCountUp(tailRiskProbability);
+  const aPnl  = useCountUp(expectedPnL.totalPnl);
+  const aRet  = useCountUp(riskMetrics.expectedReturn);
 
   return (
     <div className="mb-6">
@@ -114,31 +129,35 @@ export function RiskSnapshot({ analysis, currencySymbol, previousRiskScore, prev
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <MetricBlock
           label="Risk Score"
-          value={`${riskMetrics.riskScore}/10`}
+          value={`${aRisk.toFixed(1)}/10`}
           sub={riskMetrics.riskLabel}
           color={isHighRisk ? 'bearish' : isMediumRisk ? 'caution' : 'bullish'}
           icon={<Activity className="h-4 w-4" />}
+          delay={0}
         />
         <MetricBlock
           label="Win Prob"
-          value={`${riskMetrics.probabilityOfProfit.toFixed(0)}%`}
+          value={`${aWin.toFixed(0)}%`}
           sub={isWinner ? 'Positive Odds' : 'Negative Odds'}
           color={isWinner ? 'bullish' : 'bearish'}
           icon={isWinner ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
+          delay={80}
         />
         <MetricBlock
           label="Tail Risk"
-          value={`${tailRiskProbability.toFixed(1)}%`}
+          value={`${aTail.toFixed(1)}%`}
           sub={isElevatedTail ? 'Elevated' : 'Normal'}
           color={isElevatedTail ? 'caution' : 'neutral'}
           icon={<AlertTriangle className="h-4 w-4" />}
+          delay={160}
         />
         <MetricBlock
           label="Expected P&L"
-          value={formatCurrencyWithSign(expectedPnL.totalPnl, currencySymbol)}
-          sub={`${isPositiveReturn ? '+' : ''}${riskMetrics.expectedReturn.toFixed(1)}%`}
+          value={formatCurrencyWithSign(aPnl, currencySymbol)}
+          sub={`${isPositiveReturn ? '+' : ''}${aRet.toFixed(1)}%`}
           color={isPositiveReturn ? 'bullish' : 'bearish'}
           icon={<Target className="h-4 w-4" />}
+          delay={240}
         />
       </div>
 
