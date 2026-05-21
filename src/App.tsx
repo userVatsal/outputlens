@@ -31,6 +31,7 @@ const Welcome = lazy(() => import("./pages/Welcome"));
 const Regime = lazy(() => import("./pages/Regime"));
 const Alerts = lazy(() => import("./pages/Alerts"));
 const Scenarios = lazy(() => import("./pages/Scenarios"));
+const VarCalculator = lazy(() => import("./pages/VarCalculator"));
 
 const queryClient = new QueryClient();
 
@@ -65,6 +66,7 @@ const App = () => (
                   <Route path="/regime" element={<Regime />} />
                   <Route path="/alerts" element={<Alerts />} />
                   <Route path="/scenarios" element={<Scenarios />} />
+                  <Route path="/var" element={<VarCalculator />} />
                   <Route path="/about" element={<About />} />
                   <Route path="/ceo-dashboard" element={<CEODashboard />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

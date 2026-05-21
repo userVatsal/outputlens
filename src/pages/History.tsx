@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Calendar, TrendingUp, TrendingDown, Loader2, BarChart3, Star, Filter, Clock } from 'lucide-react';
+import { Calendar, TrendingUp, TrendingDown, Loader2, BarChart3, Star, Filter, Clock, Search } from 'lucide-react';
 import { AppShell } from '@/components/layout/AppShell';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
@@ -27,6 +27,7 @@ export default function History() {
   const [loading, setLoading] = useState(true);
   const [dirFilter, setDirFilter] = useState<DirFilter>('all');
   const [assetFilter, setAssetFilter] = useState<string>('all');
+  const [query, setQuery] = useState('');
   const [pinned, setPinned] = useState<Set<string>>(() => {
     try { return new Set(JSON.parse(localStorage.getItem(PIN_KEY) || '[]')); }
     catch { return new Set(); }
@@ -90,6 +91,10 @@ export default function History() {
     let list = history;
     if (dirFilter !== 'all') list = list.filter(h => h.direction === dirFilter);
     if (assetFilter !== 'all') list = list.filter(h => h.asset === assetFilter);
+    if (query.trim()) {
+      const q = query.trim().toUpperCase();
+      list = list.filter(h => h.asset.toUpperCase().includes(q));
+    }
     // Pinned first
     return [...list].sort((a, b) => {
       const pa = pinned.has(a.id) ? 1 : 0;
@@ -97,7 +102,7 @@ export default function History() {
       if (pa !== pb) return pb - pa;
       return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
     });
-  }, [history, dirFilter, assetFilter, pinned]);
+  }, [history, dirFilter, assetFilter, pinned, query]);
 
   return (
     <AppShell>
@@ -150,31 +155,41 @@ export default function History() {
 
           {/* Filters */}
           {!loading && history.length > 0 && (
-            <div className="flex items-center gap-2 flex-wrap">
-              <Filter className="h-3.5 w-3.5 text-muted-foreground" />
-              {(['all', 'long', 'short'] as DirFilter[]).map(d => (
-                <button
-                  key={d}
-                  onClick={() => setDirFilter(d)}
-                  className={cn(
-                    'px-3 py-1 rounded-full text-xs font-mono uppercase tracking-wider border transition-colors',
-                    dirFilter === d
-                      ? 'bg-primary text-primary-foreground border-primary'
-                      : 'border-border text-muted-foreground hover:bg-muted'
-                  )}
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex flex-wrap items-center gap-2">
+                <Filter className="h-3.5 w-3.5 text-muted-foreground" />
+                {(['all', 'long', 'short'] as DirFilter[]).map(d => (
+                  <button
+                    key={d}
+                    onClick={() => setDirFilter(d)}
+                    className={cn(
+                      'min-h-[36px] rounded-full border px-3 py-1 text-xs font-mono uppercase tracking-wider transition-colors',
+                      dirFilter === d
+                        ? 'bg-primary text-primary-foreground border-primary'
+                        : 'border-border text-muted-foreground hover:bg-muted',
+                    )}
+                  >
+                    {d}
+                  </button>
+                ))}
+                <select
+                  value={assetFilter}
+                  onChange={e => setAssetFilter(e.target.value)}
+                  className="min-h-[36px] rounded-full border border-border bg-background px-3 py-1 text-xs font-mono uppercase tracking-wider text-foreground"
                 >
-                  {d}
-                </button>
-              ))}
-              <span className="text-border mx-1">|</span>
-              <select
-                value={assetFilter}
-                onChange={e => setAssetFilter(e.target.value)}
-                className="px-3 py-1 rounded-full text-xs font-mono uppercase tracking-wider border border-border bg-background text-foreground"
-              >
-                <option value="all">All assets</option>
-                {assets.map(a => <option key={a} value={a}>{a}</option>)}
-              </select>
+                  <option value="all">All assets</option>
+                  {assets.map(a => <option key={a} value={a}>{a}</option>)}
+                </select>
+              </div>
+              <div className="relative w-full sm:w-64">
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+                <input
+                  value={query}
+                  onChange={e => setQuery(e.target.value)}
+                  placeholder="Search ticker…"
+                  className="auth-input w-full rounded-md border border-border bg-surface pl-9 pr-3 font-mono text-sm text-foreground focus:border-primary focus:outline-none"
+                />
+              </div>
             </div>
           )}
 

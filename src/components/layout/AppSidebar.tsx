@@ -29,7 +29,7 @@ const groups = [
   {
     label: 'Tools',
     items: [
-      { to: '/workspace?tool=var',         label: 'VaR Calculator',    icon: Calculator },
+      { to: '/var',                        label: 'VaR Calculator',    icon: Calculator },
       { to: '/workspace?tool=correlation', label: 'Correlation Matrix', icon: Network },
       { to: '/scenarios?new=1',            label: 'Scenario Builder',   icon: Wand2 },
     ],
