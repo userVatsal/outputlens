@@ -16,6 +16,7 @@ import {
   AgeVerificationBanner,
   OnboardingGuide,
 } from '@/components/dashboard';
+import { AgentDrawer } from '@/components/agent/AgentDrawer';
 import { ExecutiveStrip } from '@/components/dashboard/ExecutiveStrip';
 import { KpiGrid } from '@/components/dashboard/KpiGrid';
 import { PositionsTable } from '@/components/dashboard/PositionsTable';
