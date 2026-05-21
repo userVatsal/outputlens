@@ -189,7 +189,7 @@ export function Features() {
 
         <div className="mt-10 md:mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {FEATURES.map((f) => (
-            <div key={f.title} className="rounded-md bg-surface border border-border p-6 hover:border-border-focus transition-colors" style={{ borderColor: 'hsl(var(--border))' }}>
+            <div key={f.title} className="rounded-md bg-surface border border-border p-6 hover:border-foreground/20 transition-colors">
               <f.icon className="h-8 w-8 text-primary" strokeWidth={1.5} />
               <h3 className="mt-3 font-semibold text-foreground text-base">{f.title}</h3>
               <p className="mt-2 text-[13px] text-muted-foreground leading-relaxed">{f.desc}</p>
