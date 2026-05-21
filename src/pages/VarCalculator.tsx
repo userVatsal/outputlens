@@ -128,21 +128,21 @@ export default function VarCalculator() {
                 <label className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
                   Horizon
                 </label>
-                <Pills value={horizon} onChange={setHorizon} options={['1D', '5D', '1M'] as const} />
+                <Pills<Horizon> value={horizon} onChange={setHorizon} options={['1D', '5D', '1M']} />
               </div>
 
               <div className="space-y-2">
                 <label className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
                   Confidence
                 </label>
-                <Pills value={confidence} onChange={setConfidence} options={[90, 95, 99] as const} />
+                <Pills<Confidence> value={confidence} onChange={setConfidence} options={[90, 95, 99]} />
               </div>
 
               <div className="space-y-2">
                 <label className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
                   Method
                 </label>
-                <Pills value={method} onChange={setMethod} options={['Parametric', 'Historical', 'Monte Carlo'] as const} />
+                <Pills<Method> value={method} onChange={setMethod} options={['Parametric', 'Historical', 'Monte Carlo']} />
               </div>
             </div>
 
