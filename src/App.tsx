@@ -66,6 +66,7 @@ const App = () => (
                   <Route path="/regime" element={<Regime />} />
                   <Route path="/alerts" element={<Alerts />} />
                   <Route path="/scenarios" element={<Scenarios />} />
+                  <Route path="/var" element={<VarCalculator />} />
                   <Route path="/about" element={<About />} />
                   <Route path="/ceo-dashboard" element={<CEODashboard />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
