@@ -508,6 +508,156 @@ export type Database = {
         }
         Relationships: []
       }
+      mcp_agent_messages: {
+        Row: {
+          content: Json
+          created_at: string
+          id: string
+          role: string
+          tokens_input: number | null
+          tokens_output: number | null
+          tool_calls: Json | null
+          user_id: string
+        }
+        Insert: {
+          content: Json
+          created_at?: string
+          id?: string
+          role: string
+          tokens_input?: number | null
+          tokens_output?: number | null
+          tool_calls?: Json | null
+          user_id: string
+        }
+        Update: {
+          content?: Json
+          created_at?: string
+          id?: string
+          role?: string
+          tokens_input?: number | null
+          tokens_output?: number | null
+          tool_calls?: Json | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      mcp_audit_log: {
+        Row: {
+          action: string
+          args_hash: string | null
+          created_at: string
+          error_message: string | null
+          id: string
+          ip: string | null
+          latency_ms: number | null
+          request_id: string | null
+          source: string
+          status: string
+          tool_name: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          args_hash?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          ip?: string | null
+          latency_ms?: number | null
+          request_id?: string | null
+          source?: string
+          status: string
+          tool_name?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          args_hash?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          ip?: string | null
+          latency_ms?: number | null
+          request_id?: string | null
+          source?: string
+          status?: string
+          tool_name?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      mcp_tool_cache: {
+        Row: {
+          cache_key: string
+          created_at: string
+          expires_at: string
+          payload: Json
+          tool_name: string
+          user_id: string | null
+        }
+        Insert: {
+          cache_key: string
+          created_at?: string
+          expires_at: string
+          payload: Json
+          tool_name: string
+          user_id?: string | null
+        }
+        Update: {
+          cache_key?: string
+          created_at?: string
+          expires_at?: string
+          payload?: Json
+          tool_name?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      mcp_usage: {
+        Row: {
+          cache_hits: number
+          claude_messages: number
+          created_at: string
+          date: string
+          estimated_cost: number
+          id: string
+          model: string
+          tokens_input: number
+          tokens_output: number
+          tool_calls: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          cache_hits?: number
+          claude_messages?: number
+          created_at?: string
+          date?: string
+          estimated_cost?: number
+          id?: string
+          model?: string
+          tokens_input?: number
+          tokens_output?: number
+          tool_calls?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          cache_hits?: number
+          claude_messages?: number
+          created_at?: string
+          date?: string
+          estimated_cost?: number
+          id?: string
+          model?: string
+          tokens_input?: number
+          tokens_output?: number
+          tool_calls?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       optimization_recommendations: {
         Row: {
           action_type: string | null
