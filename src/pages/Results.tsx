@@ -64,7 +64,7 @@ const Results = () => {
 
   if (isLoading) {
     return (
-      <AppShell hideFooter>
+      <AppShell>
         <div className="section-container py-6">
           <div className="max-w-5xl mx-auto">
             <div className="flex items-center justify-center py-20">
@@ -105,7 +105,7 @@ const Results = () => {
   };
 
   return (
-    <AppShell hideFooter>
+    <AppShell>
       <div className="section-container py-6">
         <div className="max-w-5xl mx-auto">
           {/* Header */}
