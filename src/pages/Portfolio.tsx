@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Loader2, PieChart, Activity, Shield, Target, ArrowRight, TrendingUp } from 'lucide-react';
+import { Loader2, PieChart, Activity, Shield, Target, ArrowRight, TrendingUp, Layers } from 'lucide-react';
 import { AppShell } from '@/components/layout/AppShell';
 import { PortfolioAnalyzer } from '@/components/PortfolioAnalyzer';
 import { UsageIndicator } from '@/components/UsageIndicator';
@@ -11,9 +11,9 @@ import { User } from '@supabase/supabase-js';
 import { Button } from '@/components/ui/button';
 
 const features = [
-  { icon: Activity, title: 'Correlation Matrix', description: 'See how your assets move together and find hidden concentrations.' },
-  { icon: Shield, title: 'Combined VaR', description: 'Portfolio Value at Risk with diversification benefits.' },
-  { icon: Target, title: 'Risk Attribution', description: 'Identify the positions driving most of your tail exposure.' },
+  { icon: Activity, title: 'Correlation matrix', description: 'Spot hidden concentrations across positions.' },
+  { icon: Shield, title: 'Combined VaR', description: 'Portfolio-level Value-at-Risk with diversification.' },
+  { icon: Target, title: 'Risk attribution', description: 'Pinpoint positions driving tail exposure.' },
 ];
 
 export default function Portfolio() {
@@ -62,55 +62,87 @@ export default function Portfolio() {
 
   return (
     <AppShell>
-      <div className="section-container py-6">
-        <div className="max-w-5xl mx-auto space-y-6">
-
+      <div className="section-container py-6 lg:py-10">
+        <div className="mx-auto w-full max-w-6xl space-y-6">
           {/* Header */}
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-md flex items-center justify-center bg-primary/10">
-                <PieChart className="h-5 w-5 text-primary" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-md bg-primary/10 text-primary">
+                <PieChart className="h-5 w-5" />
               </div>
               <div>
-                <h1 className="text-2xl font-display font-semibold text-foreground">Portfolio Analysis</h1>
-                <p className="text-sm text-muted-foreground">Multi-asset risk with correlation, combined VaR, and attribution</p>
+                <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">
+                  Portfolio Analysis
+                </h1>
+                <p className="text-sm text-muted-foreground">
+                  Multi-asset risk with correlation, combined VaR, and attribution.
+                </p>
               </div>
             </div>
-            <span className="text-[10px] font-mono uppercase tracking-widest px-2 py-1 rounded bg-bullish/10 text-bullish border border-bullish/20">
-              PRO
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-bullish/20 bg-bullish/10 px-2.5 py-1 font-mono text-[10px] uppercase tracking-widest text-bullish">
+                <Layers className="h-3 w-3" /> PRO
+              </span>
+              <Button asChild size="sm" variant="outline">
+                <Link to="/workspace">
+                  Single asset <ArrowRight className="ml-1 h-3 w-3" />
+                </Link>
+              </Button>
+            </div>
           </div>
-          
-          {!usageLoading && usage && (
-            <UsageIndicator usage={usage} />
-          )}
 
-          <div className="grid md:grid-cols-3 gap-3">
+          {!usageLoading && usage && <UsageIndicator usage={usage} />}
+
+          {/* Feature strip */}
+          <div className="grid gap-3 sm:grid-cols-3">
             {features.map((feature) => (
-              <div key={feature.title} className="rounded-lg border border-border bg-card p-4">
-                <div className="inline-flex items-center justify-center w-8 h-8 rounded-md bg-primary/10 text-primary mb-2">
+              <div
+                key={feature.title}
+                className="rounded-xl border border-border bg-surface p-4 transition-colors hover:border-primary/40"
+              >
+                <div className="mb-2 inline-flex h-8 w-8 items-center justify-center rounded-md bg-primary/10 text-primary">
                   <feature.icon className="h-4 w-4" />
                 </div>
-                <h3 className="font-semibold text-foreground mb-1 text-sm font-display">{feature.title}</h3>
+                <h3 className="mb-1 font-display text-sm font-semibold text-foreground">
+                  {feature.title}
+                </h3>
                 <p className="text-xs text-muted-foreground">{feature.description}</p>
               </div>
             ))}
           </div>
 
-          <div className="glass-card p-6 md:p-8">
+          {/* Positions builder */}
+          <div className="rounded-xl border border-border bg-surface p-5 sm:p-6 shadow-sm">
+            <div className="mb-5 flex items-center justify-between border-b border-border/60 pb-4">
+              <div>
+                <h2 className="font-display text-base font-semibold text-foreground">
+                  Build your portfolio
+                </h2>
+                <p className="text-xs text-muted-foreground">
+                  Add positions inline, set weights, and run a combined simulation.
+                </p>
+              </div>
+              <span className="hidden font-mono text-[10px] uppercase tracking-widest text-muted-foreground sm:inline">
+                Step 01
+              </span>
+            </div>
             <PortfolioAnalyzer />
           </div>
 
-          <div className="rounded-lg border border-dashed border-border p-4 flex items-center justify-between bg-muted/20">
+          <div className="flex flex-col gap-3 rounded-xl border border-dashed border-border bg-elevated/40 p-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
               <TrendingUp className="h-5 w-5 text-primary" />
               <div>
                 <p className="text-sm font-medium text-foreground">Analysing a single position?</p>
-                <p className="text-xs text-muted-foreground">Open the workspace for full single-asset analysis.</p>
+                <p className="text-xs text-muted-foreground">
+                  Open the workspace for full single-asset analysis.
+                </p>
               </div>
             </div>
             <Button asChild size="sm" variant="outline">
-              <Link to="/workspace">Workspace <ArrowRight className="ml-1 h-3 w-3" /></Link>
+              <Link to="/workspace">
+                Workspace <ArrowRight className="ml-1 h-3 w-3" />
+              </Link>
             </Button>
           </div>
         </div>
