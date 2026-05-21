@@ -1,71 +1,104 @@
-# OutputLens Psychology-Driven Redesign
+# OutputLens Authenticated Experience — Retention-First Rebuild
 
-A full visual + behavioural rebuild applying loss aversion, social proof, anchoring, reciprocity, and peak-end across the design system, landing, signup, pricing, and dashboard.
+Full rebuild of every post-signup page into a quant-terminal shell with sidebar + AI feed, designed around hook-model loops (trigger → action → reward → investment).
+
+Scope is large, so it ships in 4 phases. Each phase leaves the app in a working state.
 
 ---
 
-## Phase 1 — Design system foundation
-Rewrite `src/index.css` + `tailwind.config.ts` + `index.html` fonts.
+## Phase 1 — Global Authenticated Shell
 
-- **Palette** (dark-first, semantic tokens in HSL):
-  - bg `#0A0C10`, surface `#0F1117`, elevated `#161B24`
-  - primary cyan `#00D4FF` (CTAs/active only)
-  - violet `#7B61FF` (AI/model badges), green `#00C896` (upside), amber `#F5A623` (warn), red `#E84545` (loss/tail)
-  - text `#F0F4FF` / `#8B96A8`
-- **Fonts**: Sora 700/800 (display), DM Sans 400/500/600 (UI), JetBrains Mono tabular-nums (data)
-- **Type scale utilities**: `.text-display`, `.text-data-lg`, `.text-data-sm`, `.text-label` (11px +1px tracking uppercase)
-- **Components**: `.btn-primary` (cyan + glow-pulse on idle), `.surface`, `.surface-elevated`, `.kpi-number`, `.live-dot` (pulsing cyan), `.glow-ring`
-- **Motion**: keyframes for `glow-pulse`, `count-up`, `path-draw`, `reveal-blur`, `stagger-up`. Replace warm orb gradient with restrained grid-bg.
+The foundation everything else plugs into.
 
-## Phase 2 — Landing page (`src/pages/Landing.tsx` + components)
-Rebuild around reciprocity-first flow.
+**New layout component** `src/components/layout/AppShell.tsx` (replaces `Layout` on all authenticated routes):
 
-- Hero (staggered 0/100/200/400/600/800/1200ms):
-  - Eyebrow label "AI-POWERED RISK INTELLIGENCE"
-  - H1: "The market is a distribution. Your model should be too." (Sora 800, -2px)
-  - Sub: distribution-not-forecast paragraph
-  - **Ticker input + "Run Free Simulation →"** (no signup; runs 100 paths locally via existing engine)
-  - Microcopy: "2,400+ analysts already running simulations"
-- Live Monte Carlo fan chart in hero — paths draw left→right (existing `ReturnDistributionChart` adapted, 200 paths, 2ms stagger, percentile band fill, median line last)
-- Stats bar (count-up on scroll): 10,000 / 2,400+ / 94.7% / <0.3s
-- Loss-aversion section: tail scenarios shown FIRST with red accents
-- Authority strip: "Black-Scholes-Merton · GBM · GARCH · HMM · Heston" + "How we calculate ↗"
-- Testimonials with role + firm type structure
-- `LiveActivityToast` component (bottom-left, 45–90s randomised, real-looking names, role, time)
-- Single primary CTA throughout: "Analyse a Position Free"
+- Left sidebar 240px (`AppSidebar.tsx`) — uses shadcn `Sidebar` with `collapsible="icon"`
+  - Primary CTA: New Simulation (cyan, always pinned top)
+  - Groups: Workspace · Intelligence · Tools
+  - Active route: 3px cyan left border + elevated bg
+  - Regime Monitor item: live pulsing cyan dot when high-vol regime active
+  - Risk Alerts item: red badge with unread count
+  - Footer: streak chip ("🔥 7-day streak") + subtle upgrade nudge
+- Top bar 56px (`AppTopBar.tsx`)
+  - Breadcrumb (route-driven)
+  - CMD+K command palette (`cmdk` package) — assets, portfolios, saved analyses
+  - Market status pill (NYSE OPEN/CLOSED/PRE-MARKET, time-based, no API)
+  - Alerts bell with badge + avatar dropdown
+- Right AI Intelligence Feed (`AIFeedPanel.tsx`), 320px, collapsible
+  - Stack of insight cards, newest on top, slide-down animation
+  - Unread cards: 2px cyan left border
+  - Seeded with rotating mock signals (regime, vol compression, divergence)
 
-## Phase 3 — Partial-reveal → signup flow
-- After hero ticker run: show fan chart with blurred P25/P75 tails + overlay card "Your full distribution is ready" listing locked features → CTA "Unlock Full Analysis — Free"
-- `src/pages/Auth.tsx` rebuilt as 2-step:
-  - Step 1: email only, progress `●●○`, "No card required..."
-  - Step 2: role dropdown (PM/Risk/Quant/Trader/Other) + password, CTA "Complete Setup & See My Results →"
-- New `src/pages/Welcome.tsx` (peak-end confirmation): full-screen dark, cyan glow, counter 0→10,000 in 2.2s, then "Distribution complete. You now see [TICKER] as a probability distribution, not a consensus estimate." → auto-redirect dashboard 3s
+**Hooks**:
+- `useStreak()` — reads `analysis_history`, computes consecutive-day streak, persists last-seen in localStorage
+- `useMarketStatus()` — pure client-side from UTC clock + NYSE hours
+- `useAlertsCount()` — reads existing `risk_alerts` table, returns unread count
+- `useAIFeed()` — local seeded feed (no backend), rotates every 45–90s
 
-## Phase 4 — Pricing (`src/pages/Pricing.tsx`)
-- Order: **Institutional → Desk → Analyst** (anchor high)
-- Annual toggle DEFAULT with "Save 30%" badge, monthly shows "Only £X/day"
-- Bloomberg comparison line: "Bloomberg Terminal: £24,000/yr. OutputLens Institutional: £X/yr."
-- Objection-killer strip below plans (5 bullets incl. refund guarantee)
-- CTAs: "Talk to Us", "Start Quantifying Risk", "Analyse Free for 14 Days"
+**Routing**: Wrap `/dashboard`, `/workspace`, `/portfolio`, `/history`, `/account`, `/tracked-assets`, plus new `/regime`, `/alerts`, `/scenarios` in `AppShell`.
 
-## Phase 5 — Dashboard empty state (`src/pages/Dashboard.tsx`)
-- First-run: hide sidebar, center single input "What position do you want to quantify?", suggested tickers chips, CTA "Run 10,000 Simulations →", microcopy "Your first simulation is free. Always."
-- Populated state: streak badge "N-day analysis streak 🔥", "New signal detected" badge, "Run New Simulation" primary
-- KPI cards use JetBrains Mono tabular-nums; red worst-case loss remains hero metric
+---
 
-## Phase 6 — Cross-cutting copy + components
-- Replace all generic CTAs ("Get Started", "Learn More", "Sign Up", "Try Free") with the approved list
-- `<DataFreshness />` "Updated HH:MM UTC" on every live data block
-- `<MethodologyLink />` "How we calculate this ↗" near every stat
-- Header/Footer restyled to dark system; remove warm gradient + FloatingOrbs + GlobeGraphic (keep files, unused)
+## Phase 2 — Dashboard + Simulation (core daily loop)
+
+### Dashboard rewrite (`src/pages/Dashboard.tsx`)
+
+Five zones, top to bottom:
+
+1. **Greeting + context bar** — personalised line referencing live elevated-tail-risk count, market-open countdown
+2. **Portfolio KPI row** — 4 cards: Portfolio at Risk · 1-Day VaR · Expected Shortfall · Regime State. Mono numbers, deterioration drives amber/red bg tint, each card has `Drill In →`
+3. **Portfolio distribution fan chart** — reuses `MonteCarloHero` engine, full-width 280px, freshness stamp + `[Update Now]`
+4. **Positions table** — sorted by tail-risk desc; tail-risk score 0–100 colour bar; row-hover reveals `[Analyse] [Add to Scenario]`
+5. **Activity + Insights** — two columns: Recent Simulations (from `analysis_history`) + AI Insights teasers linking into right panel
+
+### Simulation rewrite (`src/pages/Workspace.tsx`)
+
+Three-pane: configurator (left 320px) · running/results (centre) · keeps AI feed on right.
+
+- Configurator with collapsible sections (Time Horizon pills · Model Selection radio with rationale · Simulation Parameters sliders · optional Scenarios)
+- Run button shows estimated time + count of previous runs on this asset
+- Running state: full-pane cyan ring + counter 0→10,000 + stepped status messages (reuses Welcome page motion)
+- Results as 5 tabs:
+  1. **Distribution** — fan chart + KPI row + interactive probability queries ("P(AAPL > $X in 3M) = ...")
+  2. **Percentiles** — P1–P99 table with contextual interpretation
+  3. **Tail Risk** — histogram vs normal overlay, fat-tail call-out
+  4. **Scenarios** — base vs stress side-by-side
+  5. **AI Analysis** — structured commentary + Suggested Next Analyses (each a 1-click new sim)
+
+---
+
+## Phase 3 — Portfolio · Regime Monitor · Alerts
+
+- **Portfolio Analyser** (`src/pages/Portfolio.tsx`): builder table with weight bars and remaining-allocation indicator → correlation heatmap + portfolio vs individual overlay + efficient frontier + historical-crisis grid (2008/2020/2022/2010)
+- **Regime Monitor** (new `src/pages/Regime.tsx`): large status panel with regime-tinted bg, 90-day regime history timeline with user's simulation pins, watchlist regime table with divergence pulses. Uses existing `hmm.ts` on cached market data
+- **Risk Alerts** (new `src/pages/Alerts.tsx`): card feed from `risk_alerts` table (CRITICAL/WARNING/SIGNAL/INFO with the prescribed colors), dismiss/snooze, configuration panel for per-asset thresholds and digest toggles (writes to `tracked_assets.risk_threshold` + new `profiles.contact_preferences` keys — no schema change)
+
+---
+
+## Phase 4 — History · Scenario Builder · polish
+
+- **Simulation History** (`src/pages/History.tsx`): animated stats strip (47 sims · 12 assets · 3 portfolios · since X), filter pills, card grid with star/pin, compare mode (select 2 → diff view showing metric deltas since the older run)
+- **Scenario Builder** (new `src/pages/Scenarios.tsx`): canvas with draggable parameter blocks (Market Shock · Macro · Asset-Specific), save scenarios to a new lightweight `saved_scenarios` table (single migration), apply scenario to any simulation
+- **Cross-cutting polish**: streak persistence + break-recovery toast, "X days old — re-run" obsolescence prompts on stale analyses, completion-compulsion zero-badge behaviour on alerts
 
 ---
 
 ## Technical notes
-- All colour via HSL semantic tokens in `index.css`; no raw hex in components
-- Free hero simulation: reuse `src/lib/engine/stochastic/gbm.ts` client-side with mocked drift/vol so no API/auth needed
-- `LiveActivityToast`: static name pool + randomised time strings; mounted once in `Layout`
-- Count-up + path-draw use IntersectionObserver + requestAnimationFrame (no new deps)
-- Email sequence + streak emails: out of scope this pass (frontend only)
-- Files touched (new): `LiveActivityToast.tsx`, `MonteCarloHero.tsx`, `StatsBar.tsx`, `BlurredRevealOverlay.tsx`, `Welcome.tsx`, `MethodologyLink.tsx`, `DataFreshness.tsx`
-- Files rewritten: `index.css`, `tailwind.config.ts`, `index.html`, `Landing.tsx`, `Auth.tsx`, `Pricing.tsx`, `Dashboard.tsx`, `Header.tsx`, `Footer.tsx`
+
+- All colour via existing HSL semantic tokens. No raw hex.
+- Numbers in `font-mono` (JetBrains Mono, tabular-nums); headings `Sora`; UI `DM Sans`.
+- Sidebar uses shadcn `Sidebar` (already installed). CMD+K uses shadcn `Command` + `cmdk` (already installed).
+- AI feed cards, market status, streak: client-side only — no edge function or schema changes in Phase 1.
+- Phase 3 alerts page reads existing `risk_alerts` (RLS already correct).
+- Phase 4 scenario builder is the only schema touch: one migration adds `saved_scenarios (id, user_id, name, blocks jsonb, created_at)` with standard own-row RLS.
+- Reuses existing engine modules (`src/lib/engine/**`) — no new math.
+- Files removed from authenticated pages: `DashboardHero`, `WorkspacePreview`, `WhySection`, `LatestArticles`, `WorkspaceCTA` (marketing-shaped components incompatible with the terminal layout). Kept on Landing only.
+
+---
+
+## Ship order
+
+1. **Phase 1** in next turn (shell + sidebar + AI feed + top bar wired to existing pages — no page content changes yet).
+2. Phases 2–4 in subsequent turns, each gated on you confirming the previous one feels right before I rebuild more pages.
+
+Reply **"go"** to start Phase 1, or tell me to reorder/cut.

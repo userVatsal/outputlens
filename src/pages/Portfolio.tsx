@@ -14,7 +14,7 @@ import {
   Zap,
   LineChart
 } from 'lucide-react';
-import { Layout } from '@/components/layout/Layout';
+import { AppShell } from '@/components/layout/AppShell';
 import { PortfolioAnalyzer } from '@/components/PortfolioAnalyzer';
 import { UsageIndicator } from '@/components/UsageIndicator';
 import { PaywallModal } from '@/components/PaywallModal';
@@ -85,16 +85,16 @@ export default function Portfolio() {
 
   if (loading) {
     return (
-      <Layout>
+      <AppShell>
         <div className="flex items-center justify-center min-h-[60vh]">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
-      </Layout>
+      </AppShell>
     );
   }
 
   return (
-    <Layout>
+    <AppShell>
       {/* Hero Section */}
       <section className="hero-gradient py-12 lg:py-16 border-b border-border">
         <div className="section-container">
@@ -224,6 +224,6 @@ export default function Portfolio() {
 
       {/* Paywall Modal */}
       <PaywallModal open={showPaywall} onOpenChange={setShowPaywall} />
-    </Layout>
+    </AppShell>
   );
 }

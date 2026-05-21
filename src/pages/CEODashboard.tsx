@@ -6,7 +6,7 @@ import {
   Monitor, Smartphone, Globe, Clock, Shield, Loader2,
   Eye, AlertTriangle, CheckCircle, XCircle
 } from 'lucide-react';
-import { Layout } from '@/components/layout/Layout';
+import { AppShell } from '@/components/layout/AppShell';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -296,29 +296,29 @@ export default function CEODashboard() {
   // ── Auth guard render ───────────────────────────────────────────────────────
   if (adminLoading || loading) {
     return (
-      <Layout>
+      <AppShell>
         <div className="flex items-center justify-center min-h-[60vh]">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
-      </Layout>
+      </AppShell>
     );
   }
 
   if (!isAdmin) {
     return (
-      <Layout>
+      <AppShell>
         <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
           <Shield className="h-16 w-16 text-muted-foreground" />
           <h1 className="text-2xl font-bold">Access Denied</h1>
           <p className="text-muted-foreground">This page is restricted to administrators.</p>
           <Button onClick={() => navigate('/dashboard')}>Go to Dashboard</Button>
         </div>
-      </Layout>
+      </AppShell>
     );
   }
 
   return (
-    <Layout>
+    <AppShell>
       <div className="max-w-[1400px] mx-auto px-4 py-6 space-y-6">
 
         {/* ── Header ── */}
@@ -587,6 +587,6 @@ export default function CEODashboard() {
           </div>
         )}
       </div>
-    </Layout>
+    </AppShell>
   );
 }

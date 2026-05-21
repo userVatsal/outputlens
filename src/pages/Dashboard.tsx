@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
-import { Layout } from '@/components/layout/Layout';
+import { AppShell } from '@/components/layout/AppShell';
 import { supabase } from '@/integrations/supabase/client';
 import { useProfile } from '@/hooks/useProfile';
 import { useUsage } from '@/hooks/useUsage';
@@ -88,11 +88,11 @@ export default function Dashboard() {
   // Show loading while checking auth
   if (isAuthenticated === null || profileLoading || usageLoading || planData.isLoading) {
     return (
-      <Layout>
+      <AppShell>
         <div className="flex items-center justify-center min-h-[60vh]">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
-      </Layout>
+      </AppShell>
     );
   }
 
@@ -100,7 +100,7 @@ export default function Dashboard() {
   const shouldShowOnboarding = hasAnalysisHistory === false && showOnboarding;
 
   return (
-    <Layout>
+    <AppShell>
       <div className="section-container py-8">
         <div className="max-w-7xl mx-auto space-y-8">
           {/* Account Header - Top of Dashboard */}
@@ -184,6 +184,6 @@ export default function Dashboard() {
 
         </div>
       </div>
-    </Layout>
+    </AppShell>
   );
 }

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Loader2, User, CreditCard, Shield } from 'lucide-react';
-import { Layout } from '@/components/layout/Layout';
+import { AppShell } from '@/components/layout/AppShell';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ProfileSection } from '@/components/account/ProfileSection';
 import { SubscriptionSection } from '@/components/account/SubscriptionSection';
@@ -71,26 +71,26 @@ export default function Account() {
 
   if (loading || planLoading || profileLoading) {
     return (
-      <Layout>
+      <AppShell>
         <div className="flex items-center justify-center min-h-[60vh]">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
-      </Layout>
+      </AppShell>
     );
   }
 
   if (!profile) {
     return (
-      <Layout>
+      <AppShell>
         <div className="flex items-center justify-center min-h-[60vh]">
           <p className="text-muted-foreground">Unable to load profile. Please try again.</p>
         </div>
-      </Layout>
+      </AppShell>
     );
   }
 
   return (
-    <Layout>
+    <AppShell>
       <div className="section-container py-8">
         <div className="max-w-4xl mx-auto">
           {/* Header */}
@@ -148,6 +148,6 @@ export default function Account() {
           </Tabs>
         </div>
       </div>
-    </Layout>
+    </AppShell>
   );
 }

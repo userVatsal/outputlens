@@ -28,6 +28,9 @@ const Onboarding = lazy(() => import("./pages/Onboarding"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const CEODashboard = lazy(() => import("./pages/CEODashboard"));
 const Welcome = lazy(() => import("./pages/Welcome"));
+const Regime = lazy(() => import("./pages/Regime"));
+const Alerts = lazy(() => import("./pages/Alerts"));
+const Scenarios = lazy(() => import("./pages/Scenarios"));
 
 const queryClient = new QueryClient();
 
@@ -59,6 +62,9 @@ const App = () => (
                   <Route path="/account" element={<Account />} />
                   <Route path="/demo" element={<Navigate to="/#demo" replace />} />
                   <Route path="/tracked-assets" element={<TrackedAssets />} />
+                  <Route path="/regime" element={<Regime />} />
+                  <Route path="/alerts" element={<Alerts />} />
+                  <Route path="/scenarios" element={<Scenarios />} />
                   <Route path="/about" element={<About />} />
                   <Route path="/ceo-dashboard" element={<CEODashboard />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
