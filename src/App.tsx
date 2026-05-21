@@ -32,6 +32,8 @@ const Regime = lazy(() => import("./pages/Regime"));
 const Alerts = lazy(() => import("./pages/Alerts"));
 const Scenarios = lazy(() => import("./pages/Scenarios"));
 const VarCalculator = lazy(() => import("./pages/VarCalculator"));
+const Blog = lazy(() => import("./pages/Blog"));
+const BlogPost = lazy(() => import("./pages/BlogPost"));
 
 const queryClient = new QueryClient();
 
@@ -67,6 +69,8 @@ const App = () => (
                   <Route path="/alerts" element={<Alerts />} />
                   <Route path="/scenarios" element={<Scenarios />} />
                   <Route path="/var" element={<VarCalculator />} />
+                  <Route path="/blog" element={<Blog />} />
+                  <Route path="/blog/:slug" element={<BlogPost />} />
                   <Route path="/about" element={<About />} />
                   <Route path="/ceo-dashboard" element={<CEODashboard />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
