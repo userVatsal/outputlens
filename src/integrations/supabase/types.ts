@@ -934,6 +934,39 @@ export type Database = {
         }
         Relationships: []
       }
+      saved_scenarios: {
+        Row: {
+          blocks: Json
+          created_at: string
+          description: string | null
+          id: string
+          is_pinned: boolean
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          blocks?: Json
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_pinned?: boolean
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          blocks?: Json
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_pinned?: boolean
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       security_events: {
         Row: {
           action_taken: string | null
