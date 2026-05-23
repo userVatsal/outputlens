@@ -391,11 +391,14 @@ export default function Auth() {
                   disabled={loading || isBlocked}
                   onClick={async () => {
                     setLoading(true);
-                    await supabase.auth.signInWithOAuth({
-                      provider: 'google',
-                      options: { redirectTo: `${window.location.origin}/dashboard` },
+                    const { lovable } = await import('@/integrations/lovable');
+                    const result = await lovable.auth.signInWithOAuth('google', {
+                      redirect_uri: `${window.location.origin}/dashboard`,
                     });
-                    setLoading(false);
+                    if (result.error) {
+                      console.error('Google sign-in error:', result.error);
+                      setLoading(false);
+                    }
                   }}
                 >
                   <svg className="h-4 w-4" viewBox="0 0 24 24">

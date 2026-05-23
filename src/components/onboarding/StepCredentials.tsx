@@ -82,13 +82,14 @@ export function StepCredentials({ onComplete }: StepCredentialsProps) {
 
   const handleGoogleSignUp = async () => {
     setLoading(true);
-    await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/onboarding`,
-      },
+    const { lovable } = await import('@/integrations/lovable');
+    const result = await lovable.auth.signInWithOAuth('google', {
+      redirect_uri: `${window.location.origin}/onboarding`,
     });
-    setLoading(false);
+    if (result.error) {
+      console.error('Google sign-up error:', result.error);
+      setLoading(false);
+    }
   };
 
   return (
