@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Play, Check, Activity, BarChart3, Layers, GitBranch, AlertTriangle, History, Sparkles, Briefcase, Grid3x3 } from 'lucide-react';
 import { FanChart } from './FanChart';
+import { PLAN_CONFIG, type SubscriptionPlan } from '@/lib/stripe';
+import { useCountUp } from '@/hooks/useCountUp';
 
 /* ───────────── HERO ───────────── */
 export function Hero() {
@@ -82,23 +84,6 @@ export function Hero() {
 }
 
 /* ───────────── STATS BAR ───────────── */
-function useCountUp(target: number, trigger: boolean, duration = 1200) {
-  const [value, setValue] = useState(0);
-  useEffect(() => {
-    if (!trigger) return;
-    let raf = 0; const start = performance.now();
-    const step = (t: number) => {
-      const p = Math.min(1, (t - start) / duration);
-      setValue(Math.floor(target * (0.2 + 0.8 * p)));
-      if (p < 1) raf = requestAnimationFrame(step);
-      else setValue(target);
-    };
-    raf = requestAnimationFrame(step);
-    return () => cancelAnimationFrame(raf);
-  }, [target, trigger, duration]);
-  return value;
-}
-
 export function StatsBar() {
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
@@ -109,17 +94,16 @@ export function StatsBar() {
     return () => io.disconnect();
   }, []);
 
-  const sims = useCountUp(10000, visible);
-  const analysts = useCountUp(2400, visible);
-  const accuracy = useCountUp(947, visible); // shown as 94.7
+  const sims = Math.floor(useCountUp(10000, { trigger: visible, duration: 1200 }));
+  const accuracy = Math.floor(useCountUp(947, { trigger: visible, duration: 1200 })); // shown as 94.7
 
   const fmt = (n: number) => n.toLocaleString('en-US');
 
   const stats = [
     { v: fmt(sims), label: 'Simulations' },
-    { v: `${fmt(analysts)}+`, label: 'Analysts' },
     { v: `${(accuracy / 10).toFixed(1)}%`, label: 'Accuracy' },
     { v: '<0.3s', label: 'Results' },
+    { v: 'GBM·GARCH·HMM', label: 'Models' },
   ];
 
   return (
@@ -235,23 +219,24 @@ export function SocialProof() {
 
 /* ───────────── PRICING ───────────── */
 const ANNUAL_DISCOUNT = 0.2; // 20% off annual
-const BASE_PLANS = [
-  { name: 'Starter', monthly: 12, desc: 'For individual analysts getting started with probabilistic risk.',
-    features: ['30 analyses/month', 'Global markets (UK, EU, Crypto, Forex)', '10,000 Monte Carlo paths', 'GBM + GARCH + regime switching', 'Auto AI explanations'], highlight: false, cta: 'Start free' },
-  { name: 'Pro',     monthly: 29, desc: 'For active traders running portfolios.',
-    features: ['100 analyses/month', 'Full stochastic suite + jump diffusion', 'Portfolio analysis (5 assets)', 'Neural database + auto insights', 'CSV/PDF exports', 'Unlimited history'], highlight: true, cta: 'Start free' },
-  { name: 'Trader',  monthly: 79, desc: 'For desks running multi-asset portfolios.',
-    features: ['500 analyses/month', 'Portfolio analysis (20 assets)', '100 API calls/month', 'Priority support', 'All advanced models'], highlight: false, cta: 'Start free' },
-];
-const PLANS = (annual: boolean) => BASE_PLANS.map((p) => {
-  const effectiveMonthly = annual
-    ? Math.round(p.monthly * (1 - ANNUAL_DISCOUNT))
-    : p.monthly;
+const PLAN_DESCRIPTIONS: Record<string, string> = {
+  starter: 'For individual analysts getting started with probabilistic risk.',
+  pro: 'For active traders running portfolios.',
+  trader: 'For desks running multi-asset portfolios.',
+};
+const PAID_PLANS: SubscriptionPlan[] = ['starter', 'pro', 'trader'];
+const PLANS = (annual: boolean) => PAID_PLANS.map((key) => {
+  const cfg = PLAN_CONFIG[key];
+  const effectiveMonthly = annual ? Math.round(cfg.price * (1 - ANNUAL_DISCOUNT)) : cfg.price;
   return {
-    ...p,
+    name: cfg.name,
     price: `$${effectiveMonthly}`,
     period: '/month',
     subPrice: annual ? `Billed $${effectiveMonthly * 12}/year` : null,
+    desc: PLAN_DESCRIPTIONS[key] ?? '',
+    features: cfg.features,
+    highlight: !!cfg.highlighted,
+    cta: 'Start free',
   };
 });
 export function Pricing() {

@@ -1,73 +1,59 @@
-# Welcome to your Lovable project
+# OutputLens
 
-## Project info
+Probabilistic risk intelligence for traders and analysts who reject point forecasts.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+**The market is a distribution. Trade it like one.**
 
-## How can I edit this code?
+OutputLens runs 10,000 Monte Carlo simulations on any asset and returns a full probability distribution of outcomes — VaR 95%, CVaR, percentile bands, regime-adjusted volatility. Not a forecast. Not a prediction. A distribution.
 
-There are several ways of editing your application.
+---
 
-**Use Lovable**
+## Architecture — Three-Layer Intelligence
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+1. **Layer 1 — Deterministic Math (core IP).** GBM, GARCH, jump-diffusion, Hidden Markov regime detection. Lives in `src/lib/engine/`.
+2. **Layer 2 — Statistical Adaptation.** Neural database (8-dim embeddings, k-NN cosine similarity), live volatility calibration, regime-aware path generation.
+3. **Layer 3 — AI Interpretation.** Plain-English commentary on the distribution shape. Strictly constrained to never predict prices or direction.
 
-Changes made via Lovable will be committed automatically to this repo.
+## Stack
 
-**Use your preferred IDE**
+- **Frontend:** React 18 + Vite + TypeScript + Tailwind + shadcn/ui
+- **State / data:** React Query, custom hooks, shared `AuthContext`
+- **Backend:** Lovable Cloud (Supabase) — Postgres + RLS, Edge Functions (Deno)
+- **Payments:** Stripe (Starter $12 / Pro $29 / Trader $79)
+- **Market data:** Finnhub + Twelve Data with TTL-cached `market_data_cache` table
+- **AI:** Lovable AI Gateway (Gemini for analysis, Claude Haiku for the MCP agent)
+- **Auth:** Supabase Auth with Google OAuth; roles in `user_roles` (separate from `profiles`)
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## Edge Functions
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+| Function | Purpose |
+| -- | -- |
+| `analyze-asset-enhanced` | Full single-asset Monte Carlo + regime + AI interpretation |
+| `analyze-trade` | Trade-level risk analysis with position economics |
+| `check-subscription` | Stripe + DB plan resolution (cached via React Query) |
+| `create-checkout` / `customer-portal` | Stripe subscription flow |
+| `fetch-market-data` | TTL-cached quote + history + volatility |
+| `monitor-assets` | Scheduled tracked-asset risk-delta alerts |
+| `run-agent-pipeline` | Sentiment + news + social aggregation |
 
-Follow these steps:
+See `supabase/functions/` for the full list.
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+## Local development
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+```bash
+bun install
+bun run dev
 ```
 
-**Edit a file directly in GitHub**
+Tests:
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+```bash
+bunx vitest run
+```
 
-**Use GitHub Codespaces**
+The project is managed via Lovable. Code is also synced to GitHub for parallel local development.
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## Production
 
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+- Custom domain: [outputlens.com](https://outputlens.com)
+- Deploy: pushed via Lovable; preview at the Lovable preview URL

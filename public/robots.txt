@@ -45,6 +45,11 @@ Allow: /
 # Default rule for all other crawlers
 User-agent: *
 Allow: /
+Disallow: /ceo-dashboard
+Disallow: /onboarding
+Disallow: /account
+Disallow: /auth
+Disallow: /welcome
 
 # Sitemap location
 Sitemap: https://outputlens.com/sitemap.xml

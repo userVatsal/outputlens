@@ -17,7 +17,6 @@ const Auth = lazy(() => import("./pages/Auth"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Workspace = lazy(() => import("./pages/Workspace"));
 const Results = lazy(() => import("./pages/Results"));
-const Portfolio = lazy(() => import("./pages/Portfolio"));
 const History = lazy(() => import("./pages/History"));
 const Methodology = lazy(() => import("./pages/Methodology"));
 const Pricing = lazy(() => import("./pages/Pricing"));
@@ -75,7 +74,7 @@ const App = () => (
                   <Route path="/privacy" element={<Privacy />} />
                   <Route path="/terms" element={<Terms />} />
                   <Route path="/account" element={<Account />} />
-                  <Route path="/demo" element={<Navigate to="/#demo" replace />} />
+                  <Route path="/demo" element={<Navigate to="/" replace />} />
                   <Route path="/tracked-assets" element={<TrackedAssets />} />
                   <Route path="/regime" element={<Regime />} />
                   <Route path="/alerts" element={<Alerts />} />
