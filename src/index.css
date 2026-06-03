@@ -145,21 +145,21 @@
 
   .auth-input {
     width: 100%;
-    background: hsl(var(--background));
+    background: hsl(var(--elevated));
     border: 1px solid hsl(var(--border));
-    border-radius: 4px;
-    padding: 12px 14px;
+    border-radius: 10px;
+    padding: 0 14px;
+    height: 48px;
     color: hsl(var(--foreground));
-    font-family: 'DM Sans', system-ui, sans-serif;
-    font-size: 16px; /* prevents iOS zoom */
-    min-height: 48px;
-    transition: border-color 150ms, box-shadow 150ms;
+    font-family: 'Geist', 'DM Sans', system-ui, sans-serif;
+    font-size: 14px;
+    transition: border-color 200ms, box-shadow 200ms;
   }
   .auth-input::placeholder { color: hsl(var(--muted-foreground) / 0.6); }
   .auth-input:focus {
     outline: none;
-    border-color: hsl(var(--primary));
-    box-shadow: 0 0 0 3px hsl(var(--primary) / 0.12);
+    border-color: hsl(var(--primary) / 0.5);
+    box-shadow: 0 0 0 3px hsl(var(--primary) / 0.08);
   }
   .auth-input:disabled { opacity: 0.6; cursor: not-allowed; }
 
