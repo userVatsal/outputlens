@@ -199,6 +199,28 @@ const FEATURES = [
   { icon: History,       title: 'Simulation History',  desc: 'Every analysis saved and replayable. Compare distributions over time.' },
 ];
 export function Features() {
+  const gridRef = useRef<HTMLDivElement>(null);
+  const [visibleSet, setVisibleSet] = useState<Set<number>>(new Set());
+  useEffect(() => {
+    if (!gridRef.current) return;
+    const cards = Array.from(gridRef.current.querySelectorAll('[data-feature-idx]')) as HTMLElement[];
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) {
+          const idx = Number((e.target as HTMLElement).dataset.featureIdx);
+          setVisibleSet((prev) => {
+            if (prev.has(idx)) return prev;
+            const next = new Set(prev);
+            next.add(idx);
+            return next;
+          });
+          io.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.15 });
+    cards.forEach((c) => io.observe(c));
+    return () => io.disconnect();
+  }, []);
   return (
     <section id="features" className="py-16 md:py-20 relative">
       <div
@@ -209,11 +231,13 @@ export function Features() {
         <h2 className="section-title text-center">Everything you need to quantify uncertainty</h2>
         <p className="mt-3 text-base text-muted-foreground text-center">Built for analysts who reject point forecasts</p>
 
-        <div className="mt-10 md:mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {FEATURES.map((f) => (
+        <div ref={gridRef} className="mt-10 md:mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {FEATURES.map((f, idx) => (
             <div
               key={f.title}
-              className="group rounded-xl bg-surface border border-border/50 p-6 hover:border-primary/20 hover:bg-elevated/50 transition-all duration-200"
+              data-feature-idx={idx}
+              className={`group card-quant rounded-xl bg-surface border border-border/50 p-6 hover:border-primary/20 hover:bg-elevated/50 ${visibleSet.has(idx) ? 'animate-fade-up' : 'opacity-0'}`}
+              style={visibleSet.has(idx) ? { animationDelay: `${idx * 60}ms` } : undefined}
             >
               <div
                 className="w-10 h-10 rounded-lg flex items-center justify-center"
