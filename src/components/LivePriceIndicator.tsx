@@ -1,17 +1,6 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useMarketData, LiveMarketData } from '@/hooks/useMarketData';
 import { Market } from '@/types/trade';
-
-// Check if error indicates paid tier is required
-const checkPaidTierError = (errorMsg: string): boolean => {
-  const lowerError = errorMsg.toLowerCase();
-  return lowerError.includes('paid_tier_required') || 
-         lowerError.includes('grow plan') || 
-         lowerError.includes('grow (grow plan)') ||
-         lowerError.includes('upgrade') ||
-         lowerError.includes('premium') ||
-         lowerError.includes('consider upgrading');
-};
 
 interface LivePriceIndicatorProps {
   symbol: string;
