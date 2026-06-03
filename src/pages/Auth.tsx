@@ -6,7 +6,6 @@ import { z } from 'zod';
 import { toast } from 'sonner';
 import { useSecurity } from '@/hooks/useSecurity';
 import { CaptchaGate } from '@/components/security/CaptchaGate';
-import { FanChart } from '@/components/landing/v2/FanChart';
 
 const passwordSchema = z.string()
   .min(8, 'Password must be at least 8 characters')
