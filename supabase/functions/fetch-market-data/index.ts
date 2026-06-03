@@ -483,6 +483,35 @@ serve(async (req) => {
     let result: MarketDataResponse;
 
     switch (provider) {
+      case 'yahoo': {
+        try {
+          if (type === 'historical') {
+            const prices = await fetchYahooHistorical(symbol, days);
+            const volatility = calculateVolatility(prices);
+            result = { historicalPrices: prices, volatility, source: 'yahoo' };
+          } else {
+            result = await fetchYahooQuote(symbol);
+            try {
+              const prices = await fetchYahooHistorical(symbol, 90);
+              if (prices.length > 1) {
+                result.volatility = calculateVolatility(prices);
+                result.historicalPrices = prices;
+              }
+            } catch (e) {
+              console.warn('Yahoo historical unavailable:', e);
+            }
+          }
+        } catch (e) {
+          console.warn('[YAHOO] Failed:', e);
+          result = {
+            price: undefined,
+            source: 'unavailable',
+            error: 'Live data unavailable — enter price manually',
+          } as MarketDataResponse;
+        }
+        break;
+      }
+
       case 'finnhub': {
         const apiKey = Deno.env.get('FINNHUB_API_KEY');
         if (!apiKey) {
