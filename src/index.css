@@ -209,6 +209,18 @@
 
   .section-container { @apply max-w-6xl mx-auto px-4 sm:px-6 lg:px-8; }
 
+  .stat-value { @apply font-mono font-semibold tabular-nums; }
+  .card-quant { @apply rounded-xl bg-surface border border-border/60 p-5; }
+  .badge-live {
+    @apply inline-flex items-center gap-1.5 rounded-full border border-bullish/25 px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-widest text-bullish;
+    background-color: hsl(var(--bullish) / 0.08);
+  }
+  .section-title {
+    @apply font-display font-bold tracking-tight text-foreground;
+    font-size: clamp(28px, 4vw, 40px);
+    letter-spacing: -0.03em;
+  }
+
   .brand-text { @apply font-brand font-bold text-foreground; }
 
   .terminal-window {
