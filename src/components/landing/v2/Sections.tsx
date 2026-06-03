@@ -38,8 +38,11 @@ export function Hero() {
             <button
               className="inline-flex items-center gap-2 rounded-md text-foreground/80 hover:text-foreground hover:bg-elevated font-medium text-sm px-5 py-3 transition-colors min-h-[44px]"
               type="button"
+              onClick={() => {
+                document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' });
+              }}
             >
-              <Play className="h-4 w-4 fill-current" /> Watch 2 min demo
+              <Play className="h-4 w-4 fill-current" /> See how it works
             </button>
           </div>
           <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2 text-[12px] text-foreground/40 justify-center sm:justify-start" style={{ animation: 'fade-up 700ms ease-out 400ms both' }}>
