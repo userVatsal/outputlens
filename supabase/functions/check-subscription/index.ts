@@ -92,7 +92,28 @@ serve(async (req) => {
     logStep("Database plan check", { dbPlan });
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
-    const customers = await stripe.customers.list({ email: user.email, limit: 1 });
+
+    // Graceful fallback helper when Stripe is unreachable / key invalid.
+    const fallbackToDb = (reason: string) => {
+      logStep("Stripe unavailable - falling back to DB plan", { reason, dbPlan });
+      const plan = dbPlan && dbPlan !== "free" ? dbPlan : "free";
+      return new Response(JSON.stringify({
+        subscribed: plan !== "free",
+        plan,
+        subscription_end: null,
+        fallback: true,
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
+    };
+
+    let customers;
+    try {
+      customers = await stripe.customers.list({ email: user.email, limit: 1 });
+    } catch (e) {
+      return fallbackToDb(e instanceof Error ? e.message : String(e));
+    }
 
     if (customers.data.length === 0) {
       logStep("No Stripe customer found");
@@ -134,11 +155,16 @@ serve(async (req) => {
     const customerId = customers.data[0].id;
     logStep("Found Stripe customer", { customerId });
 
-    const subscriptions = await stripe.subscriptions.list({
-      customer: customerId,
-      status: "active",
-      limit: 1,
-    });
+    let subscriptions;
+    try {
+      subscriptions = await stripe.subscriptions.list({
+        customer: customerId,
+        status: "active",
+        limit: 1,
+      });
+    } catch (e) {
+      return fallbackToDb(e instanceof Error ? e.message : String(e));
+    }
 
     if (subscriptions.data.length === 0) {
       logStep("No active Stripe subscription found");
@@ -213,9 +239,16 @@ serve(async (req) => {
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     logStep("ERROR", { message: errorMessage });
-    return new Response(JSON.stringify({ error: "Subscription check temporarily unavailable" }), {
+    // Never return 500 — frontend treats this as a hard error and crashes.
+    return new Response(JSON.stringify({
+      subscribed: false,
+      plan: "free",
+      subscription_end: null,
+      fallback: true,
+      error: errorMessage,
+    }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 500,
+      status: 200,
     });
   }
 });
