@@ -23,6 +23,8 @@ import { PositionsTable } from '@/components/dashboard/PositionsTable';
 import { RecentSimulationCard } from '@/components/dashboard/RecentSimulationCard';
 import { GreetingBar } from '@/components/dashboard/GreetingBar';
 import { PortfolioDistributionCard } from '@/components/dashboard/PortfolioDistributionCard';
+import { Link } from 'react-router-dom';
+import { Sunrise, FlaskConical, Radar } from 'lucide-react';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -161,6 +163,32 @@ export default function Dashboard() {
                 onMarkRead={markAlertRead}
               />
             </div>
+          </div>
+
+          {/* Quick access — Briefing / Stress Test / Pulse */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 animate-fade-in" style={{ animationDelay: '180ms' }}>
+            {[
+              { to: '/briefing',    icon: Sunrise,       title: "Today's Briefing", sub: 'Daily risk digest' },
+              { to: '/stress-test', icon: FlaskConical,  title: 'Stress Test',      sub: 'Bull · Base · Bear' },
+              { to: '/pulse',       icon: Radar,         title: 'Risk Pulse',       sub: 'Live position heat' },
+            ].map(card => {
+              const Icon = card.icon;
+              return (
+                <Link
+                  key={card.to}
+                  to={card.to}
+                  className="rounded-xl bg-elevated border border-border/50 p-4 flex items-center gap-3 hover:border-primary/20 hover:bg-elevated/80 transition-all"
+                >
+                  <span className="w-9 h-9 rounded-lg bg-primary/8 text-primary flex items-center justify-center flex-shrink-0">
+                    <Icon className="h-4 w-4" />
+                  </span>
+                  <span className="min-w-0">
+                    <span className="block font-semibold text-[14px] text-foreground">{card.title}</span>
+                    <span className="block text-[12px] text-muted-foreground truncate">{card.sub}</span>
+                  </span>
+                </Link>
+              );
+            })}
           </div>
 
           {/* Zone 4: Positions table */}
