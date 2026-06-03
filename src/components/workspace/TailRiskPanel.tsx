@@ -39,9 +39,9 @@ export function TailRiskPanel({
   const var90 = Math.abs(expectedShortfall) * 0.65;
   const maxBar = Math.max(var90, var95, var99, 0.0001);
   const rows = [
-    { label: 'VaR 90%', value: var90 },
-    { label: 'VaR 95%', value: var95 },
-    { label: 'VaR 99%', value: var99 },
+    { label: 'VaR 90%', value: var90, fill: 'bg-caution/70' },
+    { label: 'VaR 95%', value: var95, fill: 'bg-bearish/60' },
+    { label: 'VaR 99%', value: var99, fill: 'bg-bearish/80' },
   ];
 
   return (
@@ -62,7 +62,7 @@ export function TailRiskPanel({
       </div>
 
       <div className="space-y-3">
-        {rows.map((row) => {
+        {rows.map((row, index) => {
           const pct = (row.value / maxBar) * 100;
           return (
             <div key={row.label} className="flex items-center gap-3">
@@ -71,8 +71,12 @@ export function TailRiskPanel({
               </span>
               <div className="flex-1 h-2 rounded-full bg-elevated overflow-hidden">
                 <div
-                  className="h-full rounded-full bg-destructive/70 transition-all duration-700"
-                  style={{ width: `${pct}%` }}
+                  className={cn('h-full rounded-full', row.fill)}
+                  style={{
+                    width: `${pct}%`,
+                    animation: 'bar-grow 700ms cubic-bezier(0.16,1,0.3,1) both',
+                    animationDelay: `${index * 120}ms`,
+                  }}
                 />
               </div>
               <span className="font-mono text-[14px] text-bearish font-semibold tabular-nums w-20 text-right">
