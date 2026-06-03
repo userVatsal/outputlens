@@ -132,7 +132,7 @@ export function AppSidebar({ collapsed, onToggle }: Props) {
                         'relative flex items-center h-[38px] rounded-xl text-[13px] transition-colors',
                         collapsed ? 'justify-center px-0' : 'px-3 gap-3',
                         active
-                          ? 'bg-elevated text-foreground font-medium'
+                          ? 'bg-elevated text-foreground font-medium nav-item-active'
                           : 'text-muted-foreground hover:bg-elevated/50 hover:text-foreground',
                       )}
                     >
