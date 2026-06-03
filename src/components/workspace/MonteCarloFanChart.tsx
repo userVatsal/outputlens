@@ -252,14 +252,14 @@ export function MonteCarloFanChart({ analysis, currencySymbol }: Props) {
         </ResponsiveContainer>
       </div>
 
-      <div className="grid grid-cols-3 gap-px border-t border-border bg-border">
-        <div className="bg-surface px-4 py-3">
+      <div className="grid grid-cols-3 gap-4 mt-4 pt-4 border-t border-border/40">
+        <div>
           <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">Expected</div>
           <div className={`mt-0.5 font-mono text-sm font-semibold tabular-nums ${riskMetrics.expectedReturn >= 0 ? 'text-bullish' : 'text-destructive'}`}>
             {riskMetrics.expectedReturn >= 0 ? '+' : ''}{riskMetrics.expectedReturn.toFixed(2)}%
           </div>
         </div>
-        <div className="bg-surface px-4 py-3">
+        <div>
           <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground flex items-center gap-1">
             <Zap className="h-3 w-3" /> VaR 95%
           </div>
@@ -267,7 +267,7 @@ export function MonteCarloFanChart({ analysis, currencySymbol }: Props) {
             −{riskMetrics.valueAtRisk95.toFixed(2)}%
           </div>
         </div>
-        <div className="bg-surface px-4 py-3">
+        <div>
           <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">Volatility</div>
           <div className="mt-0.5 font-mono text-sm font-semibold tabular-nums text-foreground">
             ±{simulation.stdDev.toFixed(2)}%
