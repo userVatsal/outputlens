@@ -270,9 +270,9 @@ export function SocialProof() {
           {QUOTES.map((t) => (
             <figure
               key={t.a}
-              className="relative rounded-xl bg-background border border-border/50 border-t-2 border-t-primary/40 p-7"
+              className="relative rounded-xl bg-background border border-border/50 border-t-2 border-t-primary/30 hover:border-t-primary/60 transition-colors duration-300 p-7 group"
             >
-              <blockquote className="italic text-[15px] text-foreground/85 leading-[1.75] before:content-['\201C'] before:text-primary before:text-[28px] before:font-serif before:leading-none before:block before:mb-2">
+              <blockquote className="italic text-[15px] text-foreground/85 leading-[1.75] border-l-2 border-primary/20 group-hover:border-primary/50 pl-4 transition-colors before:content-['\201C'] before:text-primary before:text-[28px] before:font-serif before:leading-none before:block before:mb-2">
                 {t.q}
               </blockquote>
               <figcaption className="mt-5">
