@@ -42,6 +42,78 @@ const MODEL_BY_TIER: Record<string, string> = {
 
 const BATCH_SIZE = 5; // Process 5 signals per AI call
 
+// ─── Lightweight VADER sentiment scorer ───────────────────────────────────────
+const VADER_LEXICON: Record<string, number> = {
+  'beat': 2.1, 'beats': 2.1, 'exceeded': 2.3, 'surpassed': 2.2, 'outperformed': 2.4,
+  'record': 1.8, 'growth': 1.6, 'profit': 1.7, 'revenue': 0.8, 'upgrade': 2.0,
+  'buy': 1.5, 'bullish': 2.2, 'rally': 2.0, 'soar': 2.4, 'surge': 2.2, 'jump': 1.8,
+  'gain': 1.6, 'gains': 1.6, 'rose': 1.4, 'rises': 1.4, 'up': 0.8, 'higher': 1.2,
+  'strong': 1.5, 'strength': 1.5, 'positive': 1.3, 'good': 1.2, 'great': 2.0,
+  'excellent': 2.4, 'outstanding': 2.4, 'impressive': 2.0, 'solid': 1.4,
+  'momentum': 1.3, 'breakout': 1.9, 'expansion': 1.4, 'accelerating': 1.6,
+  'innovation': 1.2, 'partnership': 1.1, 'deal': 1.0, 'acquisition': 0.8,
+  'stable': 0.6, 'steady': 0.6, 'resilient': 1.0, 'recovery': 1.2, 'rebound': 1.4,
+  'optimistic': 1.6, 'confident': 1.4, 'expect': 0.3, 'forecast': 0.2, 'guidance': 0.2,
+  'miss': -2.0, 'missed': -2.0, 'below': -1.2, 'fell': -1.5, 'fall': -1.5,
+  'drop': -1.6, 'drops': -1.6, 'decline': -1.5, 'declining': -1.5, 'decrease': -1.3,
+  'loss': -1.8, 'losses': -1.8, 'down': -0.8, 'lower': -1.2, 'weak': -1.5,
+  'weakness': -1.5, 'concern': -1.2, 'concerns': -1.2, 'risk': -0.8, 'risks': -0.8,
+  'warning': -1.8, 'warn': -1.8, 'cut': -1.6, 'downgrade': -2.2, 'sell': -1.5,
+  'bearish': -2.2, 'crash': -2.8, 'collapse': -2.6, 'plunge': -2.4, 'tank': -2.2,
+  'tumble': -2.0, 'slump': -1.8, 'struggle': -1.4, 'disappointing': -2.0,
+  'disappoints': -2.0, 'shortfall': -1.8, 'lawsuit': -1.6,
+  'investigation': -1.4, 'fraud': -2.8, 'scandal': -2.4, 'recall': -1.6,
+  'bankruptcy': -3.0, 'default': -2.6, 'layoffs': -1.4, 'restructuring': -1.0,
+};
+const NEGATORS = new Set(['not', 'no', 'never', 'neither', 'without', "n't", 'cannot', 'cant']);
+const INTENSIFIERS: Record<string, number> = {
+  'very': 1.3, 'extremely': 1.6, 'significantly': 1.4, 'substantially': 1.3,
+  'massive': 1.5, 'major': 1.2, 'hugely': 1.4, 'barely': 0.6, 'slightly': 0.7,
+};
+
+function vaderScore(text: string): { compound: number; pos: number; neg: number; neu: number } {
+  const words = (text || '').toLowerCase().replace(/[^\w\s'-]/g, ' ').split(/\s+/).filter(Boolean);
+  const scores: number[] = [];
+  for (let i = 0; i < words.length; i++) {
+    const word = words[i];
+    let score = VADER_LEXICON[word] ?? 0;
+    if (score !== 0) {
+      const prevWords = words.slice(Math.max(0, i - 3), i);
+      if (prevWords.some(w => NEGATORS.has(w))) score *= -0.74;
+      if (i > 0) {
+        const intensifier = INTENSIFIERS[words[i - 1]];
+        if (intensifier) score *= intensifier;
+      }
+      scores.push(score);
+    }
+  }
+  if (scores.length === 0) return { compound: 0, pos: 0, neg: 0, neu: 1 };
+  const sum = scores.reduce((a, b) => a + b, 0);
+  const alpha = 15;
+  const compound = sum / Math.sqrt(sum * sum + alpha);
+  const totalMagnitude = scores.reduce((a, b) => a + Math.abs(b), 0) || 1;
+  const posSum = scores.filter(s => s > 0).reduce((a, b) => a + b, 0);
+  const negSum = Math.abs(scores.filter(s => s < 0).reduce((a, b) => a + b, 0));
+  const pos = posSum / totalMagnitude;
+  const neg = negSum / totalMagnitude;
+  const neu = Math.max(0, 1 - pos - neg);
+  return {
+    compound: Math.max(-1, Math.min(1, compound)),
+    pos: Math.max(0, pos),
+    neg: Math.max(0, neg),
+    neu,
+  };
+}
+
+function vaderToFinancialSignal(compound: number) {
+  if (compound >= 0.5)   return { label: 'very_bullish',  probabilityAdjustment: +0.08, volatilityAdjustment: -0.05 };
+  if (compound >= 0.15)  return { label: 'bullish',        probabilityAdjustment: +0.04, volatilityAdjustment: -0.02 };
+  if (compound <= -0.5)  return { label: 'very_bearish',   probabilityAdjustment: -0.08, volatilityAdjustment: +0.08 };
+  if (compound <= -0.15) return { label: 'bearish',        probabilityAdjustment: -0.04, volatilityAdjustment: +0.04 };
+  return { label: 'neutral', probabilityAdjustment: 0, volatilityAdjustment: 0 };
+}
+// ─── End VADER ────────────────────────────────────────────────────────────────
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
