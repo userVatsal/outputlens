@@ -91,8 +91,7 @@ export function PnLSummary({ analysis, shares, currencySymbol }: PnLSummaryProps
       </div>
 
       <div className="divide-y divide-border/30">
-        {/* Column headers */}
-        <div className="grid grid-cols-3 gap-2 px-4 py-2 bg-muted/30">
+        <div className="grid grid-cols-3 gap-2 px-4 py-2 bg-elevated/40">
           <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest">Scenario</span>
           <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest text-right">P&L</span>
           <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest text-right">Return / Price</span>
