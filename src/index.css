@@ -8,58 +8,58 @@
 
 @layer base {
   :root {
-    --background: 220 22% 5%;       /* #0A0C10 */
-    --foreground: 220 100% 97%;     /* #F0F4FF (off-white) */
+    --background: 222 28% 4%;        /* #060810 near-black */
+    --foreground: 215 30% 94%;       /* #EDF0F7 warm white */
 
-    --surface: 222 22% 8%;          /* #0F1117 */
-    --elevated: 220 22% 12%;        /* #161B24 */
+    --surface: 222 24% 7%;           /* #0C0F18 card bg */
+    --elevated: 222 20% 11%;         /* #141826 hover/input bg */
 
-    --card: 222 22% 8%;
-    --card-foreground: 220 100% 97%;
+    --card: 222 24% 7%;
+    --card-foreground: 215 30% 94%;
 
-    --popover: 220 22% 12%;
-    --popover-foreground: 220 100% 97%;
+    --popover: 222 20% 11%;
+    --popover-foreground: 215 30% 94%;
 
-    --primary: 189 100% 50%;        /* #00D4FF cyan — CTAs only */
-    --primary-foreground: 220 22% 5%;
-    --primary-glow: 189 100% 50%;
+    --primary: 189 96% 52%;          /* #05D9F6 electric cyan */
+    --primary-foreground: 222 28% 4%;
+    --primary-glow: 189 96% 52%;
 
-    --secondary: 220 22% 12%;
-    --secondary-foreground: 220 100% 97%;
+    --secondary: 222 20% 11%;
+    --secondary-foreground: 215 30% 94%;
 
-    --muted: 220 18% 14%;
-    --muted-foreground: 218 18% 60%; /* #8B96A8 */
+    --muted: 222 20% 11%;
+    --muted-foreground: 220 14% 55%;
 
-    --accent: 252 100% 69%;          /* #7B61FF violet — AI/model */
-    --accent-foreground: 220 100% 97%;
+    --accent: 255 85% 66%;           /* #7B61FF violet — AI only */
+    --accent-foreground: 215 30% 94%;
 
-    --destructive: 0 75% 59%;        /* #E84545 loss/tail */
-    --destructive-foreground: 220 100% 97%;
+    --destructive: 4 82% 57%;        /* #E53935 loss/tail */
+    --destructive-foreground: 215 30% 94%;
 
-    --bullish: 161 100% 39%;         /* #00C896 upside */
-    --bullish-foreground: 220 22% 5%;
-    --bearish: 0 75% 59%;
-    --bearish-foreground: 220 100% 97%;
-    --caution: 36 91% 55%;           /* #F5A623 warning */
-    --caution-foreground: 220 22% 5%;
-    --warning: 36 91% 55%;
-    --warning-foreground: 220 22% 5%;
-    --neutral: 218 18% 60%;
-    --neutral-foreground: 220 22% 5%;
+    --bullish: 158 90% 42%;          /* #0DC876 upside */
+    --bullish-foreground: 222 28% 4%;
+    --bearish: 4 82% 57%;
+    --bearish-foreground: 215 30% 94%;
+    --caution: 38 94% 55%;           /* #F5A623 warning */
+    --caution-foreground: 222 28% 4%;
+    --warning: 38 94% 55%;
+    --warning-foreground: 222 28% 4%;
+    --neutral: 220 14% 55%;
+    --neutral-foreground: 222 28% 4%;
 
-    --border: 220 18% 16%;
-    --input: 220 18% 14%;
-    --ring: 189 100% 50%;
+    --border: 222 18% 15%;
+    --input: 222 20% 11%;
+    --ring: 189 96% 52%;
 
     --radius: 0.5rem;
 
     /* Legacy tokens kept harmless for old components */
-    --navy: 220 22% 5%;
-    --navy-deep: 220 22% 4%;
-    --brand-navy: 220 22% 5%;
-    --brand-blue: 189 100% 50%;
-    --logo-navy: 220 100% 97%;
-    --logo-blue: 189 100% 50%;
+    --navy: 222 28% 4%;
+    --navy-deep: 222 28% 3%;
+    --brand-navy: 222 28% 4%;
+    --brand-blue: 189 96% 52%;
+    --logo-navy: 215 30% 94%;
+    --logo-blue: 189 96% 52%;
   }
 
   .dark { color-scheme: dark; }
@@ -71,13 +71,24 @@
 
   html, body { @apply bg-background text-foreground antialiased; }
   body {
-    font-family: 'DM Sans', system-ui, sans-serif;
+    font-family: 'Geist', 'DM Sans', system-ui, sans-serif;
     font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+    position: relative;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: radial-gradient(circle at 1px 1px, hsl(189 100% 50% / 0.04) 1px, transparent 0);
+    background-size: 28px 28px;
+    pointer-events: none;
+    z-index: 0;
   }
 
   .font-display { font-family: 'Sora', system-ui, sans-serif; letter-spacing: -0.02em; }
   .font-brand   { font-family: 'Sora', system-ui, sans-serif; }
-  .font-mono    { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }
+  .font-mono    { font-family: 'IBM Plex Mono', 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }
 
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Sora', system-ui, sans-serif;
@@ -198,13 +209,25 @@
 
   .section-container { @apply max-w-6xl mx-auto px-4 sm:px-6 lg:px-8; }
 
+  .stat-value { @apply font-mono font-semibold tabular-nums; }
+  .card-quant { @apply rounded-xl bg-surface border border-border/60 p-5; }
+  .badge-live {
+    @apply inline-flex items-center gap-1.5 rounded-full border border-bullish/25 px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-widest text-bullish;
+    background-color: hsl(var(--bullish) / 0.08);
+  }
+  .section-title {
+    @apply font-display font-bold tracking-tight text-foreground;
+    font-size: clamp(28px, 4vw, 40px);
+    letter-spacing: -0.03em;
+  }
+
   .brand-text { @apply font-brand font-bold text-foreground; }
 
   .terminal-window {
     background: hsl(var(--surface));
     border: 1px solid hsl(var(--border));
     border-radius: 0.75rem;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', 'JetBrains Mono', monospace;
   }
   .terminal-header {
     background: hsl(var(--elevated));
