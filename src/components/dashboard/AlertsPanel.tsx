@@ -14,11 +14,11 @@ interface AlertsPanelProps {
 function getSeverityStyles(severity: 'info' | 'warning' | 'critical') {
   switch (severity) {
     case 'critical':
-      return { bar: 'bg-destructive', icon: 'text-destructive', badge: 'text-destructive bg-destructive/10' };
+      return { border: 'border-l-destructive', icon: 'text-destructive' };
     case 'warning':
-      return { bar: 'bg-caution', icon: 'text-caution', badge: 'text-caution bg-caution/10' };
+      return { border: 'border-l-caution', icon: 'text-caution' };
     default:
-      return { bar: 'bg-primary', icon: 'text-primary', badge: 'text-primary bg-primary/10' };
+      return { border: 'border-l-bullish', icon: 'text-bullish' };
   }
 }
 
@@ -37,14 +37,11 @@ function AlertRow({
   return (
     <div
       className={cn(
-        'flex items-start gap-3 px-4 py-3 border-b border-border/50 last:border-0 cursor-pointer hover:bg-muted/20 transition-colors duration-100',
-        isUnread && 'bg-primary/3'
+        'flex items-start gap-3 p-3 rounded-r-lg bg-elevated/40 border-l-2 cursor-pointer hover:bg-elevated/60 transition-colors duration-100',
+        styles.border
       )}
       onClick={() => isUnread && onMarkRead(alert.id)}
     >
-      {/* Severity bar */}
-      <div className={cn('w-0.5 self-stretch rounded-full flex-shrink-0 mt-0.5', styles.bar)} />
-
       {/* Icon */}
       {alert.severity === 'critical'
         ? <AlertTriangle className={cn('h-4 w-4 flex-shrink-0 mt-0.5', styles.icon)} />
@@ -53,18 +50,18 @@ function AlertRow({
 
       {/* Content */}
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 mb-0.5">
-          <span className={cn('text-[10px] font-mono font-bold px-1.5 py-0.5 rounded uppercase tracking-wider', styles.badge)}>
-            {alert.severity}
-          </span>
+        <div className="flex items-center gap-2 mb-1">
+          {alert.asset && (
+            <span className="font-mono text-[12px] text-primary">{alert.asset}</span>
+          )}
           {isUnread && <span className="h-1.5 w-1.5 rounded-full bg-primary" />}
-          <span className="text-[11px] text-muted-foreground ml-auto font-mono">
+          <span className="text-[11px] text-muted-foreground ml-auto font-mono tabular-nums">
             {formatDistanceToNow(new Date(alert.created_at), { addSuffix: true })}
           </span>
         </div>
-        <p className="text-sm text-foreground leading-snug">{alert.message}</p>
+        <p className="text-[13px] text-foreground leading-snug">{alert.message}</p>
         {alert.delta !== null && (
-          <p className="text-xs font-mono text-muted-foreground mt-0.5">
+          <p className="text-[11px] font-mono text-muted-foreground mt-1 tabular-nums">
             Δ {alert.delta > 0 ? '+' : ''}{alert.delta.toFixed(1)} pts
           </p>
         )}
@@ -73,9 +70,9 @@ function AlertRow({
       {/* Dismiss */}
       <button
         onClick={(e) => { e.stopPropagation(); onDismiss(alert.id); }}
-        className="p-1 rounded hover:bg-muted/50 transition-colors flex-shrink-0"
+        className="p-1 rounded text-muted-foreground hover:text-foreground transition-colors flex-shrink-0 self-start"
       >
-        <X className="h-3.5 w-3.5 text-muted-foreground" />
+        <X className="h-3.5 w-3.5" />
       </button>
     </div>
   );
@@ -87,35 +84,27 @@ export function AlertsPanel({ alerts, onDismiss, onMarkRead }: AlertsPanelProps)
   const unreadCount = alerts.filter(a => !a.read_at).length;
 
   return (
-    <div className="rounded-lg overflow-hidden border border-border bg-card">
-      {/* Dark header */}
-      <div
-        className="flex items-center justify-between px-4 py-3 border-b border-border"
-        style={{ backgroundColor: 'hsl(var(--brand-navy))' }}
-      >
-        <div className="flex items-center gap-2">
-          <Bell className="h-4 w-4 text-white/60" />
-          <span className="text-sm font-mono font-semibold text-white tracking-wider uppercase">Risk Alerts</span>
-        </div>
-        {alerts.length > 0 && (
-          <span className="text-xs font-mono text-white/50">
-            {unreadCount > 0 ? `${unreadCount} unread` : `${alerts.length} total`}
+    <div className="rounded-xl bg-surface border border-border/50 p-5">
+      <div className="flex items-center gap-2 mb-4">
+        <h3 className="text-[13px] font-semibold text-foreground">Risk Alerts</h3>
+        {unreadCount > 0 && (
+          <span className="text-[10px] font-mono font-semibold text-primary bg-primary/10 border border-primary/20 rounded-md px-1.5 py-0.5">
+            {unreadCount}
           </span>
         )}
       </div>
 
-      {/* Body */}
       {alerts.length === 0 ? (
-        <div className="text-center py-10 px-4">
-          <Bell className="h-8 w-8 mx-auto mb-3 text-muted-foreground/30" />
-          <p className="text-sm font-medium text-muted-foreground">No active alerts</p>
-          <p className="text-xs text-muted-foreground/60 mt-1">
+        <div className="text-center py-8">
+          <Bell className="h-7 w-7 mx-auto mb-2 text-muted-foreground/30" />
+          <p className="text-[13px] text-muted-foreground">No active alerts</p>
+          <p className="text-[11px] text-muted-foreground/60 mt-1">
             You'll be notified when risk metrics change significantly.
           </p>
         </div>
       ) : (
         <>
-          <div className="divide-y divide-border/0">
+          <div className="space-y-2">
             {displayAlerts.map((alert) => (
               <AlertRow
                 key={alert.id}
@@ -126,8 +115,8 @@ export function AlertsPanel({ alerts, onDismiss, onMarkRead }: AlertsPanelProps)
             ))}
           </div>
           {hasMore && (
-            <div className="px-4 py-2 border-t border-border bg-muted/20">
-              <Button variant="ghost" size="sm" className="w-full text-xs" asChild>
+            <div className="mt-3 pt-3 border-t border-border/40">
+              <Button variant="ghost" size="sm" className="w-full text-[12px]" asChild>
                 <Link to="/tracked-assets">
                   View all {alerts.length} alerts
                   <ChevronRight className="h-3.5 w-3.5 ml-1" />
