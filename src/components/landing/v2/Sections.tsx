@@ -234,14 +234,26 @@ export function SocialProof() {
 }
 
 /* ───────────── PRICING ───────────── */
-const PLANS = (_annual: boolean) => [
-  { name: 'Starter', price: '$12', period: '/month', desc: 'For individual analysts getting started with probabilistic risk.',
+const ANNUAL_DISCOUNT = 0.2; // 20% off annual
+const BASE_PLANS = [
+  { name: 'Starter', monthly: 12, desc: 'For individual analysts getting started with probabilistic risk.',
     features: ['30 analyses/month', 'Global markets (UK, EU, Crypto, Forex)', '10,000 Monte Carlo paths', 'GBM + GARCH + regime switching', 'Auto AI explanations'], highlight: false, cta: 'Start free' },
-  { name: 'Pro',     price: '$29', period: '/month', desc: 'For active traders running portfolios.',
+  { name: 'Pro',     monthly: 29, desc: 'For active traders running portfolios.',
     features: ['100 analyses/month', 'Full stochastic suite + jump diffusion', 'Portfolio analysis (5 assets)', 'Neural database + auto insights', 'CSV/PDF exports', 'Unlimited history'], highlight: true, cta: 'Start free' },
-  { name: 'Trader',  price: '$79', period: '/month', desc: 'For desks running multi-asset portfolios.',
+  { name: 'Trader',  monthly: 79, desc: 'For desks running multi-asset portfolios.',
     features: ['500 analyses/month', 'Portfolio analysis (20 assets)', '100 API calls/month', 'Priority support', 'All advanced models'], highlight: false, cta: 'Start free' },
 ];
+const PLANS = (annual: boolean) => BASE_PLANS.map((p) => {
+  const effectiveMonthly = annual
+    ? Math.round(p.monthly * (1 - ANNUAL_DISCOUNT))
+    : p.monthly;
+  return {
+    ...p,
+    price: `$${effectiveMonthly}`,
+    period: '/month',
+    subPrice: annual ? `Billed $${effectiveMonthly * 12}/year` : null,
+  };
+});
 export function Pricing() {
   const [annual, setAnnual] = useState(true);
   const plans = PLANS(annual);
@@ -256,7 +268,7 @@ export function Pricing() {
             <button onClick={() => setAnnual(true)} className={`px-4 py-1.5 text-sm rounded-full transition-colors ${annual ? 'bg-primary text-primary-foreground font-semibold' : 'text-muted-foreground'}`}>Annual</button>
             <button onClick={() => setAnnual(false)} className={`px-4 py-1.5 text-sm rounded-full transition-colors ${!annual ? 'bg-primary text-primary-foreground font-semibold' : 'text-muted-foreground'}`}>Monthly</button>
           </div>
-          {annual && <span className="text-xs font-semibold uppercase tracking-wide px-2 py-1 rounded" style={{ background: 'hsl(var(--bullish) / 0.15)', color: 'hsl(var(--bullish))' }}>Save 30%</span>}
+          {annual && <span className="text-xs font-semibold uppercase tracking-wide px-2 py-1 rounded" style={{ background: 'hsl(var(--bullish) / 0.15)', color: 'hsl(var(--bullish))' }}>Save 20%</span>}
         </div>
 
         <div className="mt-10 grid md:grid-cols-3 gap-4 max-w-5xl mx-auto">
@@ -275,6 +287,7 @@ export function Pricing() {
                 <div className="font-mono font-bold text-foreground text-[40px] leading-none">{p.price}</div>
                 {p.period && <div className="text-sm text-muted-foreground">{p.period}</div>}
               </div>
+              {p.subPrice && <div className="mt-1 text-[12px] text-muted-foreground">{p.subPrice}</div>}
               <p className="mt-2 text-[13px] text-muted-foreground">{p.desc}</p>
               <Link
                 to="/auth?mode=signup"
