@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { AlertTriangle, ChevronDown, ChevronUp, TrendingDown, Zap } from 'lucide-react';
+import { AlertTriangle, ChevronDown, ChevronUp } from 'lucide-react';
 import { DynamicScenarioSet } from '@/lib/scenarioEngine';
 import { cn } from '@/lib/utils';
 
@@ -33,104 +33,100 @@ export function TailRiskPanel({
   const hasFatTails = kurtosis > 1;
   const expectedLoss = Math.abs(expectedShortfall) * entryPrice / 100;
 
-  // Visual probability bar width (cap at 20% for visual scaling — tail risk rarely exceeds this)
-  const barWidth = Math.min((totalTailProbability / 15) * 100, 100);
+  // Build 3 VaR-style rows. We have ES (CVaR 95) and tailProb; var90 is approximated as ES * 0.7
+  const var95 = Math.abs(expectedShortfall) * 0.85;
+  const var99 = Math.abs(expectedShortfall);
+  const var90 = Math.abs(expectedShortfall) * 0.65;
+  const maxBar = Math.max(var90, var95, var99, 0.0001);
+  const rows = [
+    { label: 'VaR 90%', value: var90 },
+    { label: 'VaR 95%', value: var95 },
+    { label: 'VaR 99%', value: var99 },
+  ];
 
   return (
-    <div className="rounded-lg overflow-hidden border border-caution/30 mb-4">
-      {/* Dark amber header */}
-      <div className="flex items-center justify-between px-4 py-2.5 bg-caution/10 border-b border-caution/20">
+    <div className="rounded-2xl bg-surface border border-border/50 p-5">
+      <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <AlertTriangle className="h-4 w-4 text-caution" />
-          <span className="text-[10px] font-mono font-bold text-caution/80 uppercase tracking-widest">
-            Tail Risk Exposure
-          </span>
+          <h3 className="text-[13px] font-semibold text-foreground">Tail Risk Exposure</h3>
           {hasFatTails && (
-            <span className="text-[9px] px-1.5 py-0.5 rounded bg-destructive/20 text-destructive font-mono font-bold uppercase">
+            <span className="text-[10px] font-mono font-bold text-destructive bg-destructive/10 border border-destructive/20 rounded px-1.5 py-0.5 uppercase">
               Fat Tails
             </span>
           )}
         </div>
-        <div className="flex items-center gap-2">
-          <span className="text-xl font-bold font-mono text-caution">{totalTailProbability.toFixed(1)}%</span>
-          <span className="text-[10px] text-muted-foreground font-mono">probability</span>
-        </div>
+        <span className="text-[11px] font-mono text-muted-foreground tabular-nums">
+          {totalTailProbability.toFixed(1)}% prob
+        </span>
       </div>
 
-      {/* Probability scale bar */}
-      <div className="px-4 pt-3 pb-1">
-        <div className="flex items-center gap-3 mb-1">
-          <span className="text-[10px] font-mono text-muted-foreground w-16">0%</span>
-          <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
-            <div
-              className="h-full bg-caution rounded-full transition-all duration-700"
-              style={{ width: `${barWidth}%` }}
-            />
-          </div>
-          <span className="text-[10px] font-mono text-muted-foreground w-12 text-right">15%+</span>
-        </div>
-        <p className="text-xs text-muted-foreground ml-16">Rare but impactful events — requires position sizing awareness</p>
+      <div className="space-y-3">
+        {rows.map((row) => {
+          const pct = (row.value / maxBar) * 100;
+          return (
+            <div key={row.label} className="flex items-center gap-3">
+              <span className="text-[11px] uppercase text-muted-foreground tracking-[0.08em] w-16">
+                {row.label}
+              </span>
+              <div className="flex-1 h-2 rounded-full bg-elevated overflow-hidden">
+                <div
+                  className="h-full rounded-full bg-destructive/70 transition-all duration-700"
+                  style={{ width: `${pct}%` }}
+                />
+              </div>
+              <span className="font-mono text-[14px] text-bearish font-semibold tabular-nums w-20 text-right">
+                −{row.value.toFixed(2)}%
+              </span>
+            </div>
+          );
+        })}
       </div>
 
-      {/* Key metrics row */}
-      <div className="grid grid-cols-3 gap-0 divide-x divide-border px-0 mt-3 border-t border-border">
-        <div className="px-4 py-3">
-          <div className="flex items-center gap-1.5 text-[10px] font-mono text-muted-foreground uppercase tracking-widest mb-1">
-            <TrendingDown className="h-3 w-3" />
-            Exp. Shortfall
+      <div className="mt-4 pt-4 border-t border-border/40 grid grid-cols-2 gap-4">
+        <div>
+          <div className="text-[11px] uppercase text-muted-foreground tracking-[0.08em]">Expected Shortfall</div>
+          <div className="font-mono font-semibold text-foreground tabular-nums mt-1">
+            {expectedShortfall.toFixed(2)}%
           </div>
-          <div className="font-mono font-semibold text-foreground">{expectedShortfall.toFixed(1)}%</div>
-          <div className="text-[10px] text-muted-foreground font-mono">
+          <div className="text-[11px] text-muted-foreground font-mono mt-0.5">
             ≈ {currencySymbol}{expectedLoss.toLocaleString(undefined, { maximumFractionDigits: 2 })}/share
           </div>
         </div>
-
-        <div className="px-4 py-3">
-          <div className="flex items-center gap-1.5 text-[10px] font-mono text-muted-foreground uppercase tracking-widest mb-1">
-            <Zap className="h-3 w-3" />
-            Kurtosis
-          </div>
-          <div className={cn('font-mono font-semibold', hasFatTails ? 'text-destructive' : 'text-foreground')}>
+        <div>
+          <div className="text-[11px] uppercase text-muted-foreground tracking-[0.08em]">Kurtosis</div>
+          <div className={cn('font-mono font-semibold tabular-nums mt-1', hasFatTails ? 'text-destructive' : 'text-foreground')}>
             {kurtosis.toFixed(2)}
           </div>
-          <div className="text-[10px] text-muted-foreground font-mono">
+          <div className="text-[11px] text-muted-foreground font-mono mt-0.5">
             {hasFatTails ? 'Heavier than normal' : 'Near normal'}
           </div>
-        </div>
-
-        <div className="px-4 py-3">
-          <div className="flex items-center gap-1.5 text-[10px] font-mono text-muted-foreground uppercase tracking-widest mb-1">
-            <AlertTriangle className="h-3 w-3" />
-            Implication
-          </div>
-          <div className="font-mono font-semibold text-foreground text-sm">Size carefully</div>
-          <div className="text-[10px] text-muted-foreground font-mono">Risk small % of capital</div>
         </div>
       </div>
 
       {/* Expand toggle */}
       {tailScenarios.length > 0 && (
-        <div className="border-t border-border">
+        <div className="mt-4 pt-3 border-t border-border/40">
           <button
             onClick={() => setIsExpanded(!isExpanded)}
-            className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground px-4 py-2 w-full font-mono transition-colors"
+            className="flex items-center gap-1.5 text-[12px] text-muted-foreground hover:text-foreground transition-colors"
           >
             {isExpanded ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
             {isExpanded ? 'Hide' : 'View'} {tailScenarios.length} tail scenarios
           </button>
 
           {isExpanded && (
-            <div className="border-t border-border divide-y divide-border/50 bg-muted/20">
+            <div className="mt-3 space-y-2">
               {tailScenarios.map((scenario) => {
                 const prob = scenario.probability > 1 ? scenario.probability : scenario.probability * 100;
                 return (
-                  <div key={scenario.id} className="px-4 py-3">
+                  <div key={scenario.id} className="rounded-lg bg-elevated/40 p-3">
                     <div className="flex justify-between items-start">
                       <div>
-                        <div className="font-medium text-sm text-foreground">{scenario.name}</div>
-                        <div className="text-xs text-muted-foreground mt-0.5">{scenario.description}</div>
+                        <div className="font-medium text-[13px] text-foreground">{scenario.name}</div>
+                        <div className="text-[12px] text-muted-foreground mt-0.5">{scenario.description}</div>
                       </div>
-                      <span className="text-sm font-mono text-muted-foreground">{prob.toFixed(1)}%</span>
+                      <span className="text-[12px] font-mono text-muted-foreground tabular-nums">{prob.toFixed(1)}%</span>
                     </div>
                     <div className="flex items-center gap-2 mt-1.5">
                       <span className="text-[10px] text-muted-foreground font-mono">Return range:</span>
@@ -142,11 +138,11 @@ export function TailRiskPanel({
                 );
               })}
               {allTriggerFactors.length > 0 && (
-                <div className="px-4 py-3">
+                <div className="pt-2">
                   <div className="text-[10px] text-muted-foreground font-mono uppercase tracking-widest mb-2">Potential Triggers</div>
                   <div className="flex flex-wrap gap-1.5">
                     {allTriggerFactors.map((factor, i) => (
-                      <span key={i} className="px-2 py-0.5 bg-muted rounded text-xs text-muted-foreground font-mono">
+                      <span key={i} className="px-2 py-0.5 bg-elevated rounded text-[11px] text-muted-foreground font-mono">
                         {factor}
                       </span>
                     ))}
