@@ -51,9 +51,9 @@ function AlertRow({
       {/* Content */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-1">
-          {alert.asset && (
-            <span className="font-mono text-[12px] text-primary">{alert.asset}</span>
-          )}
+          <span className="font-mono text-[11px] text-primary uppercase tracking-wider">
+            {alert.alert_type.replace(/_/g, ' ')}
+          </span>
           {isUnread && <span className="h-1.5 w-1.5 rounded-full bg-primary" />}
           <span className="text-[11px] text-muted-foreground ml-auto font-mono tabular-nums">
             {formatDistanceToNow(new Date(alert.created_at), { addSuffix: true })}
