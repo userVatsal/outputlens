@@ -1,5 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useCallback } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 import { SubscriptionPlan, PLAN_CONFIG, planHasFeature, getPlanLimit } from '@/lib/stripe';
 
 export interface PlanData {
@@ -10,65 +12,40 @@ export interface PlanData {
 }
 
 export function usePlan() {
-  const [planData, setPlanData] = useState<PlanData>({
+  const { session, userId, loading: authLoading } = useAuth();
+  const queryClient = useQueryClient();
+
+  const { data, error, isLoading } = useQuery({
+    queryKey: ['subscription', userId],
+    enabled: !authLoading,
+    // Cache for 5 minutes; refetch on auth changes via queryKey invalidation
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+    queryFn: async (): Promise<PlanData> => {
+      if (!session) {
+        return { plan: 'free', subscribed: false, subscriptionEnd: null, isLoading: false };
+      }
+      const { data, error: fnError } = await supabase.functions.invoke('check-subscription');
+      if (fnError) throw fnError;
+      return {
+        plan: data?.plan || 'free',
+        subscribed: data?.subscribed || false,
+        subscriptionEnd: data?.subscription_end || null,
+        isLoading: false,
+      };
+    },
+  });
+
+  const planData: PlanData = data ?? {
     plan: 'free',
     subscribed: false,
     subscriptionEnd: null,
-    isLoading: true,
-  });
-  const [error, setError] = useState<string | null>(null);
+    isLoading: isLoading || authLoading,
+  };
 
   const checkSubscription = useCallback(async () => {
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        setPlanData({
-          plan: 'free',
-          subscribed: false,
-          subscriptionEnd: null,
-          isLoading: false,
-        });
-        return;
-      }
-
-      const { data, error: fnError } = await supabase.functions.invoke('check-subscription');
-      
-      if (fnError) {
-        console.error('Error checking subscription:', fnError);
-        setError(fnError.message);
-        setPlanData(prev => ({ ...prev, isLoading: false }));
-        return;
-      }
-
-      setPlanData({
-        plan: data.plan || 'free',
-        subscribed: data.subscribed || false,
-        subscriptionEnd: data.subscription_end || null,
-        isLoading: false,
-      });
-    } catch (err) {
-      console.error('Error in checkSubscription:', err);
-      setError(err instanceof Error ? err.message : 'Unknown error');
-      setPlanData(prev => ({ ...prev, isLoading: false }));
-    }
-  }, []);
-
-  useEffect(() => {
-    checkSubscription();
-
-    // Refresh subscription status every minute
-    const interval = setInterval(checkSubscription, 60000);
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
-      checkSubscription();
-    });
-
-    return () => {
-      clearInterval(interval);
-      subscription.unsubscribe();
-    };
-  }, [checkSubscription]);
+    await queryClient.invalidateQueries({ queryKey: ['subscription', userId] });
+  }, [queryClient, userId]);
 
   const createCheckoutSession = async (priceId: string) => {
     try {
@@ -120,7 +97,8 @@ export function usePlan() {
 
   return {
     ...planData,
-    error,
+    isLoading: isLoading || authLoading,
+    error: error instanceof Error ? error.message : null,
     planConfig,
     checkSubscription,
     createCheckoutSession,
