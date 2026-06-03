@@ -532,7 +532,7 @@ export default function CEODashboard() {
                           {/* User */}
                           <td className="px-4 py-3">
                             <div className="flex items-center gap-2">
-                              <div className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold text-primary flex-shrink-0">
+                              <div className="h-8 w-8 rounded-full bg-gradient-to-br from-primary/30 to-primary/5 ring-1 ring-primary/20 flex items-center justify-center text-xs font-bold text-primary flex-shrink-0">
                                 {(user.full_name?.[0] || '?').toUpperCase()}
                               </div>
                               <div>
