@@ -145,27 +145,18 @@ export function ActionPanel({ analysis, onNewAnalysis, isHistorical }: ActionPan
   ];
 
   return (
-    <div className="rounded-lg border border-border overflow-hidden">
-      {/* Dark header */}
-      <div
-        className="px-4 py-2.5 border-b border-border/50"
-        style={{ backgroundColor: 'hsl(var(--brand-navy))' }}
-      >
-        <span className="text-[10px] font-mono font-bold text-white/50 uppercase tracking-widest">Actions</span>
-      </div>
-
-      {/* Horizontal action bar */}
-      <div className="flex flex-wrap gap-1 p-3 bg-card">
+    <div className="rounded-2xl border border-border/50 bg-surface p-5">
+      <div className="flex flex-wrap gap-2">
         {actions.map((action) => (
           <button
             key={action.label}
             onClick={action.onClick}
             disabled={isExporting && action.label.includes('Export')}
             className={cn(
-              'relative flex items-center gap-1.5 px-3 py-1.5 rounded text-sm font-medium transition-all duration-100',
-              'border border-border hover:border-primary/40 hover:bg-primary/5 hover:text-primary',
-              action.active && 'border-bullish/30 bg-bullish/5 text-bullish',
-              'text-muted-foreground'
+              'relative inline-flex items-center gap-2 border border-border/50 rounded-xl h-10 px-4 text-[13px] transition-all',
+              'text-muted-foreground hover:text-foreground hover:border-foreground/20',
+              action.active && 'border-bullish/30 text-bullish bg-bullish/[0.04]',
+              'disabled:opacity-50'
             )}
           >
             {action.icon}
@@ -180,11 +171,9 @@ export function ActionPanel({ analysis, onNewAnalysis, isHistorical }: ActionPan
       </div>
 
       {isHistorical && (
-        <div className="px-4 py-2 border-t border-border bg-muted/20">
-          <p className="text-xs text-muted-foreground font-mono">
-            📜 Viewing historical analysis · Some actions may not be available
-          </p>
-        </div>
+        <p className="mt-3 text-[11px] text-muted-foreground font-mono">
+          Viewing historical analysis · Some actions may not be available
+        </p>
       )}
 
       <TrackAssetModal open={showTrackModal} onOpenChange={setShowTrackModal} analysis={analysis} />
