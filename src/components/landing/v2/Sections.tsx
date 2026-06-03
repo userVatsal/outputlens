@@ -13,12 +13,29 @@ export function Hero() {
         className="absolute inset-0 pointer-events-none"
         style={{ background: 'radial-gradient(ellipse 70% 55% at 50% -5%, hsl(189 100% 50% / 0.07), transparent 65%)' }}
       />
+      {/* Decorative grid / glow svg layer */}
+      <svg
+        className="absolute inset-0 w-full h-full pointer-events-none opacity-[0.35]"
+        aria-hidden
+      >
+        <defs>
+          <pattern id="hero-grid" width="56" height="56" patternUnits="userSpaceOnUse">
+            <path d="M 56 0 L 0 0 0 56" fill="none" stroke="hsl(189 100% 50% / 0.06)" strokeWidth="1" />
+          </pattern>
+          <radialGradient id="hero-glow" cx="50%" cy="0%" r="60%">
+            <stop offset="0%" stopColor="hsl(189 100% 50% / 0.15)" />
+            <stop offset="100%" stopColor="hsl(189 100% 50% / 0)" />
+          </radialGradient>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#hero-grid)" />
+        <rect width="100%" height="100%" fill="url(#hero-glow)" />
+      </svg>
       <div className="relative w-full max-w-[1280px] mx-auto px-6 grid lg:grid-cols-5 gap-12 lg:gap-14 items-center">
         {/* Left: 60% */}
         <div className="lg:col-span-3">
           <div
-            className="border-l-2 border-primary pl-3 font-mono text-primary text-[11px] uppercase"
-            style={{ letterSpacing: '0.15em', animation: 'fade-up 500ms ease-out both' }}
+            className="border-l-2 border-primary pl-3 font-mono text-primary text-[11px] uppercase animate-fade-up stagger-1"
+            style={{ letterSpacing: '0.15em' }}
           >
             Institutional-Grade Risk Intelligence
           </div>
@@ -28,23 +45,25 @@ export function Hero() {
               fontSize: 'clamp(36px, 5.5vw, 58px)',
               letterSpacing: '-0.03em',
               lineHeight: 1.02,
-              animation: 'fade-up 600ms ease-out 100ms both',
             }}
           >
-            <span className="block text-foreground">The market is a</span>
-            <span className="block text-primary">distribution.</span>
-            <span className="block text-foreground">Trade it like one.</span>
+            <span className="block text-foreground animate-fade-up stagger-2">The market is a</span>
+            <span
+              className="block text-primary animate-fade-up stagger-3"
+              style={{ borderBottom: '2px solid hsl(189 100% 50% / 0.4)', paddingBottom: 2, width: 'fit-content' }}
+            >distribution.</span>
+            <span className="block text-foreground animate-fade-up stagger-4">Trade it like one.</span>
           </h1>
           <p
-            className="mt-5 text-muted-foreground"
-            style={{ fontSize: 16, lineHeight: 1.75, maxWidth: 460, animation: 'fade-up 700ms ease-out 200ms both' }}
+            className="mt-5 text-muted-foreground animate-fade-up stagger-5"
+            style={{ fontSize: 16, lineHeight: 1.75, maxWidth: 460 }}
           >
             OutputLens runs 10,000 Monte Carlo simulations on any asset — giving you the full probability of outcomes, not a forecast.
           </p>
-          <div className="mt-8 flex flex-wrap gap-3" style={{ animation: 'fade-up 700ms ease-out 300ms both' }}>
+          <div className="mt-8 flex flex-wrap gap-3 animate-fade-up stagger-6">
             <Link
               to="/auth?mode=signup"
-              className="inline-flex items-center gap-2 rounded-lg bg-primary text-primary-foreground font-semibold text-sm px-6 py-3 hover:brightness-110 transition-all min-h-[48px]"
+              className="btn-primary inline-flex items-center gap-2 rounded-lg bg-primary text-primary-foreground font-semibold text-sm px-6 py-3 min-h-[48px]"
             >
               Analyse a Position Free →
             </Link>
@@ -56,8 +75,8 @@ export function Hero() {
             </a>
           </div>
           <div
-            className="mt-5 flex flex-wrap items-center gap-x-3 gap-y-2 text-[12px] text-foreground/35"
-            style={{ animation: 'fade-up 700ms ease-out 400ms both' }}
+            className="mt-5 flex flex-wrap items-center gap-x-3 gap-y-2 text-[12px] text-foreground/35 animate-fade-up"
+            style={{ animationDelay: '350ms' }}
           >
             <span>✓ No credit card</span>
             <span aria-hidden>·</span>
@@ -68,7 +87,7 @@ export function Hero() {
         </div>
 
         {/* Right: 40% — Chart */}
-        <div className="lg:col-span-2 relative">
+        <div className="lg:col-span-2 relative animate-scale-in" style={{ animationDelay: '200ms' }}>
           <div className="rounded-xl border border-border bg-surface p-4 md:p-5 relative shadow-[0_4px_24px_hsl(var(--primary)/0.08)]">
             <div className="hidden lg:block">
               <FanChart height={380} />
@@ -78,14 +97,14 @@ export function Hero() {
             </div>
 
             <div
-              className="absolute -top-3 -right-3 rounded-lg bg-elevated border border-border px-3 py-2 font-mono text-[12px] font-semibold shadow-[0_4px_24px_hsl(var(--primary)/0.08)]"
-              style={{ color: 'hsl(var(--bullish))', animation: 'fade-up 600ms ease-out 1000ms both' }}
+              className="absolute -top-3 -right-3 rounded-lg bg-elevated border border-border px-3 py-2 font-mono text-[12px] font-semibold shadow-[0_4px_24px_hsl(var(--primary)/0.08)] animate-fade-up animate-float"
+              style={{ color: 'hsl(var(--bullish))', animationDelay: '700ms' }}
             >
               P95 +34.2%
             </div>
             <div
-              className="absolute -bottom-3 -left-3 rounded-lg bg-elevated border border-border px-3 py-2 font-mono text-[12px] font-semibold shadow-[0_4px_24px_hsl(var(--primary)/0.08)]"
-              style={{ color: 'hsl(var(--bearish))', animation: 'fade-up 600ms ease-out 1100ms both' }}
+              className="absolute -bottom-3 -left-3 rounded-lg bg-elevated border border-border px-3 py-2 font-mono text-[12px] font-semibold shadow-[0_4px_24px_hsl(var(--primary)/0.08)] animate-fade-up animate-float"
+              style={{ color: 'hsl(var(--bearish))', animationDelay: '800ms' }}
             >
               CVaR 95% −12.1%
             </div>
