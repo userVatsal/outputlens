@@ -325,9 +325,20 @@ export function Pricing() {
 /* ───────────── FOOTER ───────────── */
 export function FooterV2() {
   const cols: Array<{ title: string; links: Array<{ label: string; to: string }> }> = [
-    { title: 'Product', links: [{ label: 'Features', to: '#features' }, { label: 'Pricing', to: '#pricing' }, { label: 'Changelog', to: '/about' }, { label: 'Status', to: '/about' }] },
-    { title: 'Company', links: [{ label: 'About', to: '/about' }, { label: 'Blog', to: '/blog' }, { label: 'Careers', to: '/about' }, { label: 'Contact', to: '/about' }] },
-    { title: 'Legal',   links: [{ label: 'Privacy', to: '/privacy' }, { label: 'Terms', to: '/terms' }, { label: 'Security', to: '/privacy' }, { label: 'Data Processing', to: '/privacy' }] },
+    { title: 'Product', links: [
+      { label: 'Features', to: '#features' },
+      { label: 'Pricing', to: '#pricing' },
+      { label: 'Methodology', to: '/methodology' },
+    ]},
+    { title: 'Company', links: [
+      { label: 'About', to: '/about' },
+      { label: 'Blog', to: '/blog' },
+      { label: 'Contact', to: 'mailto:contact@outputlens.com' },
+    ]},
+    { title: 'Legal',   links: [
+      { label: 'Privacy', to: '/privacy' },
+      { label: 'Terms', to: '/terms' },
+    ]},
   ];
   return (
     <footer className="bg-surface border-t border-border pt-12 pb-8">
@@ -344,7 +355,9 @@ export function FooterV2() {
             <ul className="mt-3 space-y-2">
               {c.links.map((l) => (
                 <li key={l.label}>
-                  {l.to.startsWith('#') ? (
+                  {l.to.startsWith('mailto:') ? (
+                    <a href={l.to} className="text-[13px] text-muted-foreground hover:text-foreground transition-colors">{l.label}</a>
+                  ) : l.to.startsWith('#') ? (
                     <a href={l.to} className="text-[13px] text-muted-foreground hover:text-foreground transition-colors">{l.label}</a>
                   ) : (
                     <Link to={l.to} className="text-[13px] text-muted-foreground hover:text-foreground transition-colors">{l.label}</Link>
