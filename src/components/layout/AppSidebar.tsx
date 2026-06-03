@@ -3,17 +3,32 @@ import {
   Sparkles, LayoutGrid, Briefcase, History, Star,
   Radio, Bell, Grid3x3, Calculator, Network, Wand2,
   PanelLeftClose, PanelLeftOpen,
+  BookOpen, Sunrise, Radar, FlaskConical,
 } from 'lucide-react';
 import { useStreak } from '@/hooks/useStreak';
 import { useAlertsCount } from '@/hooks/useAlertsCount';
 import { useProfile } from '@/hooks/useProfile';
+import { useJournal } from '@/hooks/useJournal';
+import { useTrackedAssets } from '@/hooks/useTrackedAssets';
+import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 
-const groups = [
+type NavItem = {
+  to: string;
+  label: string;
+  icon: any;
+  live?: boolean;
+  alerts?: boolean;
+  dotKind?: 'today' | 'warning' | 'alert';
+};
+
+const groups: { label: string; items: NavItem[] }[] = [
   {
     label: 'Workspace',
     items: [
       { to: '/dashboard',       label: 'Dashboard',          icon: LayoutGrid },
+      { to: '/briefing',        label: 'Morning Briefing',   icon: Sunrise, dotKind: 'today' },
+      { to: '/journal',         label: 'Risk Journal',       icon: BookOpen, dotKind: 'warning' },
       { to: '/workspace?mode=portfolio', label: 'Portfolio Analysis', icon: Briefcase },
       { to: '/history',         label: 'Simulation History', icon: History },
       { to: '/scenarios',       label: 'Saved Scenarios',    icon: Star },
@@ -22,20 +37,38 @@ const groups = [
   {
     label: 'Intelligence',
     items: [
-      { to: '/regime', label: 'Regime Monitor', icon: Radio,    live: true },
-      { to: '/alerts', label: 'Risk Alerts',    icon: Bell,     alerts: true },
+      { to: '/pulse',  label: 'Risk Pulse',      icon: Radar, dotKind: 'alert' },
+      { to: '/regime', label: 'Regime Monitor',  icon: Radio,  live: true },
+      { to: '/alerts', label: 'Risk Alerts',     icon: Bell,   alerts: true },
       { to: '/tracked-assets', label: 'Market Heatmap', icon: Grid3x3 },
     ],
   },
   {
     label: 'Tools',
     items: [
-      { to: '/var',                        label: 'VaR Calculator',    icon: Calculator },
+      { to: '/stress-test',                label: 'Stress Test',        icon: FlaskConical },
+      { to: '/var',                        label: 'VaR Calculator',     icon: Calculator },
       { to: '/workspace?tool=correlation', label: 'Correlation Matrix', icon: Network },
       { to: '/scenarios?new=1',            label: 'Scenario Builder',   icon: Wand2 },
     ],
   },
 ];
+
+function todayKey() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+function NavDot({ color }: { color: 'cyan' | 'orange' | 'red' }) {
+  const bg = color === 'cyan' ? 'hsl(var(--primary))' : color === 'orange' ? 'hsl(var(--caution))' : 'hsl(var(--bearish))';
+  const animate = color === 'cyan' ? 'animate-pulse' : '';
+  return (
+    <span
+      className={cn('absolute top-1 right-1 w-2 h-2 rounded-full', animate)}
+      style={{ background: bg, boxShadow: `0 0 6px ${bg}` }}
+    />
+  );
+}
 
 interface Props {
   collapsed: boolean;
@@ -47,6 +80,35 @@ export function AppSidebar({ collapsed, onToggle }: Props) {
   const { streak } = useStreak();
   const alertsCount = useAlertsCount();
   const { profile } = useProfile();
+  const { openEntries } = useJournal();
+  const { trackedAssets } = useTrackedAssets();
+  const [briefingSeen, setBriefingSeen] = useState(true);
+
+  useEffect(() => {
+    try {
+      setBriefingSeen(localStorage.getItem(`ol_briefing_seen_${todayKey()}`) === '1');
+    } catch { /* noop */ }
+    const id = setInterval(() => {
+      try { setBriefingSeen(localStorage.getItem(`ol_briefing_seen_${todayKey()}`) === '1'); } catch { /* noop */ }
+    }, 5000);
+    return () => clearInterval(id);
+  }, [pathname]);
+
+  const oldOpenTrade = openEntries.some(e => {
+    const days = (Date.now() - new Date(e.entry_date).getTime()) / 86400000;
+    return days > 7;
+  });
+  const elevatedAlert = trackedAssets.some(a => (a.risk_delta ?? 0) > 0.10);
+
+  const showDot = (kind?: 'today' | 'warning' | 'alert') => {
+    if (kind === 'today') return !briefingSeen;
+    if (kind === 'warning') return oldOpenTrade;
+    if (kind === 'alert') return elevatedAlert;
+    return false;
+  };
+  const dotColor = (kind?: 'today' | 'warning' | 'alert'): 'cyan' | 'orange' | 'red' =>
+    kind === 'today' ? 'cyan' : kind === 'warning' ? 'orange' : 'red';
+
   const displayName = profile?.display_name || profile?.full_name || 'Account';
   const initials = displayName.split(' ').map((s) => s[0]).slice(0, 2).join('').toUpperCase();
 
@@ -138,6 +200,7 @@ export function AppSidebar({ collapsed, onToggle }: Props) {
                     >
                       <Icon className="h-4 w-4 flex-shrink-0" />
                       {!collapsed && <span className="flex-1 truncate">{item.label}</span>}
+                      {showDot(item.dotKind) && <NavDot color={dotColor(item.dotKind)} />}
                       {!collapsed && isDashboard && streak > 1 && (
                         <span className="flex items-center gap-0.5 text-[11px] font-mono text-caution tabular-nums flex-shrink-0">
                           🔥 {streak}
