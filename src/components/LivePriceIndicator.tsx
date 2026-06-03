@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useMarketData, LiveMarketData } from '@/hooks/useMarketData';
 import { Market } from '@/types/trade';
 
