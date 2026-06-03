@@ -1,4 +1,4 @@
-import { AlertTriangle, Info, X, ChevronRight, Bell } from 'lucide-react';
+import { AlertTriangle, Info, X, ChevronRight, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { RiskAlert } from '@/hooks/useTrackedAssets';
 import { cn } from '@/lib/utils';
@@ -38,7 +38,8 @@ function AlertRow({
     <div
       className={cn(
         'flex items-start gap-3 p-3 rounded-r-lg bg-elevated/40 border-l-2 cursor-pointer hover:bg-elevated/60 transition-colors duration-100',
-        styles.border
+        styles.border,
+        isUnread && 'animate-border-glow'
       )}
       onClick={() => isUnread && onMarkRead(alert.id)}
     >
@@ -96,8 +97,8 @@ export function AlertsPanel({ alerts, onDismiss, onMarkRead }: AlertsPanelProps)
 
       {alerts.length === 0 ? (
         <div className="text-center py-8">
-          <Bell className="h-7 w-7 mx-auto mb-2 text-muted-foreground/30" />
-          <p className="text-[13px] text-muted-foreground">No active alerts</p>
+          <CheckCircle2 className="h-10 w-10 mx-auto mb-3 text-bullish/40" strokeWidth={1.5} />
+          <p className="text-[13px] text-muted-foreground">All clear. No active alerts.</p>
           <p className="text-[11px] text-muted-foreground/60 mt-1">
             You'll be notified when risk metrics change significantly.
           </p>
