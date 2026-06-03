@@ -1,17 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { 
-  FileText, 
-  TrendingUp, 
-  TrendingDown, 
-  Calendar, 
-  ChevronRight,
+import {
+  TrendingUp,
+  TrendingDown,
+  ArrowRight,
   RefreshCw,
-  BarChart3
+  BarChart3,
 } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/integrations/supabase/client';
 import { MARKETS, Market, TradeDirection } from '@/types/trade';
@@ -65,114 +61,100 @@ export function RecentReports() {
   };
 
   return (
-    <Card>
-      <CardHeader className="pb-3">
-        <CardTitle className="text-base flex items-center gap-2">
-          <FileText className="h-4 w-4 text-primary" />
-          Historical Risk Reports
+    <div className="rounded-xl bg-surface border border-border/50 p-5">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-[13px] font-semibold text-foreground">
+          Historical Reports
           {reports.length > 0 && (
-            <Badge variant="secondary" className="ml-auto">
+            <span className="ml-2 text-[10px] font-mono text-muted-foreground bg-elevated border border-border/40 rounded px-1.5 py-0.5">
               {reports.length}
-            </Badge>
+            </span>
           )}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        {loading ? (
-          <div className="space-y-3">
-            {[1, 2, 3].map((i) => (
-              <Skeleton key={i} className="h-16 w-full" />
-            ))}
-          </div>
-        ) : reports.length === 0 ? (
-          <div className="text-center py-6 text-muted-foreground">
-            <FileText className="h-8 w-8 mx-auto mb-2 opacity-50" />
-            <p className="text-sm font-medium">No analysis history</p>
-            <p className="text-xs mb-4">Run your first analysis to build your history.</p>
-            <Button size="sm" asChild>
-              <Link to="/workspace">
-                <BarChart3 className="h-4 w-4 mr-1.5" />
-                Run Analysis
-              </Link>
-            </Button>
-          </div>
-        ) : (
-          <div className="space-y-2">
-            {reports.map((report) => {
-              const marketInfo = MARKETS[report.market];
-              const date = new Date(report.created_at);
-              
-              return (
-                <div
-                  key={report.id}
-                  className="flex items-center justify-between p-3 rounded-lg border border-border hover:border-primary/40 hover:bg-muted/30 transition-all group cursor-pointer"
-                  onClick={() => handleViewReport(report.id)}
-                >
-                  <div className="flex items-center gap-3">
-                    <div className={cn(
-                      "p-2 rounded-lg",
-                      report.direction === 'long' ? 'bg-bullish/10' : 'bg-bearish/10'
-                    )}>
-                      {report.direction === 'long' ? (
-                        <TrendingUp className="h-4 w-4 text-bullish" />
-                      ) : (
-                        <TrendingDown className="h-4 w-4 text-bearish" />
-                      )}
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="font-mono font-semibold text-foreground">
-                          {report.asset}
-                        </span>
-                        <Badge 
-                          variant="outline" 
-                          className={cn(
-                            "text-[10px] px-1.5",
-                            report.direction === 'long' 
-                              ? 'text-bullish border-bullish/30' 
-                              : 'text-bearish border-bearish/30'
-                          )}
-                        >
-                          {report.direction.toUpperCase()}
-                        </Badge>
-                      </div>
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <Calendar className="h-3 w-3" />
-                        <span>{format(date, 'MMM d, yyyy')}</span>
-                        <span>•</span>
-                        <span>{marketInfo.currencySymbol}{report.entry_price.toLocaleString()}</span>
-                      </div>
-                    </div>
+        </h2>
+        {reports.length > 0 && (
+          <Link to="/history" className="text-[12px] text-primary hover:underline inline-flex items-center gap-1 font-medium">
+            View all <ArrowRight className="h-3 w-3" />
+          </Link>
+        )}
+      </div>
+
+      {loading ? (
+        <div className="space-y-2">
+          {[1, 2, 3].map((i) => (
+            <Skeleton key={i} className="h-12 w-full" />
+          ))}
+        </div>
+      ) : reports.length === 0 ? (
+        <div className="text-center py-8">
+          <p className="text-[13px] font-medium text-muted-foreground">No analysis history</p>
+          <p className="text-[11px] text-muted-foreground/70 mb-4">Run your first analysis to build your history.</p>
+          <Button size="sm" asChild>
+            <Link to="/workspace">
+              <BarChart3 className="h-4 w-4 mr-1.5" />
+              Run Analysis
+            </Link>
+          </Button>
+        </div>
+      ) : (
+        <div className="space-y-1.5">
+          {reports.map((report) => {
+            const marketInfo = MARKETS[report.market];
+            const date = new Date(report.created_at);
+
+            return (
+              <div
+                key={report.id}
+                className="flex items-center justify-between gap-3 p-3 rounded-lg hover:bg-elevated/40 transition-colors group cursor-pointer"
+                onClick={() => handleViewReport(report.id)}
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className={cn(
+                    'w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0',
+                    report.direction === 'long' ? 'bg-bullish/10' : 'bg-bearish/10'
+                  )}>
+                    {report.direction === 'long' ? (
+                      <TrendingUp className="h-4 w-4 text-bullish" />
+                    ) : (
+                      <TrendingDown className="h-4 w-4 text-bearish" />
+                    )}
                   </div>
-                  
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleRerun(report.asset, report.market);
-                      }}
-                      title="Re-run Risk Analysis"
-                    >
-                      <RefreshCw className="h-4 w-4" />
-                    </Button>
-                    <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono font-medium text-[13px] text-foreground">
+                        {report.asset}
+                      </span>
+                      <span className={cn(
+                        'text-[10px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded border',
+                        report.direction === 'long'
+                          ? 'text-bullish border-bullish/30 bg-bullish/5'
+                          : 'text-bearish border-bearish/30 bg-bearish/5'
+                      )}>
+                        {report.direction}
+                      </span>
+                    </div>
+                    <div className="text-[11px] text-muted-foreground font-mono tabular-nums mt-0.5">
+                      {format(date, 'MMM d, yyyy')} · {marketInfo.currencySymbol}{report.entry_price.toLocaleString()}
+                    </div>
                   </div>
                 </div>
-              );
-            })}
-            
-            <Button variant="ghost" size="sm" className="w-full mt-2" asChild>
-              <Link to="/history">
-                View Full History
-                <ChevronRight className="h-4 w-4 ml-1" />
-              </Link>
-            </Button>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleRerun(report.asset, report.market);
+                  }}
+                  title="Re-run analysis"
+                >
+                  <RefreshCw className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
   );
 }
