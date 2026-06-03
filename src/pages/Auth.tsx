@@ -183,54 +183,26 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2 bg-background">
-      {/* LEFT — brand, chart, rotating testimonials */}
-      <div className="hidden lg:flex flex-col justify-center p-12 relative bg-background">
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{ background: 'radial-gradient(ellipse 70% 50% at 30% 30%, hsl(189 100% 50% / 0.07), transparent 60%)' }}
-        />
-        <div className="relative max-w-md">
-          <Link to="/" className="font-display text-xl font-bold tracking-tight inline-block mb-10">
-            <span className="text-foreground">Output</span><span className="text-primary">Lens</span>
+    <div className="min-h-screen grid grid-cols-1 lg:grid-cols-[55fr_45fr] bg-background">
+      {/* LEFT — form panel */}
+      <div className="flex flex-col justify-center px-6 sm:px-12 py-12 bg-background relative">
+        <div className="w-full max-w-[400px] mx-auto px-2 sm:px-8 py-4">
+          <Link to="/" className="font-display text-lg font-bold tracking-tight flex items-center gap-2 mb-10">
+            <span className="block w-1.5 h-1.5 bg-primary rounded-sm shadow-[0_0_8px_hsl(var(--primary)/0.6)]" aria-hidden />
+            <span><span className="text-foreground">Output</span><span className="text-primary">Lens</span></span>
           </Link>
-          <div className="rounded-md border border-border bg-surface p-5">
-            <FanChart height={240} />
-          </div>
-          <div className="mt-8 min-h-[110px]" key={quoteIdx}>
-            <blockquote className="text-foreground text-[15px] italic leading-relaxed animate-fade-in">
-              "{ROTATING_QUOTES[quoteIdx].q}"
-            </blockquote>
-            <div className="mt-3 text-xs text-muted-foreground">— {ROTATING_QUOTES[quoteIdx].a}</div>
-          </div>
-          <div className="mt-10 pt-6 border-t border-border">
-            <div className="font-mono text-sm text-muted-foreground">
-              <span className="text-primary font-semibold">10,247</span> simulations run today
-            </div>
-          </div>
-        </div>
-      </div>
 
-      {/* RIGHT — form */}
-      <div className="flex flex-col justify-center px-6 py-12 sm:px-12 bg-surface lg:bg-background">
-        <div className="lg:hidden mb-8">
-          <Link to="/" className="font-display text-xl font-bold tracking-tight">
-            <span className="text-foreground">Output</span><span className="text-primary">Lens</span>
-          </Link>
-        </div>
-
-        <div className="w-full max-w-[420px] mx-auto">
-          <div className="mb-6 flex items-start justify-between gap-4">
+          <div className="mb-7 flex items-start justify-between gap-4">
             <div>
-              <h1 className="font-display text-[28px] font-bold text-foreground leading-tight">
+              <h1 className="font-display text-[28px] font-bold text-foreground leading-tight tracking-tight">
                 {mode === 'signin'
-                  ? 'Welcome back'
-                  : signupStep === 1 ? 'Start quantifying risk' : 'Almost there'}
+                  ? 'Welcome back.'
+                  : signupStep === 1 ? 'Start analysing risk.' : 'One last thing.'}
               </h1>
-              <p className="mt-2 text-sm text-muted-foreground">
+              <p className="mt-1 text-[14px] text-muted-foreground">
                 {mode === 'signin'
-                  ? 'Your risk intelligence is waiting.'
-                  : signupStep === 1 ? 'Free account. First simulation included.' : 'One more step to your first simulation'}
+                  ? 'Your simulations are waiting.'
+                  : signupStep === 1 ? 'Free. No card required.' : "Tell us how you'll use OutputLens."}
               </p>
             </div>
             {mode === 'signup' && (
@@ -239,7 +211,7 @@ export default function Auth() {
                   <span className="text-primary">●</span>{' '}
                   <span className={signupStep === 2 ? 'text-primary' : 'text-muted-foreground'}>{signupStep === 2 ? '●' : '○'}</span>
                 </div>
-                <div className="text-[11px] text-muted-foreground mt-1 uppercase" style={{ letterSpacing: '0.05em' }}>
+                <div className="text-[11px] text-muted-foreground mt-1 uppercase" style={{ letterSpacing: '0.06em' }}>
                   Step {signupStep} of 2
                 </div>
               </div>
@@ -296,18 +268,31 @@ export default function Auth() {
 
             {mode === 'signup' && signupStep === 2 && (
               <>
-                <div className="rounded bg-elevated border border-border px-3 py-2 text-sm flex items-center justify-between">
+                <div className="rounded-lg bg-elevated border border-border px-3.5 py-2.5 text-sm flex items-center justify-between">
                   <span className="font-mono text-foreground/80 truncate">{email}</span>
                   <button type="button" onClick={() => setSignupStep(1)} className="text-primary text-xs hover:underline">Change</button>
                 </div>
                 <Field label="I am a...">
-                  <select
-                    value={role} onChange={(e) => setRole(e.target.value)}
-                    required className="auth-input"
-                  >
-                    <option value="" disabled>Select your role</option>
-                    {ROLES.map((r) => <option key={r} value={r}>{r}</option>)}
-                  </select>
+                  <div className="flex flex-wrap gap-2">
+                    {ROLES.map((r) => {
+                      const selected = role === r;
+                      return (
+                        <button
+                          key={r}
+                          type="button"
+                          onClick={() => setRole(r)}
+                          className={`rounded-lg px-4 py-2 text-[13px] cursor-pointer transition-all border ${
+                            selected
+                              ? 'border-primary bg-primary/10 text-primary font-medium'
+                              : 'border-border text-muted-foreground hover:border-primary/40 hover:text-foreground'
+                          }`}
+                          style={selected ? { backgroundColor: 'hsl(var(--primary) / 0.08)' } : undefined}
+                        >
+                          {r}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </Field>
               </>
             )}
@@ -361,7 +346,7 @@ export default function Auth() {
             <button
               type="submit"
               disabled={loading || isBlocked || (mode === 'signup' && signupStep === 2 && !role)}
-              className="w-full inline-flex items-center justify-center gap-2 rounded-md bg-primary text-primary-foreground font-semibold text-sm min-h-[48px] px-5 hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-primary text-primary-foreground font-semibold text-[15px] h-[50px] px-5 hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-[0_4px_16px_hsl(var(--primary)/0.3)]"
             >
               {loading ? (
                 <><Loader2 className="h-4 w-4 animate-spin" /> {mode === 'signup' ? 'Creating account…' : 'Signing in…'}</>
@@ -381,12 +366,12 @@ export default function Auth() {
                 <div className="relative my-1">
                   <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-border" /></div>
                   <div className="relative flex justify-center">
-                    <span className="bg-background px-3 text-[11px] text-muted-foreground uppercase" style={{ letterSpacing: '0.08em' }}>or continue with</span>
+                    <span className="bg-background px-3 text-[11px] text-muted-foreground uppercase" style={{ letterSpacing: '0.06em' }}>or</span>
                   </div>
                 </div>
                 <button
                   type="button"
-                  className="w-full inline-flex items-center justify-center gap-2 rounded-md bg-elevated border border-border text-foreground font-medium text-sm min-h-[44px] px-5 hover:border-foreground/30 transition-colors"
+                  className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-elevated border border-border text-foreground font-medium text-[14px] h-[46px] px-5 hover:border-foreground/20 transition-colors"
                   disabled={loading || isBlocked}
                   onClick={async () => {
                     setLoading(true);
@@ -411,7 +396,7 @@ export default function Auth() {
               </>
             )}
 
-            <p className="text-center text-[11px] text-muted-foreground pt-2">
+            <p className="text-center text-[11px] text-muted-foreground/60 pt-2 mt-4">
               By continuing you agree to our{' '}
               <Link to="/terms" className="text-primary hover:underline">Terms</Link> and{' '}
               <Link to="/privacy" className="text-primary hover:underline">Privacy Policy</Link>.
@@ -429,6 +414,63 @@ export default function Auth() {
               </>
             )}
           </p>
+        </div>
+      </div>
+
+      {/* RIGHT — social proof */}
+      <div
+        className="hidden md:flex flex-col justify-center relative bg-surface border-l border-border/40 px-12 py-16 overflow-hidden"
+        style={{ background: 'hsl(var(--surface))' }}
+      >
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{ background: 'radial-gradient(ellipse 80% 60% at 50% 100%, hsl(189 100% 50% / 0.06), transparent)' }}
+        />
+        <div className="relative max-w-md mx-auto w-full">
+          <div className="relative min-h-[200px]">
+            {ROTATING_QUOTES.map((quote, i) => (
+              <div
+                key={i}
+                className="absolute inset-0 transition-all duration-700"
+                style={{
+                  opacity: i === quoteIdx ? 1 : 0,
+                  transform: i === quoteIdx ? 'translateY(0)' : 'translateY(8px)',
+                  pointerEvents: i === quoteIdx ? 'auto' : 'none',
+                }}
+              >
+                <blockquote
+                  className="text-[18px] text-foreground leading-[1.65] font-medium before:content-['\201C'] before:text-primary before:text-[36px] before:font-display before:leading-none before:block before:mb-3"
+                >
+                  {quote.q}
+                </blockquote>
+                <div className="mt-4 text-[13px] text-muted-foreground">
+                  {(() => {
+                    const [name, ...rest] = quote.a.split(',');
+                    const role = rest.join(',').trim();
+                    return (
+                      <>
+                        <div className="text-foreground font-medium">{name}</div>
+                        {role && <div className="mt-0.5">{role}</div>}
+                      </>
+                    );
+                  })()}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-12 pt-8 border-t border-border/40 grid grid-cols-3 gap-4">
+            {[
+              { v: '10,000', l: 'simulations' },
+              { v: '2,400+', l: 'analysts' },
+              { v: '<0.3s', l: 'results' },
+            ].map((s) => (
+              <div key={s.l}>
+                <div className="font-mono text-primary text-[13px] tabular-nums">{s.v}</div>
+                <div className="text-[11px] text-muted-foreground mt-0.5 uppercase" style={{ letterSpacing: '0.06em' }}>{s.l}</div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>
