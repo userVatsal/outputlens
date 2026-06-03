@@ -58,6 +58,11 @@ interface Metrics {
   portfolios: number;
 }
 
+interface Sparks {
+  analyses: number[];   // last 14 days
+  signups: number[];    // last 14 days
+}
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function inferDevice(userAgent: string | null): 'mobile' | 'desktop' | 'unknown' {
@@ -170,6 +175,7 @@ export default function CEODashboard() {
   const { isAdmin, loading: adminLoading } = useAdminRole();
 
   const [metrics, setMetrics] = useState<Metrics | null>(null);
+  const [sparks, setSparks] = useState<Sparks>({ analyses: [], signups: [] });
   const [users, setUsers] = useState<UserRow[]>([]);
   const [activity, setActivity] = useState<RecentActivity[]>([]);
   const [loading, setLoading] = useState(true);
@@ -280,6 +286,27 @@ export default function CEODashboard() {
 
       setUsers(userRows);
       setActivity(activityRows);
+
+      // Build 14-day sparklines
+      const days = 14;
+      const bucket = (ts: string | null) => {
+        if (!ts) return -1;
+        const d = new Date(ts);
+        const diff = Math.floor((Date.now() - d.getTime()) / 86400000);
+        return days - 1 - diff;
+      };
+      const analysesSpark = new Array(days).fill(0);
+      userAnalysisCounts?.forEach(r => {
+        const idx = bucket(r.created_at);
+        if (idx >= 0 && idx < days) analysesSpark[idx] += 1;
+      });
+      const signupsSpark = new Array(days).fill(0);
+      profilesRes.data?.forEach(p => {
+        const idx = bucket(p.created_at);
+        if (idx >= 0 && idx < days) signupsSpark[idx] += 1;
+      });
+      setSparks({ analyses: analysesSpark, signups: signupsSpark });
+
       setMetrics({
         totalUsers: profilesRes.data?.length || 0,
         activeToday: analysesTodayRes.count || 0,
