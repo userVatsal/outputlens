@@ -58,6 +58,11 @@ interface Metrics {
   portfolios: number;
 }
 
+interface Sparks {
+  analyses: number[];   // last 14 days
+  signups: number[];    // last 14 days
+}
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function inferDevice(userAgent: string | null): 'mobile' | 'desktop' | 'unknown' {
@@ -103,17 +108,60 @@ function getPlanBadgeVariant(plan: string | null): 'default' | 'secondary' | 'ou
 
 // ─── Subcomponents ────────────────────────────────────────────────────────────
 
-function MetricBlock({ icon: Icon, label, value, sub, accent = false }: {
-  icon: React.ElementType; label: string; value: string | number; sub?: string; accent?: boolean;
+function MetricBlock({
+  icon: Icon,
+  label,
+  value,
+  sub,
+  accent = false,
+  trend,
+  spark,
+}: {
+  icon: React.ElementType;
+  label: string;
+  value: string | number;
+  sub?: string;
+  accent?: boolean;
+  trend?: 'up' | 'down' | 'flat';
+  spark?: number[];
 }) {
+  const max = spark && spark.length ? Math.max(...spark, 1) : 1;
   return (
-    <div className={`px-5 py-4 border-r border-border last:border-r-0 ${accent ? 'bg-primary/5' : ''}`}>
+    <div
+      className={`relative px-5 py-4 border-r border-border last:border-r-0 overflow-hidden group transition-colors ${
+        accent ? 'bg-gradient-to-br from-primary/[0.08] via-primary/[0.03] to-transparent' : 'hover:bg-primary/[0.03]'
+      }`}
+    >
+      {accent && (
+        <span className="absolute left-0 top-0 bottom-0 w-[2px] bg-primary/70" />
+      )}
       <div className="flex items-center gap-2 mb-1">
-        <Icon className="h-3.5 w-3.5 text-muted-foreground" />
+        <Icon className={`h-3.5 w-3.5 ${accent ? 'text-primary' : 'text-muted-foreground'}`} />
         <span className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">{label}</span>
       </div>
-      <p className="text-2xl font-bold font-mono text-foreground">{typeof value === 'number' ? value.toLocaleString() : value}</p>
-      {sub && <p className="text-xs text-muted-foreground mt-0.5">{sub}</p>}
+      <div className="flex items-end justify-between gap-2">
+        <p className="text-2xl font-bold font-mono text-foreground tabular-nums">
+          {typeof value === 'number' ? value.toLocaleString() : value}
+        </p>
+        {spark && spark.length > 0 && (
+          <div className="flex items-end gap-[2px] h-6 opacity-70">
+            {spark.map((v, i) => (
+              <span
+                key={i}
+                className={`w-[3px] rounded-sm ${accent ? 'bg-primary/60' : 'bg-muted-foreground/40'}`}
+                style={{ height: `${Math.max(2, (v / max) * 24)}px` }}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+      {sub && (
+        <p className="text-[11px] text-muted-foreground mt-1 flex items-center gap-1 font-mono">
+          {trend === 'up' && <ChevronUp className="h-3 w-3 text-bullish" />}
+          {trend === 'down' && <ChevronDown className="h-3 w-3 text-bearish" />}
+          {sub}
+        </p>
+      )}
     </div>
   );
 }
@@ -127,6 +175,7 @@ export default function CEODashboard() {
   const { isAdmin, loading: adminLoading } = useAdminRole();
 
   const [metrics, setMetrics] = useState<Metrics | null>(null);
+  const [sparks, setSparks] = useState<Sparks>({ analyses: [], signups: [] });
   const [users, setUsers] = useState<UserRow[]>([]);
   const [activity, setActivity] = useState<RecentActivity[]>([]);
   const [loading, setLoading] = useState(true);
@@ -237,6 +286,27 @@ export default function CEODashboard() {
 
       setUsers(userRows);
       setActivity(activityRows);
+
+      // Build 14-day sparklines
+      const days = 14;
+      const bucket = (ts: string | null) => {
+        if (!ts) return -1;
+        const d = new Date(ts);
+        const diff = Math.floor((Date.now() - d.getTime()) / 86400000);
+        return days - 1 - diff;
+      };
+      const analysesSpark = new Array(days).fill(0);
+      userAnalysisCounts?.forEach(r => {
+        const idx = bucket(r.created_at);
+        if (idx >= 0 && idx < days) analysesSpark[idx] += 1;
+      });
+      const signupsSpark = new Array(days).fill(0);
+      profilesRes.data?.forEach(p => {
+        const idx = bucket(p.created_at);
+        if (idx >= 0 && idx < days) signupsSpark[idx] += 1;
+      });
+      setSparks({ analyses: analysesSpark, signups: signupsSpark });
+
       setMetrics({
         totalUsers: profilesRes.data?.length || 0,
         activeToday: analysesTodayRes.count || 0,
@@ -322,39 +392,67 @@ export default function CEODashboard() {
       <div className="max-w-[1400px] mx-auto px-4 py-6 space-y-6">
 
         {/* ── Header ── */}
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="flex items-center gap-3">
-              <BarChart3 className="h-6 w-6 text-primary" />
-              <h1 className="text-2xl font-bold font-mono">CEO COMMAND CENTRE</h1>
-              <Badge variant="outline" className="text-xs border-primary/50 text-primary font-mono">ADMIN ONLY</Badge>
+        <div className="relative overflow-hidden rounded-xl border border-border bg-gradient-to-br from-primary/[0.08] via-card to-card px-5 py-5">
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/60 to-transparent" />
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-3">
+                <div className="relative">
+                  <div className="h-9 w-9 rounded-lg bg-primary/15 border border-primary/30 flex items-center justify-center">
+                    <BarChart3 className="h-4.5 w-4.5 text-primary" />
+                  </div>
+                  <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-bullish animate-pulse" />
+                </div>
+                <div>
+                  <h1 className="text-xl md:text-2xl font-bold font-mono tracking-tight">CEO Command Centre</h1>
+                  <p className="text-[11px] text-muted-foreground mt-0.5 font-mono uppercase tracking-widest">
+                    Live · {metrics?.totalUsers ?? 0} users · refreshed {format(new Date(), 'HH:mm:ss')}
+                  </p>
+                </div>
+              </div>
             </div>
-            <p className="text-sm text-muted-foreground mt-1 font-mono">
-              {metrics?.totalUsers} registered users · Last refreshed {format(new Date(), 'HH:mm:ss')}
-            </p>
+            <div className="flex items-center gap-2">
+              <Badge variant="outline" className="text-[10px] border-primary/40 text-primary font-mono uppercase tracking-widest">
+                Admin only
+              </Badge>
+              <Button variant="outline" size="sm" onClick={handleRefresh} disabled={refreshing} className="font-mono text-xs gap-2">
+                <RefreshCw className={`h-3.5 w-3.5 ${refreshing ? 'animate-spin' : ''}`} />
+                Refresh
+              </Button>
+            </div>
           </div>
-          <Button variant="outline" size="sm" onClick={handleRefresh} disabled={refreshing} className="font-mono text-xs gap-2">
-            <RefreshCw className={`h-3.5 w-3.5 ${refreshing ? 'animate-spin' : ''}`} />
-            Refresh
-          </Button>
         </div>
 
         {/* ── Metrics Strip ── */}
-        <div className="border border-border rounded-lg overflow-hidden">
-          <div className="bg-[hsl(var(--primary)/0.08)] border-b border-border px-5 py-2">
-            <span className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">Platform Metrics</span>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 divide-x divide-y sm:divide-y-0 divide-border bg-card">
-            <MetricBlock icon={Users} label="Total Users" value={metrics?.totalUsers || 0} sub={`${metrics?.paidUsers || 0} paid`} />
-            <MetricBlock icon={Activity} label="New This Week" value={metrics?.newThisWeek || 0} accent />
-            <MetricBlock icon={TrendingUp} label="Total Analyses" value={metrics?.totalAnalyses || 0} />
-            <MetricBlock icon={Activity} label="Analyses Today" value={metrics?.analysesToday || 0} accent />
-            <MetricBlock icon={Eye} label="Tracked Assets" value={metrics?.trackedAssets || 0} />
-            <MetricBlock icon={Globe} label="Portfolios" value={metrics?.portfolios || 0} />
-            <MetricBlock icon={CheckCircle} label="Paid Users" value={metrics?.paidUsers || 0} accent />
-            <MetricBlock icon={AlertTriangle} label="Free Users" value={(metrics?.totalUsers || 0) - (metrics?.paidUsers || 0)} />
-          </div>
-        </div>
+        {(() => {
+          const total = metrics?.totalUsers || 0;
+          const paid = metrics?.paidUsers || 0;
+          const conversion = total ? ((paid / total) * 100).toFixed(1) + '%' : '0%';
+          const avgAnalyses = total ? ((metrics?.totalAnalyses || 0) / total).toFixed(1) : '0';
+          return (
+            <div className="border border-border rounded-xl overflow-hidden bg-card">
+              <div className="flex items-center justify-between px-5 py-2 border-b border-border bg-gradient-to-r from-primary/[0.06] to-transparent">
+                <span className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+                  <span className="h-1 w-1 rounded-full bg-primary" />
+                  Platform Metrics · 14-day trend
+                </span>
+                <span className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
+                  Conversion {conversion} · Avg {avgAnalyses}/user
+                </span>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 divide-x divide-y sm:divide-y-0 divide-border">
+                <MetricBlock icon={Users} label="Total Users" value={total} sub={`${paid} paid`} spark={sparks.signups} />
+                <MetricBlock icon={Activity} label="New / Week" value={metrics?.newThisWeek || 0} accent spark={sparks.signups.slice(-7)} trend="up" sub="signups 7d" />
+                <MetricBlock icon={TrendingUp} label="Total Analyses" value={metrics?.totalAnalyses || 0} spark={sparks.analyses} />
+                <MetricBlock icon={Activity} label="Today" value={metrics?.analysesToday || 0} accent sub="analyses run" />
+                <MetricBlock icon={Eye} label="Tracked Assets" value={metrics?.trackedAssets || 0} />
+                <MetricBlock icon={Globe} label="Portfolios" value={metrics?.portfolios || 0} />
+                <MetricBlock icon={CheckCircle} label="Paid Users" value={paid} accent sub={conversion + ' conv.'} />
+                <MetricBlock icon={AlertTriangle} label="Free Users" value={total - paid} />
+              </div>
+            </div>
+          );
+        })()}
 
         {/* ── Tab Bar ── */}
         <div className="flex gap-1 border-b border-border">
@@ -434,7 +532,7 @@ export default function CEODashboard() {
                           {/* User */}
                           <td className="px-4 py-3">
                             <div className="flex items-center gap-2">
-                              <div className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold text-primary flex-shrink-0">
+                              <div className="h-8 w-8 rounded-full bg-gradient-to-br from-primary/30 to-primary/5 ring-1 ring-primary/20 flex items-center justify-center text-xs font-bold text-primary flex-shrink-0">
                                 {(user.full_name?.[0] || '?').toUpperCase()}
                               </div>
                               <div>

@@ -312,6 +312,15 @@
   90%  { opacity: 1; }
   100% { transform: translateY(400%); opacity: 0; }
 }
+@keyframes scan-line-x {
+  0%   { transform: translateX(0); opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { transform: translateX(100%); opacity: 0; }
+}
+.animate-scan-line {
+  animation: scan-line-x 4.5s ease-in-out infinite;
+}
 @keyframes chart-draw {
   from { stroke-dashoffset: 600; opacity: 0; }
   to   { stroke-dashoffset: 0; opacity: 1; }
