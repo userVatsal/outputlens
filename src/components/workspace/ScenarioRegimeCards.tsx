@@ -141,10 +141,10 @@ function RegimeRow({ title, scenarios, color, currencySymbol, entryPrice, shares
 
 export function ScenarioRegimeCards({ scenarios, currencySymbol, entryPrice, shares }: ScenarioRegimeCardsProps) {
   return (
-    <div className="mb-6">
+    <div className="rounded-2xl bg-surface border border-border/50 p-5">
       {/* Section header */}
       <div className="flex items-center justify-between mb-3">
-        <h3 className="text-xs font-mono font-bold text-muted-foreground uppercase tracking-widest">Scenario Regimes</h3>
+        <h3 className="text-[13px] font-semibold text-foreground">Scenario Regimes</h3>
         <div className="hidden md:flex items-center gap-6 text-[10px] text-muted-foreground font-mono">
           <span className="w-36 text-right">PRICE TARGET</span>
           <span className="w-28 text-right">P&L RANGE</span>
