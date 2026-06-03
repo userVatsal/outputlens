@@ -105,14 +105,14 @@ export function RiskInterpretation({ analysis }: RiskInterpretationProps) {
           <div className="mt-4">
             <button
               onClick={() => setShowFull(!showFull)}
-              className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors font-mono"
+              className="flex items-center gap-1.5 text-[12px] text-muted-foreground hover:text-foreground transition-colors"
             >
               {showFull ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
               {showFull ? 'Hide detailed analysis' : 'View full analysis'}
             </button>
 
             {showFull && (
-              <div className="mt-3 pt-3 border-t border-border">
+              <div className="mt-3 pt-3 border-t border-border/40">
                 <div className="space-y-2 leading-relaxed text-sm text-foreground/80">
                   {fullExplanation.split('\n\n').map((paragraph, index) => (
                     <p key={index}>{paragraph}</p>
