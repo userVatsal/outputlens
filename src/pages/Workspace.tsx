@@ -289,7 +289,7 @@ export default function Workspace() {
                 {tradeLoading && <SimulationLoader asset={currentAsset} />}
 
                 {analysis && !tradeLoading && (
-                  <div className="space-y-4">
+                  <div className="space-y-4 animate-result-reveal">
                     {isHistorical && (
                       <div className="rounded-xl bg-surface border border-border/50 px-4 py-2 text-[12px] text-muted-foreground font-mono">
                         Viewing historical analysis from{' '}
@@ -298,13 +298,17 @@ export default function Workspace() {
                     )}
 
                     {/* Monte Carlo — full width */}
-                    <MonteCarloFanChart analysis={analysis} currencySymbol={currencySymbol} />
+                    <div className="animate-result-reveal" style={{ animationDelay: '0ms' }}>
+                      <MonteCarloFanChart analysis={analysis} currencySymbol={currencySymbol} />
+                    </div>
 
                     {/* Risk snapshot — 4 KPI cards */}
-                    <RiskSnapshot analysis={analysis} currencySymbol={currencySymbol} />
+                    <div className="animate-result-reveal" style={{ animationDelay: '100ms' }}>
+                      <RiskSnapshot analysis={analysis} currencySymbol={currencySymbol} />
+                    </div>
 
                     {/* Tail risk + Scenarios */}
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 animate-result-reveal" style={{ animationDelay: '200ms' }}>
                       <TailRiskPanel
                         scenarios={analysis.scenarios}
                         expectedShortfall={analysis.riskMetrics.expectedShortfall}
