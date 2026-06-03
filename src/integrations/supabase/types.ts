@@ -463,6 +463,90 @@ export type Database = {
         }
         Relationships: []
       }
+      journal_entries: {
+        Row: {
+          actual_pnl: number | null
+          actual_return_pct: number | null
+          analysis_id: string | null
+          asset: string
+          created_at: string
+          direction: string
+          entry_date: string
+          entry_price: number
+          exit_date: string | null
+          exit_price: number | null
+          expected_return_at_entry: number | null
+          id: string
+          market: string
+          notes: string | null
+          position_size: number | null
+          position_size_type: string | null
+          regime_at_entry: string | null
+          risk_score_at_entry: number | null
+          status: string
+          tags: string[] | null
+          thesis: string | null
+          updated_at: string
+          user_id: string
+          var95_at_entry: number | null
+          win_prob_at_entry: number | null
+        }
+        Insert: {
+          actual_pnl?: number | null
+          actual_return_pct?: number | null
+          analysis_id?: string | null
+          asset: string
+          created_at?: string
+          direction: string
+          entry_date?: string
+          entry_price: number
+          exit_date?: string | null
+          exit_price?: number | null
+          expected_return_at_entry?: number | null
+          id?: string
+          market?: string
+          notes?: string | null
+          position_size?: number | null
+          position_size_type?: string | null
+          regime_at_entry?: string | null
+          risk_score_at_entry?: number | null
+          status?: string
+          tags?: string[] | null
+          thesis?: string | null
+          updated_at?: string
+          user_id: string
+          var95_at_entry?: number | null
+          win_prob_at_entry?: number | null
+        }
+        Update: {
+          actual_pnl?: number | null
+          actual_return_pct?: number | null
+          analysis_id?: string | null
+          asset?: string
+          created_at?: string
+          direction?: string
+          entry_date?: string
+          entry_price?: number
+          exit_date?: string | null
+          exit_price?: number | null
+          expected_return_at_entry?: number | null
+          id?: string
+          market?: string
+          notes?: string | null
+          position_size?: number | null
+          position_size_type?: string | null
+          regime_at_entry?: string | null
+          risk_score_at_entry?: number | null
+          status?: string
+          tags?: string[] | null
+          thesis?: string | null
+          updated_at?: string
+          user_id?: string
+          var95_at_entry?: number | null
+          win_prob_at_entry?: number | null
+        }
+        Relationships: []
+      }
       market_data_cache: {
         Row: {
           asset_type: string

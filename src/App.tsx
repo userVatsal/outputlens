@@ -35,6 +35,11 @@ const Scenarios = lazy(() => import("./pages/Scenarios"));
 const VarCalculator = lazy(() => import("./pages/VarCalculator"));
 const Blog = lazy(() => import("./pages/Blog"));
 const BlogPost = lazy(() => import("./pages/BlogPost"));
+const Journal = lazy(() => import("./pages/Journal"));
+const Briefing = lazy(() => import("./pages/Briefing"));
+const StressTest = lazy(() => import("./pages/StressTest"));
+const Pulse = lazy(() => import("./pages/Pulse"));
+const Demo = lazy(() => import("./pages/Demo"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -74,12 +79,16 @@ const App = () => (
                   <Route path="/privacy" element={<Privacy />} />
                   <Route path="/terms" element={<Terms />} />
                   <Route path="/account" element={<Account />} />
-                  <Route path="/demo" element={<Navigate to="/" replace />} />
+                  <Route path="/demo" element={<Demo />} />
                   <Route path="/tracked-assets" element={<TrackedAssets />} />
                   <Route path="/regime" element={<Regime />} />
                   <Route path="/alerts" element={<Alerts />} />
                   <Route path="/scenarios" element={<Scenarios />} />
                   <Route path="/var" element={<VarCalculator />} />
+                  <Route path="/journal" element={<Journal />} />
+                  <Route path="/briefing" element={<Briefing />} />
+                  <Route path="/stress-test" element={<StressTest />} />
+                  <Route path="/pulse" element={<Pulse />} />
                   <Route path="/blog" element={<Blog />} />
                   <Route path="/blog/:slug" element={<BlogPost />} />
                   <Route path="/about" element={<About />} />
