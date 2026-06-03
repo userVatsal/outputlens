@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Check, Activity, BarChart3, Layers, GitBranch, AlertTriangle, History, Sparkles, Briefcase, Grid3x3 } from 'lucide-react';
+import { Activity, BarChart3, Layers, GitBranch, AlertTriangle, History, Sparkles, Briefcase, Grid3x3 } from 'lucide-react';
 import { FanChart } from './FanChart';
 import { PLAN_CONFIG, type SubscriptionPlan } from '@/lib/stripe';
 import { useCountUp } from '@/hooks/useCountUp';
@@ -120,14 +120,16 @@ export function StatsBar() {
   ];
 
   return (
-    <section ref={ref} className="bg-surface border-y border-border">
-      <div className="max-w-[1280px] mx-auto px-6 py-6 md:py-8 grid grid-cols-2 md:grid-cols-4 gap-6">
-        {stats.map((s) => (
-          <div key={s.label} className="text-center">
-            <div className="font-mono font-bold text-primary text-[28px] md:text-[32px] tabular-nums leading-none">{s.v}</div>
-            <div className="mt-2 text-[13px] text-muted-foreground">{s.label}</div>
-          </div>
-        ))}
+    <section ref={ref} className="bg-surface border-y border-border/50">
+      <div className="max-w-[1280px] mx-auto px-6 py-8 md:py-10">
+        <div className="grid grid-cols-2 md:grid-cols-4 md:divide-x md:divide-border/40">
+          {stats.map((s) => (
+            <div key={s.label} className="text-center px-4 py-3">
+              <div className="font-mono font-bold text-primary text-[28px] md:text-[36px] tabular-nums leading-none">{s.v}</div>
+              <div className="mt-3 text-[12px] text-muted-foreground uppercase" style={{ letterSpacing: '0.1em' }}>{s.label}</div>
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   );
@@ -143,17 +145,20 @@ export function HowItWorks() {
   return (
     <section id="how-it-works" className="py-16 md:py-20">
       <div className="max-w-[1280px] mx-auto px-6">
-        <h2 className="font-display font-bold text-foreground text-center" style={{ fontSize: 'clamp(28px, 4vw, 36px)', letterSpacing: '-0.02em' }}>
-          From ticker to distribution in 3 steps
-        </h2>
-        <div className="mt-10 md:mt-12 grid md:grid-cols-3 gap-8 md:gap-6">
-          {STEPS.map((s) => (
-            <div key={s.n} className="text-center md:text-left">
-              <div className="w-12 h-12 rounded-full border border-border flex items-center justify-center font-mono font-semibold text-muted-foreground mx-auto md:mx-0">
-                {s.n}
+        <h2 className="section-title text-center">From ticker to distribution in 3 steps</h2>
+        <div className="mt-10 md:mt-14 flex flex-col md:flex-row md:items-start md:justify-between gap-8 md:gap-4">
+          {STEPS.map((s, idx) => (
+            <div key={s.n} className="flex flex-col md:flex-row md:items-start md:flex-1 md:gap-4">
+              <div className="text-center md:text-left flex-1">
+                <div className="w-11 h-11 rounded-xl border border-primary/20 bg-primary/5 flex items-center justify-center font-mono font-bold text-primary mx-auto md:mx-0">
+                  {s.n}
+                </div>
+                <h3 className="mt-4 font-semibold text-lg text-foreground">{s.title}</h3>
+                <p className="mt-2 text-[13px] text-muted-foreground leading-relaxed">{s.desc}</p>
               </div>
-              <h3 className="mt-4 font-semibold text-foreground text-lg">{s.title}</h3>
-              <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{s.desc}</p>
+              {idx < STEPS.length - 1 && (
+                <div className="hidden md:block mt-6 w-12 border-t border-dashed border-border/40 flex-shrink-0" />
+              )}
             </div>
           ))}
         </div>
@@ -182,16 +187,22 @@ export function Features() {
         style={{ background: 'radial-gradient(ellipse 60% 50% at 100% 100%, hsl(252 100% 69% / 0.06), transparent 60%)' }}
       />
       <div className="relative max-w-[1280px] mx-auto px-6">
-        <h2 className="font-display font-bold text-foreground text-center" style={{ fontSize: 'clamp(28px, 4vw, 36px)', letterSpacing: '-0.02em' }}>
-          Everything you need to quantify uncertainty
-        </h2>
+        <h2 className="section-title text-center">Everything you need to quantify uncertainty</h2>
         <p className="mt-3 text-base text-muted-foreground text-center">Built for analysts who reject point forecasts</p>
 
         <div className="mt-10 md:mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {FEATURES.map((f) => (
-            <div key={f.title} className="rounded-md bg-surface border border-border p-6 hover:border-foreground/20 transition-colors">
-              <f.icon className="h-8 w-8 text-primary" strokeWidth={1.5} />
-              <h3 className="mt-3 font-semibold text-foreground text-base">{f.title}</h3>
+            <div
+              key={f.title}
+              className="group rounded-xl bg-surface border border-border/50 p-6 hover:border-primary/20 hover:bg-elevated/50 transition-all duration-200"
+            >
+              <div
+                className="w-10 h-10 rounded-lg flex items-center justify-center"
+                style={{ backgroundColor: 'hsl(var(--primary) / 0.08)' }}
+              >
+                <f.icon className="h-5 w-5 text-primary" strokeWidth={1.75} />
+              </div>
+              <h3 className="mt-4 font-semibold text-[15px] text-foreground group-hover:text-primary transition-colors">{f.title}</h3>
               <p className="mt-2 text-[13px] text-muted-foreground leading-relaxed">{f.desc}</p>
             </div>
           ))}
@@ -209,18 +220,21 @@ const QUOTES = [
 ];
 export function SocialProof() {
   return (
-    <section className="py-16 md:py-20 bg-surface border-y border-border">
+    <section className="py-16 md:py-20 bg-surface border-y border-border/50">
       <div className="max-w-[1280px] mx-auto px-6">
-        <h2 className="font-display font-bold text-foreground text-center" style={{ fontSize: 'clamp(28px, 4vw, 36px)', letterSpacing: '-0.02em' }}>
-          Trusted by quant teams
-        </h2>
-        <div className="mt-10 md:mt-12 grid md:grid-cols-3 gap-4">
+        <h2 className="section-title text-center">Trusted by quant teams</h2>
+        <div className="mt-10 md:mt-12 grid md:grid-cols-3 gap-5">
           {QUOTES.map((t) => (
-            <figure key={t.a} className="rounded-md bg-background border border-border p-6 border-l-[3px] border-l-primary">
-              <blockquote className="italic text-[15px] text-foreground leading-[1.7]">"{t.q}"</blockquote>
-              <figcaption className="mt-4">
+            <figure
+              key={t.a}
+              className="relative rounded-xl bg-background border border-border/50 border-t-2 border-t-primary/40 p-7"
+            >
+              <blockquote className="italic text-[15px] text-foreground/85 leading-[1.75] before:content-['\201C'] before:text-primary before:text-[28px] before:font-serif before:leading-none before:block before:mb-2">
+                {t.q}
+              </blockquote>
+              <figcaption className="mt-5">
                 <div className="font-semibold text-sm text-foreground">{t.a}</div>
-                <div className="text-xs text-muted-foreground mt-0.5">{t.r}</div>
+                <div className="text-[12px] text-muted-foreground mt-0.5">{t.r}</div>
               </figcaption>
             </figure>
           ))}
@@ -258,9 +272,7 @@ export function Pricing() {
   return (
     <section id="pricing" className="py-16 md:py-20">
       <div className="max-w-[1280px] mx-auto px-6">
-        <h2 className="font-display font-bold text-foreground text-center" style={{ fontSize: 'clamp(28px, 4vw, 36px)', letterSpacing: '-0.02em' }}>
-          Simple, transparent pricing
-        </h2>
+        <h2 className="section-title text-center">Simple, transparent pricing</h2>
         <div className="mt-6 flex items-center justify-center gap-3">
           <div className="inline-flex bg-surface border border-border rounded-full p-1">
             <button onClick={() => setAnnual(true)} className={`px-4 py-1.5 text-sm rounded-full transition-colors ${annual ? 'bg-primary text-primary-foreground font-semibold' : 'text-muted-foreground'}`}>Annual</button>
@@ -273,23 +285,27 @@ export function Pricing() {
           {plans.map((p) => (
             <div
               key={p.name}
-              className={`relative rounded-md bg-surface p-7 border ${p.highlight ? 'border-primary' : 'border-border'}`}
+              className={`relative rounded-xl p-8 border transition-all ${
+                p.highlight
+                  ? 'border-primary bg-gradient-to-b from-primary/5 to-transparent shadow-[0_0_0_1px_hsl(var(--primary)/0.3),0_8px_32px_hsl(var(--primary)/0.1)]'
+                  : 'border-border/50 bg-surface'
+              }`}
             >
               {p.highlight && (
-                <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-[11px] font-semibold uppercase tracking-wide px-2.5 py-1" style={{ borderRadius: '0 6px 0 4px' }}>
+                <div className="absolute -top-2.5 right-6 bg-primary text-primary-foreground text-[10px] font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full">
                   Most Popular
                 </div>
               )}
               <div className="text-primary text-xs font-semibold uppercase" style={{ letterSpacing: '0.1em' }}>{p.name}</div>
               <div className="mt-3 flex items-baseline gap-1">
-                <div className="font-mono font-bold text-foreground text-[40px] leading-none">{p.price}</div>
+                <div className="font-mono font-bold text-foreground text-[44px] leading-none tabular-nums">{p.price}</div>
                 {p.period && <div className="text-sm text-muted-foreground">{p.period}</div>}
               </div>
               {p.subPrice && <div className="mt-1 text-[12px] text-muted-foreground">{p.subPrice}</div>}
               <p className="mt-2 text-[13px] text-muted-foreground">{p.desc}</p>
               <Link
                 to="/auth?mode=signup"
-                className={`mt-6 w-full inline-flex items-center justify-center rounded-md font-semibold text-sm min-h-[44px] px-5 transition-all ${
+                className={`mt-6 w-full inline-flex items-center justify-center rounded-lg font-semibold text-sm min-h-[46px] px-5 transition-all ${
                   p.highlight
                     ? 'bg-primary text-primary-foreground hover:brightness-110'
                     : 'border border-primary text-primary bg-transparent hover:bg-primary/10'
@@ -299,8 +315,8 @@ export function Pricing() {
               </Link>
               <ul className="mt-6">
                 {p.features.map((f, i) => (
-                  <li key={f} className={`flex items-start gap-2 py-1.5 text-[13px] text-muted-foreground ${i < p.features.length - 1 ? 'border-b border-border' : ''}`}>
-                    <Check className="h-4 w-4 text-primary flex-shrink-0 mt-0.5" />
+                  <li key={f} className={`flex items-start gap-2 py-2 text-[13px] text-muted-foreground ${i < p.features.length - 1 ? 'border-b border-border/40' : ''}`}>
+                    <span className="text-primary font-semibold leading-5">✓</span>
                     <span>{f}</span>
                   </li>
                 ))}
