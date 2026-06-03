@@ -29,18 +29,18 @@ export function RecentSimulationCard() {
   }, []);
 
   if (loading) {
-    return <div className="glass-card p-6 h-48 animate-pulse" />;
+    return <div className="rounded-xl bg-surface border border-border/50 p-5 h-48 animate-pulse" />;
   }
 
   if (!recent) {
     return (
-      <div className="glass-card p-6 flex flex-col justify-center items-start gap-3">
-        <h3 className="font-display font-semibold text-foreground">No simulations yet</h3>
-        <p className="text-sm text-muted-foreground">
-          Run your first probabilistic analysis to see results here.
+      <div className="rounded-xl bg-surface border border-border/50 p-5">
+        <div className="text-[13px] font-semibold text-foreground mb-2">Latest Simulation</div>
+        <p className="text-sm text-muted-foreground mb-4">
+          No simulations yet. Run your first probabilistic analysis to see results here.
         </p>
-        <Link to="/workspace" className="text-sm text-primary hover:underline flex items-center gap-1">
-          Open Workspace <ArrowRight className="h-3 w-3" />
+        <Link to="/workspace" className="text-[13px] text-primary hover:underline inline-flex items-center gap-1 font-medium">
+          Run your first simulation <ArrowRight className="h-3 w-3" />
         </Link>
       </div>
     );
@@ -49,50 +49,47 @@ export function RecentSimulationCard() {
   const r = recent.results || {};
   const winProb = r.riskMetrics?.winProbability ?? r.winProbability ?? null;
   const var95 = r.riskMetrics?.var95 ?? null;
+  const expectedReturn = r.riskMetrics?.expectedReturn ?? r.expectedReturn ?? r.riskMetrics?.meanReturn ?? null;
   const ago = Math.round((Date.now() - new Date(recent.created_at).getTime()) / 60000);
   const fresh = ago < 60 ? `${ago}m ago` : ago < 1440 ? `${Math.round(ago / 60)}h ago` : `${Math.round(ago / 1440)}d ago`;
 
+  const Metric = ({ label, value, tone }: { label: string; value: string; tone?: 'bearish' | 'bullish' | 'foreground' }) => (
+    <div>
+      <div className="text-[11px] uppercase tracking-[0.08em] text-muted-foreground mb-1.5">{label}</div>
+      <div className={cn(
+        'font-mono font-semibold text-[20px] tabular-nums leading-none',
+        tone === 'bearish' && 'text-bearish',
+        tone === 'bullish' && 'text-bullish',
+        (!tone || tone === 'foreground') && 'text-foreground',
+      )}>
+        {value}
+      </div>
+    </div>
+  );
+
   return (
-    <div className="glass-card p-5">
-      <div className="flex items-center justify-between mb-4">
-        <div>
-          <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
-            Last simulation
-          </div>
-          <div className="flex items-center gap-2 mt-1">
-            <h3 className="font-mono font-semibold text-lg text-foreground">{recent.asset}</h3>
-            <span className="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
-              {recent.direction}
-            </span>
-          </div>
-        </div>
-        <span className="text-[11px] font-mono text-muted-foreground flex items-center gap-1">
+    <div className="rounded-xl bg-surface border border-border/50 p-5">
+      <div className="flex items-center gap-2 mb-5">
+        <h3 className="text-[13px] font-semibold text-foreground">Latest Simulation</h3>
+        <span className="font-mono text-primary text-[13px] ml-auto">{recent.asset}</span>
+        <span className="text-[11px] text-muted-foreground font-mono flex items-center gap-1">
           <Clock className="h-3 w-3" /> {fresh}
         </span>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 mb-4">
-        <div>
-          <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground mb-1">
-            Win Probability
-          </div>
-          <div className="font-mono text-xl tabular-nums text-foreground">
-            {winProb != null ? `${(winProb * 100).toFixed(1)}%` : '—'}
-          </div>
-        </div>
-        <div>
-          <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground mb-1">
-            VaR 95%
-          </div>
-          <div className="font-mono text-xl tabular-nums text-bearish">
-            {var95 != null ? `${(var95 * 100).toFixed(1)}%` : '—'}
-          </div>
-        </div>
+      <div className="grid grid-cols-3 gap-4 mb-5">
+        <Metric label="VaR 95%" value={var95 != null ? `${(var95 * 100).toFixed(1)}%` : '—'} tone="bearish" />
+        <Metric label="Win Probability" value={winProb != null ? `${(winProb * 100).toFixed(1)}%` : '—'} />
+        <Metric
+          label="Expected Return"
+          value={expectedReturn != null ? `${expectedReturn > 0 ? '+' : ''}${(expectedReturn * 100).toFixed(1)}%` : '—'}
+          tone={expectedReturn != null && expectedReturn >= 0 ? 'bullish' : expectedReturn != null ? 'bearish' : 'foreground'}
+        />
       </div>
 
       <Link
         to={`/results?history=${recent.id}`}
-        className="text-sm text-primary hover:underline flex items-center gap-1"
+        className="text-[13px] text-primary hover:underline inline-flex items-center gap-1 font-medium"
       >
         View full distribution <ArrowRight className="h-3 w-3" />
       </Link>
