@@ -3,7 +3,7 @@ import {
   AreaChart, Area, LineChart, Line, XAxis, YAxis, Tooltip,
   ResponsiveContainer, ReferenceLine, ComposedChart
 } from 'recharts';
-import { Activity, Zap } from 'lucide-react';
+import { Zap } from 'lucide-react';
 import { EnhancedTradeAnalysis } from '@/types/analysis';
 
 /**
