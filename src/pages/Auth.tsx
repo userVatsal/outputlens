@@ -187,19 +187,19 @@ export default function Auth() {
       {/* LEFT — form panel */}
       <div className="flex flex-col justify-center px-6 sm:px-12 py-12 bg-background relative">
         <div className="w-full max-w-[400px] mx-auto px-2 sm:px-8 py-4">
-          <Link to="/" className="font-display text-lg font-bold tracking-tight flex items-center gap-2 mb-10">
+          <Link to="/" className="font-display text-lg font-bold tracking-tight flex items-center gap-2 mb-10 animate-fade-up" style={{ animationDelay: '0ms' }}>
             <span className="block w-1.5 h-1.5 bg-primary rounded-sm shadow-[0_0_8px_hsl(var(--primary)/0.6)]" aria-hidden />
             <span><span className="text-foreground">Output</span><span className="text-primary">Lens</span></span>
           </Link>
 
-          <div className="mb-7 flex items-start justify-between gap-4">
+          <div className="mb-7 flex items-start justify-between gap-4 animate-fade-up" style={{ animationDelay: '60ms' }}>
             <div>
               <h1 className="font-display text-[28px] font-bold text-foreground leading-tight tracking-tight">
                 {mode === 'signin'
                   ? 'Welcome back.'
                   : signupStep === 1 ? 'Start analysing risk.' : 'One last thing.'}
               </h1>
-              <p className="mt-1 text-[14px] text-muted-foreground">
+              <p className="mt-1 text-[14px] text-muted-foreground animate-fade-up" style={{ animationDelay: '100ms' }}>
                 {mode === 'signin'
                   ? 'Your simulations are waiting.'
                   : signupStep === 1 ? 'Free. No card required.' : "Tell us how you'll use OutputLens."}
@@ -218,7 +218,7 @@ export default function Auth() {
             )}
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4 animate-fade-up" style={{ animationDelay: '140ms' }}>
             {isBlocked && (
               <div className="flex items-start gap-3 p-3 rounded bg-destructive/10 border border-destructive/20">
                 <ShieldAlert className="h-4 w-4 text-destructive flex-shrink-0 mt-0.5" />
@@ -346,7 +346,8 @@ export default function Auth() {
             <button
               type="submit"
               disabled={loading || isBlocked || (mode === 'signup' && signupStep === 2 && !role)}
-              className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-primary text-primary-foreground font-semibold text-[15px] h-[50px] px-5 hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-[0_4px_16px_hsl(var(--primary)/0.3)]"
+              className="btn-primary w-full inline-flex items-center justify-center gap-2 rounded-xl bg-primary text-primary-foreground font-semibold text-[15px] h-[50px] px-5 disabled:opacity-50 disabled:cursor-not-allowed animate-fade-up"
+              style={{ animationDelay: '180ms' }}
             >
               {loading ? (
                 <><Loader2 className="h-4 w-4 animate-spin" /> {mode === 'signup' ? 'Creating account…' : 'Signing in…'}</>
