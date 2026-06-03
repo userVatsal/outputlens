@@ -421,22 +421,25 @@ export default function Auth() {
       {/* RIGHT — social proof */}
       <div
         className="hidden md:flex flex-col justify-center relative bg-surface border-l border-border/40 px-12 py-16 overflow-hidden"
-        style={{ background: 'hsl(var(--surface))' }}
+        style={{
+          background: `
+            radial-gradient(ellipse 60% 50% at 50% 100%, hsl(189 100% 50% / 0.06), transparent 60%),
+            radial-gradient(ellipse 40% 30% at 80% 20%, hsl(255 85% 66% / 0.04), transparent 50%),
+            hsl(var(--surface))
+          `,
+        }}
       >
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{ background: 'radial-gradient(ellipse 80% 60% at 50% 100%, hsl(189 100% 50% / 0.06), transparent)' }}
-        />
         <div className="relative max-w-md mx-auto w-full">
           <div className="relative min-h-[200px]">
             {ROTATING_QUOTES.map((quote, i) => (
               <div
                 key={i}
-                className="absolute inset-0 transition-all duration-700"
+                className="absolute inset-0"
                 style={{
                   opacity: i === quoteIdx ? 1 : 0,
-                  transform: i === quoteIdx ? 'translateY(0)' : 'translateY(8px)',
+                  transform: i === quoteIdx ? 'translateY(0)' : 'translateY(10px)',
                   pointerEvents: i === quoteIdx ? 'auto' : 'none',
+                  transition: 'opacity 300ms ease-out, transform 300ms ease-out',
                 }}
               >
                 <blockquote
