@@ -72,11 +72,7 @@ export function LivePriceIndicator({
     }
   }, [symbol, market, fetchMarketData]);
 
-  const handleUsePrice = () => {
-    if (priceData?.price && onUsePrice) {
-      onUsePrice(priceData.price);
-    }
-  };
+  void handleRefresh;
 
   if (!symbol || symbol.trim().length < 1) {
     return null;
