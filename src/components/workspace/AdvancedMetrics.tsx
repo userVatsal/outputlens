@@ -54,14 +54,14 @@ export function AdvancedMetrics({ metrics, kurtosis, skewness }: AdvancedMetrics
   const hasPositiveSkew = skewness > 0.5;
 
   return (
-    <div className="rounded-xl border border-border bg-card overflow-hidden mb-6">
+    <div className="rounded-2xl border border-border/50 bg-surface overflow-hidden">
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full flex items-center justify-between p-4 hover:bg-muted/30 transition-colors"
+        className="w-full flex items-center justify-between p-5 hover:bg-elevated/30 transition-colors"
       >
         <div className="flex items-center gap-2">
-          <BarChart3 className="h-5 w-5 text-muted-foreground" />
-          <span className="font-semibold text-foreground">Advanced Statistics</span>
+          <BarChart3 className="h-4 w-4 text-muted-foreground" />
+          <span className="text-[13px] font-semibold text-foreground">Advanced Statistics</span>
         </div>
         <div className="flex items-center gap-3">
           {hasFatTails && (
