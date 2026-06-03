@@ -153,17 +153,15 @@ export function MonteCarloFanChart({ analysis, currencySymbol }: Props) {
   };
 
   return (
-    <div className="rounded-xl border border-border bg-surface overflow-hidden animate-fade-in">
-      <div className="flex items-center justify-between border-b border-border px-5 py-3">
-        <div className="flex items-center gap-2">
-          <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary/10 text-primary">
-            <Activity className="h-3.5 w-3.5" />
+    <div className="rounded-2xl border border-border/50 bg-surface overflow-hidden animate-fade-in p-5">
+      <div className="flex items-end justify-between mb-3">
+        <div>
+          <div className="flex items-center gap-2">
+            <span className="font-mono text-primary text-[14px] font-semibold">{input.asset}</span>
+            <span className="text-[11px] text-muted-foreground font-mono">· {input.timeHorizon}</span>
           </div>
-          <div>
-            <h3 className="font-display text-sm font-semibold text-foreground">Monte Carlo paths</h3>
-            <p className="text-[11px] text-muted-foreground">
-              {simulation.paths.toLocaleString()} simulated trajectories · {input.timeHorizon} horizon
-            </p>
+          <div className="text-[11px] text-muted-foreground mt-0.5">
+            Monte Carlo Fan ({simulation.paths.toLocaleString()} paths)
           </div>
         </div>
         <div className="hidden sm:flex items-center gap-3 text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
@@ -179,7 +177,7 @@ export function MonteCarloFanChart({ analysis, currencySymbol }: Props) {
         </div>
       </div>
 
-      <div className="h-[280px] sm:h-[340px] p-3">
+      <div className="h-[280px] sm:h-[340px]">
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart data={visible} margin={{ top: 12, right: 16, bottom: 8, left: 0 }}>
             <defs>
