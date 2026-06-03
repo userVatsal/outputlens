@@ -4,6 +4,8 @@ import { AppShell } from '@/components/layout/AppShell';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useTrackedAssets, RiskAlert } from '@/hooks/useTrackedAssets';
+import { useFeatureAccess, UpgradePrompt } from '@/components/FeatureGate';
+import { usePlan } from '@/hooks/usePlan';
 
 type Severity = 'all' | 'critical' | 'warning' | 'info';
 
@@ -83,6 +85,8 @@ function AlertCard({ alert, asset, onDismiss, onRead }: {
 export default function Alerts() {
   const { alerts, trackedAssets, dismissAlert, markAlertRead, isLoading } = useTrackedAssets();
   const [filter, setFilter] = useState<Severity>('all');
+  const hasAlertsAccess = useFeatureAccess('alerts');
+  const { isLoading: planLoading } = usePlan();
 
   useEffect(() => { document.title = 'Risk Alerts | OutputLens'; }, []);
 
@@ -110,6 +114,27 @@ export default function Alerts() {
     { id: 'warning', label: 'Warning' },
     { id: 'info', label: 'Signals' },
   ];
+
+  if (!planLoading && !hasAlertsAccess) {
+    return (
+      <AppShell>
+        <div className="section-container py-6">
+          <div className="max-w-2xl mx-auto space-y-6">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-md flex items-center justify-center bg-bearish/10">
+                <Bell className="h-5 w-5 text-bearish" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-display font-semibold text-foreground">Risk Alerts</h1>
+                <p className="text-sm text-muted-foreground">Available on the Trader plan</p>
+              </div>
+            </div>
+            <UpgradePrompt feature="alerts" />
+          </div>
+        </div>
+      </AppShell>
+    );
+  }
 
   return (
     <AppShell>
