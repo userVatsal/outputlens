@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { SubscriptionPlan, PLAN_CONFIG } from '@/lib/stripe';
+import { useAuth } from '@/contexts/AuthContext';
 
 export interface UsageData {
   analysisCount: number;
@@ -22,6 +23,7 @@ interface UsageTracking {
 }
 
 export function useUsage() {
+  const { userId, loading: authLoading } = useAuth();
   const [usage, setUsage] = useState<UsageData | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -31,13 +33,11 @@ export function useUsage() {
   };
 
   const fetchUsage = useCallback(async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
+    if (!userId) {
       setLoading(false);
       return;
     }
 
-    const userId = session.user.id;
     const monthYear = getCurrentMonthYear();
 
     try {
@@ -88,17 +88,16 @@ export function useUsage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [userId]);
 
   useEffect(() => {
+    if (authLoading) return;
     fetchUsage();
-  }, [fetchUsage]);
+  }, [fetchUsage, authLoading]);
 
   const incrementUsage = useCallback(async (type: 'analysis' | 'portfolio' | 'api' = 'analysis') => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) return;
+    if (!userId) return;
 
-    const userId = session.user.id;
     const monthYear = getCurrentMonthYear();
 
     try {
@@ -133,7 +132,7 @@ export function useUsage() {
     } catch (error) {
       console.error('Error incrementing usage:', error);
     }
-  }, [usage]);
+  }, [usage, userId]);
 
   const canAnalyze = usage ? usage.analysisCount < usage.limit : false;
   const canPortfolioAnalyze = usage 
