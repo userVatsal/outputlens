@@ -8,7 +8,7 @@ const corsHeaders = {
 
 interface MarketDataRequest {
   symbol: string;
-  provider: 'finnhub' | 'coingecko' | 'twelvedata';
+  provider: 'yahoo' | 'finnhub' | 'coingecko' | 'twelvedata';
   type: 'quote' | 'historical';
   market?: string;
   days?: number;
