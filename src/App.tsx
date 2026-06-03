@@ -8,6 +8,8 @@ import { TradeProvider } from "@/hooks/useTrade";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { TrackingProvider } from "@/components/tracking/TrackingProvider";
 import { PageSkeleton } from "@/components/PageSkeleton";
+import { AuthProvider } from "@/contexts/AuthContext";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 // Lazy load all page components for code splitting
 const Landing = lazy(() => import("./pages/Landing"));
@@ -35,19 +37,29 @@ const VarCalculator = lazy(() => import("./pages/VarCalculator"));
 const Blog = lazy(() => import("./pages/Blog"));
 const BlogPost = lazy(() => import("./pages/BlogPost"));
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <LanguageProvider>
-      <TooltipProvider>
-        <TradeProvider>
+  <ErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <LanguageProvider>
+        <TooltipProvider>
           <BrowserRouter>
-            <TrackingProvider>
-              <Toaster />
-              <Sonner />
-              <Suspense fallback={<PageSkeleton />}>
-                <Routes>
+            <AuthProvider>
+              <TradeProvider>
+                <TrackingProvider>
+                  <Toaster />
+                  <Sonner />
+                  <ErrorBoundary>
+                    <Suspense fallback={<PageSkeleton />}>
+                      <Routes>
                   <Route path="/" element={<Landing />} />
                   <Route path="/auth" element={<Auth />} />
                   <Route path="/dashboard" element={<Dashboard />} />
@@ -75,14 +87,17 @@ const App = () => (
                   <Route path="/ceo-dashboard" element={<CEODashboard />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
-                </Routes>
-              </Suspense>
-            </TrackingProvider>
+                      </Routes>
+                    </Suspense>
+                  </ErrorBoundary>
+                </TrackingProvider>
+              </TradeProvider>
+            </AuthProvider>
           </BrowserRouter>
-        </TradeProvider>
-      </TooltipProvider>
-    </LanguageProvider>
-  </QueryClientProvider>
+        </TooltipProvider>
+      </LanguageProvider>
+    </QueryClientProvider>
+  </ErrorBoundary>
 );
 
 export default App;

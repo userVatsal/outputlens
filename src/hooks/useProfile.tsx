@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useAuth } from '@/contexts/AuthContext';
 
 export interface ProfileData {
   id: string;
@@ -49,6 +50,7 @@ export interface ProfileUpdateData {
 }
 
 export function useProfile() {
+  const { user, loading: authLoading } = useAuth();
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -58,7 +60,6 @@ export function useProfile() {
       setLoading(true);
       setError(null);
 
-      const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         setProfile(null);
         return;
@@ -82,14 +83,13 @@ export function useProfile() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [user]);
 
   const updateProfile = useCallback(async (
     updates: ProfileUpdateData,
     logChanges = true
   ): Promise<boolean> => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         toast.error('You must be logged in to update your profile');
         return false;
@@ -135,7 +135,7 @@ export function useProfile() {
       toast.error(err instanceof Error ? err.message : 'Failed to update profile');
       return false;
     }
-  }, [profile, fetchProfile]);
+  }, [profile, fetchProfile, user]);
 
   const updateField = useCallback(async (
     field: keyof ProfileUpdateData,
@@ -147,8 +147,6 @@ export function useProfile() {
   const checkUsernameAvailable = useCallback(async (username: string): Promise<boolean> => {
     if (!username || username.length < 3) return false;
 
-    const { data: { user } } = await supabase.auth.getUser();
-    
     const { data, error } = await supabase
       .from('profiles')
       .select('username')
@@ -162,7 +160,7 @@ export function useProfile() {
     }
 
     return data === null;
-  }, []);
+  }, [user]);
 
   const acceptConsent = useCallback(async (
     gdpr: boolean,
@@ -178,21 +176,10 @@ export function useProfile() {
   }, [updateProfile]);
 
   useEffect(() => {
+    if (authLoading) return;
+    if (!user) { setProfile(null); setLoading(false); return; }
     fetchProfile();
-
-    // Subscribe to auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event) => {
-        if (event === 'SIGNED_IN') {
-          fetchProfile();
-        } else if (event === 'SIGNED_OUT') {
-          setProfile(null);
-        }
-      }
-    );
-
-    return () => subscription.unsubscribe();
-  }, [fetchProfile]);
+  }, [fetchProfile, user, authLoading]);
 
   return {
     profile,
