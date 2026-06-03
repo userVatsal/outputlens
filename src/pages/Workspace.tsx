@@ -62,13 +62,19 @@ function SimulationLoader({ asset }: { asset?: string }) {
   }, [asset]);
 
   return (
-    <div className="rounded-2xl overflow-hidden border border-border/50 bg-surface">
+    <div className="rounded-2xl overflow-hidden border border-border/50 bg-surface relative animate-result-reveal">
+      {/* Scan-line sweep effect */}
+      <div
+        className="absolute inset-x-0 pointer-events-none"
+        style={{
+          height: '60px',
+          background: 'linear-gradient(180deg, transparent 0%, hsl(189 100% 50% / 0.06) 50%, transparent 100%)',
+          animation: 'scan-line 2.4s cubic-bezier(0.4,0,0.2,1) infinite',
+        }}
+      />
       <div className="flex items-center justify-between bg-elevated px-5 py-3 border-b border-border/40">
         <div className="flex items-center gap-2">
-          <span className="relative flex h-2 w-2">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-bullish opacity-60" />
-            <span className="relative inline-flex h-2 w-2 rounded-full bg-bullish" />
-          </span>
+          <span className="dot-live" />
           <span className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
             Risk engine running
           </span>
@@ -81,7 +87,7 @@ function SimulationLoader({ asset }: { asset?: string }) {
           <div
             key={i}
             className={cn(
-              'flex items-center gap-2 transition-all duration-300',
+              'flex items-center gap-2 animate-fade-up',
               i === allLines.length - 1 ? 'text-bullish' : 'text-foreground/80'
             )}
           >
@@ -96,6 +102,7 @@ function SimulationLoader({ asset }: { asset?: string }) {
           <div className="flex items-center gap-2 text-muted-foreground/60">
             <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/40 animate-pulse" />
             <span className="italic">working…</span>
+            <span className="animate-terminal-cursor font-mono text-primary">▊</span>
           </div>
         )}
       </div>
@@ -282,7 +289,7 @@ export default function Workspace() {
                 {tradeLoading && <SimulationLoader asset={currentAsset} />}
 
                 {analysis && !tradeLoading && (
-                  <div className="space-y-4">
+                  <div className="space-y-4 animate-result-reveal">
                     {isHistorical && (
                       <div className="rounded-xl bg-surface border border-border/50 px-4 py-2 text-[12px] text-muted-foreground font-mono">
                         Viewing historical analysis from{' '}
@@ -291,13 +298,17 @@ export default function Workspace() {
                     )}
 
                     {/* Monte Carlo — full width */}
-                    <MonteCarloFanChart analysis={analysis} currencySymbol={currencySymbol} />
+                    <div className="animate-result-reveal" style={{ animationDelay: '0ms' }}>
+                      <MonteCarloFanChart analysis={analysis} currencySymbol={currencySymbol} />
+                    </div>
 
                     {/* Risk snapshot — 4 KPI cards */}
-                    <RiskSnapshot analysis={analysis} currencySymbol={currencySymbol} />
+                    <div className="animate-result-reveal" style={{ animationDelay: '100ms' }}>
+                      <RiskSnapshot analysis={analysis} currencySymbol={currencySymbol} />
+                    </div>
 
                     {/* Tail risk + Scenarios */}
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 animate-result-reveal" style={{ animationDelay: '200ms' }}>
                       <TailRiskPanel
                         scenarios={analysis.scenarios}
                         expectedShortfall={analysis.riskMetrics.expectedShortfall}

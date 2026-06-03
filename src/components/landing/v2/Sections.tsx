@@ -13,12 +13,29 @@ export function Hero() {
         className="absolute inset-0 pointer-events-none"
         style={{ background: 'radial-gradient(ellipse 70% 55% at 50% -5%, hsl(189 100% 50% / 0.07), transparent 65%)' }}
       />
+      {/* Decorative grid / glow svg layer */}
+      <svg
+        className="absolute inset-0 w-full h-full pointer-events-none opacity-[0.35]"
+        aria-hidden
+      >
+        <defs>
+          <pattern id="hero-grid" width="56" height="56" patternUnits="userSpaceOnUse">
+            <path d="M 56 0 L 0 0 0 56" fill="none" stroke="hsl(189 100% 50% / 0.06)" strokeWidth="1" />
+          </pattern>
+          <radialGradient id="hero-glow" cx="50%" cy="0%" r="60%">
+            <stop offset="0%" stopColor="hsl(189 100% 50% / 0.15)" />
+            <stop offset="100%" stopColor="hsl(189 100% 50% / 0)" />
+          </radialGradient>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#hero-grid)" />
+        <rect width="100%" height="100%" fill="url(#hero-glow)" />
+      </svg>
       <div className="relative w-full max-w-[1280px] mx-auto px-6 grid lg:grid-cols-5 gap-12 lg:gap-14 items-center">
         {/* Left: 60% */}
         <div className="lg:col-span-3">
           <div
-            className="border-l-2 border-primary pl-3 font-mono text-primary text-[11px] uppercase"
-            style={{ letterSpacing: '0.15em', animation: 'fade-up 500ms ease-out both' }}
+            className="border-l-2 border-primary pl-3 font-mono text-primary text-[11px] uppercase animate-fade-up stagger-1"
+            style={{ letterSpacing: '0.15em' }}
           >
             Institutional-Grade Risk Intelligence
           </div>
@@ -28,23 +45,25 @@ export function Hero() {
               fontSize: 'clamp(36px, 5.5vw, 58px)',
               letterSpacing: '-0.03em',
               lineHeight: 1.02,
-              animation: 'fade-up 600ms ease-out 100ms both',
             }}
           >
-            <span className="block text-foreground">The market is a</span>
-            <span className="block text-primary">distribution.</span>
-            <span className="block text-foreground">Trade it like one.</span>
+            <span className="block text-foreground animate-fade-up stagger-2">The market is a</span>
+            <span
+              className="block text-primary animate-fade-up stagger-3"
+              style={{ borderBottom: '2px solid hsl(189 100% 50% / 0.4)', paddingBottom: 2, width: 'fit-content' }}
+            >distribution.</span>
+            <span className="block text-foreground animate-fade-up stagger-4">Trade it like one.</span>
           </h1>
           <p
-            className="mt-5 text-muted-foreground"
-            style={{ fontSize: 16, lineHeight: 1.75, maxWidth: 460, animation: 'fade-up 700ms ease-out 200ms both' }}
+            className="mt-5 text-muted-foreground animate-fade-up stagger-5"
+            style={{ fontSize: 16, lineHeight: 1.75, maxWidth: 460 }}
           >
             OutputLens runs 10,000 Monte Carlo simulations on any asset — giving you the full probability of outcomes, not a forecast.
           </p>
-          <div className="mt-8 flex flex-wrap gap-3" style={{ animation: 'fade-up 700ms ease-out 300ms both' }}>
+          <div className="mt-8 flex flex-wrap gap-3 animate-fade-up stagger-6">
             <Link
               to="/auth?mode=signup"
-              className="inline-flex items-center gap-2 rounded-lg bg-primary text-primary-foreground font-semibold text-sm px-6 py-3 hover:brightness-110 transition-all min-h-[48px]"
+              className="btn-primary inline-flex items-center gap-2 rounded-lg bg-primary text-primary-foreground font-semibold text-sm px-6 py-3 min-h-[48px]"
             >
               Analyse a Position Free →
             </Link>
@@ -56,8 +75,8 @@ export function Hero() {
             </a>
           </div>
           <div
-            className="mt-5 flex flex-wrap items-center gap-x-3 gap-y-2 text-[12px] text-foreground/35"
-            style={{ animation: 'fade-up 700ms ease-out 400ms both' }}
+            className="mt-5 flex flex-wrap items-center gap-x-3 gap-y-2 text-[12px] text-foreground/35 animate-fade-up"
+            style={{ animationDelay: '350ms' }}
           >
             <span>✓ No credit card</span>
             <span aria-hidden>·</span>
@@ -68,7 +87,7 @@ export function Hero() {
         </div>
 
         {/* Right: 40% — Chart */}
-        <div className="lg:col-span-2 relative">
+        <div className="lg:col-span-2 relative animate-scale-in" style={{ animationDelay: '200ms' }}>
           <div className="rounded-xl border border-border bg-surface p-4 md:p-5 relative shadow-[0_4px_24px_hsl(var(--primary)/0.08)]">
             <div className="hidden lg:block">
               <FanChart height={380} />
@@ -78,14 +97,14 @@ export function Hero() {
             </div>
 
             <div
-              className="absolute -top-3 -right-3 rounded-lg bg-elevated border border-border px-3 py-2 font-mono text-[12px] font-semibold shadow-[0_4px_24px_hsl(var(--primary)/0.08)]"
-              style={{ color: 'hsl(var(--bullish))', animation: 'fade-up 600ms ease-out 1000ms both' }}
+              className="absolute -top-3 -right-3 rounded-lg bg-elevated border border-border px-3 py-2 font-mono text-[12px] font-semibold shadow-[0_4px_24px_hsl(var(--primary)/0.08)] animate-fade-up animate-float"
+              style={{ color: 'hsl(var(--bullish))', animationDelay: '700ms' }}
             >
               P95 +34.2%
             </div>
             <div
-              className="absolute -bottom-3 -left-3 rounded-lg bg-elevated border border-border px-3 py-2 font-mono text-[12px] font-semibold shadow-[0_4px_24px_hsl(var(--primary)/0.08)]"
-              style={{ color: 'hsl(var(--bearish))', animation: 'fade-up 600ms ease-out 1100ms both' }}
+              className="absolute -bottom-3 -left-3 rounded-lg bg-elevated border border-border px-3 py-2 font-mono text-[12px] font-semibold shadow-[0_4px_24px_hsl(var(--primary)/0.08)] animate-fade-up animate-float"
+              style={{ color: 'hsl(var(--bearish))', animationDelay: '800ms' }}
             >
               CVaR 95% −12.1%
             </div>
@@ -180,6 +199,28 @@ const FEATURES = [
   { icon: History,       title: 'Simulation History',  desc: 'Every analysis saved and replayable. Compare distributions over time.' },
 ];
 export function Features() {
+  const gridRef = useRef<HTMLDivElement>(null);
+  const [visibleSet, setVisibleSet] = useState<Set<number>>(new Set());
+  useEffect(() => {
+    if (!gridRef.current) return;
+    const cards = Array.from(gridRef.current.querySelectorAll('[data-feature-idx]')) as HTMLElement[];
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) {
+          const idx = Number((e.target as HTMLElement).dataset.featureIdx);
+          setVisibleSet((prev) => {
+            if (prev.has(idx)) return prev;
+            const next = new Set(prev);
+            next.add(idx);
+            return next;
+          });
+          io.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.15 });
+    cards.forEach((c) => io.observe(c));
+    return () => io.disconnect();
+  }, []);
   return (
     <section id="features" className="py-16 md:py-20 relative">
       <div
@@ -190,11 +231,13 @@ export function Features() {
         <h2 className="section-title text-center">Everything you need to quantify uncertainty</h2>
         <p className="mt-3 text-base text-muted-foreground text-center">Built for analysts who reject point forecasts</p>
 
-        <div className="mt-10 md:mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {FEATURES.map((f) => (
+        <div ref={gridRef} className="mt-10 md:mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {FEATURES.map((f, idx) => (
             <div
               key={f.title}
-              className="group rounded-xl bg-surface border border-border/50 p-6 hover:border-primary/20 hover:bg-elevated/50 transition-all duration-200"
+              data-feature-idx={idx}
+              className={`group card-quant rounded-xl bg-surface border border-border/50 p-6 hover:border-primary/20 hover:bg-elevated/50 ${visibleSet.has(idx) ? 'animate-fade-up' : 'opacity-0'}`}
+              style={visibleSet.has(idx) ? { animationDelay: `${idx * 60}ms` } : undefined}
             >
               <div
                 className="w-10 h-10 rounded-lg flex items-center justify-center"
@@ -227,9 +270,9 @@ export function SocialProof() {
           {QUOTES.map((t) => (
             <figure
               key={t.a}
-              className="relative rounded-xl bg-background border border-border/50 border-t-2 border-t-primary/40 p-7"
+              className="relative rounded-xl bg-background border border-border/50 border-t-2 border-t-primary/30 hover:border-t-primary/60 transition-colors duration-300 p-7 group"
             >
-              <blockquote className="italic text-[15px] text-foreground/85 leading-[1.75] before:content-['\201C'] before:text-primary before:text-[28px] before:font-serif before:leading-none before:block before:mb-2">
+              <blockquote className="italic text-[15px] text-foreground/85 leading-[1.75] border-l-2 border-primary/20 group-hover:border-primary/50 pl-4 transition-colors before:content-['\201C'] before:text-primary before:text-[28px] before:font-serif before:leading-none before:block before:mb-2">
                 {t.q}
               </blockquote>
               <figcaption className="mt-5">

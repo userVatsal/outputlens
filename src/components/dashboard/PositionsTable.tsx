@@ -49,14 +49,15 @@ export function PositionsTable({ assets }: Props) {
               </tr>
             </thead>
             <tbody>
-              {sorted.map(a => {
+              {sorted.map((a, rowIndex) => {
                 const delta = a.risk_delta ?? 0;
                 const tail = a.current_tail_risk ?? a.tail_risk_at_track ?? 0;
                 const risk = riskBucket(tail);
                 return (
                   <tr
                     key={a.id}
-                    className="h-12 hover:bg-elevated/30 transition-colors border-b border-border/20 last:border-0"
+                    className="h-12 hover:bg-elevated/30 transition-colors border-b border-border/20 last:border-0 animate-fade-up"
+                    style={{ animationDelay: `${rowIndex * 40}ms`, animationFillMode: 'backwards' }}
                   >
                     <td className="px-2">
                       <div className="font-mono font-medium text-[14px] text-foreground">{a.symbol}</div>
@@ -71,10 +72,15 @@ export function PositionsTable({ assets }: Props) {
                       ${a.entry_price.toFixed(2)}
                     </td>
                     <td className="px-2 text-center">
-                      <span className={cn(
-                        'inline-block text-[10px] font-mono font-semibold uppercase tracking-wider border rounded-md px-1.5 py-0.5',
-                        risk.tone
-                      )}>
+                      <span
+                        className={cn(
+                          'inline-block text-[10px] font-mono font-semibold uppercase tracking-wider border rounded-md px-1.5 py-0.5',
+                          risk.tone
+                        )}
+                        style={risk.label === 'HIGH' ? {
+                          boxShadow: '0 0 0 1px hsl(4 82% 57% / 0.25), 0 0 12px hsl(4 82% 57% / 0.2)',
+                        } : undefined}
+                      >
                         {risk.label}
                       </span>
                     </td>

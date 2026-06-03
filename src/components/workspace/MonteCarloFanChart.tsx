@@ -153,12 +153,16 @@ export function MonteCarloFanChart({ analysis, currencySymbol }: Props) {
   };
 
   return (
-    <div className="rounded-2xl border border-border/50 bg-surface overflow-hidden animate-fade-in p-5">
+    <div className="rounded-2xl border border-border/50 bg-surface overflow-hidden p-5">
       <div className="flex items-end justify-between mb-3">
         <div>
           <div className="flex items-center gap-2">
             <span className="font-mono text-primary text-[14px] font-semibold">{input.asset}</span>
-            <span className="text-[11px] text-muted-foreground font-mono">· {input.timeHorizon}</span>
+            <span className="text-[11px] text-muted-foreground font-mono">· 10,000 paths · 30-day horizon</span>
+            <span className="badge-live">
+              <span className="dot-live" style={{ width: 6, height: 6 }} />
+              LIVE
+            </span>
           </div>
           <div className="text-[11px] text-muted-foreground mt-0.5">
             Monte Carlo Fan ({simulation.paths.toLocaleString()} paths)

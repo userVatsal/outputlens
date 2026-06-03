@@ -8,22 +8,26 @@ interface Props {
 }
 
 function KpiCard({
-  label, value, delta, icon: Icon,
+  label, value, delta, icon: Icon, delay = 0,
 }: {
   label: string;
   value: string;
   delta?: { value: number; suffix?: string } | null;
   icon: React.ComponentType<{ className?: string }>;
+  delay?: number;
 }) {
   const isPositive = delta && delta.value > 0;
   const isNegative = delta && delta.value < 0;
 
   return (
-    <div className="rounded-xl bg-surface border border-border/50 p-5 hover:border-primary/15 transition-colors">
+    <div
+      className="card-quant rounded-xl bg-surface border border-border/50 p-5 animate-fade-up"
+      style={{ animationDelay: `${delay}ms`, animationFillMode: 'backwards' }}
+    >
       <div className="w-9 h-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
         <Icon className="h-4 w-4" />
       </div>
-      <div className="font-mono font-bold text-[28px] text-foreground tabular-nums mt-4 leading-none">
+      <div className="font-mono font-bold text-[28px] text-foreground tabular-nums mt-4 leading-none animate-count-flash">
         {value}
       </div>
       <div className="text-[12px] text-muted-foreground uppercase tracking-[0.08em] mt-1">
@@ -64,21 +68,25 @@ export function KpiGrid({ assets, streak }: Props) {
         value={active.length ? `${(avgVar * 100).toFixed(1)}%` : '—'}
         delta={active.length ? { value: avgDelta * 100 } : null}
         icon={Shield}
+        delay={0}
       />
       <KpiCard
         label="Expected Shortfall"
         value={active.length ? `${(avgTail * 100).toFixed(1)}%` : '—'}
         icon={TrendingDown}
+        delay={60}
       />
       <KpiCard
         label="Regime Stress"
         value={`${deteriorating}/${active.length || 0}`}
         icon={Gauge}
+        delay={120}
       />
       <KpiCard
         label="Analysis Streak"
         value={`${streak}d`}
         icon={Flame}
+        delay={180}
       />
     </div>
   );

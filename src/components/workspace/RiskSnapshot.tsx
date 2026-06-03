@@ -47,13 +47,13 @@ function MetricBlock({ label, value, sub, color, icon, delay = 0 }: MetricBlockP
 
   return (
     <div
-      className="rounded-xl bg-surface border border-border/50 p-5 hover:border-primary/15 transition-colors animate-fade-in"
+      className="card-quant rounded-xl bg-surface border border-border/50 p-5 animate-fade-up"
       style={{ animationDelay: `${delay}ms`, animationFillMode: 'backwards' }}
     >
       <div className="flex items-center gap-2">
         <span className={cn('w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center', textColor[color])}>{icon}</span>
       </div>
-      <div className={cn('font-mono font-bold text-[32px] tabular-nums leading-none mt-4', textColor[color])}>{value}</div>
+      <div className={cn('font-mono font-bold text-[32px] tabular-nums leading-none mt-4 animate-count-flash', textColor[color])}>{value}</div>
       <div className="text-[11px] uppercase text-muted-foreground tracking-[0.08em] mt-2">{label}</div>
       <div className="text-[12px] text-muted-foreground/70 mt-1">{sub}</div>
     </div>
