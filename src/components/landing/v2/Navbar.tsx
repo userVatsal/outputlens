@@ -7,7 +7,7 @@ export function Navbar() {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20);
+    const onScroll = () => setScrolled(window.scrollY > 200);
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
@@ -45,7 +45,8 @@ export function Navbar() {
           </Link>
           <Link
             to="/auth?mode=signup"
-            className="inline-flex items-center gap-1.5 rounded-lg bg-primary text-primary-foreground font-semibold text-sm px-5 py-2.5 hover:brightness-110 transition-all"
+            className={`btn-primary inline-flex items-center gap-1.5 rounded-lg bg-primary text-primary-foreground font-semibold text-sm px-5 py-2.5 ${scrolled ? 'animate-glow-pulse' : ''}`}
+            style={{ boxShadow: '0 0 0 1px hsl(189 100% 50% / 0.2), 0 4px 16px hsl(189 100% 50% / 0.3)' }}
           >
             Start Free →
           </Link>
