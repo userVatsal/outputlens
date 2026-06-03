@@ -38,12 +38,6 @@ interface MetricBlockProps {
 }
 
 function MetricBlock({ label, value, sub, color, icon, delay = 0 }: MetricBlockProps) {
-  const colorMap = {
-    bullish: 'text-bullish border-bullish/30 bg-bullish/5',
-    bearish: 'text-destructive border-destructive/30 bg-destructive/5',
-    caution: 'text-caution border-caution/30 bg-caution/5',
-    neutral: 'text-muted-foreground border-border bg-muted/20',
-  };
   const textColor = {
     bullish: 'text-bullish',
     bearish: 'text-destructive',
@@ -53,18 +47,15 @@ function MetricBlock({ label, value, sub, color, icon, delay = 0 }: MetricBlockP
 
   return (
     <div
-      className={cn(
-        'rounded-lg border px-4 py-3 animate-fade-in transition-transform hover:-translate-y-0.5 hover:shadow-lg',
-        colorMap[color]
-      )}
+      className="rounded-xl bg-surface border border-border/50 p-5 hover:border-primary/15 transition-colors animate-fade-in"
       style={{ animationDelay: `${delay}ms`, animationFillMode: 'backwards' }}
     >
-      <div className="flex items-center gap-1.5 mb-2">
-        <span className={cn('h-4 w-4', textColor[color])}>{icon}</span>
-        <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest">{label}</span>
+      <div className="flex items-center gap-2">
+        <span className={cn('w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center', textColor[color])}>{icon}</span>
       </div>
-      <div className={cn('text-2xl font-bold font-mono tabular-nums', textColor[color])}>{value}</div>
-      <div className={cn('text-xs font-semibold mt-0.5', textColor[color])}>{sub}</div>
+      <div className={cn('font-mono font-bold text-[32px] tabular-nums leading-none mt-4', textColor[color])}>{value}</div>
+      <div className="text-[11px] uppercase text-muted-foreground tracking-[0.08em] mt-2">{label}</div>
+      <div className="text-[12px] text-muted-foreground/70 mt-1">{sub}</div>
     </div>
   );
 }
@@ -100,11 +91,11 @@ export function RiskSnapshot({ analysis, currencySymbol, previousRiskScore, prev
   const aRet  = useCountUp(riskMetrics.expectedReturn);
 
   return (
-    <div className="mb-6">
+    <div>
       {/* Section header */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <h2 className="text-xs font-mono font-bold text-muted-foreground uppercase tracking-widest">Risk Snapshot</h2>
+          <h2 className="text-[13px] font-semibold text-foreground">Risk Snapshot</h2>
           {riskMetrics.usedLiveData && (
             <span className="flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded bg-bullish/10 text-bullish font-mono font-bold">
               <span className="w-1.5 h-1.5 rounded-full bg-bullish animate-pulse" />
@@ -125,8 +116,8 @@ export function RiskSnapshot({ analysis, currencySymbol, previousRiskScore, prev
         )}
       </div>
 
-      {/* 4-metric strip */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      {/* 4-metric grid */}
+      <div className="grid grid-cols-2 gap-3">
         <MetricBlock
           label="Risk Score"
           value={`${aRisk.toFixed(1)}/10`}
