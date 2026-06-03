@@ -1,10 +1,16 @@
-import { ArrowUpRight, TrendingDown, TrendingUp } from 'lucide-react';
+import { ArrowRight, TrendingDown, TrendingUp } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { TrackedAsset } from '@/hooks/useTrackedAssets';
 import { cn } from '@/lib/utils';
 
 interface Props {
   assets: TrackedAsset[];
+}
+
+function riskBucket(tail: number): { label: 'LOW' | 'MED' | 'HIGH'; tone: string } {
+  if (tail > 0.2) return { label: 'HIGH', tone: 'text-bearish bg-bearish/10 border-bearish/20' };
+  if (tail > 0.1) return { label: 'MED', tone: 'text-caution bg-caution/10 border-caution/20' };
+  return { label: 'LOW', tone: 'text-bullish bg-bullish/10 border-bullish/20' };
 }
 
 export function PositionsTable({ assets }: Props) {
@@ -14,106 +20,86 @@ export function PositionsTable({ assets }: Props) {
     .slice(0, 8);
 
   return (
-    <div className="rounded-lg border border-border bg-card overflow-hidden">
-      <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-        <div className="flex items-center gap-2">
-          <h2 className="font-display font-semibold text-foreground">Tracked Positions</h2>
-          <span className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
-            sorted by tail risk
-          </span>
-        </div>
-        <Link to="/tracked-assets" className="text-xs text-primary hover:underline flex items-center gap-1">
-          Manage <ArrowUpRight className="h-3 w-3" />
+    <div className="rounded-xl bg-surface border border-border/50 p-5">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-[13px] font-semibold text-foreground">Tracked Positions</h2>
+        <Link to="/tracked-assets" className="text-[12px] text-primary hover:underline inline-flex items-center gap-1 font-medium">
+          View all <ArrowRight className="h-3 w-3" />
         </Link>
       </div>
 
       {sorted.length === 0 ? (
-        <div className="p-8 text-center">
-          <p className="text-sm text-muted-foreground mb-3">No positions tracked yet</p>
-          <Link to="/workspace" className="text-sm text-primary hover:underline">
+        <div className="py-8 text-center">
+          <p className="text-[13px] text-muted-foreground mb-3">No positions tracked yet</p>
+          <Link to="/workspace" className="text-[13px] text-primary hover:underline font-medium">
             Run your first analysis →
           </Link>
         </div>
       ) : (
-        <div className="divide-y divide-border">
-          {/* Desktop header */}
-          <div className="hidden md:grid grid-cols-12 px-4 py-2 text-[10px] font-mono uppercase tracking-widest text-muted-foreground bg-muted/30">
-            <div className="col-span-3">Asset</div>
-            <div className="col-span-2 text-right">Entry</div>
-            <div className="col-span-2 text-right">VaR 95%</div>
-            <div className="col-span-2 text-right">Tail</div>
-            <div className="col-span-3 text-right">Δ vs track</div>
-          </div>
-          {sorted.map(a => {
-            const delta = a.risk_delta ?? 0;
-            const var95 = a.current_var95 ?? a.var95_at_track ?? 0;
-            const tail = a.current_tail_risk ?? a.tail_risk_at_track ?? 0;
-            const tailPct = Math.min(100, Math.max(0, tail * 100 * 2)); // 0-100 risk bar
-            const tailColor = tailPct < 30 ? 'hsl(var(--bullish))' : tailPct < 60 ? 'hsl(var(--caution))' : 'hsl(var(--bearish))';
-            return (
-              <Link
-                key={a.id}
-                to={`/workspace?asset=${a.symbol}`}
-                className="block hover:bg-muted/40 transition-colors"
-              >
-                {/* Desktop row */}
-                <div className="hidden md:grid grid-cols-12 px-4 py-3 text-sm items-center">
-                  <div className="col-span-3">
-                    <div className="font-mono font-semibold text-foreground">{a.symbol}</div>
-                    <div className="text-[10px] text-muted-foreground uppercase">{a.direction}</div>
-                  </div>
-                  <div className="col-span-2 text-right font-mono text-foreground tabular-nums">
-                    ${a.entry_price.toFixed(2)}
-                  </div>
-                  <div className="col-span-2 text-right font-mono text-foreground tabular-nums">
-                    {(var95 * 100).toFixed(1)}%
-                  </div>
-                  <div className="col-span-2 text-right font-mono text-bearish tabular-nums flex items-center justify-end gap-2">
-                    <div className="hidden lg:block h-1 w-12 rounded-full bg-border overflow-hidden">
-                      <div className="h-full rounded-full" style={{ width: `${tailPct}%`, background: tailColor }} />
-                    </div>
-                    {(tail * 100).toFixed(1)}%
-                  </div>
-                  <div className={cn(
-                    'col-span-3 text-right font-mono tabular-nums flex items-center justify-end gap-1',
-                    delta > 0.02 ? 'text-bearish' : delta < -0.02 ? 'text-bullish' : 'text-muted-foreground'
-                  )}>
-                    {delta > 0.02 ? <TrendingUp className="h-3 w-3" /> : delta < -0.02 ? <TrendingDown className="h-3 w-3" /> : null}
-                    {delta > 0 ? '+' : ''}{(delta * 100).toFixed(1)}%
-                  </div>
-                </div>
-                {/* Mobile card */}
-                <div className="md:hidden p-4 space-y-2.5">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="font-mono font-semibold text-foreground text-base">{a.symbol}</div>
-                      <div className="text-[10px] text-muted-foreground uppercase">{a.direction} · Entry ${a.entry_price.toFixed(2)}</div>
-                    </div>
-                    <div className={cn(
-                      'font-mono text-xs tabular-nums flex items-center gap-1',
+        <div className="overflow-x-auto -mx-1">
+          <table className="w-full">
+            <thead>
+              <tr className="text-[11px] uppercase text-muted-foreground tracking-[0.08em] font-medium border-b border-border/40">
+                <th className="text-left font-medium pb-2 px-2">Asset</th>
+                <th className="text-left font-medium pb-2 px-2 hidden sm:table-cell">Market</th>
+                <th className="text-right font-medium pb-2 px-2">Entry</th>
+                <th className="text-center font-medium pb-2 px-2">Risk Score</th>
+                <th className="text-right font-medium pb-2 px-2">Change</th>
+                <th className="text-right font-medium pb-2 px-2">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {sorted.map(a => {
+                const delta = a.risk_delta ?? 0;
+                const tail = a.current_tail_risk ?? a.tail_risk_at_track ?? 0;
+                const risk = riskBucket(tail);
+                return (
+                  <tr
+                    key={a.id}
+                    className="h-12 hover:bg-elevated/30 transition-colors border-b border-border/20 last:border-0"
+                  >
+                    <td className="px-2">
+                      <div className="font-mono font-medium text-[14px] text-foreground">{a.symbol}</div>
+                      <div className="text-[10px] text-muted-foreground uppercase tracking-wider">{a.direction}</div>
+                    </td>
+                    <td className="px-2 hidden sm:table-cell">
+                      <span className="inline-block text-[10px] font-mono uppercase tracking-wider text-muted-foreground bg-elevated border border-border/40 rounded px-1.5 py-0.5">
+                        {a.market}
+                      </span>
+                    </td>
+                    <td className="px-2 text-right font-mono text-[13px] text-foreground tabular-nums">
+                      ${a.entry_price.toFixed(2)}
+                    </td>
+                    <td className="px-2 text-center">
+                      <span className={cn(
+                        'inline-block text-[10px] font-mono font-semibold uppercase tracking-wider border rounded-md px-1.5 py-0.5',
+                        risk.tone
+                      )}>
+                        {risk.label}
+                      </span>
+                    </td>
+                    <td className={cn(
+                      'px-2 text-right font-mono text-[13px] tabular-nums',
                       delta > 0.02 ? 'text-bearish' : delta < -0.02 ? 'text-bullish' : 'text-muted-foreground'
                     )}>
-                      {delta > 0.02 ? <TrendingUp className="h-3 w-3" /> : delta < -0.02 ? <TrendingDown className="h-3 w-3" /> : null}
-                      Δ {delta > 0 ? '+' : ''}{(delta * 100).toFixed(1)}%
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-4 text-xs">
-                    <div>
-                      <span className="text-muted-foreground uppercase text-[10px]">VaR </span>
-                      <span className="font-mono text-foreground tabular-nums">{(var95 * 100).toFixed(1)}%</span>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground uppercase text-[10px]">Tail </span>
-                      <span className="font-mono text-bearish tabular-nums">{(tail * 100).toFixed(1)}%</span>
-                    </div>
-                  </div>
-                  <div className="h-1 w-full rounded-full bg-border overflow-hidden">
-                    <div className="h-full rounded-full" style={{ width: `${tailPct}%`, background: tailColor }} />
-                  </div>
-                </div>
-              </Link>
-            );
-          })}
+                      <span className="inline-flex items-center gap-1 justify-end">
+                        {delta > 0.02 ? <TrendingUp className="h-3 w-3" /> : delta < -0.02 ? <TrendingDown className="h-3 w-3" /> : null}
+                        {delta > 0 ? '+' : ''}{(delta * 100).toFixed(1)}%
+                      </span>
+                    </td>
+                    <td className="px-2 text-right">
+                      <Link
+                        to={`/workspace?asset=${a.symbol}`}
+                        className="text-primary text-[12px] hover:underline font-medium"
+                      >
+                        Analyse
+                      </Link>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
       )}
     </div>

@@ -1,8 +1,4 @@
-import { Flame, TrendingUp, Zap, Activity } from 'lucide-react';
 import { useStreak } from '@/hooks/useStreak';
-import { useMarketStatus } from '@/hooks/useMarketStatus';
-import { Link } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
 
 interface Props {
   profile: { full_name?: string | null } | null;
@@ -11,63 +7,61 @@ interface Props {
   planLabel: string;
 }
 
-export function ExecutiveStrip({ profile, used, limit, planLabel }: Props) {
-  const { streak } = useStreak();
-  const market = useMarketStatus();
-  const isOpen = market.state === 'open';
-  const statusLabel = market.state.toUpperCase();
-  const first = (profile?.full_name || 'Analyst').split(' ')[0];
-  const hour = new Date().getHours();
-  const greet = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
+function daysLeftInBillingPeriod() {
+  const now = new Date();
+  const end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+  return Math.max(0, Math.ceil((end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
+}
 
+function Cell({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="flex-1 px-6 first:pl-0 last:pr-0 min-w-0">
+      <div className="text-[11px] uppercase text-muted-foreground tracking-[0.08em] mb-1.5">
+        {label}
+      </div>
+      {children}
+    </div>
+  );
+}
+
+export function ExecutiveStrip({ profile: _profile, used, limit, planLabel }: Props) {
+  const { streak } = useStreak();
   const pct = limit > 0 ? Math.min(100, (used / limit) * 100) : 0;
-  const nearLimit = pct >= 80;
+  const daysLeft = daysLeftInBillingPeriod();
 
   return (
-    <div className="glass-card p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-      <div>
-        <div className="flex items-center gap-3 mb-1">
-          <h1 className="text-2xl font-display font-semibold text-foreground">
-            {greet}, {first}
-          </h1>
-          <span className="text-[10px] font-mono uppercase tracking-widest px-2 py-0.5 rounded bg-primary/10 text-primary border border-primary/20">
-            {planLabel}
-          </span>
-        </div>
-        <div className="flex items-center gap-4 text-xs text-muted-foreground font-mono">
-          <span className="flex items-center gap-1.5">
-            <span className={`w-1.5 h-1.5 rounded-full ${isOpen ? 'bg-bullish animate-pulse' : 'bg-muted-foreground/50'}`} />
-            NYSE {statusLabel}
-          </span>
-          {streak > 0 && (
-            <span className="flex items-center gap-1 text-foreground">
-              <Flame className="h-3.5 w-3.5 text-bearish" />
-              {streak}-day streak
-            </span>
-          )}
-          <span className="flex items-center gap-1">
-            <Activity className="h-3.5 w-3.5" />
-            {used}/{limit} analyses
-          </span>
-        </div>
-      </div>
+    <div className="bg-surface border border-border/50 rounded-xl px-6 py-4 flex items-center gap-0 divide-x divide-border/40">
+      <Cell label="Plan">
+        <span className="inline-block text-primary bg-primary/10 border border-primary/20 rounded-md px-2 py-0.5 text-[11px] font-mono font-semibold uppercase tracking-wider">
+          {planLabel}
+        </span>
+      </Cell>
 
-      <div className="flex items-center gap-3">
-        {nearLimit && (
-          <Button variant="outline" size="sm" asChild>
-            <Link to="/pricing">
-              <Zap className="h-3.5 w-3.5 mr-1.5" />
-              Upgrade
-            </Link>
-          </Button>
-        )}
-        <Button asChild size="sm" className="bg-primary text-primary-foreground">
-          <Link to="/workspace">
-            <TrendingUp className="h-4 w-4 mr-1.5" />
-            New Simulation
-          </Link>
-        </Button>
-      </div>
+      <Cell label="Analyses this month">
+        <div className="font-mono font-semibold text-[20px] tabular-nums leading-none">
+          <span className="text-foreground">{used}</span>
+          <span className="text-muted-foreground"> / {limit || '∞'}</span>
+        </div>
+        <div className="mt-2 h-1 rounded-full bg-elevated overflow-hidden">
+          <div className="h-full bg-primary transition-all" style={{ width: `${pct}%` }} />
+        </div>
+      </Cell>
+
+      <Cell label="Billing period">
+        <div className="font-mono font-semibold text-[20px] text-foreground tabular-nums leading-none">
+          {daysLeft}
+          <span className="text-muted-foreground text-[13px] font-normal ml-1">days left</span>
+        </div>
+      </Cell>
+
+      <Cell label="Streak">
+        <div className="font-mono font-semibold text-[20px] text-foreground tabular-nums leading-none">
+          {streak}
+          <span className="text-muted-foreground text-[13px] font-normal ml-1">
+            {streak === 1 ? 'day' : 'days'}
+          </span>
+        </div>
+      </Cell>
     </div>
   );
 }
