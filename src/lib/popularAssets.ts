@@ -3,39 +3,79 @@
  * Organized by market with human-friendly names and icons
  */
 
-import { Market } from '@/types/trade';
-
 export interface PopularAsset {
   symbol: string;
   name: string;
   icon: string;
   type: 'stock' | 'etf' | 'crypto' | 'forex' | 'index';
+  sector: string;
 }
 
-export const POPULAR_ASSETS: Record<Market, PopularAsset[]> = {
+export const POPULAR_ASSETS: Record<string, PopularAsset[]> = {
   US: [
-    { symbol: 'AAPL', name: 'Apple', icon: '🍎', type: 'stock' },
-    { symbol: 'TSLA', name: 'Tesla', icon: '🚗', type: 'stock' },
-    { symbol: 'NVDA', name: 'NVIDIA', icon: '🎮', type: 'stock' },
-    { symbol: 'MSFT', name: 'Microsoft', icon: '💻', type: 'stock' },
-    { symbol: 'SPY', name: 'S&P 500', icon: '📈', type: 'etf' },
-    { symbol: 'BTC', name: 'Bitcoin', icon: '₿', type: 'crypto' },
+    { symbol: 'AAPL',  name: 'Apple',     icon: '🍎', type: 'stock', sector: 'Tech' },
+    { symbol: 'MSFT',  name: 'Microsoft', icon: '🪟', type: 'stock', sector: 'Tech' },
+    { symbol: 'NVDA',  name: 'NVIDIA',    icon: '⚡', type: 'stock', sector: 'Tech' },
+    { symbol: 'GOOGL', name: 'Alphabet',  icon: '🔍', type: 'stock', sector: 'Tech' },
+    { symbol: 'AMZN',  name: 'Amazon',    icon: '📦', type: 'stock', sector: 'Tech' },
+    { symbol: 'META',  name: 'Meta',      icon: '👤', type: 'stock', sector: 'Tech' },
+    { symbol: 'TSLA',  name: 'Tesla',     icon: '🚗', type: 'stock', sector: 'Auto' },
+    { symbol: 'JPM',   name: 'JPMorgan',  icon: '🏦', type: 'stock', sector: 'Finance' },
+    { symbol: 'GS',    name: 'Goldman',   icon: '💼', type: 'stock', sector: 'Finance' },
+    { symbol: 'V',     name: 'Visa',      icon: '💳', type: 'stock', sector: 'Finance' },
+    { symbol: 'SPY',   name: 'S&P 500',    icon: '📈', type: 'etf',   sector: 'Index' },
+    { symbol: 'QQQ',   name: 'Nasdaq 100', icon: '💹', type: 'etf',   sector: 'Index' },
+    { symbol: 'IWM',   name: 'Russell 2K', icon: '📊', type: 'etf',   sector: 'Index' },
+    { symbol: 'GLD',   name: 'Gold',       icon: '🥇', type: 'etf',   sector: 'Commodity' },
+    { symbol: 'BTC-USD', name: 'Bitcoin',  icon: '₿', type: 'crypto', sector: 'Crypto' },
+    { symbol: 'ETH-USD', name: 'Ethereum', icon: '⟠', type: 'crypto', sector: 'Crypto' },
+    { symbol: 'SOL-USD', name: 'Solana',   icon: '◎', type: 'crypto', sector: 'Crypto' },
   ],
   UK: [
-    { symbol: 'HSBA.L', name: 'HSBC', icon: '🏦', type: 'stock' },
-    { symbol: 'BP.L', name: 'BP', icon: '⛽', type: 'stock' },
-    { symbol: 'GSK.L', name: 'GSK', icon: '💊', type: 'stock' },
-    { symbol: 'SHEL.L', name: 'Shell', icon: '🛢️', type: 'stock' },
-    { symbol: 'AZN.L', name: 'AstraZeneca', icon: '🧬', type: 'stock' },
-    { symbol: 'BTC', name: 'Bitcoin', icon: '₿', type: 'crypto' },
+    { symbol: 'HSBA.L',  name: 'HSBC',        icon: '🏦', type: 'stock', sector: 'Finance' },
+    { symbol: 'BP.L',    name: 'BP',          icon: '⛽', type: 'stock', sector: 'Energy' },
+    { symbol: 'SHEL.L',  name: 'Shell',       icon: '🛢️', type: 'stock', sector: 'Energy' },
+    { symbol: 'AZN.L',   name: 'AstraZeneca', icon: '🧬', type: 'stock', sector: 'Pharma' },
+    { symbol: 'GSK.L',   name: 'GSK',         icon: '💊', type: 'stock', sector: 'Pharma' },
+    { symbol: 'ULVR.L',  name: 'Unilever',    icon: '🧴', type: 'stock', sector: 'Consumer' },
+    { symbol: 'RIO.L',   name: 'Rio Tinto',   icon: '⛏️', type: 'stock', sector: 'Mining' },
+    { symbol: 'LSEG.L',  name: 'LSEG',        icon: '🏛️', type: 'stock', sector: 'Finance' },
+    { symbol: 'BTC-USD', name: 'Bitcoin',     icon: '₿', type: 'crypto', sector: 'Crypto' },
+    { symbol: 'ETH-USD', name: 'Ethereum',    icon: '⟠', type: 'crypto', sector: 'Crypto' },
   ],
   EU: [
-    { symbol: 'SAP', name: 'SAP', icon: '💼', type: 'stock' },
-    { symbol: 'ASML', name: 'ASML', icon: '🔬', type: 'stock' },
-    { symbol: 'MC.PA', name: 'LVMH', icon: '👜', type: 'stock' },
-    { symbol: 'SIE.DE', name: 'Siemens', icon: '⚡', type: 'stock' },
-    { symbol: 'OR.PA', name: "L'Oréal", icon: '💄', type: 'stock' },
-    { symbol: 'BTC', name: 'Bitcoin', icon: '₿', type: 'crypto' },
+    { symbol: 'SAP.DE',  name: 'SAP',     icon: '💼', type: 'stock', sector: 'Tech' },
+    { symbol: 'ASML.AS', name: 'ASML',    icon: '🔬', type: 'stock', sector: 'Tech' },
+    { symbol: 'SIE.DE',  name: 'Siemens', icon: '⚡', type: 'stock', sector: 'Industrial' },
+    { symbol: 'OR.PA',   name: "L'Oréal", icon: '💄', type: 'stock', sector: 'Consumer' },
+    { symbol: 'MC.PA',   name: 'LVMH',    icon: '👜', type: 'stock', sector: 'Luxury' },
+    { symbol: 'AIR.PA',  name: 'Airbus',  icon: '✈️', type: 'stock', sector: 'Aerospace' },
+    { symbol: 'BAS.DE',  name: 'BASF',    icon: '🧪', type: 'stock', sector: 'Chemical' },
+    { symbol: 'ALV.DE',  name: 'Allianz', icon: '🛡️', type: 'stock', sector: 'Finance' },
+    { symbol: 'BTC-USD', name: 'Bitcoin', icon: '₿', type: 'crypto', sector: 'Crypto' },
+    { symbol: 'ETH-USD', name: 'Ethereum', icon: '⟠', type: 'crypto', sector: 'Crypto' },
+  ],
+  Crypto: [
+    { symbol: 'BTC-USD',  name: 'Bitcoin',   icon: '₿', type: 'crypto', sector: 'L1' },
+    { symbol: 'ETH-USD',  name: 'Ethereum',  icon: '⟠', type: 'crypto', sector: 'L1' },
+    { symbol: 'SOL-USD',  name: 'Solana',    icon: '◎', type: 'crypto', sector: 'L1' },
+    { symbol: 'BNB-USD',  name: 'BNB',       icon: '🔶', type: 'crypto', sector: 'Exchange' },
+    { symbol: 'XRP-USD',  name: 'XRP',       icon: '💧', type: 'crypto', sector: 'Payment' },
+    { symbol: 'DOGE-USD', name: 'Dogecoin',  icon: '🐕', type: 'crypto', sector: 'Meme' },
+    { symbol: 'AVAX-USD', name: 'Avalanche', icon: '🔺', type: 'crypto', sector: 'L1' },
+    { symbol: 'LINK-USD', name: 'Chainlink', icon: '🔗', type: 'crypto', sector: 'Oracle' },
+    { symbol: 'ADA-USD',  name: 'Cardano',   icon: '💙', type: 'crypto', sector: 'L1' },
+    { symbol: 'DOT-USD',  name: 'Polkadot',  icon: '🔴', type: 'crypto', sector: 'L0' },
+  ],
+  Forex: [
+    { symbol: 'EURUSD=X', name: 'EUR/USD', icon: '🇪🇺', type: 'forex', sector: 'Major' },
+    { symbol: 'GBPUSD=X', name: 'GBP/USD', icon: '🇬🇧', type: 'forex', sector: 'Major' },
+    { symbol: 'USDJPY=X', name: 'USD/JPY', icon: '🇯🇵', type: 'forex', sector: 'Major' },
+    { symbol: 'USDCHF=X', name: 'USD/CHF', icon: '🇨🇭', type: 'forex', sector: 'Major' },
+    { symbol: 'AUDUSD=X', name: 'AUD/USD', icon: '🇦🇺', type: 'forex', sector: 'Major' },
+    { symbol: 'USDCAD=X', name: 'USD/CAD', icon: '🇨🇦', type: 'forex', sector: 'Major' },
+    { symbol: 'GBPEUR=X', name: 'GBP/EUR', icon: '🇬🇧', type: 'forex', sector: 'Cross' },
+    { symbol: 'USDINR=X', name: 'USD/INR', icon: '🇮🇳', type: 'forex', sector: 'EM' },
   ],
 };
 

@@ -8,7 +8,7 @@ const corsHeaders = {
 
 interface MarketDataRequest {
   symbol: string;
-  provider: 'finnhub' | 'coingecko' | 'twelvedata';
+  provider: 'yahoo' | 'finnhub' | 'coingecko' | 'twelvedata';
   type: 'quote' | 'historical';
   market?: string;
   days?: number;
@@ -168,6 +168,85 @@ async function fetchFinnhubQuote(symbol: string, apiKey: string): Promise<Market
     timestamp: data.t * 1000,
     source: 'finnhub'
   };
+}
+
+/**
+ * Yahoo Finance: fetch a quote using the public v8 chart endpoint.
+ * No API key required.
+ */
+async function fetchYahooQuote(symbol: string): Promise<MarketDataResponse> {
+  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&range=1d`;
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 8000);
+  try {
+    const response = await fetch(url, {
+      signal: controller.signal,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (compatible; OutputLens/1.0)',
+        'Accept': 'application/json',
+      },
+    });
+    clearTimeout(timeout);
+
+    if (!response.ok) {
+      throw new Error(`Yahoo Finance error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const meta = data?.chart?.result?.[0]?.meta;
+    if (!meta || typeof meta.regularMarketPrice !== 'number') {
+      throw new Error('No quote data available');
+    }
+
+    return {
+      price: meta.regularMarketPrice,
+      change: typeof meta.regularMarketChange === 'number'
+        ? meta.regularMarketChange
+        : (meta.regularMarketPrice - (meta.chartPreviousClose ?? meta.previousClose ?? meta.regularMarketPrice)),
+      changePercent: typeof meta.regularMarketChangePercent === 'number'
+        ? meta.regularMarketChangePercent
+        : (meta.chartPreviousClose
+            ? ((meta.regularMarketPrice - meta.chartPreviousClose) / meta.chartPreviousClose) * 100
+            : 0),
+      open: meta.regularMarketOpen,
+      previousClose: meta.chartPreviousClose ?? meta.previousClose,
+      high: meta.regularMarketDayHigh,
+      low: meta.regularMarketDayLow,
+      volume: meta.regularMarketVolume,
+      timestamp: meta.regularMarketTime ? meta.regularMarketTime * 1000 : Date.now(),
+      source: 'yahoo',
+    };
+  } catch (err) {
+    clearTimeout(timeout);
+    throw err;
+  }
+}
+
+/**
+ * Yahoo Finance: fetch historical close prices for volatility calculation.
+ */
+async function fetchYahooHistorical(symbol: string, days: number = 90): Promise<number[]> {
+  const range = days <= 30 ? '1mo' : days <= 90 ? '3mo' : days <= 180 ? '6mo' : '1y';
+  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&range=${range}`;
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 8000);
+  try {
+    const response = await fetch(url, {
+      signal: controller.signal,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (compatible; OutputLens/1.0)',
+        'Accept': 'application/json',
+      },
+    });
+    clearTimeout(timeout);
+    if (!response.ok) return [];
+    const data = await response.json();
+    const closes: (number | null)[] = data?.chart?.result?.[0]?.indicators?.quote?.[0]?.close || [];
+    return closes.filter((c): c is number => typeof c === 'number' && c > 0);
+  } catch {
+    clearTimeout(timeout);
+    return [];
+  }
 }
 
 /**
@@ -404,6 +483,35 @@ serve(async (req) => {
     let result: MarketDataResponse;
 
     switch (provider) {
+      case 'yahoo': {
+        try {
+          if (type === 'historical') {
+            const prices = await fetchYahooHistorical(symbol, days);
+            const volatility = calculateVolatility(prices);
+            result = { historicalPrices: prices, volatility, source: 'yahoo' };
+          } else {
+            result = await fetchYahooQuote(symbol);
+            try {
+              const prices = await fetchYahooHistorical(symbol, 90);
+              if (prices.length > 1) {
+                result.volatility = calculateVolatility(prices);
+                result.historicalPrices = prices;
+              }
+            } catch (e) {
+              console.warn('Yahoo historical unavailable:', e);
+            }
+          }
+        } catch (e) {
+          console.warn('[YAHOO] Failed:', e);
+          result = {
+            price: undefined,
+            source: 'unavailable',
+            error: 'Live data unavailable — enter price manually',
+          } as MarketDataResponse;
+        }
+        break;
+      }
+
       case 'finnhub': {
         const apiKey = Deno.env.get('FINNHUB_API_KEY');
         if (!apiKey) {

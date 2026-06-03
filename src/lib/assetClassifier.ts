@@ -4,7 +4,7 @@
  */
 
 export type AssetType = 'stock' | 'crypto' | 'forex' | 'index' | 'unknown';
-export type DataProvider = 'finnhub' | 'coingecko' | 'twelvedata';
+export type DataProvider = 'yahoo' | 'finnhub' | 'coingecko' | 'twelvedata';
 
 export interface AssetClassification {
   type: AssetType;
@@ -112,9 +112,9 @@ function isIndex(symbol: string): boolean {
 export function classifyAsset(symbol: string, market: string = 'US'): AssetClassification {
   const normalized = normalizeSymbol(symbol);
   const display = symbol.toUpperCase().trim();
-  
-  // Check crypto first (most distinctive)
-  if (isCrypto(symbol)) {
+
+  // Crypto: route to CoinGecko (free, unlimited)
+  if (isCrypto(symbol) || /-USD$/i.test(symbol)) {
     // CoinGecko uses lowercase ids
     const cryptoId = normalized.replace(/USD$/, '').toLowerCase();
     return {
@@ -124,11 +124,11 @@ export function classifyAsset(symbol: string, market: string = 'US'): AssetClass
       displaySymbol: display
     };
   }
-  
-  // Check forex
-  if (isForexPair(symbol)) {
+
+  // Forex: keep Twelve Data fallback
+  if (isForexPair(symbol) || /=X$/i.test(symbol)) {
     // Twelve Data format: EUR/USD
-    const forexSymbol = normalized.length === 6 
+    const forexSymbol = normalized.length === 6
       ? `${normalized.slice(0, 3)}/${normalized.slice(3, 6)}`
       : symbol.toUpperCase();
     return {
@@ -138,37 +138,42 @@ export function classifyAsset(symbol: string, market: string = 'US'): AssetClass
       displaySymbol: display
     };
   }
-  
-  // Check indices
+
+  // Indices via Yahoo
   if (isIndex(symbol)) {
-    // Use Twelve Data for non-US indices, Finnhub for US
-    const provider = market === 'US' ? 'finnhub' : 'twelvedata';
     return {
       type: 'index',
-      provider,
-      normalizedSymbol: normalized,
+      provider: 'yahoo',
+      normalizedSymbol: formatYahooSymbol(symbol, market),
       displaySymbol: display
     };
   }
-  
-  // For stocks: Finnhub free tier only supports US stocks
-  // Route UK, EU, Asia markets to Twelve Data
-  if (market !== 'US' && market !== 'Crypto') {
-    return {
-      type: 'stock',
-      provider: 'twelvedata',
-      normalizedSymbol: formatTwelveDataSymbol(symbol, market),
-      displaySymbol: display
-    };
-  }
-  
-  // Default to stock via Finnhub (US market)
+
+  // All stocks/ETFs via Yahoo Finance
   return {
     type: 'stock',
-    provider: 'finnhub',
-    normalizedSymbol: normalized,
+    provider: 'yahoo',
+    normalizedSymbol: formatYahooSymbol(symbol, market),
     displaySymbol: display
   };
+}
+
+/**
+ * Format a symbol for the Yahoo Finance API
+ */
+export function formatYahooSymbol(symbol: string, market: string): string {
+  const s = symbol.toUpperCase().trim();
+  if (s.endsWith('.L') || s.endsWith('.PA') || s.endsWith('.DE') || s.endsWith('.AS') || s.endsWith('.MI') || s.endsWith('.MC')) return s;
+  if (s.startsWith('^')) return s;
+  if (s.endsWith('=X') || s.endsWith('-USD')) return s;
+  const INDEX_MAP: Record<string, string> = {
+    'SPX': '^GSPC', 'SP500': '^GSPC', 'DJI': '^DJI', 'DJIA': '^DJI',
+    'NASDAQ': '^IXIC', 'NDX': '^NDX', 'VIX': '^VIX', 'FTSE': '^FTSE',
+    'DAX': '^GDAXI', 'CAC': '^FCHI', 'CAC40': '^FCHI', 'NIKKEI': '^N225',
+  };
+  if (INDEX_MAP[s]) return INDEX_MAP[s];
+  if (market === 'UK' && !s.includes('.')) return s + '.L';
+  return s;
 }
 
 /**

@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Brain, AlertTriangle, TrendingUp, TrendingDown, Minus, Newspaper, MessageSquare, FileText, Loader2 } from 'lucide-react';
+import { Brain, AlertTriangle, TrendingUp, TrendingDown, Minus, Newspaper, MessageSquare, FileText, Loader2, HelpCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { supabase } from '@/integrations/supabase/client';
 
 interface SentimentIndicatorProps {
@@ -157,6 +158,19 @@ export function SentimentIndicator({ asset, market = 'US' }: SentimentIndicatorP
           <div className="flex items-center gap-2">
             <Brain className="h-4 w-4 text-primary" />
             <CardTitle className="text-base">Market Sentiment</CardTitle>
+            <span className="bg-accent/10 border border-accent/20 text-accent text-[9px] font-mono uppercase px-1.5 py-0.5 rounded-md">AI</span>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button type="button" className="text-muted-foreground/60 hover:text-foreground transition-colors">
+                    <HelpCircle className="h-3.5 w-3.5" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="top" className="max-w-[260px] text-xs">
+                  VADER rule-based sentiment analysis of recent news headlines. Instant, no latency. LLM enrichment applied to ambiguous signals only.
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
           {data.conflict_detected && (
             <Badge variant="outline" className="bg-caution/10 text-caution border-caution/30 text-xs">

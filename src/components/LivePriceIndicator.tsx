@@ -1,19 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { TrendingUp, TrendingDown, Loader2, Wifi, WifiOff, RefreshCw, DollarSign } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { useMarketData, LiveMarketData } from '@/hooks/useMarketData';
 import { Market } from '@/types/trade';
-
-// Check if error indicates paid tier is required
-const checkPaidTierError = (errorMsg: string): boolean => {
-  const lowerError = errorMsg.toLowerCase();
-  return lowerError.includes('paid_tier_required') || 
-         lowerError.includes('grow plan') || 
-         lowerError.includes('grow (grow plan)') ||
-         lowerError.includes('upgrade') ||
-         lowerError.includes('premium') ||
-         lowerError.includes('consider upgrading');
-};
 
 interface LivePriceIndicatorProps {
   symbol: string;
@@ -23,11 +10,10 @@ interface LivePriceIndicatorProps {
   debounceMs?: number;
 }
 
-export function LivePriceIndicator({ 
-  symbol, 
-  market, 
+export function LivePriceIndicator({
+  symbol,
+  market,
   currencySymbol,
-  onUsePrice,
   debounceMs = 500
 }: LivePriceIndicatorProps) {
   const { fetchMarketData, isLoading, error } = useMarketData();
@@ -75,169 +61,66 @@ export function LivePriceIndicator({
     }
   }, [symbol, market, fetchMarketData]);
 
-  const handleUsePrice = () => {
-    if (priceData?.price && onUsePrice) {
-      onUsePrice(priceData.price);
-    }
-  };
+  void handleRefresh;
 
-  // Don't show anything if no symbol entered
   if (!symbol || symbol.trim().length < 1) {
     return null;
   }
 
-  // Loading state
+  // Loading skeleton row
   if (isLoading) {
     return (
-      <div className="flex items-center gap-2 p-3 rounded-lg bg-muted/30 border border-border/50 animate-pulse">
-        <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-        <span className="text-sm text-muted-foreground">Fetching live price...</span>
+      <div className="flex items-center gap-3 bg-elevated/60 border border-border/40 rounded-xl px-4 py-3">
+        <div className="h-3 w-24 rounded bg-elevated animate-pulse" />
+        <div className="h-5 w-32 rounded bg-elevated animate-pulse" />
+        <div className="h-5 w-20 rounded bg-elevated animate-pulse ml-auto" />
       </div>
     );
   }
 
-  // Error state - check for paid tier requirement
-  if (error && !priceData) {
-    const isPaidRequired = checkPaidTierError(error);
-    const isNonUSMarket = market !== 'US';
-    
-    // Show premium data message for paid tier errors or non-US markets
-    if (isPaidRequired || isNonUSMarket) {
-      return (
-        <div className="p-4 rounded-lg bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20">
-          <div className="flex items-start gap-3">
-            <div className="p-2 rounded-full bg-amber-500/20 shrink-0">
-              <DollarSign className="h-4 w-4 text-amber-500" />
-            </div>
-            <div className="flex-1">
-              <p className="text-sm font-medium text-foreground mb-1">
-                Premium Data Required
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Live pricing for {market} market symbols requires a premium data subscription. 
-                Enter your entry price manually in the form below.
-              </p>
-            </div>
-          </div>
-        </div>
-      );
-    }
-    
-    // Generic error for US market failures
+  if ((error && !priceData) || (priceData && priceData.price == null)) {
     return (
-      <div className="flex items-center justify-between gap-2 p-3 rounded-lg bg-muted/30 border border-border/50">
-        <div className="flex items-center gap-2 flex-1">
-          <WifiOff className="h-4 w-4 text-muted-foreground shrink-0" />
-          <span className="text-sm text-muted-foreground">
-            Price unavailable for {symbol.toUpperCase()}
-          </span>
-        </div>
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          onClick={handleRefresh}
-          className="h-7 px-2 shrink-0"
-        >
-          <RefreshCw className="h-3 w-3" />
-        </Button>
+      <div className="bg-elevated/60 border border-border/40 rounded-xl px-4 py-3 text-[12px] italic text-muted-foreground">
+        Enter price manually ↓
       </div>
     );
   }
 
-  // Success state with price data
-  if (priceData) {
-    const isPositive = (priceData.changePercent || 0) >= 0;
+  if (priceData && typeof priceData.price === 'number') {
+    const isPositive = (priceData.changePercent ?? 0) >= 0;
     const formattedPrice = priceData.price.toLocaleString('en-US', {
       minimumFractionDigits: 2,
-      maximumFractionDigits: priceData.price < 1 ? 6 : 2
+      maximumFractionDigits: priceData.price < 1 ? 6 : 2,
     });
-    const formattedChange = priceData.change 
-      ? `${isPositive ? '+' : ''}${priceData.change.toFixed(2)}`
-      : null;
-    const formattedChangePercent = priceData.changePercent
-      ? `${isPositive ? '+' : ''}${priceData.changePercent.toFixed(2)}%`
-      : null;
-
-    const timeSinceUpdate = Math.round((Date.now() - priceData.timestamp) / 1000);
-    const timeLabel = timeSinceUpdate < 60 
-      ? `${timeSinceUpdate}s ago` 
-      : timeSinceUpdate < 3600 
-        ? `${Math.round(timeSinceUpdate / 60)}m ago`
-        : 'Delayed';
+    const change = priceData.change ?? 0;
+    const changePct = priceData.changePercent ?? 0;
+    const source = (priceData.source || 'live').toUpperCase();
 
     return (
-      <div className="p-3 rounded-lg bg-muted/30 border border-border/50 space-y-2">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            {/* Price and change */}
-            <div className="flex items-center gap-2">
-              <span className="font-mono text-lg font-semibold text-foreground">
-                {currencySymbol}{formattedPrice}
-              </span>
-              {formattedChange && formattedChangePercent && (
-                <span className={`flex items-center gap-1 text-sm font-medium ${
-                  isPositive ? 'text-bullish' : 'text-bearish'
-                }`}>
-                  {isPositive ? (
-                    <TrendingUp className="h-3.5 w-3.5" />
-                  ) : (
-                    <TrendingDown className="h-3.5 w-3.5" />
-                  )}
-                  {formattedChange} ({formattedChangePercent})
-                </span>
-              )}
-            </div>
-          </div>
-
-          {/* Status indicators */}
-          <div className="flex items-center gap-2">
-            <span className="flex items-center gap-1 text-xs text-muted-foreground">
-              <Wifi className="h-3 w-3 text-bullish" />
-              {timeLabel}
-            </span>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={handleRefresh}
-              className="h-7 w-7 p-0"
-              disabled={isLoading}
-            >
-              <RefreshCw className={`h-3 w-3 ${isLoading ? 'animate-spin' : ''}`} />
-            </Button>
-          </div>
+      <div className="bg-elevated/60 border border-border/40 rounded-xl px-4 py-3 flex items-center gap-4 flex-wrap">
+        <div className="flex flex-col leading-tight">
+          <span className="text-[13px] text-muted-foreground">Live price</span>
+          <span className="font-mono text-[13px] text-foreground font-semibold">{symbol.toUpperCase()}</span>
         </div>
-
-        {/* Use price button */}
-        {onUsePrice && (
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={handleUsePrice}
-            className="w-full text-xs h-8"
-          >
-            Use {currencySymbol}{formattedPrice} as entry price
-          </Button>
-        )}
-
-        {/* Additional data row */}
-        {(priceData.high || priceData.low || priceData.volatility) && (
-          <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground pt-1 border-t border-border/30">
-            {priceData.high && priceData.low && (
-              <span>
-                Day Range: {currencySymbol}{priceData.low.toFixed(2)} – {currencySymbol}{priceData.high.toFixed(2)}
-              </span>
-            )}
-            {priceData.volatility && (
-              <span>
-                Volatility: {priceData.volatility.toFixed(1)}%
-              </span>
-            )}
-            <span className="text-muted-foreground/60">
-              via {priceData.source}
-            </span>
-          </div>
-        )}
+        <div className="flex items-baseline gap-1">
+          <span className="font-mono font-bold text-[22px] text-foreground tabular-nums">
+            {currencySymbol}{formattedPrice}
+          </span>
+        </div>
+        <div
+          className={`ml-auto flex items-center gap-1 rounded-lg border px-2 py-1 font-mono text-[12px] font-semibold ${
+            isPositive
+              ? 'bg-bullish/8 border-bullish/20 text-bullish'
+              : 'bg-bearish/8 border-bearish/20 text-bearish'
+          }`}
+        >
+          <span>{isPositive ? '▲' : '▼'}</span>
+          <span>{Math.abs(change).toFixed(2)}</span>
+          <span className="opacity-80">({changePct >= 0 ? '+' : ''}{changePct.toFixed(2)}%)</span>
+        </div>
+        <span className="font-mono text-[9px] text-muted-foreground/60 uppercase tracking-widest">
+          LIVE · {source}
+        </span>
       </div>
     );
   }

@@ -42,6 +42,78 @@ const MODEL_BY_TIER: Record<string, string> = {
 
 const BATCH_SIZE = 5; // Process 5 signals per AI call
 
+// ─── Lightweight VADER sentiment scorer ───────────────────────────────────────
+const VADER_LEXICON: Record<string, number> = {
+  'beat': 2.1, 'beats': 2.1, 'exceeded': 2.3, 'surpassed': 2.2, 'outperformed': 2.4,
+  'record': 1.8, 'growth': 1.6, 'profit': 1.7, 'revenue': 0.8, 'upgrade': 2.0,
+  'buy': 1.5, 'bullish': 2.2, 'rally': 2.0, 'soar': 2.4, 'surge': 2.2, 'jump': 1.8,
+  'gain': 1.6, 'gains': 1.6, 'rose': 1.4, 'rises': 1.4, 'up': 0.8, 'higher': 1.2,
+  'strong': 1.5, 'strength': 1.5, 'positive': 1.3, 'good': 1.2, 'great': 2.0,
+  'excellent': 2.4, 'outstanding': 2.4, 'impressive': 2.0, 'solid': 1.4,
+  'momentum': 1.3, 'breakout': 1.9, 'expansion': 1.4, 'accelerating': 1.6,
+  'innovation': 1.2, 'partnership': 1.1, 'deal': 1.0, 'acquisition': 0.8,
+  'stable': 0.6, 'steady': 0.6, 'resilient': 1.0, 'recovery': 1.2, 'rebound': 1.4,
+  'optimistic': 1.6, 'confident': 1.4, 'expect': 0.3, 'forecast': 0.2, 'guidance': 0.2,
+  'miss': -2.0, 'missed': -2.0, 'below': -1.2, 'fell': -1.5, 'fall': -1.5,
+  'drop': -1.6, 'drops': -1.6, 'decline': -1.5, 'declining': -1.5, 'decrease': -1.3,
+  'loss': -1.8, 'losses': -1.8, 'down': -0.8, 'lower': -1.2, 'weak': -1.5,
+  'weakness': -1.5, 'concern': -1.2, 'concerns': -1.2, 'risk': -0.8, 'risks': -0.8,
+  'warning': -1.8, 'warn': -1.8, 'cut': -1.6, 'downgrade': -2.2, 'sell': -1.5,
+  'bearish': -2.2, 'crash': -2.8, 'collapse': -2.6, 'plunge': -2.4, 'tank': -2.2,
+  'tumble': -2.0, 'slump': -1.8, 'struggle': -1.4, 'disappointing': -2.0,
+  'disappoints': -2.0, 'shortfall': -1.8, 'lawsuit': -1.6,
+  'investigation': -1.4, 'fraud': -2.8, 'scandal': -2.4, 'recall': -1.6,
+  'bankruptcy': -3.0, 'default': -2.6, 'layoffs': -1.4, 'restructuring': -1.0,
+};
+const NEGATORS = new Set(['not', 'no', 'never', 'neither', 'without', "n't", 'cannot', 'cant']);
+const INTENSIFIERS: Record<string, number> = {
+  'very': 1.3, 'extremely': 1.6, 'significantly': 1.4, 'substantially': 1.3,
+  'massive': 1.5, 'major': 1.2, 'hugely': 1.4, 'barely': 0.6, 'slightly': 0.7,
+};
+
+function vaderScore(text: string): { compound: number; pos: number; neg: number; neu: number } {
+  const words = (text || '').toLowerCase().replace(/[^\w\s'-]/g, ' ').split(/\s+/).filter(Boolean);
+  const scores: number[] = [];
+  for (let i = 0; i < words.length; i++) {
+    const word = words[i];
+    let score = VADER_LEXICON[word] ?? 0;
+    if (score !== 0) {
+      const prevWords = words.slice(Math.max(0, i - 3), i);
+      if (prevWords.some(w => NEGATORS.has(w))) score *= -0.74;
+      if (i > 0) {
+        const intensifier = INTENSIFIERS[words[i - 1]];
+        if (intensifier) score *= intensifier;
+      }
+      scores.push(score);
+    }
+  }
+  if (scores.length === 0) return { compound: 0, pos: 0, neg: 0, neu: 1 };
+  const sum = scores.reduce((a, b) => a + b, 0);
+  const alpha = 15;
+  const compound = sum / Math.sqrt(sum * sum + alpha);
+  const totalMagnitude = scores.reduce((a, b) => a + Math.abs(b), 0) || 1;
+  const posSum = scores.filter(s => s > 0).reduce((a, b) => a + b, 0);
+  const negSum = Math.abs(scores.filter(s => s < 0).reduce((a, b) => a + b, 0));
+  const pos = posSum / totalMagnitude;
+  const neg = negSum / totalMagnitude;
+  const neu = Math.max(0, 1 - pos - neg);
+  return {
+    compound: Math.max(-1, Math.min(1, compound)),
+    pos: Math.max(0, pos),
+    neg: Math.max(0, neg),
+    neu,
+  };
+}
+
+function vaderToFinancialSignal(compound: number) {
+  if (compound >= 0.5)   return { label: 'very_bullish',  probabilityAdjustment: +0.08, volatilityAdjustment: -0.05 };
+  if (compound >= 0.15)  return { label: 'bullish',        probabilityAdjustment: +0.04, volatilityAdjustment: -0.02 };
+  if (compound <= -0.5)  return { label: 'very_bearish',   probabilityAdjustment: -0.08, volatilityAdjustment: +0.08 };
+  if (compound <= -0.15) return { label: 'bearish',        probabilityAdjustment: -0.04, volatilityAdjustment: +0.04 };
+  return { label: 'neutral', probabilityAdjustment: 0, volatilityAdjustment: 0 };
+}
+// ─── End VADER ────────────────────────────────────────────────────────────────
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -109,113 +181,84 @@ serve(async (req) => {
 
     console.log(`[SENTIMENT] Processing ${signals.length} signals in batches of ${BATCH_SIZE}`);
 
-    // Process signals in batches for efficiency
-    for (let i = 0; i < signals.length; i += BATCH_SIZE) {
-      const batch = signals.slice(i, i + BATCH_SIZE);
+    // STEP 1: Run VADER on ALL signals first (instant, no API cost)
+    const vaderResults = signals.map((signal: any) => {
+      const text = `${signal.title || ''} ${signal.content_snippet || signal.content || ''}`;
+      const v = vaderScore(text);
+      const fin = vaderToFinancialSignal(v.compound);
+      return { signal, vader: v, fin };
+    });
+
+    // Helper to persist a sentiment record (VADER baseline, optionally enriched by LLM)
+    const persistSentiment = async (signal: any, vader: any, fin: any, llm?: any) => {
+      try {
+        const { error: insertError } = await supabase
+          .from('sentiment_scores')
+          .insert({
+            signal_id: signal.id,
+            asset: signal.asset || 'UNKNOWN',
+            sentiment_score: llm?.sentiment_score ?? vader.compound,
+            confidence: llm?.confidence ?? (1 - Math.abs(vader.neu) * 0.3),
+            expected_impact: llm?.expected_impact ?? 0,
+            impact_timeframe: llm?.impact_timeframe ?? '1 week',
+            entities: llm?.entities ?? [],
+            keywords: llm?.keywords ?? [],
+            reasoning: llm?.reasoning
+              ? `${llm.reasoning} (VADER=${vader.compound.toFixed(2)})`
+              : `VADER ${fin.label} (compound=${vader.compound.toFixed(2)}, pos=${vader.pos.toFixed(2)}, neg=${vader.neg.toFixed(2)})`,
+            model_used: llm ? `vader+${model}` : 'vader',
+          });
+        if (insertError) throw insertError;
+
+        await supabase
+          .from('qualitative_signals')
+          .update({ processed: true })
+          .eq('id', signal.id);
+
+        itemsProcessed++;
+      } catch (e) {
+        console.error(`[SENTIMENT] Failed to persist signal ${signal.id}:`, e);
+        await supabase
+          .from('qualitative_signals')
+          .update({ processed: true, processing_error: e instanceof Error ? e.message : 'Save error' })
+          .eq('id', signal.id);
+        itemsFailed++;
+      }
+    };
+
+    // Ambiguous signals → enrich with LLM. Confident VADER scores → persist directly.
+    const ambiguous = vaderResults.filter(r => Math.abs(r.vader.compound) <= 0.15);
+    const confident = vaderResults.filter(r => Math.abs(r.vader.compound) > 0.15);
+
+    console.log(`[SENTIMENT] VADER: ${confident.length} confident, ${ambiguous.length} ambiguous → LLM`);
+
+    // Persist all confident VADER scores immediately (no AI calls)
+    for (const { signal, vader, fin } of confident) {
+      await persistSentiment(signal, vader, fin);
+    }
+
+    // Process ambiguous signals through the LLM in batches
+    for (let i = 0; i < ambiguous.length; i += BATCH_SIZE) {
+      const slice = ambiguous.slice(i, i + BATCH_SIZE);
+      const batch = slice.map(s => s.signal);
       
       try {
-        // Batch analyze all signals in one AI call
         const batchResults = await analyzeSentimentBatch(batch, LOVABLE_API_KEY, model);
         aiCallsCount++;
-        
-        // Insert all sentiment scores
-        for (const result of batchResults) {
-          try {
-            const { error: insertError } = await supabase
-              .from("sentiment_scores")
-              .insert({
-                signal_id: result.signal_id,
-                asset: signals.find(s => s.id === result.signal_id)?.asset || "UNKNOWN",
-                sentiment_score: result.sentiment_score,
-                confidence: result.confidence,
-                expected_impact: result.expected_impact,
-                impact_timeframe: result.impact_timeframe,
-                entities: result.entities,
-                keywords: result.keywords,
-                reasoning: result.reasoning,
-                model_used: model
-              });
 
-            if (insertError) {
-              throw insertError;
-            }
-
-            // Mark signal as processed
-            await supabase
-              .from("qualitative_signals")
-              .update({ processed: true })
-              .eq("id", result.signal_id);
-
-            itemsProcessed++;
-            console.log(`[SENTIMENT] Processed signal ${result.signal_id}: score=${result.sentiment_score}`);
-
-          } catch (signalError) {
-            console.error(`[SENTIMENT] Failed to save signal ${result.signal_id}:`, signalError);
-            
-            await supabase
-              .from("qualitative_signals")
-              .update({
-                processed: true,
-                processing_error: signalError instanceof Error ? signalError.message : "Save error"
-              })
-              .eq("id", result.signal_id);
-
-            itemsFailed++;
-          }
+        const byId = new Map(batchResults.map(r => [r.signal_id, r]));
+        for (const { signal, vader, fin } of slice) {
+          const llm = byId.get(signal.id);
+          await persistSentiment(signal, vader, fin, llm);
         }
-
       } catch (batchError) {
-        console.error(`[SENTIMENT] Batch processing failed:`, batchError);
-        
-        // Fallback: process signals individually if batch fails
-        for (const signal of batch) {
-          try {
-            const results = await analyzeSentimentBatch([signal], LOVABLE_API_KEY, model);
-            aiCallsCount++;
-            
-            if (results.length > 0) {
-              const result = results[0];
-              
-              await supabase
-                .from("sentiment_scores")
-                .insert({
-                  signal_id: result.signal_id,
-                  asset: signal.asset || "UNKNOWN",
-                  sentiment_score: result.sentiment_score,
-                  confidence: result.confidence,
-                  expected_impact: result.expected_impact,
-                  impact_timeframe: result.impact_timeframe,
-                  entities: result.entities,
-                  keywords: result.keywords,
-                  reasoning: result.reasoning,
-                  model_used: model
-                });
-
-              await supabase
-                .from("qualitative_signals")
-                .update({ processed: true })
-                .eq("id", signal.id);
-
-              itemsProcessed++;
-            }
-          } catch (individualError) {
-            console.error(`[SENTIMENT] Individual processing failed for ${signal.id}:`, individualError);
-            
-            await supabase
-              .from("qualitative_signals")
-              .update({
-                processed: true,
-                processing_error: individualError instanceof Error ? individualError.message : "Unknown error"
-              })
-              .eq("id", signal.id);
-
-            itemsFailed++;
-          }
+        console.warn('[SENTIMENT] LLM batch failed — falling back to VADER-only:', batchError);
+        for (const { signal, vader, fin } of slice) {
+          await persistSentiment(signal, vader, fin);
         }
       }
 
-      // Small delay between batches to avoid rate limits
-      if (i + BATCH_SIZE < signals.length) {
+      if (i + BATCH_SIZE < ambiguous.length) {
         await new Promise(resolve => setTimeout(resolve, 300));
       }
     }
