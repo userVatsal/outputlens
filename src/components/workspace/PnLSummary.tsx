@@ -123,8 +123,7 @@ export function PnLSummary({ analysis, shares, currencySymbol }: PnLSummaryProps
           currencySymbol={currencySymbol}
         />
 
-        {/* Risk section divider */}
-        <div className="px-4 py-2 bg-muted/20">
+        <div className="px-4 py-2 bg-elevated/30">
           <div className="flex items-center gap-1.5 text-[10px] font-mono text-muted-foreground uppercase tracking-widest">
             <AlertTriangle className="h-3 w-3" />
             Risk Thresholds
