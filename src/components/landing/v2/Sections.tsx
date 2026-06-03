@@ -144,7 +144,7 @@ const STEPS = [
 ];
 export function HowItWorks() {
   return (
-    <section className="py-16 md:py-20">
+    <section id="how-it-works" className="py-16 md:py-20">
       <div className="max-w-[1280px] mx-auto px-6">
         <h2 className="font-display font-bold text-foreground text-center" style={{ fontSize: 'clamp(28px, 4vw, 36px)', letterSpacing: '-0.02em' }}>
           From ticker to distribution in 3 steps
