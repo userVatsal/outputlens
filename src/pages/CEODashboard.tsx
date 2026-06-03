@@ -424,21 +424,35 @@ export default function CEODashboard() {
         </div>
 
         {/* ── Metrics Strip ── */}
-        <div className="border border-border rounded-lg overflow-hidden">
-          <div className="bg-[hsl(var(--primary)/0.08)] border-b border-border px-5 py-2">
-            <span className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">Platform Metrics</span>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 divide-x divide-y sm:divide-y-0 divide-border bg-card">
-            <MetricBlock icon={Users} label="Total Users" value={metrics?.totalUsers || 0} sub={`${metrics?.paidUsers || 0} paid`} />
-            <MetricBlock icon={Activity} label="New This Week" value={metrics?.newThisWeek || 0} accent />
-            <MetricBlock icon={TrendingUp} label="Total Analyses" value={metrics?.totalAnalyses || 0} />
-            <MetricBlock icon={Activity} label="Analyses Today" value={metrics?.analysesToday || 0} accent />
-            <MetricBlock icon={Eye} label="Tracked Assets" value={metrics?.trackedAssets || 0} />
-            <MetricBlock icon={Globe} label="Portfolios" value={metrics?.portfolios || 0} />
-            <MetricBlock icon={CheckCircle} label="Paid Users" value={metrics?.paidUsers || 0} accent />
-            <MetricBlock icon={AlertTriangle} label="Free Users" value={(metrics?.totalUsers || 0) - (metrics?.paidUsers || 0)} />
-          </div>
-        </div>
+        {(() => {
+          const total = metrics?.totalUsers || 0;
+          const paid = metrics?.paidUsers || 0;
+          const conversion = total ? ((paid / total) * 100).toFixed(1) + '%' : '0%';
+          const avgAnalyses = total ? ((metrics?.totalAnalyses || 0) / total).toFixed(1) : '0';
+          return (
+            <div className="border border-border rounded-xl overflow-hidden bg-card">
+              <div className="flex items-center justify-between px-5 py-2 border-b border-border bg-gradient-to-r from-primary/[0.06] to-transparent">
+                <span className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+                  <span className="h-1 w-1 rounded-full bg-primary" />
+                  Platform Metrics · 14-day trend
+                </span>
+                <span className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
+                  Conversion {conversion} · Avg {avgAnalyses}/user
+                </span>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 divide-x divide-y sm:divide-y-0 divide-border">
+                <MetricBlock icon={Users} label="Total Users" value={total} sub={`${paid} paid`} spark={sparks.signups} />
+                <MetricBlock icon={Activity} label="New / Week" value={metrics?.newThisWeek || 0} accent spark={sparks.signups.slice(-7)} trend="up" sub="signups 7d" />
+                <MetricBlock icon={TrendingUp} label="Total Analyses" value={metrics?.totalAnalyses || 0} spark={sparks.analyses} />
+                <MetricBlock icon={Activity} label="Today" value={metrics?.analysesToday || 0} accent sub="analyses run" />
+                <MetricBlock icon={Eye} label="Tracked Assets" value={metrics?.trackedAssets || 0} />
+                <MetricBlock icon={Globe} label="Portfolios" value={metrics?.portfolios || 0} />
+                <MetricBlock icon={CheckCircle} label="Paid Users" value={paid} accent sub={conversion + ' conv.'} />
+                <MetricBlock icon={AlertTriangle} label="Free Users" value={total - paid} />
+              </div>
+            </div>
+          );
+        })()}
 
         {/* ── Tab Bar ── */}
         <div className="flex gap-1 border-b border-border">
