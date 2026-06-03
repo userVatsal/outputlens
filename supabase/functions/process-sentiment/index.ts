@@ -181,113 +181,84 @@ serve(async (req) => {
 
     console.log(`[SENTIMENT] Processing ${signals.length} signals in batches of ${BATCH_SIZE}`);
 
-    // Process signals in batches for efficiency
-    for (let i = 0; i < signals.length; i += BATCH_SIZE) {
-      const batch = signals.slice(i, i + BATCH_SIZE);
+    // STEP 1: Run VADER on ALL signals first (instant, no API cost)
+    const vaderResults = signals.map((signal: any) => {
+      const text = `${signal.title || ''} ${signal.content_snippet || signal.content || ''}`;
+      const v = vaderScore(text);
+      const fin = vaderToFinancialSignal(v.compound);
+      return { signal, vader: v, fin };
+    });
+
+    // Helper to persist a sentiment record (VADER baseline, optionally enriched by LLM)
+    const persistSentiment = async (signal: any, vader: any, fin: any, llm?: any) => {
+      try {
+        const { error: insertError } = await supabase
+          .from('sentiment_scores')
+          .insert({
+            signal_id: signal.id,
+            asset: signal.asset || 'UNKNOWN',
+            sentiment_score: llm?.sentiment_score ?? vader.compound,
+            confidence: llm?.confidence ?? (1 - Math.abs(vader.neu) * 0.3),
+            expected_impact: llm?.expected_impact ?? 0,
+            impact_timeframe: llm?.impact_timeframe ?? '1 week',
+            entities: llm?.entities ?? [],
+            keywords: llm?.keywords ?? [],
+            reasoning: llm?.reasoning
+              ? `${llm.reasoning} (VADER=${vader.compound.toFixed(2)})`
+              : `VADER ${fin.label} (compound=${vader.compound.toFixed(2)}, pos=${vader.pos.toFixed(2)}, neg=${vader.neg.toFixed(2)})`,
+            model_used: llm ? `vader+${model}` : 'vader',
+          });
+        if (insertError) throw insertError;
+
+        await supabase
+          .from('qualitative_signals')
+          .update({ processed: true })
+          .eq('id', signal.id);
+
+        itemsProcessed++;
+      } catch (e) {
+        console.error(`[SENTIMENT] Failed to persist signal ${signal.id}:`, e);
+        await supabase
+          .from('qualitative_signals')
+          .update({ processed: true, processing_error: e instanceof Error ? e.message : 'Save error' })
+          .eq('id', signal.id);
+        itemsFailed++;
+      }
+    };
+
+    // Ambiguous signals → enrich with LLM. Confident VADER scores → persist directly.
+    const ambiguous = vaderResults.filter(r => Math.abs(r.vader.compound) <= 0.15);
+    const confident = vaderResults.filter(r => Math.abs(r.vader.compound) > 0.15);
+
+    console.log(`[SENTIMENT] VADER: ${confident.length} confident, ${ambiguous.length} ambiguous → LLM`);
+
+    // Persist all confident VADER scores immediately (no AI calls)
+    for (const { signal, vader, fin } of confident) {
+      await persistSentiment(signal, vader, fin);
+    }
+
+    // Process ambiguous signals through the LLM in batches
+    for (let i = 0; i < ambiguous.length; i += BATCH_SIZE) {
+      const slice = ambiguous.slice(i, i + BATCH_SIZE);
+      const batch = slice.map(s => s.signal);
       
       try {
-        // Batch analyze all signals in one AI call
         const batchResults = await analyzeSentimentBatch(batch, LOVABLE_API_KEY, model);
         aiCallsCount++;
-        
-        // Insert all sentiment scores
-        for (const result of batchResults) {
-          try {
-            const { error: insertError } = await supabase
-              .from("sentiment_scores")
-              .insert({
-                signal_id: result.signal_id,
-                asset: signals.find(s => s.id === result.signal_id)?.asset || "UNKNOWN",
-                sentiment_score: result.sentiment_score,
-                confidence: result.confidence,
-                expected_impact: result.expected_impact,
-                impact_timeframe: result.impact_timeframe,
-                entities: result.entities,
-                keywords: result.keywords,
-                reasoning: result.reasoning,
-                model_used: model
-              });
 
-            if (insertError) {
-              throw insertError;
-            }
-
-            // Mark signal as processed
-            await supabase
-              .from("qualitative_signals")
-              .update({ processed: true })
-              .eq("id", result.signal_id);
-
-            itemsProcessed++;
-            console.log(`[SENTIMENT] Processed signal ${result.signal_id}: score=${result.sentiment_score}`);
-
-          } catch (signalError) {
-            console.error(`[SENTIMENT] Failed to save signal ${result.signal_id}:`, signalError);
-            
-            await supabase
-              .from("qualitative_signals")
-              .update({
-                processed: true,
-                processing_error: signalError instanceof Error ? signalError.message : "Save error"
-              })
-              .eq("id", result.signal_id);
-
-            itemsFailed++;
-          }
+        const byId = new Map(batchResults.map(r => [r.signal_id, r]));
+        for (const { signal, vader, fin } of slice) {
+          const llm = byId.get(signal.id);
+          await persistSentiment(signal, vader, fin, llm);
         }
-
       } catch (batchError) {
-        console.error(`[SENTIMENT] Batch processing failed:`, batchError);
-        
-        // Fallback: process signals individually if batch fails
-        for (const signal of batch) {
-          try {
-            const results = await analyzeSentimentBatch([signal], LOVABLE_API_KEY, model);
-            aiCallsCount++;
-            
-            if (results.length > 0) {
-              const result = results[0];
-              
-              await supabase
-                .from("sentiment_scores")
-                .insert({
-                  signal_id: result.signal_id,
-                  asset: signal.asset || "UNKNOWN",
-                  sentiment_score: result.sentiment_score,
-                  confidence: result.confidence,
-                  expected_impact: result.expected_impact,
-                  impact_timeframe: result.impact_timeframe,
-                  entities: result.entities,
-                  keywords: result.keywords,
-                  reasoning: result.reasoning,
-                  model_used: model
-                });
-
-              await supabase
-                .from("qualitative_signals")
-                .update({ processed: true })
-                .eq("id", signal.id);
-
-              itemsProcessed++;
-            }
-          } catch (individualError) {
-            console.error(`[SENTIMENT] Individual processing failed for ${signal.id}:`, individualError);
-            
-            await supabase
-              .from("qualitative_signals")
-              .update({
-                processed: true,
-                processing_error: individualError instanceof Error ? individualError.message : "Unknown error"
-              })
-              .eq("id", signal.id);
-
-            itemsFailed++;
-          }
+        console.warn('[SENTIMENT] LLM batch failed — falling back to VADER-only:', batchError);
+        for (const { signal, vader, fin } of slice) {
+          await persistSentiment(signal, vader, fin);
         }
       }
 
-      // Small delay between batches to avoid rate limits
-      if (i + BATCH_SIZE < signals.length) {
+      if (i + BATCH_SIZE < ambiguous.length) {
         await new Promise(resolve => setTimeout(resolve, 300));
       }
     }
