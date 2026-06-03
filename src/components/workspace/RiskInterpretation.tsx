@@ -66,23 +66,20 @@ export function RiskInterpretation({ analysis }: RiskInterpretationProps) {
   }, [analysis]);
 
   return (
-    <div className="rounded-lg border border-border overflow-hidden mb-6">
-      {/* Dark header */}
-      <div
-        className="flex items-center justify-between px-4 py-2.5 border-b border-white/10"
-        style={{ backgroundColor: 'hsl(var(--brand-navy))' }}
-      >
+    <div className="rounded-2xl border border-border/50 bg-surface overflow-hidden">
+      <div className="flex items-center justify-between px-5 py-4 border-b border-border/40">
         <div className="flex items-center gap-2">
-          <Sparkles className="h-4 w-4 text-white/60" />
-          <span className="text-[10px] font-mono font-bold text-white/50 uppercase tracking-widest">AI Analysis</span>
+          <Sparkles className="h-4 w-4 text-primary" />
+          <span className="text-[13px] font-semibold text-foreground">AI Interpretation</span>
         </div>
         {analysis.riskMetrics.usedLiveData && (
-          <span className="text-[10px] font-mono text-bullish/80">Live data</span>
+          <span className="text-[10px] font-mono text-bullish font-bold uppercase tracking-wider bg-bullish/10 border border-bullish/20 px-1.5 py-0.5 rounded">
+            Live
+          </span>
         )}
       </div>
 
-      {/* Body */}
-      <div className="bg-card p-4">
+      <div className="p-5">
         {isLoading && (
           <div className="flex items-center gap-3 py-4 text-muted-foreground">
             <Loader2 className="h-4 w-4 animate-spin flex-shrink-0" />
@@ -108,14 +105,14 @@ export function RiskInterpretation({ analysis }: RiskInterpretationProps) {
           <div className="mt-4">
             <button
               onClick={() => setShowFull(!showFull)}
-              className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors font-mono"
+              className="flex items-center gap-1.5 text-[12px] text-muted-foreground hover:text-foreground transition-colors"
             >
               {showFull ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
               {showFull ? 'Hide detailed analysis' : 'View full analysis'}
             </button>
 
             {showFull && (
-              <div className="mt-3 pt-3 border-t border-border">
+              <div className="mt-3 pt-3 border-t border-border/40">
                 <div className="space-y-2 leading-relaxed text-sm text-foreground/80">
                   {fullExplanation.split('\n\n').map((paragraph, index) => (
                     <p key={index}>{paragraph}</p>

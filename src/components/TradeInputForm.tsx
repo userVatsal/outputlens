@@ -1,12 +1,9 @@
-import { useState, useCallback, useMemo, useEffect } from 'react';
-import { TrendingUp, TrendingDown, DollarSign, Globe, Loader2, Sliders, FileText, Check, ChevronDown, ChevronUp } from 'lucide-react';
+import { useState, useCallback, useEffect } from 'react';
+import { TrendingUp, TrendingDown, Loader2, FileText, ChevronDown, ChevronUp } from 'lucide-react';
 import { addDays, setHours, setMinutes } from 'date-fns';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Slider } from '@/components/ui/slider';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { TradeDirection, TimeHorizon, Market, MARKETS } from '@/types/trade';
 import { EnhancedTradeInput } from '@/types/analysis';
 import { cn } from '@/lib/utils';
@@ -24,18 +21,10 @@ interface TradeInputFormProps {
   initialAmount?: number;
 }
 
-function StepIndicator({ step, current, completed }: { step: number; current: number; completed: boolean }) {
-  const isActive = step === current;
-  const isPast = step < current || completed;
-  
+function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <div className={cn(
-      "w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-all",
-      isPast && "bg-primary text-primary-foreground",
-      isActive && !isPast && "bg-primary/20 text-primary border-2 border-primary",
-      !isActive && !isPast && "bg-muted text-muted-foreground"
-    )}>
-      {isPast ? <Check className="h-4 w-4" /> : step}
+    <div className="text-[11px] uppercase text-muted-foreground tracking-[0.08em] font-medium mb-2.5">
+      {children}
     </div>
   );
 }
@@ -62,6 +51,13 @@ function getDefaultExitTime(market: Market, entryDate: Date): Date {
   return setMinutes(setHours(exit, hours), minutes);
 }
 
+function setExitFromEntry(entry: Date, market: Market, days: number): Date {
+  const exit = addDays(entry, days);
+  const hours = market === 'US' ? 16 : market === 'UK' ? 16 : 17;
+  const minutes = market === 'US' ? 0 : market === 'UK' ? 30 : 30;
+  return setMinutes(setHours(exit, hours), minutes);
+}
+
 export function TradeInputForm({ onSubmit, isLoading = false, initialAsset, initialMarket, initialDirection, initialAmount }: TradeInputFormProps) {
   const [market, setMarket] = useState<Market>(initialMarket ?? 'US');
   const [selectedAsset, setSelectedAsset] = useState<SelectedAsset | null>(
@@ -76,7 +72,6 @@ export function TradeInputForm({ onSubmit, isLoading = false, initialAsset, init
   const [confidence, setConfidence] = useState(5);
   const [assumptions, setAssumptions] = useState('');
   const [showAdvanced, setShowAdvanced] = useState(false);
-  const [showMarketDetails, setShowMarketDetails] = useState(false);
   const [positionSize, setPositionSize] = useState(initialAmount ? String(initialAmount) : '100');
   const [positionType, setPositionType] = useState<'shares' | 'dollars'>(initialAmount ? 'dollars' : 'shares');
 
@@ -86,12 +81,6 @@ export function TradeInputForm({ onSubmit, isLoading = false, initialAsset, init
     setEntryDateTime(getDefaultEntryTime(market));
     setExitDateTime(getDefaultExitTime(market, getDefaultEntryTime(market)));
   }, [market]);
-
-  const currentStep = useMemo(() => {
-    if (!selectedAsset) return 1;
-    if (direction === null) return 2;
-    return 3;
-  }, [selectedAsset, direction]);
 
   const handleAssetSelect = useCallback((asset: SelectedAsset | null) => {
     setSelectedAsset(asset);
@@ -107,6 +96,10 @@ export function TradeInputForm({ onSubmit, isLoading = false, initialAsset, init
     setPriceAutoFilled(true);
     setShowPriceOverride(false);
   }, []);
+
+  const applyHorizonPreset = (days: number) => {
+    setExitDateTime(setExitFromEntry(entryDateTime, market, days));
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -134,216 +127,284 @@ export function TradeInputForm({ onSubmit, isLoading = false, initialAsset, init
   const confidenceLabel = confidence <= 3 ? 'Low' : confidence <= 6 ? 'Medium' : 'High';
   const confidenceColor = confidence <= 3 ? 'text-bearish' : confidence <= 6 ? 'text-yellow-500' : 'text-bullish';
 
-  return (
-    <form onSubmit={handleSubmit} className="space-y-8">
-      {/* Progress */}
-      <div className="flex items-center justify-center gap-4">
-        <StepIndicator step={1} current={currentStep} completed={!!selectedAsset} />
-        <div className={cn("h-0.5 w-12 transition-colors", selectedAsset ? "bg-primary" : "bg-muted")} />
-        <StepIndicator step={2} current={currentStep} completed={direction !== null && !!selectedAsset} />
-        <div className={cn("h-0.5 w-12 transition-colors", direction !== null ? "bg-primary" : "bg-muted")} />
-        <StepIndicator step={3} current={currentStep} completed={isValid as boolean} />
-      </div>
+  const markets: { value: Market; label: string }[] = [
+    { value: 'US', label: 'US' },
+    { value: 'UK', label: 'UK' },
+    { value: 'EU', label: 'EU' },
+  ];
 
-      {/* Market (Collapsed) */}
-      <div className="space-y-2">
-        <button type="button" onClick={() => setShowMarketDetails(!showMarketDetails)} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
-          <Globe className="h-4 w-4" />
-          <span>Market: <strong className="text-foreground">{selectedMarket.name}</strong></span>
-          {showMarketDetails ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-        </button>
-        {showMarketDetails && (
-          <div className="space-y-3 p-4 rounded-lg bg-muted/30 border border-border/50 animate-in fade-in slide-in-from-top-2">
-            <Select value={market} onValueChange={(v) => setMarket(v as Market)} disabled={isLoading}>
-              <SelectTrigger className="trading-input"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="US"><div className="flex items-center gap-2"><span>🇺🇸</span><span>US Market</span></div></SelectItem>
-                <SelectItem value="UK"><div className="flex items-center gap-2"><span>🇬🇧</span><span>UK Market</span></div></SelectItem>
-                <SelectItem value="EU"><div className="flex items-center gap-2"><span>🇪🇺</span><span>Europe</span></div></SelectItem>
-              </SelectContent>
-            </Select>
+  const horizonPresets = [
+    { label: '1W', days: 7 },
+    { label: '1M', days: 30 },
+    { label: '3M', days: 90 },
+  ];
+
+  return (
+    <form
+      onSubmit={handleSubmit}
+      className="rounded-2xl bg-surface border border-border/50 p-6 space-y-6"
+    >
+      {/* Asset */}
+      <div>
+        <SectionLabel>Asset</SectionLabel>
+        <div className="rounded-xl border border-border/50 bg-elevated focus-within:border-primary/40 focus-within:shadow-[0_0_0_3px_hsl(var(--primary)/0.08)] transition-all min-h-[48px]">
+          <AssetSearchInput
+            market={market}
+            onAssetSelect={handleAssetSelect}
+            disabled={isLoading}
+            selectedAsset={selectedAsset}
+          />
+        </div>
+        {selectedAsset && (
+          <div className="mt-2 inline-flex items-center bg-elevated border border-border/50 rounded-lg px-3 py-1.5 font-mono text-[13px]">
+            <LivePriceIndicator
+              symbol={selectedAsset.symbol}
+              market={market}
+              currencySymbol={selectedMarket.currencySymbol}
+              onUsePrice={handleUsePrice}
+            />
           </div>
         )}
       </div>
 
-      {/* Step 1: Asset */}
-      <AssetSearchInput market={market} onAssetSelect={handleAssetSelect} disabled={isLoading} selectedAsset={selectedAsset} />
-      {selectedAsset && <LivePriceIndicator symbol={selectedAsset.symbol} market={market} currencySymbol={selectedMarket.currencySymbol} onUsePrice={handleUsePrice} />}
-
-      {/* Step 2: Direction */}
-      {selectedAsset && (
-        <div className="space-y-3 animate-in fade-in slide-in-from-top-2">
-          <Label className="flex items-center gap-2 text-sm font-medium">Market Outlook</Label>
-          <div className="grid grid-cols-2 gap-3">
-            <button type="button" onClick={() => setDirection('long')} disabled={isLoading} className={cn("flex flex-col items-center gap-2 rounded-lg border-2 px-4 py-4 font-medium transition-all", direction === 'long' ? "border-bullish bg-bullish/10 text-bullish" : "border-border bg-muted/30 text-muted-foreground hover:border-bullish/50")}>
-              <TrendingUp className="h-6 w-6" /><span className="text-sm">Bullish View ↗</span>
-            </button>
-            <button type="button" onClick={() => setDirection('short')} disabled={isLoading} className={cn("flex flex-col items-center gap-2 rounded-lg border-2 px-4 py-4 font-medium transition-all", direction === 'short' ? "border-bearish bg-bearish/10 text-bearish" : "border-border bg-muted/30 text-muted-foreground hover:border-bearish/50")}>
-              <TrendingDown className="h-6 w-6" /><span className="text-sm">Bearish View ↘</span>
-            </button>
-          </div>
-          {direction && <p className="text-sm text-muted-foreground flex items-center gap-2"><Check className="h-4 w-4 text-bullish" />Position: <strong className="text-foreground">{selectedAsset.name}</strong> — <strong className={direction === 'long' ? 'text-bullish' : 'text-bearish'}>{direction === 'long' ? 'Bullish' : 'Bearish'}</strong> outlook.</p>}
-        </div>
-      )}
-
-      {/* Step 3: Timing, Price & Position Size */}
-      {selectedAsset && direction && (
-        <div className="space-y-6 animate-in fade-in slide-in-from-top-2">
-          <DateTimePicker entryDateTime={entryDateTime} exitDateTime={exitDateTime} onEntryChange={setEntryDateTime} onExitChange={setExitDateTime} market={market} disabled={isLoading} />
-          <div className="space-y-2">
-            <Label className="flex items-center gap-2 text-sm font-medium"><DollarSign className="h-4 w-4 text-muted-foreground" />Price per share</Label>
-            {priceAutoFilled && !showPriceOverride ? (
-              <div className="flex items-center justify-between bg-muted/30 rounded-lg px-4 py-3 border border-border/50">
-                <div className="flex items-center gap-2"><span className="text-lg font-mono font-medium">{selectedMarket.currencySymbol}{parseFloat(entryPrice).toLocaleString()}</span><span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">Current market price</span></div>
-                <button type="button" onClick={() => setShowPriceOverride(true)} className="text-xs text-primary hover:underline">Change</button>
-              </div>
-            ) : (
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-mono">{selectedMarket.currencySymbol}</span>
-                <Input type="number" step="0.01" min="0" placeholder="0.00" value={entryPrice} onChange={(e) => { setEntryPrice(e.target.value); setPriceAutoFilled(false); }} className="trading-input font-mono text-lg pl-8" disabled={isLoading} />
-              </div>
+      {/* Direction */}
+      <div>
+        <SectionLabel>Direction</SectionLabel>
+        <div className="grid grid-cols-2 gap-3">
+          <button
+            type="button"
+            onClick={() => setDirection('long')}
+            disabled={isLoading}
+            className={cn(
+              'h-12 flex-1 rounded-xl font-semibold text-[14px] cursor-pointer transition-all inline-flex items-center justify-center gap-2 border',
+              direction === 'long'
+                ? 'border-bullish/30 bg-bullish/[0.06] text-bullish'
+                : 'border-border text-muted-foreground hover:text-foreground hover:border-border/80'
             )}
-          </div>
-
-          {/* Position Size Input */}
-          <div className="space-y-3">
-            <Label className="flex items-center gap-2 text-sm font-medium">
-              <TrendingUp className="h-4 w-4 text-muted-foreground" />
-              Position size
-            </Label>
-            
-            {/* Type Toggle */}
-            <div className="flex items-center rounded-lg border border-border bg-muted/30 p-1 w-fit">
-              <button
-                type="button"
-                onClick={() => setPositionType('shares')}
-                className={cn(
-                  "px-3 py-1.5 rounded-md text-sm font-medium transition-all",
-                  positionType === 'shares' 
-                    ? "bg-background text-foreground shadow-sm" 
-                    : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                Shares
-              </button>
-              <button
-                type="button"
-                onClick={() => setPositionType('dollars')}
-                className={cn(
-                  "px-3 py-1.5 rounded-md text-sm font-medium transition-all",
-                  positionType === 'dollars' 
-                    ? "bg-background text-foreground shadow-sm" 
-                    : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                {selectedMarket.currencySymbol} Amount
-              </button>
-            </div>
-
-            {/* Quick Select Chips */}
-            <div className="flex flex-wrap gap-2">
-              {positionType === 'shares' ? (
-                <>
-                  {[10, 50, 100, 500].map((qty) => (
-                    <button
-                      key={qty}
-                      type="button"
-                      onClick={() => setPositionSize(qty.toString())}
-                      className={cn(
-                        "px-3 py-1.5 rounded-full text-sm font-medium transition-all border",
-                        positionSize === qty.toString()
-                          ? "bg-primary/10 text-primary border-primary/30"
-                          : "bg-muted/30 text-muted-foreground border-border hover:border-primary/50"
-                      )}
-                    >
-                      {qty} shares
-                    </button>
-                  ))}
-                </>
-              ) : (
-                <>
-                  {[1000, 5000, 10000, 25000].map((amount) => (
-                    <button
-                      key={amount}
-                      type="button"
-                      onClick={() => setPositionSize(amount.toString())}
-                      className={cn(
-                        "px-3 py-1.5 rounded-full text-sm font-medium transition-all border",
-                        positionSize === amount.toString()
-                          ? "bg-primary/10 text-primary border-primary/30"
-                          : "bg-muted/30 text-muted-foreground border-border hover:border-primary/50"
-                      )}
-                    >
-                      {selectedMarket.currencySymbol}{amount.toLocaleString()}
-                    </button>
-                  ))}
-                </>
-              )}
-            </div>
-
-            {/* Custom Input */}
-            <div className="relative">
-              {positionType === 'dollars' && (
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-mono">
-                  {selectedMarket.currencySymbol}
-                </span>
-              )}
-              <Input
-                type="number"
-                min="1"
-                placeholder={positionType === 'shares' ? 'Number of shares' : 'Investment amount'}
-                value={positionSize}
-                onChange={(e) => setPositionSize(e.target.value)}
-                className={cn("trading-input font-mono", positionType === 'dollars' && "pl-8")}
-                disabled={isLoading}
-              />
-              {positionType === 'shares' && (
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">
-                  shares
-                </span>
-              )}
-            </div>
-
-            {/* Position Value Summary */}
-            {entryPrice && positionSize && (
-              <div className="text-sm text-muted-foreground bg-muted/20 rounded-lg px-3 py-2">
-                {positionType === 'shares' ? (
-                  <>
-                    Total investment: <span className="font-mono font-medium text-foreground">
-                      {selectedMarket.currencySymbol}{(parseFloat(positionSize) * parseFloat(entryPrice)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                    </span>
-                  </>
-                ) : (
-                  <>
-                    ≈ <span className="font-mono font-medium text-foreground">
-                      {Math.floor(parseFloat(positionSize) / parseFloat(entryPrice))}
-                    </span> shares
-                  </>
-                )}
-              </div>
+          >
+            <TrendingUp className="h-4 w-4" /> LONG
+          </button>
+          <button
+            type="button"
+            onClick={() => setDirection('short')}
+            disabled={isLoading}
+            className={cn(
+              'h-12 flex-1 rounded-xl font-semibold text-[14px] cursor-pointer transition-all inline-flex items-center justify-center gap-2 border',
+              direction === 'short'
+                ? 'border-bearish/30 bg-bearish/[0.06] text-bearish'
+                : 'border-border text-muted-foreground hover:text-foreground hover:border-border/80'
             )}
-          </div>
+          >
+            <TrendingDown className="h-4 w-4" /> SHORT
+          </button>
         </div>
-      )}
+      </div>
+
+      {/* Market */}
+      <div>
+        <SectionLabel>Market</SectionLabel>
+        <div className="flex flex-wrap gap-1.5">
+          {markets.map((m) => (
+            <button
+              key={m.value}
+              type="button"
+              onClick={() => setMarket(m.value)}
+              disabled={isLoading}
+              className={cn(
+                'rounded-lg px-3 py-1.5 text-[12px] font-medium transition-all',
+                market === m.value
+                  ? 'bg-primary/10 border border-primary/20 text-primary'
+                  : 'border border-transparent text-muted-foreground hover:text-foreground'
+              )}
+            >
+              {m.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Position Size */}
+      <div>
+        <SectionLabel>Position Size</SectionLabel>
+        <div className="flex gap-1 mb-2.5">
+          <button
+            type="button"
+            onClick={() => setPositionType('dollars')}
+            className={cn(
+              'rounded-lg px-3 py-1 text-[12px] font-medium transition-all',
+              positionType === 'dollars'
+                ? 'bg-elevated text-foreground'
+                : 'text-muted-foreground hover:text-foreground'
+            )}
+          >
+            {selectedMarket.currencySymbol} Amount
+          </button>
+          <button
+            type="button"
+            onClick={() => setPositionType('shares')}
+            className={cn(
+              'rounded-lg px-3 py-1 text-[12px] font-medium transition-all',
+              positionType === 'shares'
+                ? 'bg-elevated text-foreground'
+                : 'text-muted-foreground hover:text-foreground'
+            )}
+          >
+            Shares
+          </button>
+        </div>
+        <div className="relative">
+          {positionType === 'dollars' && (
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-mono text-[14px]">
+              {selectedMarket.currencySymbol}
+            </span>
+          )}
+          <Input
+            type="number"
+            min="1"
+            placeholder={positionType === 'shares' ? 'Number of shares' : 'Investment amount'}
+            value={positionSize}
+            onChange={(e) => setPositionSize(e.target.value)}
+            disabled={isLoading}
+            className={cn(
+              'h-12 rounded-xl bg-elevated border border-border/50 focus:border-primary/40 px-4 font-mono text-[16px] focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:shadow-[0_0_0_3px_hsl(var(--primary)/0.08)]',
+              positionType === 'dollars' && 'pl-8'
+            )}
+          />
+        </div>
+      </div>
+
+      {/* Time Horizon */}
+      <div>
+        <SectionLabel>Time Horizon</SectionLabel>
+        <div className="flex gap-1.5 mb-3">
+          {horizonPresets.map((preset) => (
+            <button
+              key={preset.label}
+              type="button"
+              onClick={() => applyHorizonPreset(preset.days)}
+              disabled={isLoading}
+              className="rounded-lg px-3 py-1 text-[12px] text-muted-foreground border border-border hover:border-primary/20 hover:text-primary transition-all"
+            >
+              {preset.label}
+            </button>
+          ))}
+        </div>
+        <DateTimePicker
+          entryDateTime={entryDateTime}
+          exitDateTime={exitDateTime}
+          onEntryChange={setEntryDateTime}
+          onExitChange={setExitDateTime}
+          market={market}
+          disabled={isLoading}
+        />
+      </div>
+
+      {/* Entry Price */}
+      <div>
+        <SectionLabel>Entry Price</SectionLabel>
+        {priceAutoFilled && !showPriceOverride ? (
+          <div className="flex items-center justify-between bg-elevated rounded-xl px-4 h-12 border border-border/50">
+            <div className="flex items-center gap-2">
+              <span className="font-mono font-medium text-[16px] text-foreground">
+                {selectedMarket.currencySymbol}{parseFloat(entryPrice).toLocaleString()}
+              </span>
+              <span className="inline-flex items-center gap-1 text-[10px] font-mono font-bold text-bullish bg-bullish/10 border border-bullish/20 px-1.5 py-0.5 rounded uppercase tracking-wider">
+                <span className="w-1.5 h-1.5 rounded-full bg-bullish animate-pulse" />
+                Live
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowPriceOverride(true)}
+              className="text-[12px] text-primary hover:underline"
+            >
+              Change
+            </button>
+          </div>
+        ) : (
+          <div className="relative">
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-mono text-[14px]">
+              {selectedMarket.currencySymbol}
+            </span>
+            <Input
+              type="number"
+              step="0.01"
+              min="0"
+              placeholder="0.00"
+              value={entryPrice}
+              onChange={(e) => { setEntryPrice(e.target.value); setPriceAutoFilled(false); }}
+              disabled={isLoading}
+              className="h-12 rounded-xl bg-elevated border border-border/50 focus:border-primary/40 px-4 pl-8 font-mono text-[16px] focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:shadow-[0_0_0_3px_hsl(var(--primary)/0.08)]"
+            />
+          </div>
+        )}
+      </div>
 
       {/* Advanced */}
-      {isValid && <button type="button" onClick={() => setShowAdvanced(!showAdvanced)} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"><Sliders className="h-4 w-4" />{showAdvanced ? 'Hide' : 'Show'} Advanced Options</button>}
+      {isValid && (
+        <button
+          type="button"
+          onClick={() => setShowAdvanced(!showAdvanced)}
+          className="text-[12px] text-muted-foreground hover:text-foreground cursor-pointer flex items-center gap-1.5 underline-offset-2 hover:underline"
+        >
+          {showAdvanced ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+          {showAdvanced ? 'Hide' : 'Show'} advanced options
+        </button>
+      )}
       {showAdvanced && isValid && (
-        <div className="space-y-6 p-4 rounded-lg bg-muted/30 border border-border/50">
-          <div className="space-y-3">
-            <div className="flex items-center justify-between"><Label className="text-sm font-medium">How confident are you?</Label><span className={`text-sm font-medium ${confidenceColor}`}>{confidence}/10 ({confidenceLabel})</span></div>
-            <Slider value={[confidence]} onValueChange={(v) => setConfidence(v[0])} min={1} max={10} step={1} disabled={isLoading} />
+        <div className="space-y-5 p-4 rounded-xl bg-elevated/50 border border-border/40">
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-[12px] font-medium text-foreground">Confidence</span>
+              <span className={cn('text-[12px] font-medium font-mono', confidenceColor)}>
+                {confidence}/10 · {confidenceLabel}
+              </span>
+            </div>
+            <Slider
+              value={[confidence]}
+              onValueChange={(v) => setConfidence(v[0])}
+              min={1}
+              max={10}
+              step={1}
+              disabled={isLoading}
+            />
           </div>
           <div className="space-y-2">
-            <Label className="flex items-center gap-2 text-sm font-medium"><FileText className="h-4 w-4 text-muted-foreground" />Why do you think this? (Optional)</Label>
-            <Textarea placeholder="e.g., Expecting positive earnings..." value={assumptions} onChange={(e) => setAssumptions(e.target.value)} className="trading-input min-h-[80px] resize-none" disabled={isLoading} maxLength={500} />
+            <span className="text-[12px] font-medium text-foreground flex items-center gap-2">
+              <FileText className="h-3.5 w-3.5 text-muted-foreground" />
+              Thesis (optional)
+            </span>
+            <Textarea
+              placeholder="e.g., Expecting positive earnings reaction…"
+              value={assumptions}
+              onChange={(e) => setAssumptions(e.target.value)}
+              disabled={isLoading}
+              maxLength={500}
+              className="min-h-[80px] resize-none rounded-xl bg-surface border border-border/50 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:shadow-[0_0_0_3px_hsl(var(--primary)/0.08)]"
+            />
           </div>
         </div>
       )}
 
-      <Button type="submit" disabled={!isValid || isLoading} className="w-full py-6 text-lg font-semibold">
-        {isLoading ? <><Loader2 className="mr-2 h-5 w-5 animate-spin" />Analyzing 10,000 scenarios...</> : 'Analyze Risk & Scenarios'}
-      </Button>
+      {/* Submit */}
+      <button
+        type="submit"
+        disabled={!isValid || isLoading}
+        className={cn(
+          'w-full h-[52px] rounded-2xl bg-primary text-primary-foreground font-bold text-[16px] shadow-[0_4px_20px_hsl(var(--primary)/0.35)] transition-all',
+          'hover:brightness-110 hover:shadow-[0_4px_28px_hsl(var(--primary)/0.45)]',
+          'disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:brightness-100'
+        )}
+      >
+        {isLoading ? (
+          <span className="inline-flex items-center gap-2">
+            <Loader2 className="h-5 w-5 animate-spin" />
+            Running 10,000 simulations…
+          </span>
+        ) : (
+          'Run 10,000 Simulations →'
+        )}
+      </button>
     </form>
   );
 }

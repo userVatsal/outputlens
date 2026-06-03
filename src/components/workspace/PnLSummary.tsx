@@ -74,28 +74,24 @@ export function PnLSummary({ analysis, shares, currencySymbol }: PnLSummaryProps
   const downsidePnL = calculatePnL(entryPrice, worstDownside, shares);
 
   return (
-    <div className="rounded-lg overflow-hidden border border-border mb-4">
-      {/* Dark header */}
-      <div
-        className="flex items-center justify-between px-4 py-2.5 border-b border-white/10"
-        style={{ backgroundColor: 'hsl(var(--brand-navy))' }}
-      >
+    <div className="rounded-2xl overflow-hidden border border-border/50 bg-surface">
+      <div className="flex items-center justify-between px-5 py-4 border-b border-border/40">
         <div className="flex items-center gap-2">
-          <DollarSign className="h-4 w-4 text-white/60" />
-          <span className="text-[10px] font-mono font-bold text-white/50 uppercase tracking-widest">Position Summary</span>
+          <DollarSign className="h-4 w-4 text-muted-foreground" />
+          <span className="text-[13px] font-semibold text-foreground">Position Summary</span>
         </div>
         <div className="text-right">
-          <span className="font-mono font-bold text-white text-sm">{formatCurrency(totalInvestment, currencySymbol)}</span>
-          <span className="text-[10px] text-white/40 font-mono ml-2">
-            {shares} share{shares !== 1 ? 's' : ''} × {formatPrice(entryPrice, currencySymbol)}
+          <span className="font-mono font-semibold text-foreground text-[14px] tabular-nums">
+            {formatCurrency(totalInvestment, currencySymbol)}
+          </span>
+          <span className="text-[11px] text-muted-foreground font-mono ml-2 tabular-nums">
+            {shares} × {formatPrice(entryPrice, currencySymbol)}
           </span>
         </div>
       </div>
 
-      {/* Ledger table */}
-      <div className="bg-card divide-y divide-border/50">
-        {/* Column headers */}
-        <div className="grid grid-cols-3 gap-2 px-4 py-2 bg-muted/30">
+      <div className="divide-y divide-border/30">
+        <div className="grid grid-cols-3 gap-2 px-4 py-2 bg-elevated/40">
           <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest">Scenario</span>
           <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest text-right">P&L</span>
           <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest text-right">Return / Price</span>
@@ -127,8 +123,7 @@ export function PnLSummary({ analysis, shares, currencySymbol }: PnLSummaryProps
           currencySymbol={currencySymbol}
         />
 
-        {/* Risk section divider */}
-        <div className="px-4 py-2 bg-muted/20">
+        <div className="px-4 py-2 bg-elevated/30">
           <div className="flex items-center gap-1.5 text-[10px] font-mono text-muted-foreground uppercase tracking-widest">
             <AlertTriangle className="h-3 w-3" />
             Risk Thresholds

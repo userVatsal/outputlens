@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { History, Loader2, BarChart3, FolderOpen, Activity, Zap, Sparkles } from 'lucide-react';
+import { Loader2, BarChart3, FolderOpen } from 'lucide-react';
 import { AppShell } from '@/components/layout/AppShell';
 import { TradeInputForm } from '@/components/TradeInputForm';
 import { UsageIndicator } from '@/components/UsageIndicator';
@@ -24,8 +24,6 @@ import { useUsage } from '@/hooks/useUsage';
 import { useProfile } from '@/hooks/useProfile';
 import { usePlan } from '@/hooks/usePlan';
 import { User } from '@supabase/supabase-js';
-import { Button } from '@/components/ui/button';
-import { Link } from 'react-router-dom';
 import { MARKETS } from '@/types/trade';
 import { cn } from '@/lib/utils';
 
@@ -64,21 +62,21 @@ function SimulationLoader({ asset }: { asset?: string }) {
   }, [asset]);
 
   return (
-    <div className="rounded-xl overflow-hidden border border-border bg-surface">
-      <div className="flex items-center justify-between px-5 py-3 border-b border-border">
+    <div className="rounded-2xl overflow-hidden border border-border/50 bg-surface">
+      <div className="flex items-center justify-between bg-elevated px-5 py-3 border-b border-border/40">
         <div className="flex items-center gap-2">
           <span className="relative flex h-2 w-2">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-60" />
-            <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-bullish opacity-60" />
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-bullish" />
           </span>
           <span className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
             Risk engine running
           </span>
         </div>
-        <span className="font-mono text-[11px] tabular-nums text-muted-foreground">{progress}%</span>
+        <span className="font-mono text-[11px] tabular-nums text-primary">{progress}%</span>
       </div>
 
-      <div className="p-5 font-mono text-sm space-y-2 min-h-[240px]">
+      <div className="p-5 font-mono text-[13px] space-y-2.5 min-h-[220px]">
         {lines.map((line, i) => (
           <div
             key={i}
@@ -102,7 +100,7 @@ function SimulationLoader({ asset }: { asset?: string }) {
         )}
       </div>
 
-      <div className="h-1 bg-elevated">
+      <div className="h-0.5 bg-elevated">
         <div
           className="h-full bg-primary transition-all duration-300"
           style={{ width: `${progress}%` }}
@@ -179,105 +177,77 @@ export default function Workspace() {
       : (analysis.input.positionSize || 1))
     : 1;
 
+  const hasResults = !!analysis || tradeLoading;
+
   return (
     <AppShell>
-      <div className="section-container py-6 lg:py-10">
-        <div className="mx-auto w-full max-w-6xl space-y-6">
+      <div className="section-container py-6 lg:py-8">
+        <div className="mx-auto w-full max-w-[1440px] space-y-5">
 
-          {/* Page header */}
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-md bg-primary/10 text-primary">
-                <Activity className="h-5 w-5" />
-              </div>
-              <div>
-                <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">
-                  Risk Workspace
-                </h1>
-                <p className="text-sm text-muted-foreground">
-                  Probabilistic analysis — Monte Carlo with live volatility.
-                </p>
-              </div>
+          {/* Slim breadcrumb header */}
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-2 text-[15px]">
+              <span className="text-foreground font-semibold">Risk Workspace</span>
+              {analysis && (
+                <>
+                  <span className="text-muted-foreground/40">/</span>
+                  <span className="font-mono text-primary">{analysis.input.asset}</span>
+                </>
+              )}
             </div>
 
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="hidden items-center gap-1.5 rounded-full border border-bullish/20 bg-bullish/10 px-2.5 py-1 font-mono text-[10px] uppercase tracking-widest text-bullish sm:inline-flex">
-                <Zap className="h-3 w-3" /> Live engine
-              </span>
-
-              {/* Mode toggle */}
-              <div className="flex items-center rounded-md border border-border bg-elevated p-0.5">
-                <button
-                  type="button"
-                  onClick={() => setMode('single')}
-                  className={cn(
-                    'flex items-center gap-1.5 rounded px-3 py-1.5 text-xs font-medium font-mono transition-all',
-                    mode === 'single' ? 'bg-surface text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
-                  )}
-                >
-                  <BarChart3 className="h-3.5 w-3.5" />
-                  Single
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (!canAccessPortfolio) { setShowPaywall(true); return; }
-                    setMode('portfolio');
-                    navigate('/portfolio');
-                  }}
-                  className={cn(
-                    'flex items-center gap-1.5 rounded px-3 py-1.5 text-xs font-medium font-mono transition-all',
-                    mode === 'portfolio' ? 'bg-surface text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
-                  )}
-                >
-                  <FolderOpen className="h-3.5 w-3.5" />
-                  Portfolio
-                  {!canAccessPortfolio && (
-                    <span className="rounded bg-primary/15 px-1 py-0.5 text-[8px] font-bold text-primary">PRO</span>
-                  )}
-                </button>
-              </div>
-
-              <Button variant="outline" size="sm" asChild>
-                <Link to="/history">
-                  <History className="mr-2 h-4 w-4" />
-                  History
-                </Link>
-              </Button>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setMode('single')}
+                className={cn(
+                  'inline-flex items-center gap-1.5 rounded-lg border border-border h-8 px-3 text-[12px] font-medium transition-all',
+                  mode === 'single' ? 'bg-elevated text-foreground' : 'text-muted-foreground hover:text-foreground'
+                )}
+              >
+                <BarChart3 className="h-3.5 w-3.5" />
+                Single
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (!canAccessPortfolio) { setShowPaywall(true); return; }
+                  setMode('portfolio');
+                  navigate('/portfolio');
+                }}
+                className={cn(
+                  'inline-flex items-center gap-1.5 rounded-lg border border-border h-8 px-3 text-[12px] font-medium transition-all',
+                  mode === 'portfolio' ? 'bg-elevated text-foreground' : 'text-muted-foreground hover:text-foreground'
+                )}
+              >
+                <FolderOpen className="h-3.5 w-3.5" />
+                Portfolio
+                {!canAccessPortfolio && (
+                  <span className="ml-1 rounded bg-primary/15 px-1 py-0.5 text-[8px] font-bold text-primary leading-none">PRO</span>
+                )}
+              </button>
             </div>
           </div>
 
           {!usageLoading && usage && <UsageIndicator usage={usage} />}
 
-          {/* Main layout */}
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
-            {/* Left: Input panel */}
-            <div className={cn('lg:col-span-5', analysis && 'lg:sticky lg:top-6 lg:self-start')}>
-              <div className="rounded-xl border border-border bg-surface shadow-sm overflow-hidden">
-                <div className="flex items-center justify-between border-b border-border px-5 py-3">
-                  <div>
-                    <h2 className="font-display text-sm font-semibold text-foreground">
-                      Position parameters
-                    </h2>
-                    <p className="text-[11px] text-muted-foreground">
-                      Market, asset, direction, entry &amp; horizon.
-                    </p>
-                  </div>
-                  <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-                    Step 01
-                  </span>
-                </div>
-                <div className="p-5">
-                  {!user && (
-                    <div className="mb-4 flex items-start gap-2 rounded-md border border-primary/20 bg-primary/5 px-3 py-2 text-xs text-muted-foreground">
-                      <Sparkles className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-primary" />
-                      <span>
-                        Fill in your position and click{' '}
-                        <strong className="text-foreground">Analyze Risk</strong> — you'll be
-                        asked to sign in to run the full analysis.
-                      </span>
-                    </div>
-                  )}
+          {/* Main layout — centered when no results, split when results exist */}
+          {!hasResults ? (
+            <div className="mx-auto w-full max-w-[640px]">
+              <TradeInputForm
+                onSubmit={handleSubmitTrade}
+                isLoading={tradeLoading}
+                initialAsset={urlAsset}
+                initialMarket={urlMarket as 'US' | 'UK' | 'EU' | undefined}
+                initialDirection={urlDirection as 'long' | 'short' | undefined}
+                initialAmount={urlAmount ? Number(urlAmount) : undefined}
+              />
+            </div>
+          ) : (
+            <div className="flex gap-5">
+              {/* Left column — fixed 420px */}
+              <div className="w-[420px] flex-shrink-0 hidden lg:block">
+                <div className="lg:sticky lg:top-6">
                   <TradeInputForm
                     onSubmit={handleSubmitTrade}
                     isLoading={tradeLoading}
@@ -288,69 +258,81 @@ export default function Workspace() {
                   />
                 </div>
               </div>
-            </div>
 
-            {/* Right: Results / Loader / Empty state */}
-            <div className="lg:col-span-7">
-              {tradeLoading && <SimulationLoader asset={currentAsset} />}
+              {/* Mobile form */}
+              <div className="block lg:hidden w-full">
+                <TradeInputForm
+                  onSubmit={handleSubmitTrade}
+                  isLoading={tradeLoading}
+                  initialAsset={urlAsset}
+                  initialMarket={urlMarket as 'US' | 'UK' | 'EU' | undefined}
+                  initialDirection={urlDirection as 'long' | 'short' | undefined}
+                  initialAmount={urlAmount ? Number(urlAmount) : undefined}
+                />
+              </div>
 
-              {!analysis && !tradeLoading && (
-                <div className="flex min-h-[320px] flex-col items-center justify-center rounded-xl border border-dashed border-border bg-surface/40 p-8 text-center">
-                  <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
-                    <Activity className="h-6 w-6" />
-                  </div>
-                  <h3 className="font-display text-base font-semibold text-foreground">
-                    Awaiting position
-                  </h3>
-                  <p className="mt-1 max-w-sm text-sm text-muted-foreground">
-                    Enter a market, asset and direction on the left to run a 10,000-path
-                    Monte Carlo simulation calibrated to live volatility.
-                  </p>
-                  <div className="mt-5 flex flex-wrap items-center justify-center gap-2 text-[11px] font-mono uppercase tracking-widest text-muted-foreground">
-                    <span className="rounded-full border border-border bg-elevated px-2.5 py-1">VaR 95%</span>
-                    <span className="rounded-full border border-border bg-elevated px-2.5 py-1">Tail risk</span>
-                    <span className="rounded-full border border-border bg-elevated px-2.5 py-1">Regime aware</span>
-                  </div>
-                </div>
-              )}
+              {/* Right column — results, slides in */}
+              <div
+                key={analysis?.analyzedAt ?? 'loading'}
+                className="flex-1 min-w-0 animate-[slideInRight_300ms_ease-out]"
+                style={{
+                  animation: 'workspaceSlideIn 300ms ease-out',
+                }}
+              >
+                {tradeLoading && <SimulationLoader asset={currentAsset} />}
 
-              {analysis && !tradeLoading && (
-                <div className="space-y-4">
-                  {isHistorical && (
-                    <div className="rounded-md border border-border bg-elevated px-4 py-2 text-xs text-muted-foreground font-mono">
-                      Viewing historical analysis from{' '}
-                      {new Date(analysis.analyzedAt).toLocaleDateString()}
+                {analysis && !tradeLoading && (
+                  <div className="space-y-4">
+                    {isHistorical && (
+                      <div className="rounded-xl bg-surface border border-border/50 px-4 py-2 text-[12px] text-muted-foreground font-mono">
+                        Viewing historical analysis from{' '}
+                        {new Date(analysis.analyzedAt).toLocaleDateString()}
+                      </div>
+                    )}
+
+                    {/* Monte Carlo — full width */}
+                    <MonteCarloFanChart analysis={analysis} currencySymbol={currencySymbol} />
+
+                    {/* Risk snapshot — 4 KPI cards */}
+                    <RiskSnapshot analysis={analysis} currencySymbol={currencySymbol} />
+
+                    {/* Tail risk + Scenarios */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                      <TailRiskPanel
+                        scenarios={analysis.scenarios}
+                        expectedShortfall={analysis.riskMetrics.expectedShortfall}
+                        kurtosis={analysis.simulation.kurtosis}
+                        currencySymbol={currencySymbol}
+                        entryPrice={analysis.input.entryPrice}
+                      />
+                      <ScenarioProbabilityDonut analysis={analysis} />
                     </div>
-                  )}
-                  <RiskSnapshot analysis={analysis} currencySymbol={currencySymbol} />
-                  <MonteCarloFanChart analysis={analysis} currencySymbol={currencySymbol} />
-                  <PnLSummary analysis={analysis} shares={shares} currencySymbol={currencySymbol} />
-                  <ScenarioProbabilityDonut analysis={analysis} />
-                  <TailRiskPanel
-                    scenarios={analysis.scenarios}
-                    expectedShortfall={analysis.riskMetrics.expectedShortfall}
-                    kurtosis={analysis.simulation.kurtosis}
-                    currencySymbol={currencySymbol}
-                    entryPrice={analysis.input.entryPrice}
-                  />
-                  <ScenarioRegimeCards
-                    scenarios={analysis.scenarios}
-                    currencySymbol={currencySymbol}
-                    entryPrice={analysis.input.entryPrice}
-                    shares={shares}
-                  />
-                  <ReturnDistributionChart riskMetrics={analysis.riskMetrics} simulation={analysis.simulation} />
-                  <AdvancedMetrics
-                    metrics={analysis.riskMetrics}
-                    kurtosis={analysis.simulation.kurtosis}
-                    skewness={analysis.simulation.skewness}
-                  />
-                  <RiskInterpretation analysis={analysis} />
-                  <ActionPanel analysis={analysis} onNewAnalysis={handleNewAnalysis} isHistorical={isHistorical} />
-                </div>
-              )}
+
+                    <ScenarioRegimeCards
+                      scenarios={analysis.scenarios}
+                      currencySymbol={currencySymbol}
+                      entryPrice={analysis.input.entryPrice}
+                      shares={shares}
+                    />
+
+                    <PnLSummary analysis={analysis} shares={shares} currencySymbol={currencySymbol} />
+
+                    <ReturnDistributionChart riskMetrics={analysis.riskMetrics} simulation={analysis.simulation} />
+
+                    <AdvancedMetrics
+                      metrics={analysis.riskMetrics}
+                      kurtosis={analysis.simulation.kurtosis}
+                      skewness={analysis.simulation.skewness}
+                    />
+
+                    <RiskInterpretation analysis={analysis} />
+
+                    <ActionPanel analysis={analysis} onNewAnalysis={handleNewAnalysis} isHistorical={isHistorical} />
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
 
