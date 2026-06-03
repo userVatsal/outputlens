@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Play, Check, Activity, BarChart3, Layers, GitBranch, AlertTriangle, History, Sparkles, Briefcase, Grid3x3 } from 'lucide-react';
 import { FanChart } from './FanChart';
 import { PLAN_CONFIG, type SubscriptionPlan } from '@/lib/stripe';
-import { useCountUp as useCountUpHook } from '@/hooks/useCountUp';
+import { useCountUp } from '@/hooks/useCountUp';
 
 /* ───────────── HERO ───────────── */
 export function Hero() {
@@ -94,8 +94,8 @@ export function StatsBar() {
     return () => io.disconnect();
   }, []);
 
-  const sims = useCountUpHook(10000, { trigger: visible, duration: 1200 });
-  const accuracy = useCountUpHook(947, { trigger: visible, duration: 1200 }); // shown as 94.7
+  const sims = Math.floor(useCountUp(10000, { trigger: visible, duration: 1200 }));
+  const accuracy = Math.floor(useCountUp(947, { trigger: visible, duration: 1200 })); // shown as 94.7
 
   const fmt = (n: number) => n.toLocaleString('en-US');
 
