@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Progress } from '@/components/ui/progress';
 import { supabase } from '@/integrations/supabase/client';
 import { StepCredentials } from './StepCredentials';
 import { StepLegal } from './StepLegal';
@@ -96,40 +95,45 @@ export function OnboardingWizard({ initialStep = 'credentials' }: OnboardingWiza
   };
 
   return (
-    <div className="w-full max-w-md mx-auto">
-      {/* Progress indicator */}
+    <div className="relative min-h-screen bg-background">
+      {/* Top progress bar */}
       {currentStep !== 'complete' && (
-        <div className="mb-8">
-          <div className="flex justify-between text-sm text-muted-foreground mb-2">
-            <span>Step {currentStepIndex + 1} of {STEPS.length - 1}</span>
-            <span>{Math.round(progress)}%</span>
-          </div>
-          <Progress value={progress} className="h-2" />
+        <div className="fixed top-0 inset-x-0 h-[3px] bg-elevated z-50">
+          <div
+            className="h-full bg-primary transition-all duration-500"
+            style={{ width: `${progress}%` }}
+          />
         </div>
       )}
 
-      {/* Step title */}
-      {getStepTitle() && (
-        <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-foreground">{getStepTitle()}</h1>
-          {getStepDescription() && (
-            <p className="mt-2 text-muted-foreground">{getStepDescription()}</p>
+      <div className="relative z-10 max-w-[520px] mx-auto mt-[15vh] px-4 pb-16">
+        <div className="rounded-2xl bg-surface border border-border/50 p-8">
+          {getStepTitle() && (
+            <div className="mb-8">
+              <h1 className="font-display font-bold text-[28px] text-foreground tracking-tight leading-tight">
+                {getStepTitle()}
+              </h1>
+              {getStepDescription() && (
+                <p className="text-[14px] text-muted-foreground mt-2 leading-relaxed">
+                  {getStepDescription()}
+                </p>
+              )}
+            </div>
+          )}
+
+          {currentStep === 'credentials' && (
+            <StepCredentials onComplete={handleCredentialsComplete} />
+          )}
+
+          {currentStep === 'legal' && userId && (
+            <StepLegal
+              userId={userId}
+              onComplete={handleLegalComplete}
+              onBack={handleBack}
+            />
           )}
         </div>
-      )}
-
-      {/* Step content */}
-      {currentStep === 'credentials' && (
-        <StepCredentials onComplete={handleCredentialsComplete} />
-      )}
-      
-      {currentStep === 'legal' && userId && (
-        <StepLegal 
-          userId={userId} 
-          onComplete={handleLegalComplete} 
-          onBack={handleBack}
-        />
-      )}
+      </div>
     </div>
   );
 }

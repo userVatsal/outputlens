@@ -14,7 +14,7 @@ const groups = [
     label: 'Workspace',
     items: [
       { to: '/dashboard',       label: 'Dashboard',          icon: LayoutGrid },
-      { to: '/portfolio',       label: 'My Portfolios',      icon: Briefcase },
+      { to: '/workspace?mode=portfolio', label: 'Portfolio Analysis', icon: Briefcase },
       { to: '/history',         label: 'Simulation History', icon: History },
       { to: '/scenarios',       label: 'Saved Scenarios',    icon: Star },
     ],

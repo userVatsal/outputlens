@@ -49,7 +49,7 @@ export function MobileNav() {
   return (
     <>
       {/* Top bar */}
-      <header className="md:hidden fixed top-0 inset-x-0 z-40 h-14 bg-surface border-b border-border flex items-center px-4">
+      <header className="md:hidden fixed top-0 inset-x-0 z-40 h-14 bg-background/85 backdrop-blur-xl border-b border-border/40 flex items-center px-4">
         <button onClick={() => setOpen(true)} aria-label="Open menu" className="p-2 -ml-2 text-foreground">
           <Menu className="h-6 w-6" />
         </button>
@@ -125,22 +125,29 @@ export function MobileNav() {
 
       {/* Bottom tab bar */}
       <nav
-        className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-surface border-t border-border h-[60px] flex items-stretch"
+        className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-background/90 backdrop-blur-xl border-t border-border/40 h-[62px] flex items-stretch"
         style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
       >
         {TABS.map((t) => {
           const active = pathname.startsWith(t.to);
+          const isSimulate = t.to === '/workspace';
           return (
             <Link
               key={t.to}
               to={t.to}
               className={cn(
-                'flex-1 flex flex-col items-center justify-center gap-0.5 text-[10px] relative',
+                'flex-1 flex flex-col items-center justify-center gap-0.5 relative transition-colors',
                 active ? 'text-primary' : 'text-muted-foreground',
               )}
             >
-              <t.icon className="h-5 w-5" />
-              {active && <span>{t.label}</span>}
+              {isSimulate ? (
+                <span className="w-9 h-9 rounded-xl bg-primary/12 border border-primary/20 text-primary flex items-center justify-center">
+                  <t.icon className="h-5 w-5" />
+                </span>
+              ) : (
+                <t.icon className="h-5 w-5" />
+              )}
+              {active && <span className="text-[10px] mt-0.5">{t.label}</span>}
               {t.alerts && alertsCount > 0 && (
                 <span
                   className="absolute top-2 right-[28%] min-w-[16px] h-4 px-1 rounded-full text-[10px] font-mono font-bold leading-4 text-center"
@@ -152,10 +159,10 @@ export function MobileNav() {
         })}
         <Link
           to="/account"
-          className={cn('flex-1 flex flex-col items-center justify-center gap-0.5 text-[10px]', pathname === '/account' ? 'text-primary' : 'text-muted-foreground')}
+          className={cn('flex-1 flex flex-col items-center justify-center gap-0.5 transition-colors', pathname === '/account' ? 'text-primary' : 'text-muted-foreground')}
         >
           <MoreHorizontal className="h-5 w-5" />
-          {pathname === '/account' && <span>More</span>}
+          {pathname === '/account' && <span className="text-[10px] mt-0.5">More</span>}
         </Link>
       </nav>
     </>
