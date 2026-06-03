@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Play, Check, Activity, BarChart3, Layers, GitBranch, AlertTriangle, History, Sparkles, Briefcase, Grid3x3 } from 'lucide-react';
+import { Check, Activity, BarChart3, Layers, GitBranch, AlertTriangle, History, Sparkles, Briefcase, Grid3x3 } from 'lucide-react';
 import { FanChart } from './FanChart';
 import { PLAN_CONFIG, type SubscriptionPlan } from '@/lib/stripe';
 import { useCountUp } from '@/hooks/useCountUp';
@@ -11,70 +11,83 @@ export function Hero() {
     <section className="relative min-h-screen flex items-center pt-20 md:pt-24 pb-16 overflow-hidden">
       <div
         className="absolute inset-0 pointer-events-none"
-        style={{ background: 'radial-gradient(ellipse 80% 50% at 50% -10%, hsl(189 100% 50% / 0.08), transparent 60%)' }}
+        style={{ background: 'radial-gradient(ellipse 70% 55% at 50% -5%, hsl(189 100% 50% / 0.07), transparent 65%)' }}
       />
-      <div className="relative w-full max-w-[1280px] mx-auto px-6 grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-        <div className="order-1 lg:order-1">
-          <div className="text-primary font-semibold uppercase text-[11px]" style={{ letterSpacing: '0.1em', animation: 'fade-up 500ms ease-out both' }}>
-            AI-Powered Risk Intelligence
+      <div className="relative w-full max-w-[1280px] mx-auto px-6 grid lg:grid-cols-5 gap-12 lg:gap-14 items-center">
+        {/* Left: 60% */}
+        <div className="lg:col-span-3">
+          <div
+            className="border-l-2 border-primary pl-3 font-mono text-primary text-[11px] uppercase"
+            style={{ letterSpacing: '0.15em', animation: 'fade-up 500ms ease-out both' }}
+          >
+            Institutional-Grade Risk Intelligence
           </div>
           <h1
-            className="mt-5 font-display font-extrabold text-foreground leading-[1.04]"
-            style={{ fontSize: 'clamp(30px, 5.5vw, 52px)', letterSpacing: '-0.03em', animation: 'fade-up 600ms ease-out 100ms both' }}
+            className="mt-6 font-display font-extrabold"
+            style={{
+              fontSize: 'clamp(36px, 5.5vw, 58px)',
+              letterSpacing: '-0.03em',
+              lineHeight: 1.02,
+              animation: 'fade-up 600ms ease-out 100ms both',
+            }}
           >
-            The market is a distribution. Trade it like one.
+            <span className="block text-foreground">The market is a</span>
+            <span className="block text-primary">distribution.</span>
+            <span className="block text-foreground">Trade it like one.</span>
           </h1>
           <p
-            className="mt-6 text-muted-foreground"
-            style={{ fontSize: 'clamp(15px, 1.5vw, 17px)', lineHeight: 1.7, maxWidth: 480, animation: 'fade-up 700ms ease-out 200ms both' }}
+            className="mt-5 text-muted-foreground"
+            style={{ fontSize: 16, lineHeight: 1.75, maxWidth: 460, animation: 'fade-up 700ms ease-out 200ms both' }}
           >
-            OutputLens runs 10,000 Monte Carlo simulations on any asset giving you the full probability of outcomes — not a forecast, not a prediction, a distribution.
+            OutputLens runs 10,000 Monte Carlo simulations on any asset — giving you the full probability of outcomes, not a forecast.
           </p>
           <div className="mt-8 flex flex-wrap gap-3" style={{ animation: 'fade-up 700ms ease-out 300ms both' }}>
             <Link
               to="/auth?mode=signup"
-              className="inline-flex items-center justify-center gap-1.5 rounded-md bg-primary text-primary-foreground font-semibold text-sm px-5 py-3 hover:brightness-110 transition-all min-h-[44px]"
+              className="inline-flex items-center gap-2 rounded-lg bg-primary text-primary-foreground font-semibold text-sm px-6 py-3 hover:brightness-110 transition-all min-h-[48px]"
             >
               Analyse a Position Free →
             </Link>
-            <button
-              className="inline-flex items-center gap-2 rounded-md text-foreground/80 hover:text-foreground hover:bg-elevated font-medium text-sm px-5 py-3 transition-colors min-h-[44px]"
-              type="button"
-              onClick={() => {
-                document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' });
-              }}
+            <a
+              href="#how-it-works"
+              className="inline-flex items-center rounded-lg border border-border text-foreground/70 hover:text-foreground hover:border-foreground/30 text-sm px-5 py-3 transition-colors min-h-[48px]"
             >
-              <Play className="h-4 w-4 fill-current" /> See how it works
-            </button>
+              See how it works
+            </a>
           </div>
-          <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2 text-[12px] text-foreground/40 justify-center sm:justify-start" style={{ animation: 'fade-up 700ms ease-out 400ms both' }}>
+          <div
+            className="mt-5 flex flex-wrap items-center gap-x-3 gap-y-2 text-[12px] text-foreground/35"
+            style={{ animation: 'fade-up 700ms ease-out 400ms both' }}
+          >
             <span>✓ No credit card</span>
+            <span aria-hidden>·</span>
             <span>✓ First simulation free</span>
+            <span aria-hidden>·</span>
             <span>✓ 2,400+ analysts</span>
           </div>
         </div>
 
-        {/* Chart */}
-        <div className="order-2 lg:order-2 relative">
-          <div className="rounded-md border border-border bg-surface p-4 md:p-5 relative">
+        {/* Right: 40% — Chart */}
+        <div className="lg:col-span-2 relative">
+          <div className="rounded-xl border border-border bg-surface p-4 md:p-5 relative shadow-[0_4px_24px_hsl(var(--primary)/0.08)]">
             <div className="hidden lg:block">
               <FanChart height={380} />
             </div>
             <div className="lg:hidden">
               <FanChart height={260} />
             </div>
-            {/* Floating stat chips */}
+
             <div
-              className="absolute top-6 right-6 rounded bg-elevated border border-border px-3 py-2 font-mono text-[12px] font-semibold"
+              className="absolute -top-3 -right-3 rounded-lg bg-elevated border border-border px-3 py-2 font-mono text-[12px] font-semibold shadow-[0_4px_24px_hsl(var(--primary)/0.08)]"
               style={{ color: 'hsl(var(--bullish))', animation: 'fade-up 600ms ease-out 1000ms both' }}
             >
               P95 +34.2%
             </div>
             <div
-              className="absolute bottom-6 left-6 rounded bg-elevated border border-border px-3 py-2 font-mono text-[12px] font-semibold"
+              className="absolute -bottom-3 -left-3 rounded-lg bg-elevated border border-border px-3 py-2 font-mono text-[12px] font-semibold shadow-[0_4px_24px_hsl(var(--primary)/0.08)]"
               style={{ color: 'hsl(var(--bearish))', animation: 'fade-up 600ms ease-out 1100ms both' }}
             >
-              VaR 95% -12.1%
+              CVaR 95% −12.1%
             </div>
           </div>
         </div>
