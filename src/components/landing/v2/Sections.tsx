@@ -322,16 +322,19 @@ export function Pricing() {
 
 /* ───────────── FOOTER ───────────── */
 export function FooterV2() {
-  const cols: Array<{ title: string; links: Array<{ label: string; to: string }> }> = [
+  const cols: Array<{ title: string; links: Array<{ label: string; to: string; external?: boolean }> }> = [
     { title: 'Product', links: [
       { label: 'Features', to: '#features' },
       { label: 'Pricing', to: '#pricing' },
       { label: 'Methodology', to: '/methodology' },
+      { label: 'Changelog', to: '/blog' },
     ]},
     { title: 'Company', links: [
       { label: 'About', to: '/about' },
       { label: 'Blog', to: '/blog' },
-      { label: 'Contact', to: 'mailto:contact@outputlens.com' },
+      { label: 'Roadmap', to: '/blog' },
+      { label: 'Contact', to: 'mailto:hello@outputlens.com' },
+      { label: 'Status', to: 'https://status.outputlens.com', external: true },
     ]},
     { title: 'Legal',   links: [
       { label: 'Privacy', to: '/privacy' },
@@ -339,11 +342,12 @@ export function FooterV2() {
     ]},
   ];
   return (
-    <footer className="bg-surface border-t border-border pt-12 pb-8">
+    <footer className="bg-gradient-to-b from-background to-surface border-t border-border/50 pt-14 pb-8">
       <div className="max-w-[1280px] mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-8">
         <div className="col-span-2 md:col-span-1">
-          <div className="font-display text-lg font-bold tracking-tight">
-            <span className="text-foreground">Output</span><span className="text-primary">Lens</span>
+          <div className="font-display text-lg font-bold tracking-tight flex items-center gap-2">
+            <span className="block w-1.5 h-1.5 bg-primary rounded-sm" aria-hidden />
+            <span><span className="text-foreground">Output</span><span className="text-primary">Lens</span></span>
           </div>
           <p className="mt-3 text-sm text-muted-foreground">Probabilities, not predictions.</p>
         </div>
@@ -353,8 +357,15 @@ export function FooterV2() {
             <ul className="mt-3 space-y-2">
               {c.links.map((l) => (
                 <li key={l.label}>
-                  {l.to.startsWith('mailto:') ? (
-                    <a href={l.to} className="text-[13px] text-muted-foreground hover:text-foreground transition-colors">{l.label}</a>
+                  {l.external || l.to.startsWith('mailto:') || l.to.startsWith('http') ? (
+                    <a
+                      href={l.to}
+                      target={l.external ? '_blank' : undefined}
+                      rel={l.external ? 'noopener noreferrer' : undefined}
+                      className="text-[13px] text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      {l.label}
+                    </a>
                   ) : l.to.startsWith('#') ? (
                     <a href={l.to} className="text-[13px] text-muted-foreground hover:text-foreground transition-colors">{l.label}</a>
                   ) : (
@@ -366,8 +377,10 @@ export function FooterV2() {
           </div>
         ))}
       </div>
-      <div className="max-w-[1280px] mx-auto px-6 mt-8 pt-6 border-t border-border">
-        <p className="text-[12px] text-foreground/40">© {new Date().getFullYear()} OutputLens Ltd. All rights reserved.</p>
+      <div className="max-w-[1280px] mx-auto px-6 mt-10 pt-6 border-t border-border/40">
+        <p className="text-[12px] text-foreground/40">
+          © {new Date().getFullYear()} OutputLens Ltd. All rights reserved. · Not financial advice. Probabilistic tools only.
+        </p>
       </div>
     </footer>
   );
