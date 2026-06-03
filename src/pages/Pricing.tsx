@@ -15,6 +15,16 @@ const plans: { key: SubscriptionPlan; badge?: string }[] = [
   { key: 'free' },
 ];
 
+// 20% off annual: monthly [0,12,29,79] → annual [0,10,24,66]
+const PRICE_MAP: Record<SubscriptionPlan, { monthly: number; annual: number }> = {
+  free:    { monthly: 0,  annual: 0 },
+  starter: { monthly: 12, annual: 10 },
+  pro:     { monthly: 29, annual: 24 },
+  trader:  { monthly: 79, annual: 66 },
+};
+const getPrice = (key: SubscriptionPlan, annual: boolean) =>
+  annual ? PRICE_MAP[key].annual : PRICE_MAP[key].monthly;
+
 const objections = [
   { icon: Shield,    label: '14-day refund — no questions' },
   { icon: RefreshCw, label: 'Cancel anytime, one click' },
@@ -34,6 +44,7 @@ export default function Pricing() {
   const { plan: currentPlan, createCheckoutSession, isLoading: planLoading } = usePlan();
   const [loadingPlan, setLoadingPlan] = useState<SubscriptionPlan | null>(null);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [annual, setAnnual] = useState(false);
 
   useEffect(() => { document.title = 'Pricing | OutputLens'; }, []);
 
@@ -66,17 +77,41 @@ export default function Pricing() {
       </section>
 
       <div className="section-container py-16">
+        {/* Billing toggle */}
+        <div className="flex items-center justify-center gap-3 mb-10">
+          <button
+            onClick={() => setAnnual(false)}
+            className={cn(
+              'px-4 h-9 rounded-lg text-sm font-medium transition-all',
+              !annual ? 'bg-surface text-foreground border border-border/60' : 'text-muted-foreground hover:text-foreground'
+            )}
+          >Monthly</button>
+          <button
+            onClick={() => setAnnual(true)}
+            className={cn(
+              'px-4 h-9 rounded-lg text-sm font-medium transition-all inline-flex items-center gap-2',
+              annual ? 'bg-surface text-foreground border border-border/60' : 'text-muted-foreground hover:text-foreground'
+            )}
+          >
+            Annual
+            <span className="text-[10px] font-mono font-bold text-primary bg-primary/10 border border-primary/20 rounded px-1.5 py-0.5">Save 20%</span>
+          </button>
+        </div>
+
         {/* Pricing cards */}
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 max-w-5xl mx-auto mb-20">
           {plans.map(({ key, badge }) => {
             const config = PLAN_CONFIG[key];
             const isCurrent = key === currentPlan;
             const isHighlighted = config.highlighted;
+            const displayPrice = getPrice(key, annual);
 
             return (
               <div key={key} className={cn(
-                'relative flex flex-col rounded-lg border bg-card p-6',
-                isHighlighted ? 'border-primary shadow-lg shadow-primary/10' : 'border-border',
+                'relative flex flex-col rounded-2xl border bg-surface p-8 transition-all',
+                isHighlighted
+                  ? 'border-primary bg-gradient-to-b from-primary/[0.06] to-transparent shadow-[0_0_0_1px_hsl(var(--primary)/0.25),0_12px_40px_hsl(var(--primary)/0.12)]'
+                  : 'border-border/50 hover:border-primary/15',
                 isCurrent && 'ring-2 ring-bullish/40',
               )}>
                 {badge && (
@@ -95,9 +130,12 @@ export default function Pricing() {
                 <div className="mb-5">
                   <h2 className="font-bold text-foreground text-lg mb-2">{config.name}</h2>
                   <div className="flex items-baseline gap-1">
-                    <span className="text-3xl font-bold text-foreground">${config.price}</span>
-                    {config.price > 0 && <span className="text-muted-foreground text-sm">/mo</span>}
+                    <span className="text-3xl font-bold font-display text-foreground tabular-nums">${displayPrice}</span>
+                    {displayPrice > 0 && <span className="text-muted-foreground text-sm">/mo</span>}
                   </div>
+                  {annual && displayPrice > 0 && (
+                    <p className="text-[11px] text-muted-foreground mt-1 font-mono">billed yearly</p>
+                  )}
                   <p className="text-xs text-muted-foreground mt-1">{config.analysesLimit} analyses/month</p>
                 </div>
 
@@ -136,33 +174,39 @@ export default function Pricing() {
         {/* FAQ accordion */}
         <div className="max-w-2xl mx-auto">
           {/* Objection-killer strip — addresses risk-aversion right before FAQ */}
-          <div className="mb-12 grid grid-cols-2 md:grid-cols-5 gap-3">
+          <div className="mb-12 flex flex-wrap items-center justify-center gap-x-6 gap-y-3">
             {objections.map(({ icon: Icon, label }) => (
-              <div key={label} className="flex flex-col items-center text-center gap-2 p-4 rounded-lg border border-border bg-card/40">
+              <div key={label} className="inline-flex items-center gap-2">
                 <Icon className="h-4 w-4 text-primary" />
-                <span className="text-xs text-muted-foreground leading-snug">{label}</span>
+                <span className="text-[13px] text-muted-foreground">{label}</span>
               </div>
             ))}
           </div>
 
           <h2 className="text-2xl font-bold font-display text-foreground text-center mb-8">Common Questions</h2>
-          <div className="divide-y divide-border border border-border rounded-lg overflow-hidden">
-            {faqs.map((faq, i) => (
-              <div key={i}>
-                <button
-                  className="w-full flex items-center justify-between gap-4 px-5 py-4 text-left hover:bg-muted/50 transition-colors"
-                  onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                >
-                  <span className="font-medium text-foreground text-sm">{faq.q}</span>
-                  <ChevronDown className={cn('h-4 w-4 text-muted-foreground flex-shrink-0 transition-transform', openFaq === i && 'rotate-180')} />
-                </button>
-                {openFaq === i && (
-                  <div className="px-5 pb-4">
-                    <p className="text-sm text-muted-foreground leading-relaxed">{faq.a}</p>
-                  </div>
-                )}
-              </div>
-            ))}
+          <div>
+            {faqs.map((faq, i) => {
+              const isOpen = openFaq === i;
+              return (
+                <div key={i} className={cn(
+                  'rounded-xl border border-border/40 mb-2 transition-colors',
+                  isOpen && 'bg-surface'
+                )}>
+                  <button
+                    className="w-full flex justify-between items-center gap-4 p-5 text-left cursor-pointer"
+                    onClick={() => setOpenFaq(isOpen ? null : i)}
+                  >
+                    <span className="font-semibold text-[14px] text-foreground">{faq.q}</span>
+                    <ChevronDown className={cn('h-4 w-4 text-muted-foreground flex-shrink-0 transition-transform', isOpen && 'rotate-180')} />
+                  </button>
+                  {isOpen && (
+                    <div className="px-5 pb-5">
+                      <p className="text-[14px] text-muted-foreground leading-relaxed">{faq.a}</p>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
