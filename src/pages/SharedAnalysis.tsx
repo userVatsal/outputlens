@@ -79,7 +79,7 @@ export default function SharedAnalysis() {
   const isLong = dir === 'LONG';
   const dirColor = isLong ? 'text-bullish' : 'text-bearish';
 
-  const percentiles = simulation?.percentiles ?? ({} as any);
+  const percentiles = ((simulation as any)?.percentiles ?? {}) as Record<string, number>;
   const rows = [
     { k: 'P95 (Best 5%)', v: percentiles.p95 },
     { k: 'P75', v: percentiles.p75 },
