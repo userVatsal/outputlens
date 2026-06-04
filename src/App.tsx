@@ -40,6 +40,10 @@ const Briefing = lazy(() => import("./pages/Briefing"));
 const StressTest = lazy(() => import("./pages/StressTest"));
 const Pulse = lazy(() => import("./pages/Pulse"));
 const Demo = lazy(() => import("./pages/Demo"));
+const Founder = lazy(() => import('./pages/Founder'));
+const SharedAnalysis = lazy(() => import('./pages/SharedAnalysis'));
+const Metrics = lazy(() => import('./pages/Metrics'));
+const YC = lazy(() => import('./pages/YC'));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -93,6 +97,10 @@ const App = () => (
                   <Route path="/blog/:slug" element={<BlogPost />} />
                   <Route path="/about" element={<About />} />
                   <Route path="/ceo-dashboard" element={<CEODashboard />} />
+                  <Route path="/founder" element={<Founder />} />
+                  <Route path="/metrics" element={<Metrics />} />
+                  <Route path="/yc" element={<YC />} />
+                  <Route path="/analysis/:id" element={<SharedAnalysis />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
                       </Routes>

@@ -146,6 +146,7 @@ export type Database = {
           direction: string
           entry_price: number
           id: string
+          is_public: boolean
           live_volatility: number | null
           market: string
           results: Json
@@ -163,6 +164,7 @@ export type Database = {
           direction: string
           entry_price: number
           id?: string
+          is_public?: boolean
           live_volatility?: number | null
           market: string
           results: Json
@@ -180,6 +182,7 @@ export type Database = {
           direction?: string
           entry_price?: number
           id?: string
+          is_public?: boolean
           live_volatility?: number | null
           market?: string
           results?: Json
@@ -1514,6 +1517,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_daily_analysis_counts: {
+        Args: { days_back?: number }
+        Returns: {
+          analysis_date: string
+          cnt: number
+        }[]
+      }
+      get_platform_stats: { Args: never; Returns: Json }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

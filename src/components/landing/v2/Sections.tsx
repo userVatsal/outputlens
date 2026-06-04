@@ -4,6 +4,7 @@ import { Activity, BarChart3, Layers, GitBranch, AlertTriangle, History, Sparkle
 import { FanChart } from './FanChart';
 import { PLAN_CONFIG, type SubscriptionPlan } from '@/lib/stripe';
 import { useCountUp } from '@/hooks/useCountUp';
+import { usePlatformStats } from '@/hooks/usePlatformStats';
 
 /* ───────────── HERO ───────────── */
 export function Hero() {
@@ -118,24 +119,23 @@ export function Hero() {
 /* ───────────── STATS BAR ───────────── */
 export function StatsBar() {
   const ref = useRef<HTMLDivElement>(null);
-  const [visible, setVisible] = useState(false);
-  useEffect(() => {
-    if (!ref.current) return;
-    const io = new IntersectionObserver(([e]) => e.isIntersecting && setVisible(true), { threshold: 0.3 });
-    io.observe(ref.current);
-    return () => io.disconnect();
-  }, []);
-
-  const sims = Math.floor(useCountUp(10000, { trigger: visible, duration: 1200 }));
-  const accuracy = Math.floor(useCountUp(947, { trigger: visible, duration: 1200 })); // shown as 94.7
-
-  const fmt = (n: number) => n.toLocaleString('en-US');
+  const { totalAnalyses, totalUsers, analysesToday, isLoading } = usePlatformStats();
 
   const stats = [
-    { v: fmt(sims), label: 'Simulations' },
-    { v: `${(accuracy / 10).toFixed(1)}%`, label: 'Accuracy' },
-    { v: '<0.3s', label: 'Results' },
-    { v: 'GBM·GARCH·HMM', label: 'Models' },
+    {
+      v: isLoading ? '' : totalAnalyses.toLocaleString('en-GB'),
+      label: 'Simulations Run',
+      sub: analysesToday > 0 ? `+${analysesToday} today` : 'and counting',
+      live: true,
+    },
+    { v: '10,000', label: 'Paths Per Sim', sub: 'GBM · GARCH · Regime', live: false },
+    {
+      v: isLoading ? '' : `${totalUsers.toLocaleString('en-GB')}+`,
+      label: 'Registered Users',
+      sub: 'across 40+ countries',
+      live: false,
+    },
+    { v: '<0.3s', label: 'Results', sub: 'median response time', live: false },
   ];
 
   return (
@@ -144,8 +144,18 @@ export function StatsBar() {
         <div className="grid grid-cols-2 md:grid-cols-4 md:divide-x md:divide-border/40">
           {stats.map((s) => (
             <div key={s.label} className="text-center px-4 py-3">
-              <div className="font-mono font-bold text-primary text-[28px] md:text-[36px] tabular-nums leading-none">{s.v}</div>
-              <div className="mt-3 text-[12px] text-muted-foreground uppercase" style={{ letterSpacing: '0.1em' }}>{s.label}</div>
+              {isLoading && !s.v ? (
+                <div className="h-9 w-24 mx-auto rounded-md bg-muted animate-pulse" />
+              ) : (
+                <div className="font-mono font-bold text-primary text-[28px] md:text-[36px] tabular-nums leading-none">{s.v}</div>
+              )}
+              <div className="mt-3 flex items-center justify-center gap-1.5 text-[12px] text-muted-foreground uppercase" style={{ letterSpacing: '0.1em' }}>
+                {s.live && (
+                  <span className="inline-block w-1.5 h-1.5 rounded-full bg-bullish animate-pulse" aria-hidden />
+                )}
+                {s.label}
+              </div>
+              {s.sub && <div className="mt-1 text-[10px] text-muted-foreground/60 font-mono">{s.sub}</div>}
             </div>
           ))}
         </div>
@@ -383,17 +393,18 @@ export function Pricing() {
 export function FooterV2() {
   const cols: Array<{ title: string; links: Array<{ label: string; to: string; external?: boolean }> }> = [
     { title: 'Product', links: [
-      { label: 'Features', to: '#features' },
-      { label: 'Pricing', to: '#pricing' },
+      { label: 'Features',    to: '/#features' },
+      { label: 'Pricing',     to: '/pricing' },
       { label: 'Methodology', to: '/methodology' },
-      { label: 'Changelog', to: '/blog' },
+      { label: 'Demo',        to: '/demo' },
+      { label: 'Changelog',   to: '/blog' },
     ]},
     { title: 'Company', links: [
-      { label: 'About', to: '/about' },
-      { label: 'Blog', to: '/blog' },
-      { label: 'Roadmap', to: '/blog' },
-      { label: 'Contact', to: 'mailto:hello@outputlens.com' },
-      { label: 'Status', to: 'https://status.outputlens.com', external: true },
+      { label: 'About',   to: '/about' },
+      { label: 'Founder', to: '/founder' },
+      { label: 'Metrics', to: '/metrics' },
+      { label: 'Blog',    to: '/blog' },
+      { label: 'Contact', to: 'mailto:vatsal@outputlens.com' },
     ]},
     { title: 'Legal',   links: [
       { label: 'Privacy', to: '/privacy' },

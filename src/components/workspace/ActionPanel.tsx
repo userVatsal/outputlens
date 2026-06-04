@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Bookmark, Bell, FolderPlus, FileText, Download, RotateCcw, Loader2, Check } from 'lucide-react';
+import { Bookmark, Bell, FolderPlus, FileText, Download, RotateCcw, Loader2, Check, Share2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { usePlan } from '@/hooks/usePlan';
 import { useToast } from '@/hooks/use-toast';
@@ -7,12 +7,14 @@ import { EnhancedTradeAnalysis } from '@/types/analysis';
 import { useTrackedAssets } from '@/hooks/useTrackedAssets';
 import { TrackAssetModal } from './TrackAssetModal';
 import { AddToPortfolioModal } from './AddToPortfolioModal';
+import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
 
 interface ActionPanelProps {
   analysis: EnhancedTradeAnalysis;
   onNewAnalysis: () => void;
   isHistorical?: boolean;
+  analysisId?: string;
 }
 
 function generatePDFContent(analysis: EnhancedTradeAnalysis): string {
@@ -37,15 +39,38 @@ function generatePDFContent(analysis: EnhancedTradeAnalysis): string {
   <div class="footer"><p>© ${new Date().getFullYear()} OutputLens. All rights reserved. This report is for informational purposes only.</p></div></div>`;
 }
 
-export function ActionPanel({ analysis, onNewAnalysis, isHistorical }: ActionPanelProps) {
+export function ActionPanel({ analysis, onNewAnalysis, isHistorical, analysisId }: ActionPanelProps) {
   const { canExport } = usePlan();
   const { toast } = useToast();
   const { isAssetTracked } = useTrackedAssets();
   const [isExporting, setIsExporting] = useState(false);
   const [showTrackModal, setShowTrackModal] = useState(false);
   const [showPortfolioModal, setShowPortfolioModal] = useState(false);
+  const [isSharing, setIsSharing] = useState(false);
 
   const existingTrack = isAssetTracked(analysis.input.asset, analysis.input.market);
+
+  const handleShare = async () => {
+    if (!analysisId) {
+      toast({ title: 'Save analysis first', description: 'Run or open an analysis to share it.', variant: 'destructive' });
+      return;
+    }
+    setIsSharing(true);
+    try {
+      const { error } = await supabase
+        .from('analysis_history')
+        .update({ is_public: true })
+        .eq('id', analysisId);
+      if (error) throw error;
+      const url = `${window.location.origin}/analysis/${analysisId}`;
+      await navigator.clipboard.writeText(url);
+      toast({ title: 'Link copied!', description: 'Anyone with this URL can view this analysis.' });
+    } catch (e: any) {
+      toast({ title: 'Share failed', description: e?.message ?? 'Try again.', variant: 'destructive' });
+    } finally {
+      setIsSharing(false);
+    }
+  };
 
   const handleExportPDF = async () => {
     if (!canExport) {
@@ -140,6 +165,13 @@ export function ActionPanel({ analysis, onNewAnalysis, isHistorical }: ActionPan
       icon: <Download className="h-4 w-4" />,
       onClick: handleExportCSV,
       pro: !canExport,
+      active: false,
+    },
+    {
+      label: isSharing ? 'Sharing...' : 'Share',
+      icon: isSharing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Share2 className="h-4 w-4" />,
+      onClick: handleShare,
+      pro: false,
       active: false,
     },
   ];
