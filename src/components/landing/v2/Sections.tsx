@@ -393,17 +393,18 @@ export function Pricing() {
 export function FooterV2() {
   const cols: Array<{ title: string; links: Array<{ label: string; to: string; external?: boolean }> }> = [
     { title: 'Product', links: [
-      { label: 'Features', to: '#features' },
-      { label: 'Pricing', to: '#pricing' },
+      { label: 'Features',    to: '/#features' },
+      { label: 'Pricing',     to: '/pricing' },
       { label: 'Methodology', to: '/methodology' },
-      { label: 'Changelog', to: '/blog' },
+      { label: 'Demo',        to: '/demo' },
+      { label: 'Changelog',   to: '/blog' },
     ]},
     { title: 'Company', links: [
-      { label: 'About', to: '/about' },
-      { label: 'Blog', to: '/blog' },
-      { label: 'Roadmap', to: '/blog' },
-      { label: 'Contact', to: 'mailto:hello@outputlens.com' },
-      { label: 'Status', to: 'https://status.outputlens.com', external: true },
+      { label: 'About',   to: '/about' },
+      { label: 'Founder', to: '/founder' },
+      { label: 'Metrics', to: '/metrics' },
+      { label: 'Blog',    to: '/blog' },
+      { label: 'Contact', to: 'mailto:vatsal@outputlens.com' },
     ]},
     { title: 'Legal',   links: [
       { label: 'Privacy', to: '/privacy' },
