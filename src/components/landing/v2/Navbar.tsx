@@ -71,10 +71,10 @@ export function Navbar() {
             <button aria-label="Close" onClick={() => setOpen(false)} className="p-2 -mr-2"><X className="h-6 w-6" /></button>
           </div>
           <nav className="flex-1 flex flex-col px-6 py-4">
-            <a href="#features" onClick={() => setOpen(false)} className="h-12 flex items-center text-foreground border-b border-border">Features</a>
-            <a href="#pricing" onClick={() => setOpen(false)} className="h-12 flex items-center text-foreground border-b border-border">Pricing</a>
-            <Link to="/blog" onClick={() => setOpen(false)} className="h-12 flex items-center text-foreground border-b border-border">Blog</Link>
-            <Link to="/auth" onClick={() => setOpen(false)} className="h-12 flex items-center text-foreground border-b border-border">Sign In</Link>
+            <a href="#features" onClick={() => setOpen(false)} className="min-h-[52px] flex items-center text-foreground border-b border-border">Features</a>
+            <a href="#pricing" onClick={() => setOpen(false)} className="min-h-[52px] flex items-center text-foreground border-b border-border">Pricing</a>
+            <Link to="/blog" onClick={() => setOpen(false)} className="min-h-[52px] flex items-center text-foreground border-b border-border">Blog</Link>
+            <Link to="/auth" onClick={() => setOpen(false)} className="min-h-[52px] flex items-center text-foreground border-b border-border">Sign In</Link>
           </nav>
           <div className="p-6 pb-10">
             <Link
