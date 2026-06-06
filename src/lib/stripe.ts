@@ -40,7 +40,7 @@ export const PLAN_CONFIG: Record<SubscriptionPlan, PlanConfig> = {
     price: 0,
     priceId: '',
     productId: '',
-    analysesLimit: 5,
+    analysesLimit: 3,
     portfolioAssetsLimit: 0,
     apiCallsLimit: 0,
     historyDays: 7,
@@ -59,20 +59,17 @@ export const PLAN_CONFIG: Record<SubscriptionPlan, PlanConfig> = {
     aiInterpretation: 'manual',
     ragAccess: false,
     features: [
-      '5 analyses/month',
-      'US markets only',
+      '3 analyses per month',
+      'US stocks only',
       '5,000 Monte Carlo paths',
-      'Basic GBM model',
-      'Manual AI explanations',
+      'Basic GBM simulation',
+      'Manual AI explanation',
       '7-day history',
-      'Risk Pulse (read-only, 3 positions max)',
-      'Risk Journal (5 entries)',
-      'Morning Briefing (text only, no AI)',
     ],
   },
   starter: {
     name: 'Starter',
-    price: 12,
+    price: 19,
     priceId: 'price_1SuEvy6fOimPgR7zEMm58xaG',
     productId: 'prod_TrythZDLRcM1Df',
     analysesLimit: 30,
@@ -94,20 +91,18 @@ export const PLAN_CONFIG: Record<SubscriptionPlan, PlanConfig> = {
     aiInterpretation: 'auto',
     ragAccess: true,
     features: [
-      '30 analyses/month',
+      '30 analyses per month',
       'Global markets (UK, EU, Crypto, Forex)',
       '10,000 Monte Carlo paths',
-      'GBM + GARCH + regime switching',
-      'Auto AI explanations',
-      'Morning Briefing with AI Focus (daily)',
-      'Risk Journal (unlimited)',
-      'Pre-Trade Stress Test',
-      'Risk Pulse (all positions, live)',
+      'GBM + GARCH(1,1) volatility',
+      'Regime detection (HMM)',
+      'Auto AI explanations (Claude)',
+      '30-day history',
     ],
   },
   pro: {
     name: 'Pro',
-    price: 29,
+    price: 39,
     priceId: 'price_1SuFAb6fOimPgR7zOqOhB67x',
     productId: 'prod_Trz8F237n1udxv',
     analysesLimit: 100,
@@ -129,21 +124,21 @@ export const PLAN_CONFIG: Record<SubscriptionPlan, PlanConfig> = {
     aiInterpretation: 'advanced',
     ragAccess: true,
     features: [
-      '100 analyses/month',
-      'Full stochastic suite + jump diffusion',
+      '100 analyses per month',
+      'Full stochastic suite',
+      'Jump diffusion modelling',
       'Portfolio analysis (5 assets)',
-      'Neural database + auto insights',
-      'CSV/PDF exports',
+      'AI explanations (Claude Sonnet)',
+      'Risk alerts by email',
+      'CSV + PDF exports',
+      'Shareable analysis links',
       'Unlimited history',
-      'Everything in Starter',
-      'Stress Test with custom scenario parameters',
-      'Journal performance vs model analytics',
     ],
     highlighted: true,
   },
   trader: {
     name: 'Trader',
-    price: 79,
+    price: 99,
     priceId: 'price_1SuFBC6fOimPgR7zy8NOODxI',
     productId: 'prod_Trz9TGqW9escEk',
     analysesLimit: 500,
@@ -165,14 +160,14 @@ export const PLAN_CONFIG: Record<SubscriptionPlan, PlanConfig> = {
     aiInterpretation: 'advanced',
     ragAccess: true,
     features: [
-      '500 analyses/month',
+      '500 analyses per month',
       'Portfolio analysis (20 assets)',
-      '100 API calls/month',
-      'All advanced models',
-      'Priority support',
-      'Everything in Pro',
-      'API access to stress test engine',
-      'Journal export (CSV/PDF)',
+      '100 REST API calls per month',
+      'Priority Claude Sonnet (no rate limits)',
+      'White-label PDF exports',
+      'Risk alerts (email + SMS)',
+      'Priority support (24hr)',
+      'Early access to new features',
     ],
   },
 };
@@ -200,7 +195,9 @@ export type GatableFeature =
   | 'regime_detection'
   | 'global_markets'
   | 'advanced_ai'
-  | 'jump_diffusion';
+  | 'jump_diffusion'
+  | 'shareable_links'
+  | 'risk_alerts';
 
 export function planHasFeature(plan: SubscriptionPlan, feature: GatableFeature): boolean {
   const config = PLAN_CONFIG[plan];
@@ -224,6 +221,10 @@ export function planHasFeature(plan: SubscriptionPlan, feature: GatableFeature):
       return config.aiInterpretation === 'advanced';
     case 'jump_diffusion':
       return config.jumpDiffusion;
+    case 'shareable_links':
+      return plan === 'pro' || plan === 'trader';
+    case 'risk_alerts':
+      return plan === 'pro' || plan === 'trader';
     default:
       return false;
   }

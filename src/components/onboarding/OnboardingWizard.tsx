@@ -84,7 +84,7 @@ export function OnboardingWizard({ initialStep = 'credentials' }: OnboardingWiza
   const getStepDescription = () => {
     switch (currentStep) {
       case 'credentials':
-        return '5 free analyses/month • No credit card • Start in 30 seconds';
+        return '3 free analyses/month • No credit card • Start in 30 seconds';
       case 'legal':
         return 'Quick legal agreements, then you\'re ready to analyze';
       case 'complete':

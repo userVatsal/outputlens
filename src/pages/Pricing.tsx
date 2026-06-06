@@ -15,15 +15,11 @@ const plans: { key: SubscriptionPlan; badge?: string }[] = [
   { key: 'free' },
 ];
 
-// 20% off annual: monthly [0,12,29,79] → annual [0,10,24,66]
-const PRICE_MAP: Record<SubscriptionPlan, { monthly: number; annual: number }> = {
-  free:    { monthly: 0,  annual: 0 },
-  starter: { monthly: 12, annual: 10 },
-  pro:     { monthly: 29, annual: 24 },
-  trader:  { monthly: 79, annual: 66 },
+// Annual: 20% off the monthly price defined in PLAN_CONFIG.
+const getPrice = (key: SubscriptionPlan, annual: boolean) => {
+  const monthly = PLAN_CONFIG[key].price;
+  return annual ? Math.round(monthly * 0.8) : monthly;
 };
-const getPrice = (key: SubscriptionPlan, annual: boolean) =>
-  annual ? PRICE_MAP[key].annual : PRICE_MAP[key].monthly;
 
 const objections = [
   { icon: Shield,    label: '14-day refund — no questions' },
@@ -34,10 +30,11 @@ const objections = [
 ];
 
 const faqs = [
-  { q: "What do I get with the Free tier?", a: "5 risk analyses per month on US stocks only, using basic Monte Carlo simulation with 5,000 paths. Perfect for learning probabilistic risk concepts." },
-  { q: "Why upgrade to Starter or Pro?", a: "Paid plans unlock global markets (UK, EU, Crypto, Forex), 10,000 Monte Carlo paths, regime detection, and AI-powered explanations." },
-  { q: "Is this a trading signal service?", a: "No. OutputLens shows probability distributions, not price predictions. We quantify uncertainty — we never tell you what to buy or sell." },
-  { q: "Can I upgrade or downgrade anytime?", a: "Yes. All subscriptions can be changed at any time from your Account page. Changes take effect immediately with prorated billing." },
+  { q: "What do I get with the Free tier?", a: "3 risk analyses per month on US stocks, using basic Monte Carlo with 5,000 simulation paths. No credit card required. It's designed to show you what probabilistic risk analysis looks like before you commit." },
+  { q: "What does Starter ($19/mo) add over Free?", a: "Everything. Global markets (UK, EU, Crypto, Forex), 10,000 Monte Carlo paths, GARCH volatility modelling, HMM regime detection, and automatic Claude AI explanations. 10× more analyses per month." },
+  { q: "Why choose Pro ($39/mo) over Starter?", a: "Jump diffusion for tail risk and earnings shocks, portfolio analysis across 5 assets simultaneously, Claude Sonnet (more capable than Haiku), PDF exports, shareable analysis links, email risk alerts, and unlimited history. It's for active traders running a real book." },
+  { q: "Is this a trading signal service?", a: "No. OutputLens shows probability distributions, not price predictions. We quantify uncertainty — we never tell you what to buy or sell. Every output includes a disclaimer." },
+  { q: "Can I upgrade or downgrade anytime?", a: "Yes. Changes take effect immediately with prorated billing. Downgrading preserves your data but limits future analyses." },
 ];
 
 export default function Pricing() {
@@ -70,7 +67,7 @@ export default function Pricing() {
           </h1>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
             Bloomberg Terminal: <span className="font-mono text-foreground">$24,000/yr</span>.
-            OutputLens Trader: <span className="font-mono text-foreground">$79/mo</span>.
+            OutputLens Trader: <span className="font-mono text-foreground">$99/mo</span>.
             Same probabilistic depth. None of the bloat.
           </p>
         </div>
@@ -134,7 +131,9 @@ export default function Pricing() {
                     {displayPrice > 0 && <span className="text-muted-foreground text-sm">/mo</span>}
                   </div>
                   {annual && displayPrice > 0 && (
-                    <p className="text-[11px] text-muted-foreground mt-1 font-mono">billed yearly</p>
+                    <p className="text-[11px] text-muted-foreground mt-1 font-mono">
+                      billed ${displayPrice * 12}/year · save ${(PLAN_CONFIG[key].price - displayPrice) * 12}/year
+                    </p>
                   )}
                   <p className="text-xs text-muted-foreground mt-1">{config.analysesLimit} analyses/month</p>
                 </div>
@@ -208,6 +207,46 @@ export default function Pricing() {
               );
             })}
           </div>
+
+          {/* Value comparison */}
+          <section className="mt-16 max-w-3xl mx-auto">
+            <h3 className="font-display font-bold text-center text-foreground" style={{ fontSize: 'clamp(20px,3vw,28px)', letterSpacing: '-0.02em' }}>
+              What you get per dollar
+            </h3>
+            <div className="mt-6 overflow-x-auto">
+              <table className="w-full text-[13px]">
+                <thead>
+                  <tr className="border-b border-border">
+                    <th className="text-left pb-3 text-muted-foreground font-medium">Tool</th>
+                    <th className="text-right pb-3 text-muted-foreground font-medium">Price</th>
+                    <th className="text-right pb-3 text-muted-foreground font-medium">Monte Carlo</th>
+                    <th className="text-right pb-3 text-muted-foreground font-medium">VaR/CVaR</th>
+                    <th className="text-right pb-3 text-muted-foreground font-medium">Regime</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border/50">
+                  {[
+                    { name: 'Bloomberg Terminal', price: '£1,667/mo', mc: '✓', var: '✓', regime: '✓', highlight: false },
+                    { name: 'FactSet',            price: '$1,000/mo', mc: '✓', var: '✓', regime: '~', highlight: false },
+                    { name: 'Koyfin Pro',         price: '$49/mo',    mc: '✗', var: '✗', regime: '✗', highlight: false },
+                    { name: 'TradingView Pro',    price: '$15/mo',    mc: '✗', var: '✗', regime: '✗', highlight: false },
+                    { name: 'OutputLens Pro',     price: '$39/mo',    mc: '✓', var: '✓', regime: '✓', highlight: true  },
+                  ].map((row) => (
+                    <tr key={row.name} className={row.highlight ? 'bg-primary/5 font-semibold' : ''}>
+                      <td className={cn('py-3 pl-2', row.highlight && 'text-primary')}>{row.name}</td>
+                      <td className="py-3 text-right font-mono">{row.price}</td>
+                      <td className={cn('py-3 text-right', row.mc === '✓' ? 'text-bullish' : 'text-muted-foreground')}>{row.mc}</td>
+                      <td className={cn('py-3 text-right', row.var === '✓' ? 'text-bullish' : 'text-muted-foreground')}>{row.var}</td>
+                      <td className={cn('py-3 pr-2 text-right', row.regime === '✓' ? 'text-bullish' : 'text-muted-foreground')}>{row.regime}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <p className="text-center text-[12px] text-muted-foreground mt-4">
+              OutputLens Pro delivers Bloomberg-grade risk mathematics at 97% lower cost.
+            </p>
+          </section>
         </div>
       </div>
     </Layout>

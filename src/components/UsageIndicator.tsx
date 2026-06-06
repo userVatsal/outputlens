@@ -13,17 +13,17 @@ interface UsageIndicatorProps {
 const UPGRADE_BENEFITS = {
   free: {
     nextPlan: 'Starter',
-    nextPrice: 12,
+    nextPrice: 19,
     highlights: ['30 analyses/mo', '10,000 paths', 'Live data'],
   },
   starter: {
     nextPlan: 'Pro',
-    nextPrice: 29,
+    nextPrice: 39,
     highlights: ['100 analyses/mo', 'Portfolio (5)', 'Exports'],
   },
   pro: {
     nextPlan: 'Trader',
-    nextPrice: 79,
+    nextPrice: 99,
     highlights: ['500 analyses/mo', 'Portfolio (20)', 'API'],
   },
   trader: null,
