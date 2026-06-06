@@ -44,6 +44,7 @@ const Founder = lazy(() => import('./pages/Founder'));
 const SharedAnalysis = lazy(() => import('./pages/SharedAnalysis'));
 const Metrics = lazy(() => import('./pages/Metrics'));
 const YC = lazy(() => import('./pages/YC'));
+const AuthCallback = lazy(() => import('./pages/AuthCallback'));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -70,6 +71,7 @@ const App = () => (
                       <Routes>
                   <Route path="/" element={<Landing />} />
                   <Route path="/auth" element={<Auth />} />
+                  <Route path="/auth/callback" element={<AuthCallback />} />
                   <Route path="/dashboard" element={<Dashboard />} />
                   <Route path="/onboarding" element={<Onboarding />} />
                   <Route path="/welcome" element={<Welcome />} />
