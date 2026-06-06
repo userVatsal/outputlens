@@ -82,12 +82,40 @@ export function StepCredentials({ onComplete }: StepCredentialsProps) {
 
   const handleGoogleSignUp = async () => {
     setLoading(true);
-    const { lovable } = await import('@/integrations/lovable');
-    const result = await lovable.auth.signInWithOAuth('google', {
-      redirect_uri: `${window.location.origin}/onboarding`,
-    });
-    if (result.error) {
-      console.error('Google sign-up error:', result.error);
+    try {
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+
+      if (isIOS || isSafari) {
+        const { error } = await supabase.auth.signInWithOAuth({
+          provider: 'google',
+          options: {
+            redirectTo: `${window.location.origin}/auth/callback`,
+            skipBrowserRedirect: false,
+            queryParams: {
+              access_type: 'offline',
+              prompt: 'select_account',
+            },
+          },
+        });
+        if (error) {
+          console.error('Google sign-in error:', error);
+          setLoading(false);
+        }
+        return;
+      }
+
+      const { lovable } = await import('@/integrations/lovable');
+      const result = await lovable.auth.signInWithOAuth('google', {
+        redirect_uri: `${window.location.origin}/onboarding`,
+      });
+      if (result.error) {
+        console.error('Google sign-up error:', result.error);
+        setLoading(false);
+      }
+    } catch (err) {
+      console.error('Google sign-in error:', err);
       setLoading(false);
     }
   };
