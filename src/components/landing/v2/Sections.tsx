@@ -61,16 +61,16 @@ export function Hero() {
           >
             OutputLens runs 10,000 Monte Carlo simulations on any asset — giving you the full probability of outcomes, not a forecast.
           </p>
-          <div className="mt-8 flex flex-wrap gap-3 animate-fade-up stagger-6">
+          <div className="mt-8 flex flex-col sm:flex-row flex-wrap gap-3 animate-fade-up stagger-6">
             <Link
               to="/auth?mode=signup"
-              className="btn-primary inline-flex items-center gap-2 rounded-lg bg-primary text-primary-foreground font-semibold text-sm px-6 py-3 min-h-[48px]"
+              className="btn-primary inline-flex items-center justify-center gap-2 rounded-lg bg-primary text-primary-foreground font-semibold text-sm px-6 py-3 min-h-[48px] w-full sm:w-auto"
             >
               Analyse a Position Free →
             </Link>
             <a
               href="#how-it-works"
-              className="inline-flex items-center rounded-lg border border-border text-foreground/70 hover:text-foreground hover:border-foreground/30 text-sm px-5 py-3 transition-colors min-h-[48px]"
+              className="inline-flex items-center justify-center rounded-lg border border-border text-foreground/70 hover:text-foreground hover:border-foreground/30 text-sm px-5 py-3 transition-colors min-h-[48px] w-full sm:w-auto"
             >
               See how it works
             </a>
@@ -88,7 +88,7 @@ export function Hero() {
         </div>
 
         {/* Right: 40% — Chart */}
-        <div className="lg:col-span-2 relative animate-scale-in" style={{ animationDelay: '200ms' }}>
+        <div className="lg:col-span-2 relative animate-scale-in max-h-[340px] sm:max-h-none lg:max-h-none overflow-hidden lg:overflow-visible" style={{ animationDelay: '200ms' }}>
           <div className="rounded-xl border border-border bg-surface p-4 md:p-5 relative shadow-[0_4px_24px_hsl(var(--primary)/0.08)]">
             <div className="hidden lg:block">
               <FanChart height={380} />
@@ -141,7 +141,7 @@ export function StatsBar() {
   return (
     <section ref={ref} className="bg-surface border-y border-border/50">
       <div className="max-w-[1280px] mx-auto px-6 py-8 md:py-10">
-        <div className="grid grid-cols-2 md:grid-cols-4 md:divide-x md:divide-border/40">
+        <div className="grid grid-cols-2 md:grid-cols-4 divide-x-0 md:divide-x divide-border/40">
           {stats.map((s) => (
             <div key={s.label} className="text-center px-4 py-3">
               {isLoading && !s.v ? (
@@ -276,11 +276,11 @@ export function SocialProof() {
     <section className="py-16 md:py-20 bg-surface border-y border-border/50">
       <div className="max-w-[1280px] mx-auto px-6">
         <h2 className="section-title text-center">Trusted by quant teams</h2>
-        <div className="mt-10 md:mt-12 grid md:grid-cols-3 gap-5">
+        <div className="mt-10 md:mt-12 md:grid md:grid-cols-3 gap-5 flex flex-nowrap overflow-x-auto snap-x snap-mandatory pb-4 -mx-6 px-6 md:mx-0 md:px-0 md:overflow-visible">
           {QUOTES.map((t) => (
             <figure
               key={t.a}
-              className="relative rounded-xl bg-background border border-border/50 border-t-2 border-t-primary/30 hover:border-t-primary/60 transition-colors duration-300 p-7 group"
+              className="relative rounded-xl bg-background border border-border/50 border-t-2 border-t-primary/30 hover:border-t-primary/60 transition-colors duration-300 p-7 group flex-shrink-0 w-[85vw] sm:w-[70vw] md:w-auto snap-center"
             >
               <blockquote className="italic text-[15px] text-foreground/85 leading-[1.75] border-l-2 border-primary/20 group-hover:border-primary/50 pl-4 transition-colors before:content-['\201C'] before:text-primary before:text-[28px] before:font-serif before:leading-none before:block before:mb-2">
                 {t.q}
@@ -326,7 +326,7 @@ export function Pricing() {
     <section id="pricing" className="py-16 md:py-20">
       <div className="max-w-[1280px] mx-auto px-6">
         <h2 className="section-title text-center">Simple, transparent pricing</h2>
-        <div className="mt-6 flex items-center justify-center gap-3">
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
           <div className="inline-flex bg-surface border border-border rounded-full p-1">
             <button onClick={() => setAnnual(true)} className={`px-4 py-1.5 text-sm rounded-full transition-colors ${annual ? 'bg-primary text-primary-foreground font-semibold' : 'text-muted-foreground'}`}>Annual</button>
             <button onClick={() => setAnnual(false)} className={`px-4 py-1.5 text-sm rounded-full transition-colors ${!annual ? 'bg-primary text-primary-foreground font-semibold' : 'text-muted-foreground'}`}>Monthly</button>
@@ -334,11 +334,11 @@ export function Pricing() {
           {annual && <span className="text-xs font-semibold uppercase tracking-wide px-2 py-1 rounded" style={{ background: 'hsl(var(--bullish) / 0.15)', color: 'hsl(var(--bullish))' }}>Save 20%</span>}
         </div>
 
-        <div className="mt-10 grid md:grid-cols-3 gap-4 max-w-5xl mx-auto">
+        <div className="mt-10 md:grid md:grid-cols-3 gap-4 max-w-5xl mx-auto flex flex-nowrap overflow-x-auto snap-x snap-mandatory pb-4 -mx-6 px-6 md:mx-0 md:px-0 md:overflow-visible">
           {plans.map((p) => (
             <div
               key={p.name}
-              className={`relative rounded-xl p-8 border transition-all ${
+              className={`relative rounded-xl p-8 border transition-all flex-shrink-0 w-[85vw] sm:w-[70vw] md:w-auto snap-center ${
                 p.highlight
                   ? 'border-primary bg-gradient-to-b from-primary/5 to-transparent shadow-[0_0_0_1px_hsl(var(--primary)/0.3),0_8px_32px_hsl(var(--primary)/0.1)]'
                   : 'border-border/50 bg-surface'
