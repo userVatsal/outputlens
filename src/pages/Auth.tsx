@@ -426,6 +426,14 @@ export default function Auth() {
                   )}
                   {loading ? 'Signing in...' : 'Continue with Google'}
                 </button>
+                {import.meta.env.DEV && (
+                  <Link
+                    to="/auth/diagnostic"
+                    className="block text-center text-[11px] text-muted-foreground/60 hover:text-primary transition-colors pt-1"
+                  >
+                    Sign-in diagnostic →
+                  </Link>
+                )}
               </>
             )}
 
