@@ -60,8 +60,8 @@ const FEATURE_CONFIG: Record<GatableFeature, {
   alerts: {
     title: 'Risk Alerts',
     description: 'Get notified when assets breach VaR thresholds or regime shifts.',
-    minPlan: 'Trader',
-    price: 99,
+    minPlan: 'Pro',
+    price: 39,
     icon: Bell,
   }
 };

@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Sparkles, Loader2, ChevronDown, ChevronUp } from 'lucide-react';
+import { Sparkles, Loader2, ChevronDown, ChevronUp, Lock } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { EnhancedTradeAnalysis } from '@/types/analysis';
 import { supabase } from '@/integrations/supabase/client';
+import { usePlan } from '@/hooks/usePlan';
 
 interface RiskInterpretationProps {
   analysis: EnhancedTradeAnalysis;
@@ -27,6 +29,7 @@ function parseBulletPoints(text: string): string[] {
 }
 
 export function RiskInterpretation({ analysis }: RiskInterpretationProps) {
+  const { canAccessSentiment, isLoading: planLoading } = usePlan();
   const [bullets, setBullets] = useState<string[]>([]);
   const [fullExplanation, setFullExplanation] = useState('');
   const [isLoading, setIsLoading] = useState(true);
@@ -34,6 +37,10 @@ export function RiskInterpretation({ analysis }: RiskInterpretationProps) {
   const [showFull, setShowFull] = useState(false);
 
   useEffect(() => {
+    if (!canAccessSentiment) {
+      setIsLoading(false);
+      return;
+    }
     const fetchInterpretation = async () => {
       setIsLoading(true);
       setError(null);
@@ -63,7 +70,31 @@ export function RiskInterpretation({ analysis }: RiskInterpretationProps) {
     };
 
     fetchInterpretation();
-  }, [analysis]);
+  }, [analysis, canAccessSentiment]);
+
+  if (!planLoading && !canAccessSentiment) {
+    return (
+      <div className="rounded-2xl border border-dashed border-primary/30 bg-primary/5 p-5">
+        <div className="flex items-center gap-2 mb-2">
+          <Lock className="h-4 w-4 text-primary" />
+          <span className="text-[13px] font-semibold text-foreground">AI Risk Commentary</span>
+          <span className="text-[10px] px-1.5 py-0.5 bg-primary/20 text-primary rounded font-semibold ml-auto">
+            STARTER
+          </span>
+        </div>
+        <p className="text-sm text-muted-foreground mb-3">
+          Automatic Claude-powered interpretation of your simulation results — bullet-point risk commentary
+          on win probability, tail risk, regime, and position sizing. Available on Starter and above.
+        </p>
+        <Link
+          to="/pricing"
+          className="inline-flex items-center text-[13px] font-medium text-primary hover:underline"
+        >
+          Upgrade to Starter ($19/mo) →
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div className="rounded-2xl border border-border/50 bg-surface overflow-hidden">

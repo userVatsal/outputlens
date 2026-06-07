@@ -126,7 +126,7 @@ export default function Alerts() {
               </div>
               <div>
                 <h1 className="text-2xl font-display font-semibold text-foreground">Risk Alerts</h1>
-                <p className="text-sm text-muted-foreground">Available on the Trader plan</p>
+                <p className="text-sm text-muted-foreground">Available on Pro and Trader plans</p>
               </div>
             </div>
             <UpgradePrompt feature="alerts" />

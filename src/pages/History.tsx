@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { MARKETS, Market, TradeDirection } from '@/types/trade';
 import { cn } from '@/lib/utils';
+import { usePlan } from '@/hooks/usePlan';
+import { PLAN_CONFIG } from '@/lib/stripe';
 
 interface AnalysisHistoryItem {
   id: string;
@@ -23,6 +25,8 @@ const PIN_KEY = 'ol_pinned_history';
 
 export default function History() {
   const navigate = useNavigate();
+  const { plan } = usePlan();
+  const historyDays = PLAN_CONFIG[plan].historyDays;
   const [history, setHistory] = useState<AnalysisHistoryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [dirFilter, setDirFilter] = useState<DirFilter>('all');
@@ -55,12 +59,20 @@ export default function History() {
         return;
       }
 
-      const { data, error } = await supabase
+      let query = supabase
         .from('analysis_history' as never)
         .select('id, asset, market, direction, entry_price, time_horizon, created_at, results')
         .eq('user_id', session.user.id)
         .order('created_at', { ascending: false })
-        .limit(100) as { data: AnalysisHistoryItem[] | null; error: unknown };
+        .limit(100);
+
+      if (historyDays !== Infinity && Number.isFinite(historyDays)) {
+        const cutoff = new Date();
+        cutoff.setDate(cutoff.getDate() - historyDays);
+        query = query.gte('created_at', cutoff.toISOString());
+      }
+
+      const { data, error } = await query as { data: AnalysisHistoryItem[] | null; error: unknown };
 
       if (data) {
         setHistory(data);
@@ -69,7 +81,7 @@ export default function History() {
     };
 
     fetchHistory();
-  }, [navigate]);
+  }, [navigate, historyDays]);
 
   const handleViewAnalysis = (historyId: string) => {
     navigate(`/results?history=${historyId}`);
@@ -280,6 +292,18 @@ export default function History() {
                   </div>
                 );
               })}
+            </div>
+          )}
+
+          {!loading && history.length > 0 && historyDays !== Infinity && Number.isFinite(historyDays) && (
+            <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              <p className="text-sm text-muted-foreground">
+                Showing the last <span className="text-foreground font-medium">{historyDays} days</span>.
+                Upgrade to Pro for unlimited history.
+              </p>
+              <Button asChild size="sm" variant="outline">
+                <Link to="/pricing">Upgrade</Link>
+              </Button>
             </div>
           )}
         </div>
