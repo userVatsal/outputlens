@@ -61,9 +61,9 @@ export const PLAN_CONFIG: Record<SubscriptionPlan, PlanConfig> = {
     features: [
       '3 analyses per month',
       'US stocks only',
-      '5,000 Monte Carlo paths',
-      'Basic GBM simulation',
-      'Manual AI explanation',
+      'Monte Carlo simulation (limited)',
+      'VaR and CVaR at 90/95/99%',
+      'Manual AI explanation (on request)',
       '7-day history',
     ],
   },
@@ -93,10 +93,10 @@ export const PLAN_CONFIG: Record<SubscriptionPlan, PlanConfig> = {
     features: [
       '30 analyses per month',
       'Global markets (UK, EU, Crypto, Forex)',
-      '10,000 Monte Carlo paths',
-      'GBM + GARCH(1,1) volatility',
-      'Regime detection (HMM)',
-      'Auto AI explanations (Claude)',
+      'Advanced stochastic models',
+      'HMM regime detection',
+      'Automatic AI risk commentary',
+      'Regime Monitor access',
       '30-day history',
     ],
   },
@@ -126,13 +126,12 @@ export const PLAN_CONFIG: Record<SubscriptionPlan, PlanConfig> = {
     features: [
       '100 analyses per month',
       'Full stochastic suite',
-      'Jump diffusion modelling',
       'Portfolio analysis (5 assets)',
-      'AI explanations (Claude Sonnet)',
-      'Risk alerts by email',
-      'CSV + PDF exports',
+      'In-app risk alerts (VaR + regime)',
+      'CSV and PDF export',
       'Shareable analysis links',
       'Unlimited history',
+      'AI risk commentary (Claude)',
     ],
     highlighted: true,
   },
@@ -163,11 +162,10 @@ export const PLAN_CONFIG: Record<SubscriptionPlan, PlanConfig> = {
       '500 analyses per month',
       'Portfolio analysis (20 assets)',
       '100 REST API calls per month',
-      'Priority Claude Sonnet (no rate limits)',
-      'White-label PDF exports',
-      'Risk alerts (email + SMS)',
-      'Priority support (24hr)',
-      'Early access to new features',
+      'In-app risk alerts (VaR + regime)',
+      'Branded PDF exports + CSV downloads',
+      'Priority AI processing queue',
+      'Dedicated support · Founder 24hr response',
     ],
   },
 };
@@ -197,7 +195,8 @@ export type GatableFeature =
   | 'advanced_ai'
   | 'jump_diffusion'
   | 'shareable_links'
-  | 'risk_alerts';
+  | 'risk_alerts'
+  | 'history_full';
 
 export function planHasFeature(plan: SubscriptionPlan, feature: GatableFeature): boolean {
   const config = PLAN_CONFIG[plan];
@@ -212,7 +211,7 @@ export function planHasFeature(plan: SubscriptionPlan, feature: GatableFeature):
     case 'exports':
       return plan === 'pro' || plan === 'trader';
     case 'alerts':
-      return plan === 'trader';
+      return plan === 'pro' || plan === 'trader';
     case 'neural_database':
       return config.neuralDatabase !== 'limited';
     case 'regime_detection':
@@ -224,6 +223,8 @@ export function planHasFeature(plan: SubscriptionPlan, feature: GatableFeature):
     case 'shareable_links':
       return plan === 'pro' || plan === 'trader';
     case 'risk_alerts':
+      return plan === 'pro' || plan === 'trader';
+    case 'history_full':
       return plan === 'pro' || plan === 'trader';
     default:
       return false;
