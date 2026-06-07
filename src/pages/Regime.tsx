@@ -5,6 +5,8 @@ import { AppShell } from '@/components/layout/AppShell';
 import { useTrackedAssets } from '@/hooks/useTrackedAssets';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { usePlan } from '@/hooks/usePlan';
+import { UpgradePrompt } from '@/components/FeatureGate';
 
 type RegimeState = 'BULL' | 'NEUTRAL' | 'CHOPPY' | 'CRISIS';
 
@@ -52,6 +54,7 @@ const regimeMeta: Record<
 
 export default function Regime() {
   const { trackedAssets, isLoading } = useTrackedAssets();
+  const { plan, isLoading: planLoading } = usePlan();
 
   useEffect(() => { document.title = 'Regime Monitor | OutputLens'; }, []);
 
@@ -74,6 +77,27 @@ export default function Regime() {
   const confidence = Math.min(99, Math.round(50 + (Math.max(deteriorating, improving) / total) * 50 * 10) / 10);
   const since = new Date(Date.now() - 1000 * 60 * 60 * Math.max(3, deteriorating * 2 + 4))
     .toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+  if (!planLoading && plan === 'free') {
+    return (
+      <AppShell>
+        <div className="section-container py-6">
+          <div className="max-w-2xl mx-auto space-y-6">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-md flex items-center justify-center bg-primary/10">
+                <Activity className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-display font-semibold text-foreground">Regime Monitor</h1>
+                <p className="text-sm text-muted-foreground">Available on the Starter plan and above</p>
+              </div>
+            </div>
+            <UpgradePrompt feature="sentiment" />
+          </div>
+        </div>
+      </AppShell>
+    );
+  }
 
   return (
     <AppShell>
