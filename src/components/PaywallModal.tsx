@@ -38,7 +38,7 @@ const TRIGGER_CONFIG: Record<PaywallTrigger, {
 }> = {
   usage_limit: {
     title: "You've Hit Your Monthly Limit",
-    description: "You've used all 5 free analyses this month. Upgrade to continue analyzing trades.",
+    description: `You've used all ${PLAN_CONFIG.free.analysesLimit} free analyses this month. Upgrade to continue analyzing trades.`,
     icon: TrendingUp,
     highlightFeatures: ['Layer 1-3 access', '10,000 paths', 'Global markets'],
   },
