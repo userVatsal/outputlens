@@ -43,7 +43,7 @@ export default function About() {
             We built OutputLens because institutional-grade risk quantification shouldn't require an institutional budget. Every serious trader deserves to know their actual downside before they trade.
           </p>
           <div className="flex flex-col sm:flex-row gap-3">
-            <Link to="/workspace" className="inline-flex items-center gap-2 px-6 py-3 rounded font-semibold text-white text-sm transition-all hover:opacity-90 group" style={{ backgroundColor: 'hsl(225, 83%, 53%)' }}>
+            <Link to="/workspace" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-white text-sm transition-all hover:brightness-110 group bg-primary shadow-[0_4px_16px_hsl(var(--primary)/0.4)]">
               Try Risk Analysis <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
             </Link>
             <Link to="/methodology" className="inline-flex items-center gap-2 px-6 py-3 rounded font-medium text-sm text-white/70 hover:text-white border border-white/20 hover:border-white/40 transition-all">
@@ -84,7 +84,7 @@ export default function About() {
       </section>
 
       {/* Who we serve */}
-      <section className="py-20 border-t border-border" style={{ backgroundColor: 'hsl(220, 16%, 97%)' }}>
+      <section className="py-20 border-t border-border bg-surface">
         <div className="section-container">
           <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-10">Who We Serve</p>
           <div className="grid md:grid-cols-3 gap-6 max-w-4xl">
@@ -130,7 +130,7 @@ export default function About() {
         <div className="section-container text-center">
           <h2 className="text-3xl font-bold font-display text-white mb-3">Ready to quantify your risk?</h2>
           <p className="text-white/60 mb-8">Join traders who understand their downside before they trade.</p>
-          <Link to="/auth?mode=signup" className="inline-flex items-center gap-2 px-7 py-3 rounded font-semibold text-white text-sm transition-all hover:opacity-90 group mb-10" style={{ backgroundColor: 'hsl(225, 83%, 53%)' }}>
+          <Link to="/auth?mode=signup" className="inline-flex items-center gap-2 px-7 py-3 rounded-xl font-semibold text-white text-sm transition-all hover:brightness-110 group mb-10 bg-primary shadow-[0_4px_24px_hsl(var(--primary)/0.4)]">
             Get Started Free <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
           </Link>
           <div className="flex items-center justify-center gap-4 border-t border-white/10 pt-8 mt-4">

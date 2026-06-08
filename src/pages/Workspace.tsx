@@ -68,7 +68,7 @@ function SimulationLoader({ asset }: { asset?: string }) {
         className="absolute inset-x-0 pointer-events-none"
         style={{
           height: '60px',
-          background: 'linear-gradient(180deg, transparent 0%, hsl(189 100% 50% / 0.06) 50%, transparent 100%)',
+          background: 'linear-gradient(180deg, transparent 0%, hsl(var(--primary) / 0.08) 50%, transparent 100%)',
           animation: 'scan-line 2.4s cubic-bezier(0.4,0,0.2,1) infinite',
         }}
       />

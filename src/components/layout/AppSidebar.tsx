@@ -123,14 +123,14 @@ export function AppSidebar({ collapsed, onToggle }: Props) {
       <div className="h-14 flex items-center justify-between px-3 border-b border-border/40">
         <Link to="/dashboard" className="flex items-center gap-2 overflow-hidden">
           <div
-            className="w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0"
+            className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
             style={{ background: 'hsl(var(--primary) / 0.10)' }}
           >
             <span className="font-display font-bold text-[15px]" style={{ color: 'hsl(var(--primary))' }}>O</span>
           </div>
           {!collapsed && (
-            <span className="font-display font-bold text-[15px] tracking-tight">
-              <span className="text-foreground">Output</span><span className="text-primary">Lens</span>
+            <span className="font-display font-bold text-[15px] tracking-tight select-none">
+              <span className="text-logo-navy">Output</span><span className="text-logo-blue">Lens</span>
             </span>
           )}
         </Link>

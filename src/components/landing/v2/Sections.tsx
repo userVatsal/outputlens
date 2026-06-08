@@ -12,7 +12,7 @@ export function Hero() {
     <section className="relative min-h-screen flex items-center pt-20 md:pt-24 pb-16 overflow-hidden">
       <div
         className="absolute inset-0 pointer-events-none"
-        style={{ background: 'radial-gradient(ellipse 70% 55% at 50% -5%, hsl(189 100% 50% / 0.07), transparent 65%)' }}
+        style={{ background: 'radial-gradient(ellipse 70% 55% at 50% -5%, hsl(var(--primary) / 0.12), transparent 65%)' }}
       />
       {/* Decorative grid / glow svg layer */}
       <svg
@@ -21,11 +21,11 @@ export function Hero() {
       >
         <defs>
           <pattern id="hero-grid" width="56" height="56" patternUnits="userSpaceOnUse">
-            <path d="M 56 0 L 0 0 0 56" fill="none" stroke="hsl(189 100% 50% / 0.06)" strokeWidth="1" />
+            <path d="M 56 0 L 0 0 0 56" fill="none" stroke="hsl(var(--primary) / 0.08)" strokeWidth="1" />
           </pattern>
           <radialGradient id="hero-glow" cx="50%" cy="0%" r="60%">
-            <stop offset="0%" stopColor="hsl(189 100% 50% / 0.15)" />
-            <stop offset="100%" stopColor="hsl(189 100% 50% / 0)" />
+            <stop offset="0%" stopColor="hsl(var(--primary) / 0.18)" />
+            <stop offset="100%" stopColor="hsl(var(--primary) / 0)" />
           </radialGradient>
         </defs>
         <rect width="100%" height="100%" fill="url(#hero-grid)" />
@@ -51,7 +51,7 @@ export function Hero() {
             <span className="block text-foreground animate-fade-up stagger-2">The market is a</span>
             <span
               className="block text-primary animate-fade-up stagger-3"
-              style={{ borderBottom: '2px solid hsl(189 100% 50% / 0.4)', paddingBottom: 2, width: 'fit-content' }}
+              style={{ borderBottom: '2px solid hsl(var(--primary) / 0.4)', paddingBottom: 2, width: 'fit-content' }}
             >distribution.</span>
             <span className="block text-foreground animate-fade-up stagger-4">Trade it like one.</span>
           </h1>
@@ -235,7 +235,7 @@ export function Features() {
     <section id="features" className="py-16 md:py-20 relative">
       <div
         className="absolute inset-0 pointer-events-none"
-        style={{ background: 'radial-gradient(ellipse 60% 50% at 100% 100%, hsl(252 100% 69% / 0.06), transparent 60%)' }}
+        style={{ background: 'radial-gradient(ellipse 60% 50% at 100% 100%, hsl(var(--accent) / 0.08), transparent 60%)' }}
       />
       <div className="relative max-w-[1280px] mx-auto px-6">
         <h2 className="section-title text-center">Everything you need to quantify uncertainty</h2>
@@ -417,7 +417,7 @@ export function FooterV2() {
         <div className="col-span-2 md:col-span-1">
           <div className="font-display text-lg font-bold tracking-tight flex items-center gap-2">
             <span className="block w-1.5 h-1.5 bg-primary rounded-sm" aria-hidden />
-            <span><span className="text-foreground">Output</span><span className="text-primary">Lens</span></span>
+            <span className="select-none"><span className="text-logo-navy">Output</span><span className="text-logo-blue">Lens</span></span>
           </div>
           <p className="mt-3 text-sm text-muted-foreground">Probabilities, not predictions.</p>
         </div>
