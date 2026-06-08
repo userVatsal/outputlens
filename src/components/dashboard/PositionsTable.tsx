@@ -78,7 +78,7 @@ export function PositionsTable({ assets }: Props) {
                           risk.tone
                         )}
                         style={risk.label === 'HIGH' ? {
-                          boxShadow: '0 0 0 1px hsl(4 82% 57% / 0.25), 0 0 12px hsl(4 82% 57% / 0.2)',
+                          boxShadow: '0 0 0 1px hsl(var(--destructive) / 0.25), 0 0 12px hsl(var(--destructive) / 0.2)',
                         } : undefined}
                       >
                         {risk.label}

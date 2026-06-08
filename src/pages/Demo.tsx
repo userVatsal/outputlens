@@ -59,8 +59,8 @@ function MiniFan({ p25, p50, p75 }: { p25: number; p50: number; p75: number }) {
   const linePath = pts.map((p, idx) => `${idx === 0 ? 'M' : 'L'} ${scaleX(p.i)},${scaleY(p.p50)}`).join(' ');
   return (
     <svg width="100%" height={h} viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none">
-      <path d={`M ${areaPath} Z`} fill="hsl(189 100% 60% / 0.18)" />
-      <path d={linePath} stroke="hsl(189 100% 65%)" strokeWidth={1.5} fill="none" />
+      <path d={`M ${areaPath} Z`} fill="hsl(var(--primary) / 0.18)" />
+      <path d={linePath} stroke="hsl(var(--primary-glow))" strokeWidth={1.5} fill="none" />
     </svg>
   );
 }

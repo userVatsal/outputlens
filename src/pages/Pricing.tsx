@@ -149,13 +149,13 @@ export default function Pricing() {
 
                 {key === 'free' ? (
                   <Link to="/auth?mode=signup"
-                    className={cn('w-full py-2 rounded text-sm font-semibold text-center transition-all', isCurrent ? 'bg-muted text-muted-foreground cursor-default pointer-events-none' : 'bg-secondary text-secondary-foreground hover:bg-secondary/80')}>
+                    className={cn('w-full py-2 rounded-xl text-sm font-bold text-center transition-all h-10 flex items-center justify-center', isCurrent ? 'bg-muted text-muted-foreground cursor-default pointer-events-none' : 'bg-secondary text-secondary-foreground hover:bg-secondary/80')}>
                     {isCurrent ? 'Current Plan' : 'Start Free'}
                   </Link>
                 ) : (
                   <button
-                    className={cn('w-full py-2 rounded text-sm font-semibold transition-all flex items-center justify-center gap-2',
-                      isHighlighted && isUpgrade(key) ? 'text-white hover:opacity-90' : 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
+                    className={cn('w-full py-2 rounded-xl text-sm font-bold transition-all h-10 flex items-center justify-center gap-2',
+                      isHighlighted && isUpgrade(key) ? 'text-white hover:brightness-110 shadow-[0_4px_16px_hsl(var(--primary)/0.3)]' : 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
                       isCurrent && 'bg-muted text-muted-foreground cursor-default')}
                     style={isHighlighted && isUpgrade(key) ? { backgroundColor: 'hsl(var(--primary))' } : {}}
                     disabled={isCurrent || loadingPlan === key || planLoading}

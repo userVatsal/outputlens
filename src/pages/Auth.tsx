@@ -463,8 +463,8 @@ export default function Auth() {
         className="hidden md:flex flex-col justify-center relative bg-surface border-l border-border/40 px-12 py-16 overflow-hidden"
         style={{
           background: `
-            radial-gradient(ellipse 60% 50% at 50% 100%, hsl(189 100% 50% / 0.06), transparent 60%),
-            radial-gradient(ellipse 40% 30% at 80% 20%, hsl(255 85% 66% / 0.04), transparent 50%),
+            radial-gradient(ellipse 60% 50% at 50% 100%, hsl(var(--primary) / 0.12), transparent 70%),
+            radial-gradient(ellipse 40% 30% at 80% 20%, hsl(var(--accent) / 0.08), transparent 50%),
             hsl(var(--surface))
           `,
         }}

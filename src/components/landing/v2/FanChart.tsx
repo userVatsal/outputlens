@@ -75,20 +75,20 @@ export function FanChart({ height = 380 }: { height?: number }) {
         >
           <defs>
             <linearGradient id="fanOuter" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="hsl(189 100% 60%)" stopOpacity={0.18} />
-              <stop offset="100%" stopColor="hsl(189 100% 60%)" stopOpacity={0.02} />
+              <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.18} />
+              <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0.02} />
             </linearGradient>
             <linearGradient id="fanMid" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="hsl(189 100% 60%)" stopOpacity={0.28} />
-              <stop offset="100%" stopColor="hsl(189 100% 60%)" stopOpacity={0.08} />
+              <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.28} />
+              <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0.08} />
             </linearGradient>
             <linearGradient id="fanInner" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="hsl(189 100% 60%)" stopOpacity={0.42} />
-              <stop offset="100%" stopColor="hsl(189 100% 60%)" stopOpacity={0.14} />
+              <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.42} />
+              <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0.14} />
             </linearGradient>
             <linearGradient id="medianStroke" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stopColor="hsl(189 100% 70%)" stopOpacity={0.4} />
-              <stop offset="100%" stopColor="hsl(189 100% 60%)" stopOpacity={1} />
+              <stop offset="0%" stopColor="hsl(var(--primary-glow))" stopOpacity={0.4} />
+              <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={1} />
             </linearGradient>
           </defs>
 

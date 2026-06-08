@@ -43,8 +43,8 @@ export function Header() {
             <div className="w-7 h-7 rounded-md bg-primary/15 border border-primary/30 flex items-center justify-center">
               <span className="text-primary text-xs font-bold tabular">OL</span>
             </div>
-            <span className="font-brand font-bold text-foreground tracking-tight">
-              Output<span className="text-primary">Lens</span>
+            <span className="font-brand font-bold tracking-tight select-none">
+              <span className="text-logo-navy">Output</span><span className="text-logo-blue">Lens</span>
             </span>
           </Link>
 

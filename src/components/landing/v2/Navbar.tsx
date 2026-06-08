@@ -24,9 +24,9 @@ export function Navbar() {
       <div className="max-w-[1280px] mx-auto px-6 h-14 md:h-16 flex items-center justify-between">
         <Link to="/" className="font-display text-lg font-bold tracking-tight flex items-center gap-2">
           <span className="block w-1.5 h-1.5 bg-primary rounded-sm shadow-[0_0_8px_hsl(var(--primary)/0.6)]" aria-hidden />
-          <span>
-            <span className="text-foreground">Output</span>
-            <span className="text-primary">Lens</span>
+          <span className="select-none">
+            <span className="text-logo-navy">Output</span>
+            <span className="text-logo-blue">Lens</span>
           </span>
         </Link>
 
@@ -46,7 +46,7 @@ export function Navbar() {
           <Link
             to="/auth?mode=signup"
             className={`btn-primary inline-flex items-center gap-1.5 rounded-lg bg-primary text-primary-foreground font-semibold text-sm px-5 py-2.5 ${scrolled ? 'animate-glow-pulse' : ''}`}
-            style={{ boxShadow: '0 0 0 1px hsl(189 100% 50% / 0.2), 0 4px 16px hsl(189 100% 50% / 0.3)' }}
+            style={{ boxShadow: '0 0 0 1px hsl(var(--primary) / 0.2), 0 4px 16px hsl(var(--primary) / 0.3)' }}
           >
             Start Free →
           </Link>
@@ -66,7 +66,7 @@ export function Navbar() {
           <div className="h-14 px-6 flex items-center justify-between border-b border-border">
             <Link to="/" onClick={() => setOpen(false)} className="font-display text-lg font-bold flex items-center gap-2">
               <span className="block w-1.5 h-1.5 bg-primary rounded-sm" aria-hidden />
-              <span><span className="text-foreground">Output</span><span className="text-primary">Lens</span></span>
+              <span className="select-none"><span className="text-logo-navy">Output</span><span className="text-logo-blue">Lens</span></span>
             </Link>
             <button aria-label="Close" onClick={() => setOpen(false)} className="p-2 -mr-2"><X className="h-6 w-6" /></button>
           </div>
