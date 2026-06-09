@@ -1,59 +1,161 @@
 # OutputLens
 
-Probabilistic risk intelligence for traders and analysts who reject point forecasts.
+## Institutional Risk Intelligence for Modern Investors
 
-**The market is a distribution. Trade it like one.**
+OutputLens is a quantitative risk intelligence platform designed to help investors understand uncertainty before they deploy capital.
 
-OutputLens runs 10,000 Monte Carlo simulations on any asset and returns a full probability distribution of outcomes — VaR 95%, CVaR, percentile bands, regime-adjusted volatility. Not a forecast. Not a prediction. A distribution.
+Traditional investing platforms focus on forecasts, analyst targets, and directional opinions. OutputLens takes a different approach.
+
+Rather than attempting to predict where markets will go next, OutputLens evaluates the range of plausible outcomes for a position and quantifies the associated risk. Every analysis is designed to answer a single question:
+
+> **What does the risk actually look like before I enter this trade?**
+
+By combining advanced statistical modelling, probabilistic analysis, and AI-assisted interpretation, OutputLens transforms complex market risk into clear, actionable intelligence.
 
 ---
 
-## Architecture — Three-Layer Intelligence
+## The Problem
 
-1. **Layer 1 — Deterministic Math (core IP).** GBM, GARCH, jump-diffusion, Hidden Markov regime detection. Lives in `src/lib/engine/`.
-2. **Layer 2 — Statistical Adaptation.** Neural database (8-dim embeddings, k-NN cosine similarity), live volatility calibration, regime-aware path generation.
-3. **Layer 3 — AI Interpretation.** Plain-English commentary on the distribution shape. Strictly constrained to never predict prices or direction.
+Most investors make decisions using incomplete information.
 
-## Stack
+They can see charts, news, analyst ratings, and price targets, but they rarely understand:
 
-- **Frontend:** React 18 + Vite + TypeScript + Tailwind + shadcn/ui
-- **State / data:** React Query, custom hooks, shared `AuthContext`
-- **Backend:** Lovable Cloud (Supabase) — Postgres + RLS, Edge Functions (Deno)
-- **Payments:** Stripe (Starter $12 / Pro $29 / Trader $79)
-- **Market data:** Finnhub + Twelve Data with TTL-cached `market_data_cache` table
-- **AI:** Lovable AI Gateway (Gemini for analysis, Claude Haiku for the MCP agent)
-- **Auth:** Supabase Auth with Google OAuth; roles in `user_roles` (separate from `profiles`)
+- The probability of profit
+- Potential downside exposure
+- Tail-risk events
+- Position concentration risk
+- Market regime conditions
+- Distribution of possible outcomes
 
-## Edge Functions
+Without this context, risk management becomes reactive rather than proactive.
 
-| Function | Purpose |
-| -- | -- |
-| `analyze-asset-enhanced` | Full single-asset Monte Carlo + regime + AI interpretation |
-| `analyze-trade` | Trade-level risk analysis with position economics |
-| `check-subscription` | Stripe + DB plan resolution (cached via React Query) |
-| `create-checkout` / `customer-portal` | Stripe subscription flow |
-| `fetch-market-data` | TTL-cached quote + history + volatility |
-| `monitor-assets` | Scheduled tracked-asset risk-delta alerts |
-| `run-agent-pipeline` | Sentiment + news + social aggregation |
+OutputLens was built to change that.
 
-See `supabase/functions/` for the full list.
+---
 
-## Local development
+## What OutputLens Delivers
 
-```bash
-bun install
-bun run dev
-```
+Every analysis provides a comprehensive risk profile of a trade, position, or portfolio.
 
-Tests:
+Users gain visibility into:
 
-```bash
-bunx vitest run
-```
+### Probabilistic Outcomes
 
-The project is managed via Lovable. Code is also synced to GitHub for parallel local development.
+Understand the range of potential future scenarios rather than relying on a single forecast.
 
-## Production
+### Risk Exposure
 
-- Custom domain: [outputlens.com](https://outputlens.com)
-- Deploy: pushed via Lovable; preview at the Lovable preview URL
+Measure downside risk, expected drawdowns, and adverse market conditions before entering a position.
+
+### Market Regimes
+
+Identify whether current conditions favour risk-taking, caution, or defensive positioning.
+
+### Portfolio Intelligence
+
+Reveal hidden concentrations, correlations, and sources of portfolio vulnerability.
+
+### AI-Powered Interpretation
+
+Receive clear explanations of complex quantitative outputs in plain English.
+
+---
+
+## Platform Capabilities
+
+### Trade Analysis
+
+Evaluate individual positions before execution using institutional-grade risk methodologies.
+
+### Portfolio Analysis
+
+Understand how positions interact and contribute to overall portfolio risk.
+
+### Risk Monitoring
+
+Track changing market conditions and emerging risk factors in real time.
+
+### Scenario Testing
+
+Assess how positions may behave under a range of market environments.
+
+### Risk Alerts
+
+Receive notifications when predefined risk thresholds are breached.
+
+### Historical Intelligence
+
+Review previous analyses and monitor how risk evolves over time.
+
+---
+
+## Built for Serious Decision-Making
+
+OutputLens is designed for:
+
+- Private investors
+- Active traders
+- Portfolio managers
+- Financial analysts
+- Wealth professionals
+- Risk-conscious market participants
+
+Whether analysing a single position or an entire portfolio, the objective remains the same:
+
+**Deliver a deeper understanding of risk before capital is exposed.**
+
+---
+
+## Guiding Principles
+
+### Risk Before Return
+
+Every investment outcome begins with risk. Understanding potential losses is a prerequisite for evaluating potential gains.
+
+### Probability Over Prediction
+
+Markets are uncertain. Sound decision-making comes from understanding distributions, not relying on forecasts.
+
+### Clarity Over Complexity
+
+Sophisticated quantitative methods should produce simple, understandable conclusions.
+
+### Transparency Over Hype
+
+OutputLens is designed to help users understand risk, not manufacture certainty.
+
+---
+
+## Why OutputLens Exists
+
+Most retail investing tools focus on telling users what might happen.
+
+OutputLens focuses on helping users understand what could happen.
+
+By quantifying uncertainty rather than forecasting certainty, investors gain a more complete picture of the opportunities and risks that exist within every position.
+
+This approach enables more informed decision-making, better risk management, and greater confidence when navigating uncertain markets.
+
+---
+
+## Mission
+
+To make institutional-grade risk intelligence accessible to every investor.
+
+Professional risk management should not be limited to hedge funds, trading desks, and large financial institutions.
+
+OutputLens exists to provide investors with the tools, context, and intelligence needed to make more informed decisions in uncertain markets.
+
+---
+
+## Disclaimer
+
+OutputLens is a risk analysis platform and does not provide investment advice, recommendations, or guarantees of future performance. All analysis is probabilistic in nature and should be used as one input within a broader investment decision-making process.
+
+---
+
+# OutputLens
+
+### Institutional Risk Intelligence
+
+**Understand Risk. Quantify Uncertainty. Make Better Decisions.**
