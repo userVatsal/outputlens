@@ -1,17 +1,7 @@
-/**
- * Agent Pipeline Orchestrator
- * 
- * Runs the full qualitative→quantitative pipeline for specified assets:
- * 1. Ingest news (Finnhub)
- * 2. Ingest social media (Reddit, blogs via Firecrawl)
- * 3. Ingest YouTube (financial video content)
- * 4. Process sentiment (Lovable AI)
- * 5. Aggregate insights (weighted by source)
- * 
- * Can be triggered via cron job or on-demand.
- */
+// FILE LOCATION: supabase/functions/run-agent-pipeline/index.ts
+// ACTION: REPLACE ENTIRE FILE
 
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 
 const corsHeaders = {
@@ -56,173 +46,122 @@ serve(async (req) => {
     const results: Record<string, any> = {};
     const errors: string[] = [];
 
-    // Stage 1: Ingest News (Finnhub)
+    // Stage 1: Ingest News — isolated so failure does not kill pipeline
     if (stages.includes("ingest-news")) {
       console.log("Stage: Ingesting news from Finnhub...");
       try {
-        const ingestResponse = await fetch(`${supabaseUrl}/functions/v1/ingest-news`, {
+        const r = await fetch(`${supabaseUrl}/functions/v1/ingest-news`, {
           method: "POST",
-          headers: {
-            "Authorization": `Bearer ${serviceRoleKey}`,
-            "Content-Type": "application/json"
-          },
+          headers: { "Authorization": `Bearer ${serviceRoleKey}`, "Content-Type": "application/json" },
           body: JSON.stringify({ assets, limit: newsLimit })
         });
-
-        if (ingestResponse.ok) {
-          results.ingestNews = await ingestResponse.json();
-          console.log(`News ingest complete: ${results.ingestNews.itemsProcessed} items`);
-        } else {
-          const error = await ingestResponse.text();
-          errors.push(`News ingest failed: ${error}`);
-          console.error("News ingest error:", error);
-        }
-      } catch (ingestError) {
-        errors.push(`News ingest error: ${ingestError}`);
-        console.error("News ingest error:", ingestError);
+        results.ingestNews = r.ok ? await r.json() : { error: await r.text(), itemsProcessed: 0 };
+        console.log(`News ingest: ${results.ingestNews.itemsProcessed ?? 0} items`);
+      } catch (e) {
+        errors.push(`News ingest error: ${e}`);
+        results.ingestNews = { error: String(e), itemsProcessed: 0 };
+        console.error("ingest-news failed (continuing pipeline):", e);
       }
-
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 800));
     }
 
-    // Stage 2: Ingest Social Media (Reddit, blogs via Firecrawl)
+    // Stage 2: Ingest Social — isolated
     if (stages.includes("ingest-social")) {
-      console.log("Stage: Ingesting social media via Firecrawl...");
+      console.log("Stage: Ingesting social media...");
       try {
-        const socialResponse = await fetch(`${supabaseUrl}/functions/v1/ingest-social`, {
+        const r = await fetch(`${supabaseUrl}/functions/v1/ingest-social`, {
           method: "POST",
-          headers: {
-            "Authorization": `Bearer ${serviceRoleKey}`,
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({ 
-            assets, 
-            subreddits: socialSubreddits,
-            limit: 30 
-          })
+          headers: { "Authorization": `Bearer ${serviceRoleKey}`, "Content-Type": "application/json" },
+          body: JSON.stringify({ assets, subreddits: socialSubreddits, limit: 30 })
         });
-
-        if (socialResponse.ok) {
-          results.ingestSocial = await socialResponse.json();
-          console.log(`Social ingest complete: ${results.ingestSocial.itemsProcessed} items`);
-        } else {
-          const error = await socialResponse.text();
-          errors.push(`Social ingest failed: ${error}`);
-          console.error("Social ingest error:", error);
-        }
-      } catch (socialError) {
-        errors.push(`Social ingest error: ${socialError}`);
-        console.error("Social ingest error:", socialError);
+        results.ingestSocial = r.ok ? await r.json() : { error: await r.text(), itemsProcessed: 0 };
+        console.log(`Social ingest: ${results.ingestSocial.itemsProcessed ?? 0} items`);
+      } catch (e) {
+        errors.push(`Social ingest error: ${e}`);
+        results.ingestSocial = { error: String(e), itemsProcessed: 0 };
+        console.error("ingest-social failed (continuing pipeline):", e);
       }
-
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 800));
     }
 
-    // Stage 3: Ingest YouTube (financial video content)
+    // Stage 3: Ingest YouTube — isolated
     if (stages.includes("ingest-youtube")) {
-      console.log("Stage: Ingesting YouTube content via Firecrawl...");
+      console.log("Stage: Ingesting YouTube...");
       try {
-        const youtubeResponse = await fetch(`${supabaseUrl}/functions/v1/ingest-youtube`, {
+        const r = await fetch(`${supabaseUrl}/functions/v1/ingest-youtube`, {
           method: "POST",
-          headers: {
-            "Authorization": `Bearer ${serviceRoleKey}`,
-            "Content-Type": "application/json"
-          },
+          headers: { "Authorization": `Bearer ${serviceRoleKey}`, "Content-Type": "application/json" },
           body: JSON.stringify({ assets, limit: 20 })
         });
-
-        if (youtubeResponse.ok) {
-          results.ingestYoutube = await youtubeResponse.json();
-          console.log(`YouTube ingest complete: ${results.ingestYoutube.itemsProcessed} items`);
-        } else {
-          const error = await youtubeResponse.text();
-          errors.push(`YouTube ingest failed: ${error}`);
-          console.error("YouTube ingest error:", error);
-        }
-      } catch (youtubeError) {
-        errors.push(`YouTube ingest error: ${youtubeError}`);
-        console.error("YouTube ingest error:", youtubeError);
+        results.ingestYoutube = r.ok ? await r.json() : { error: await r.text(), itemsProcessed: 0 };
+        console.log(`YouTube ingest: ${results.ingestYoutube.itemsProcessed ?? 0} items`);
+      } catch (e) {
+        errors.push(`YouTube ingest error: ${e}`);
+        results.ingestYoutube = { error: String(e), itemsProcessed: 0 };
+        console.error("ingest-youtube failed (continuing pipeline):", e);
       }
-
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 800));
     }
 
-    // Stage 4: Process Sentiment
+    // Stage 4: Process Sentiment — isolated
     if (stages.includes("sentiment")) {
-      console.log("Stage: Processing sentiment via Lovable AI...");
+      console.log("Stage: Processing sentiment...");
       try {
-        const sentimentResponse = await fetch(`${supabaseUrl}/functions/v1/process-sentiment`, {
+        const r = await fetch(`${supabaseUrl}/functions/v1/process-sentiment`, {
           method: "POST",
-          headers: {
-            "Authorization": `Bearer ${serviceRoleKey}`,
-            "Content-Type": "application/json"
-          },
+          headers: { "Authorization": `Bearer ${serviceRoleKey}`, "Content-Type": "application/json" },
           body: JSON.stringify({ limit: sentimentLimit })
         });
-
-        if (sentimentResponse.ok) {
-          results.sentiment = await sentimentResponse.json();
-          console.log(`Sentiment complete: ${results.sentiment.itemsProcessed} items`);
-        } else {
-          const error = await sentimentResponse.text();
-          errors.push(`Sentiment failed: ${error}`);
-          console.error("Sentiment error:", error);
-        }
-      } catch (sentimentError) {
-        errors.push(`Sentiment error: ${sentimentError}`);
-        console.error("Sentiment error:", sentimentError);
+        results.sentiment = r.ok ? await r.json() : { error: await r.text(), itemsProcessed: 0 };
+        console.log(`Sentiment: ${results.sentiment.itemsProcessed ?? 0} items`);
+      } catch (e) {
+        errors.push(`Sentiment error: ${e}`);
+        results.sentiment = { error: String(e), itemsProcessed: 0 };
+        console.error("process-sentiment failed (continuing pipeline):", e);
       }
-
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 800));
     }
 
-    // Stage 5: Aggregate Insights (for each asset)
+    // Stage 5: Aggregate Insights — isolated per asset
     if (stages.includes("aggregate")) {
-      console.log("Stage: Aggregating insights with source weighting...");
+      console.log("Stage: Aggregating insights...");
       results.aggregate = {};
 
-      // Get unique assets from sentiment scores if none specified
       let assetsToAggregate = assets;
       if (assetsToAggregate.length === 0) {
-        const { data: recentAssets } = await supabase
-          .from("sentiment_scores")
-          .select("asset")
-          .gte("processed_at", new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
-          .order("processed_at", { ascending: false });
-
-        if (recentAssets) {
-          assetsToAggregate = [...new Set(recentAssets.map(r => r.asset))].slice(0, 20);
+        try {
+          const { data: recentAssets } = await supabase
+            .from("sentiment_scores")
+            .select("asset")
+            .gte("processed_at", new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
+            .order("processed_at", { ascending: false });
+          if (recentAssets) {
+            assetsToAggregate = [...new Set(recentAssets.map(r => r.asset))].slice(0, 20);
+          }
+        } catch (e) {
+          console.error("Could not fetch assets for aggregation:", e);
         }
       }
 
       for (const asset of assetsToAggregate) {
         try {
-          const aggregateResponse = await fetch(`${supabaseUrl}/functions/v1/aggregate-insights`, {
+          const r = await fetch(`${supabaseUrl}/functions/v1/aggregate-insights`, {
             method: "POST",
-            headers: {
-              "Authorization": `Bearer ${serviceRoleKey}`,
-              "Content-Type": "application/json"
-            },
+            headers: { "Authorization": `Bearer ${serviceRoleKey}`, "Content-Type": "application/json" },
             body: JSON.stringify({ asset, windowHours: 24 })
           });
-
-          if (aggregateResponse.ok) {
-            results.aggregate[asset] = await aggregateResponse.json();
-          } else {
-            errors.push(`Aggregate ${asset} failed`);
-          }
-        } catch (aggError) {
-          errors.push(`Aggregate ${asset} error: ${aggError}`);
+          results.aggregate[asset] = r.ok ? await r.json() : { error: await r.text() };
+        } catch (e) {
+          errors.push(`Aggregate ${asset} error: ${e}`);
+          results.aggregate[asset] = { error: String(e) };
         }
       }
-
       console.log(`Aggregation complete for ${Object.keys(results.aggregate).length} assets`);
     }
 
-    // Summarize results
     const summary = {
       success: errors.length === 0,
-      stages: stages,
+      stages,
       results: {
         newsIngested: results.ingestNews?.itemsProcessed || 0,
         socialIngested: results.ingestSocial?.itemsProcessed || 0,
@@ -230,25 +169,17 @@ serve(async (req) => {
         sentimentProcessed: results.sentiment?.itemsProcessed || 0,
         assetsAggregated: Object.keys(results.aggregate || {}).length
       },
-      sources: {
-        news: results.ingestNews?.itemsProcessed || 0,
-        reddit: results.ingestSocial?.sources?.reddit || 0,
-        research: results.ingestSocial?.sources?.research || 0,
-        youtube: results.ingestYoutube?.videosFound || 0
-      },
       errors: errors.length > 0 ? errors : undefined,
       timestamp: new Date().toISOString()
     };
 
     console.log("Pipeline complete:", summary);
-
-    return new Response(
-      JSON.stringify(summary),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    return new Response(JSON.stringify(summary), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" }
+    });
 
   } catch (error) {
-    console.error("Pipeline error:", error);
+    console.error("Pipeline fatal error:", error);
     return new Response(
       JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }

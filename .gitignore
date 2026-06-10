@@ -22,3 +22,14 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+
+# FILE LOCATION: .gitignore (the file already exists at the root of your project)
+# ACTION: OPEN IT AND ADD THIS ONE LINE ANYWHERE IN THE FILE, THEN SAVE
+ 
+.env
+ 
+# Then run these two commands in the VS Code terminal:
+# git rm --cached .env
+# git commit -am "fix: remove .env from version control"
+ 

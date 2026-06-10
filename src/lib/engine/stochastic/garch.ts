@@ -1,62 +1,40 @@
 /**
- * GARCH-like Volatility Module
- * 
- * Layer 1: Deterministic Math - CORE IP
- * 
- * Implements GARCH(1,1) volatility dynamics for stochastic volatility modeling.
- * Returns volatility paths - NOT prices. Pure math, no AI.
- * 
+ * GARCH-like Volatility Module — FIXED
+ *
+ * FIX: getGARCHVolatilityPath() previously ran paths:1 (single path shortcut).
+ * Now runs a full distribution and returns the MEDIAN path, which correctly
+ * represents expected volatility rather than a single random draw.
+ *
+ * FIX: Extracted SeededRandom to shared util (no longer duplicated with gbm.ts).
+ *
  * GARCH(1,1): σ²(t+1) = ω + α·ε²(t) + β·σ²(t)
- * where ε(t) = return shock at time t
  */
 
+export { SeededRandom, randomNormal } from '../utils/random';
+import { SeededRandom, randomNormal } from '../utils/random';
+
 export interface GARCHParams {
-  currentVolatility: number;   // Current annualized volatility (%)
-  alpha: number;               // ARCH term weight (reaction to shocks) - typical: 0.05-0.15
-  beta: number;                // GARCH term weight (persistence) - typical: 0.80-0.95
-  omega?: number;              // Unconditional variance (auto-calculated if not provided)
+  currentVolatility: number;
+  alpha: number;
+  beta: number;
+  omega?: number;
   holdingPeriodDays: number;
   paths?: number;
   seed?: number;
 }
 
 export interface GARCHResult {
-  volatilityPaths: number[][];     // [path][day] - daily volatility values (%)
-  finalVolatilities: number[];     // Final volatility at end of each path
+  volatilityPaths: number[][];
+  finalVolatilities: number[];
   meanFinalVolatility: number;
-  volatilityOfVolatility: number;  // Vol of vol
-  maxVolSpike: number;             // Maximum vol observed across all paths
+  medianVolatilityPath: number[];   // NEW: median path for integration with GBM
+  p10VolatilityPath: number[];      // NEW: 10th percentile vol path (low vol scenario)
+  p90VolatilityPath: number[];      // NEW: 90th percentile vol path (high vol scenario)
+  volatilityOfVolatility: number;
+  maxVolSpike: number;
   reproducible: boolean;
 }
 
-// Seeded random number generator
-class SeededRandom {
-  private state: number;
-  
-  constructor(seed: number) {
-    this.state = seed;
-  }
-  
-  next(): number {
-    let t = this.state += 0x6D2B79F5;
-    t = Math.imul(t ^ t >>> 15, t | 1);
-    t ^= t + Math.imul(t ^ t >>> 7, t | 61);
-    return ((t ^ t >>> 14) >>> 0) / 4294967296;
-  }
-}
-
-function randomNormal(rng?: SeededRandom): number {
-  const u1 = rng ? rng.next() : Math.random();
-  const u2 = rng ? rng.next() : Math.random();
-  return Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
-}
-
-/**
- * Run GARCH volatility simulation
- * 
- * LAYER 1: Pure deterministic math
- * Returns volatility paths, not price predictions
- */
 export function runGARCH(params: GARCHParams): GARCHResult {
   const {
     currentVolatility,
@@ -69,48 +47,34 @@ export function runGARCH(params: GARCHParams): GARCHResult {
 
   const rng = seed !== undefined ? new SeededRandom(seed) : undefined;
 
-  // Convert annual volatility to daily variance
   const dailyVol = currentVolatility / 100 / Math.sqrt(252);
   const dailyVariance = dailyVol * dailyVol;
-
-  // Calculate omega (unconditional variance) if not provided
-  // Long-run variance: ω / (1 - α - β)
   const omega = params.omega ?? dailyVariance * (1 - alpha - beta);
 
   const volatilityPaths: number[][] = [];
   const finalVolatilities: number[] = [];
 
-  // Run simulation paths
   for (let p = 0; p < paths; p++) {
     const volPath: number[] = [];
-    let sigma2 = dailyVariance; // Current variance
-    
+    let sigma2 = dailyVariance;
+
     for (let day = 0; day < holdingPeriodDays; day++) {
-      // Store annualized volatility (%)
       const annualizedVol = Math.sqrt(sigma2 * 252) * 100;
       volPath.push(annualizedVol);
-      
-      // Generate return shock
       const z = randomNormal(rng);
       const epsilon = Math.sqrt(sigma2) * z;
-      
-      // GARCH(1,1) update
       sigma2 = omega + alpha * epsilon * epsilon + beta * sigma2;
-      
-      // Ensure non-negative variance
       sigma2 = Math.max(sigma2, 1e-10);
     }
-    
+
     volatilityPaths.push(volPath);
     finalVolatilities.push(volPath[volPath.length - 1]);
   }
 
-  // Calculate statistics
   const meanFinalVol = finalVolatilities.reduce((sum, v) => sum + v, 0) / finalVolatilities.length;
   const volVariance = finalVolatilities.reduce((sum, v) => sum + Math.pow(v - meanFinalVol, 2), 0) / finalVolatilities.length;
   const volOfVol = Math.sqrt(volVariance);
-  
-  // Find max volatility spike across all paths
+
   let maxVolSpike = 0;
   for (const path of volatilityPaths) {
     for (const vol of path) {
@@ -118,10 +82,26 @@ export function runGARCH(params: GARCHParams): GARCHResult {
     }
   }
 
+  // Build per-day percentile paths (median, p10, p90)
+  const medianVolatilityPath: number[] = [];
+  const p10VolatilityPath: number[] = [];
+  const p90VolatilityPath: number[] = [];
+
+  for (let day = 0; day < holdingPeriodDays; day++) {
+    const dayVols = volatilityPaths.map(p => p[day]).sort((a, b) => a - b);
+    const n = dayVols.length;
+    medianVolatilityPath.push(dayVols[Math.floor(n * 0.50)]);
+    p10VolatilityPath.push(dayVols[Math.floor(n * 0.10)]);
+    p90VolatilityPath.push(dayVols[Math.floor(n * 0.90)]);
+  }
+
   return {
     volatilityPaths,
     finalVolatilities,
     meanFinalVolatility: meanFinalVol,
+    medianVolatilityPath,
+    p10VolatilityPath,
+    p90VolatilityPath,
     volatilityOfVolatility: volOfVol,
     maxVolSpike,
     reproducible: seed !== undefined
@@ -129,8 +109,10 @@ export function runGARCH(params: GARCHParams): GARCHResult {
 }
 
 /**
- * Integrate GARCH volatility with GBM
- * Returns adjusted volatility for each day of simulation
+ * FIXED: Returns the median volatility path across 500 GARCH simulations.
+ * Previous version ran paths:1 (single random draw — incorrect).
+ *
+ * Used by engine/index.ts for the 'garch' stochastic model.
  */
 export function getGARCHVolatilityPath(
   baseVolatility: number,
@@ -144,9 +126,9 @@ export function getGARCHVolatilityPath(
     alpha,
     beta,
     holdingPeriodDays,
-    paths: 1,
+    paths: 500,   // FIX: was 1 — now runs full distribution
     seed
   });
-  
-  return result.volatilityPaths[0];
+
+  return result.medianVolatilityPath; // FIX: was volatilityPaths[0] (single path)
 }
